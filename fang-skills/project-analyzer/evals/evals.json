@@ -1,0 +1,23 @@
+{
+  "skill_name": "project-analyzer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "分析当前项目中 workspace/components/ 目录下的所有组件，生成一份组件清单。对每个组件需要列出：组件名称、文件路径、用途描述、Props（从 defineProps 提取）、被引用的次数（用 grep 统计）。只输出 Component Patterns.md 这一份文件，写入 .project-knowledge/ 目录。不需要写 Obsidian Vault。",
+      "expected_output": "一份 Component Patterns.md，包含 workspace/components/ 下所有 .vue 组件的清单（约 133 个组件，分布在 business/ 和 common/ 子目录）。每个组件有名称、路径、用途、Props、引用次数。统计数字来自实际 grep 命令。",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "分析当前项目的整体架构。需要输出：1) 从 package.json 识别技术栈 2) 顶层目录结构 3) workspace/views/ 下的模块列表及各自代码规模 4) workspace/stores/ 下的所有 store。输出 Architecture.md 到 .project-knowledge/ 目录。不需要写 Obsidian Vault。",
+      "expected_output": "一份 Architecture.md，包含技术栈表格、目录结构、约 33 个模块列表（含代码行数）、5 个 Store 清单。数据来自实际读取 package.json 和 shell 命令统计。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "分析当前项目的编码风格。扫描 workspace/ 目录下的 .vue 和 .ts 文件，总结：1) <script setup> vs Options API 的使用比例（用 grep 统计）2) API 函数的命名风格分布（Swagger 生成 vs 手写）3) import 组织方式 4) 错误处理模式。输出 Coding Guidelines.md 到 .project-knowledge/ 目录。不需要写 Obsidian Vault。",
+      "expected_output": "一份 Coding Guidelines.md，包含组件写法统计（约 1101 script setup / 4 Options API）、API 命名风格分布、import 排序规律、错误处理模式。每个结论有实际代码证据。",
+      "files": []
+    }
+  ]
+}
