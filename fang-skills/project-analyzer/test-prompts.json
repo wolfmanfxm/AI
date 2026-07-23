@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "mode": "分析模式",
+    "prompt": "分析当前项目的整体架构：识别技术栈、目录结构、模块划分、状态管理。输出 Architecture.md 到 .project-knowledge/ 目录，不需要写 Obsidian Vault。",
+    "expected": "一份 Architecture.md，包含：从 package.json 提取的技术栈表格、顶层目录树、模块列表（约33个含代码规模）、Store清单（5个业务层+6个框架层）。每个结论有 file:line 引用。"
+  },
+  {
+    "id": 2,
+    "mode": "分析模式",
+    "prompt": "扫描该项目 workspace/components/ 目录下的所有组件，生成 Component Patterns.md。对每个组件需要名称、路径、Props（从 defineProps 提取）、引用次数（用 grep 统计）。写入 .project-knowledge/。",
+    "expected": "一份 Component Patterns.md，正确识别 business/ 和 common/ 子目录结构，列出约133个组件，高引用组件（SchemaTable ~569、PageTable ~336）排在前面。Props 含 TypeScript 类型定义。"
+  },
+  {
+    "id": 3,
+    "mode": "开发前检查模式",
+    "prompt": "帮我在这个项目里新增一个用户列表页面，需要表格展示、搜索筛选、分页功能。",
+    "expected": "先读取 .project-knowledge/Coding Guidelines.md 和 UI Style Guide.md（若存在），然后基于项目实际的编码规范和 UI 模式生成代码。如果知识文档不存在，提示用户先运行分析。代码应使用项目实际在用的组件（如 SchemaTable）而非框架默认组件。"
+  }
+]
