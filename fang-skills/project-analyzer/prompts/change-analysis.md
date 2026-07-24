@@ -1,6 +1,6 @@
 # Migration Notes Prompt
 
-使用模板：[templates/MigrationNotes.md](../templates/documents/MigrationNotes.md)
+输出格式参见下方模板说明
 
 ## 对比流程
 

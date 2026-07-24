@@ -1,6 +1,6 @@
 # Architecture Analysis Prompt
 
-使用模板：[templates/Architecture.md](../templates/documents/Architecture.md)
+参考模板：templates/architecture/overview.md（灵活扩展）
 
 ## 执行清单
 

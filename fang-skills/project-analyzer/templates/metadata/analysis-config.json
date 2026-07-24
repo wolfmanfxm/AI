@@ -1,0 +1,8 @@
+{
+  "project": {"name": "", "vaultPath": ""},
+  "techStack": {},
+  "sourceDirectories": [],
+  "analysis": {"mode": "standard", "scope": "full", "outputTargets": ["local"]},
+  "status": "pending",
+  "generatedAt": ""
+}

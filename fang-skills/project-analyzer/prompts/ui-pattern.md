@@ -1,6 +1,6 @@
 # UI Pattern Analysis Prompt
 
-使用模板：[templates/UIGuide.md](../templates/documents/UIGuide.md)
+输出格式参见下方模板说明
 
 ## 前置
 
