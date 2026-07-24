@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Statistics",
+  "description": "项目仪表盘数据。每次分析必定生成。",
+  "type": "object",
+  "required": ["generatedAt", "project", "codebase"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "statistics.schema.json 的版本"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "framework"],
+      "properties": {
+        "name": { "type": "string" },
+        "packageName": { "type": "string" },
+        "version": { "type": "string" },
+        "framework": { "type": "string" },
+        "language": { "type": "string" },
+        "buildTool": { "type": "string" },
+        "uiLibrary": { "type": "string" },
+        "stateManagement": { "type": "string" }
+      }
+    },
+    "codebase": {
+      "type": "object",
+      "properties": {
+        "totalLines": { "type": "integer" },
+        "srcLines": { "type": "integer" },
+        "workspaceLines": { "type": "integer" },
+        "vueFiles": { "type": "integer" },
+        "tsFiles": { "type": "integer" }
+      }
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "global": { "type": "integer" },
+        "highReuse": { "type": "integer" },
+        "unused": { "type": "integer" }
+      }
+    },
+    "api": {
+      "type": "object",
+      "properties": {
+        "totalModules": { "type": "integer" },
+        "totalFunctions": { "type": "integer" }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "unusedComponents": { "type": "array", "items": { "type": "string" } },
+        "namingInconsistency": { "type": "string" }
+      }
+    }
+  }
+}

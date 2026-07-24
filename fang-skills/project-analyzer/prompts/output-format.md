@@ -15,12 +15,26 @@
 id: component-search-form
 generatedBy: project-analyzer
 generatedAt: 2026-07-24T14:00:00Z
+last_scan: 2026-07-24T14:00:00Z
+lifecycle: draft
 confidence: 98
 sources:
   - src/components/SearchForm.vue
   - src/views/user/list.vue
 ---
 ```
+
+**字段说明**：
+
+| 字段 | 含义 | 必填 |
+|------|------|------|
+| `id` | 文档唯一标识 | 是 |
+| `generatedBy` | 生成工具，固定 `project-analyzer` | 是 |
+| `generatedAt` | 首次生成时间 | 是 |
+| `last_scan` | 最后校验时间。增量扫描确认内容仍然准确但无需修改时更新此字段 | 是 |
+| `lifecycle` | 生命周期状态：`draft` / `confirmed` / `deprecated` / `archived`，详见 [protocol/knowledge-lifecycle.md](../protocol/knowledge-lifecycle.md) | 是 |
+| `confidence` | 置信度，见下方分级 | 是 |
+| `sources` | 证据源文件列表 | 是 |
 
 **confidence 分级**：
 

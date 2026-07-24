@@ -9,12 +9,26 @@ description: >
 
 ## Quick Start
 
+**Lifecycle 是唯一入口。先路由，再执行，遇到不确定的行为才查阅 Runtime Specification。**
+
 分析项目 → 说"分析项目"即进入 [Analysis Flow](#analysis-flow)。
 写代码前检查 → 说"新增组件/创建页面"即进入 [Development Flow](#development-flow)。
 中断后继续 → 说"继续分析"，自动从断点恢复。
 
 首次运行：探测技术栈 → 确认配置 → 8 维度并行分析 → 产出 ~20 个知识文件。
 后续运行：增量更新变更部分，人工维护的 rules/ 目录绝不覆盖。
+
+### Agent Checklist
+
+分析模式每次执行前，逐项确认：
+
+□ 已读取 `package.json`
+□ 已探测源码目录结构
+□ 已确认项目名称
+□ 已确认分析深度（快速/标准/详尽）
+□ 已确认扫描范围（全量/增量）
+□ 已确认输出位置（Vault+本地/仅本地/仅Vault）
+□ 已创建 `analysis-config.json`（用户选择）和 `manifest.json`（执行状态）
 
 ---
 
@@ -25,6 +39,7 @@ description: >
 ```
 用户意图
 ├── "分析/扫描/刷新" → Analysis Flow
+├── "继续分析/resume" → Analysis Flow（Phase 2 Resume）
 └── "新增/创建/实现/开发前检查" → Development Flow
 ```
 
@@ -32,13 +47,16 @@ description: >
 
 ## Analysis Flow
 
-进入 Analysis Flow 后，先读 `.project-knowledge/analysis-config.json` 判断状态：
+进入 Analysis Flow 后，判断状态：
 
 ```
-config 不存在  → Phase 1：发现（首次分析）
-config status = completed → 询问：🔁全量刷新 / 📝增量更新 / ❌取消
-config status = interrupted / partial / in_progress → Phase 2 Resume：恢复执行
+analysis-config.json 不存在     → Phase 1：发现（首次分析）
+manifest.json status = completed → 询问：🔁全量刷新 / 📝增量更新 / ❌取消
+manifest.json status = interrupted / partial / in_progress → Phase 2 Resume：恢复执行
 ```
+
+> `analysis-config.json` 存放用户选择（mode/scope/vault），一旦创建不再修改。
+> `manifest.json` 存放执行状态（status/dimensions/files），由分析流程持续更新。
 
 ### Phase 1：发现
 
@@ -54,7 +72,7 @@ config status = interrupted / partial / in_progress → Phase 2 Resume：恢复�
 
    > AskUserQuestion: header 4-6字中文, label 3-8字, 单选
 
-3. 完成 → `status: confirmed` → 立即进入 Phase 2
+3. 完成 → 写入 `analysis-config.json`（用户选择，此后只读）和 `manifest.json`（status: confirmed，维度清单）→ 立即进入 Phase 2
 
 ### Phase 2 Resume：恢复执行
 
@@ -67,9 +85,11 @@ config status = interrupted / partial / in_progress → Phase 2 Resume：恢复�
 
 ### Phase 2：执行
 
-🔴 **CHECKPOINT · 🛑 STOP**：以下维度将产出约 15-25 个文件。展示预计产出清单（维度→文件名→预估行数），用户确认后执行。快速模式跳过 `change-analysis` 维度，标准模式跳过 `change-analysis`，详尽模式全执行。
+#### 2.1 Execution
 
-1. 读 config → 按 scope、mode 并行执行以下维度（各维度独立，无依赖的可并行）：
+🔴 **CHECKPOINT · 🛑 STOP**：以下 8 个维度将产出约 15-25 个文件。展示预计产出清单，用户确认后执行。快速/标准模式跳过 `change-analysis`，详尽模式全执行。
+
+读 config → 按 scope、mode 并行执行（各维度独立，无依赖的可并行）：
 
 | 维度 | 指南 | 输出目录 | 预期产出（必选 + 可选） |
 |------|------|---------|---------------------|
@@ -82,14 +102,19 @@ config status = interrupted / partial / in_progress → Phase 2 Resume：恢复�
 | 观察 | [prompts/observations.md](prompts/observations.md) | observations/ | `statistics.md`（必选），可选 `dead-code.md` |
 | 变更 | [prompts/change-analysis.md](prompts/change-analysis.md) | reports/ | `change-log.md`（详尽模式必选） |
 
-2. 固定产出：`manifest.json`、`statistics.json`、`graph.json`、`search-index.json`、`index.md`
-3. 目录初次运行时全部创建：`architecture/` `components/` `api/` `patterns/` `observations/` `proposals/` `reports/` `rules/` `experience/` `playbooks/` `decisions/`
-4. 根据分析发现填充各目录，有内容才建文件。详见 [prompts/output-format.md](prompts/output-format.md)
-5. 聚合 `graph.json`：所有维度分析完成后，从各目录汇总节点和关系
-6. 每个 `.md` 文件包含 Evidence Header，详见 [prompts/output-format.md](prompts/output-format.md)
-7. 非首次运行：已有文档不被覆盖，对比标记 `[NEW]/[CHANGED]/[REMOVED]/[CONFIRMED]`；`rules/` 中已确认规则不再重复提议
-8. 检查/创建 `.claude/CLAUDE.md`
-9. 报告摘要 → config `status` → `completed`
+#### 2.2 Post Processing
+
+1. 目录初次运行时全部创建：`architecture/` `components/` `api/` `patterns/` `observations/` `proposals/` `reports/` `rules/` `experience/` `playbooks/` `decisions/`
+2. 根据分析发现填充各目录，有内容才建文件。详见 [prompts/output-format.md](prompts/output-format.md)
+3. 每个 `.md` 文件包含 Evidence Header。详见 [prompts/output-format.md](prompts/output-format.md)
+4. 聚合 `graph.json`：从各目录汇总节点和关系
+5. 非首次运行：对比标记 `[NEW]/[CHANGED]/[REMOVED]/[CONFIRMED]`；`rules/` 中已确认规则不再重复提议
+
+#### 2.3 Finalize
+
+1. 生成固定产出：`manifest.json`（按 [schema](schema/manifest.schema.json) 写入 knowledgeVersion + schemaVersion）、`statistics.json`、`search-index.json`、`index.md`
+2. 检查/创建 `.claude/CLAUDE.md`
+3. 报告摘要 → manifest `status` → `completed`
 
 ---
 
@@ -105,22 +130,23 @@ config status = interrupted / partial / in_progress → Phase 2 Resume：恢复�
 
 ---
 
-## Prompt References
+## References
 
-各维度指南（由 Analysis Flow Phase 2 调度）：
+| Prompt | Purpose |
+|--------|---------|
+| [prompts/architecture.md](prompts/architecture.md) | 技术栈、目录结构、模块划分、路由设计 |
+| [prompts/components.md](prompts/components.md) | 全局组件编目、Props/Emits、复用度分级 |
+| [prompts/coding-style.md](prompts/coding-style.md) | Vue 写法、TypeScript 风格、命名、Import 规范 |
+| [prompts/ui-pattern.md](prompts/ui-pattern.md) | 表格、表单、搜索、对话框、上传、布局模式 |
+| [prompts/api-pattern.md](prompts/api-pattern.md) | API 层组织、HTTP 客户端封装、调用点分析 |
+| [prompts/patterns.md](prompts/patterns.md) | 跨模块可复用模式（CRUD、审批流、导入导出） |
+| [prompts/observations.md](prompts/observations.md) | 纯数据报告：文件统计、组件引用、dead code |
+| [prompts/change-analysis.md](prompts/change-analysis.md) | 增量变更分析（详尽模式） |
 
-[prompts/architecture.md](prompts/architecture.md) ·
-[prompts/components.md](prompts/components.md) ·
-[prompts/coding-style.md](prompts/coding-style.md) ·
-[prompts/ui-pattern.md](prompts/ui-pattern.md) ·
-[prompts/api-pattern.md](prompts/api-pattern.md) ·
-[prompts/patterns.md](prompts/patterns.md) ·
-[prompts/observations.md](prompts/observations.md) ·
-[prompts/change-analysis.md](prompts/change-analysis.md)
-
-## Template References
-
-[templates/](templates/) · [examples/](examples/)
+**Templates**：[templates/](templates/) · [examples/](examples/)
+**Capability Matrix**：[references/capability-matrix.md](references/capability-matrix.md)
+**Schemas**：[schema/manifest.schema.json](schema/manifest.schema.json) · [schema/analysis-config.schema.json](schema/analysis-config.schema.json) · [schema/graph.schema.json](schema/graph.schema.json) · [schema/statistics.schema.json](schema/statistics.schema.json)
+**Protocols**：[protocol/knowledge-protocol.md](protocol/knowledge-protocol.md) · [protocol/runtime-protocol.md](protocol/runtime-protocol.md) · [protocol/knowledge-lifecycle.md](protocol/knowledge-lifecycle.md)
 
 ---
 
@@ -129,6 +155,7 @@ config status = interrupted / partial / in_progress → Phase 2 Resume：恢复�
 ### Operating Mode
 
 Production · Deterministic · Incremental OK · Dev OK
+Goal: Generate stable, reusable project knowledge.
 
 ### Capability Contract
 
@@ -157,34 +184,13 @@ Production · Deterministic · Incremental OK · Dev OK
 
 ### Output Contract
 
-#### 固定产出
+Analysis Flow 保证产出以下内容。具体文件清单见 Analysis Flow Phase 2 维度表，此处声明契约：
 
-每次分析必定产出，无条件覆盖：
+**固定产出** — 每次必定生成：`manifest.json`（含 `knowledgeVersion` + `schemaVersion`）、`statistics.json`、`search-index.json`、`graph.json`、`index.md`。字段定义见 [protocol/knowledge-protocol.md](protocol/knowledge-protocol.md)。
 
-| 文件 | 说明 |
-|------|------|
-| `manifest.json` | 元数据：版本、维度、文件清单、状态 |
-| `statistics.json` | 仪表盘数据：组件/API/模式/质量指标 |
-| `search-index.json` | 关键词→文件检索索引 |
-| `graph.json` | 结构化关系图谱（节点+边） |
-| `index.md` | 人类导航入口 |
+**按需产出** — 由 8 个维度并行 agent 按实际代码检测结果动态生成，有内容才建文件。
 
-#### 按需产出
-
-按实际代码检测结果动态产出，有内容才建文件：
-
-| 目录 | 产出文件 | 触发条件 |
-|------|---------|----------|
-| `architecture/` | `overview.md`（必选），可选 `modules.md` `tech-stack.md` | 有源码目录 |
-| `components/` | `catalog.md`（必选），可选 高复用组件独立 `.md` | 有组件目录 |
-| `api/` | `overview.md` `request.md`（必选），可选 `modules.md` | 有 API 目录 |
-| `patterns/` | `vue.md` `typescript.md` `naming.md` `folder.md` `table.md` `form.md` `dialog.md` `layout.md` `upload.md` `crud.md` `approval.md` `import-export.md` | 按实际模式数量 |
-| `observations/` | `statistics.md`（必选），可选 `dead-code.md` | 有扫描数据 |
-| `reports/` | `change-log.md`（详尽模式） | 增量/详尽模式 |
-
-#### 人工维护
-
-分析模式**仅首次创建占位 `index.md`**，后续运行**绝不覆盖**：
+**人工维护** — 以下目录分析仅首次创建占位 `index.md`，后续绝不覆盖：
 
 | 目录 | 维护者 | 说明 |
 |------|--------|------|
@@ -215,6 +221,8 @@ rules/     experience/     playbooks/     decisions/
 对比标记：非首次运行时，自动覆盖区域的文件对比后标注 `[NEW]` / `[CHANGED]` / `[REMOVED]` / `[CONFIRMED]`；永不覆盖区域跳过不处理。
 
 ### Resource Boundaries
+
+> 本章为执行建议，非强制保证。随 context 演进自行调整，不作为契约约束。
 
 #### 行为原则
 
@@ -272,50 +280,10 @@ rules/     experience/     playbooks/     decisions/
 → 主 agent 从部分数据合成产出，标记 `⚠️ 子agent超时，数据由主agent补充`。
   不阻塞其他维度。
 
-### Governed Package
-
-| 字段 | 值 | 来源 |
-|------|-----|------|
-| owner | skill author | Production 模式要求 |
-| review cadence | 每次大版本后 | Appendix 关键约束 §6 |
-| input_files | `package.json` + 源码目录 + Vault 路径 | file-backed fixture（文件锚点） |
-| output contract | 见 [Output Contract](#output-contract) | 固定产出 + 按需产出 + 人工维护 |
-| rollback boundary | 删除 `.project-knowledge/` 即可回滚 | [Overwrite Policy](#overwrite-policy) |
-| trust report | missing evidence（缺失证据） | 待产出 |
-| quality scorecard | missing evidence（缺失证据） | 待 `reports/output_quality_scorecard.md` |
-
 ---
 
 ## Appendix
 
-### A. 关键约束
-
-1. **只读业务代码** — 不修改项目源码目录中的任何业务代码，仅写入 `.project-knowledge/` 和 Obsidian Vault（agent 应主动写文件，不是只读模式；源码目录从探测结果动态确定，不预设名称）
-2. **自动适配** — 不预设技术栈，一切从实际代码检测
-3. **证据优先** — 每个结论标注 `file:line`
-4. **区分事实与推断** — 标注模式来源
-5. **中文输出** — 主体中文，代码原文
-6. **定期刷新** — 建议每周或大版本后运行 (§6)
-
-### B. 异常处理
-
-| 步骤 | 触发条件 | 一线修复 | 仍失败兜底 |
-|------|---------|---------|-----------|
-| 读 `package.json` | 不存在/解析失败 | 检查是否在根目录 | AskUserQuestion：输入框架名/跳过/自定义目录 |
-| 探测目录结构 | find 空/权限拒绝 | 排除 node_modules/dist | AskUserQuestion：输入目录/降级ls/取消 |
-| 统计命令 | 零匹配 | 扩大搜索范围 | 标注⚠️，不编造数据 |
-| 读 Vault | 路径不可达 | 尝试本地 `.project-knowledge/` | AskUserQuestion：重输路径/仅本地/取消 |
-| 组件引用计数 | 无结果 | 尝试 PascalCase + kebab-case | 标注"引用计数=0" |
-| 增量扫描 | 本地副本为空 | 回退全量扫描 | 新建目录 + 全量 |
-
-### C. 反例清单
-
-| # | ❌ 不要做 | ✅ 正确做法 |
-|---|----------|-----------|
-| 1 | 修改任何业务代码文件 | 仅写 `.project-knowledge/` 和 Obsidian Vault |
-| 2 | 用框架通用模式代替项目实际模式 | 从实际代码提取，引用 `file:line` |
-| 3 | 编造不存在的 API、组件、目录 | 实时验证后再写 |
-| 4 | 跳过确认直接扫描大型项目 | 先确认项目名、范围、路径 |
-| 5 | 开发前检查中重新扫描源码 | 只读已有文档 |
-| 6 | 输出无 `file:line` 的笼统建议 | 每个结论标注源文件位置 |
-| 7 | 对不存在的目录静默跳过 | 标注"⚠️ 路径不存在" |
+- [关键约束](references/constraints.md)
+- [异常处理](references/exceptions.md)
+- [反例清单](references/anti-patterns.md)

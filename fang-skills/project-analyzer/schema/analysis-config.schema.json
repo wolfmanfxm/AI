@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Analysis Config",
+  "description": "用户选择文件。Phase 1 写入一次后只读，不再修改。",
+  "type": "object",
+  "required": ["projectName", "mode", "scope", "output"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "analysis-config.schema.json 的版本"
+    },
+    "projectName": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["quick", "standard", "deep"],
+      "description": "分析深度：快速/标准/详尽"
+    },
+    "scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "扫描范围：源码目录列表"
+    },
+    "output": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["vault", "local"] },
+      "description": "输出位置"
+    },
+    "vaultPath": {
+      "type": "string",
+      "description": "Obsidian Vault 路径"
+    },
+    "firstAnalysis": {
+      "type": "boolean",
+      "description": "是否首次分析"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "skillVersion": {
+      "type": "string",
+      "description": "project-analyzer skill 版本"
+    }
+  }
+}

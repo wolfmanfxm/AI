@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifest",
+  "description": "项目知识库执行状态文件。由 Analysis Flow 创建和更新。",
+  "type": "object",
+  "required": ["knowledgeVersion", "schemaVersion", "status", "generatedBy", "generatedAt"],
+  "properties": {
+    "knowledgeVersion": {
+      "type": "string",
+      "description": "知识库版本号，每次全量刷新递增"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "manifest.schema.json 的版本，用于升级兼容"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["confirmed", "in_progress", "partial", "interrupted", "completed"],
+      "description": "执行状态"
+    },
+    "generatedBy": {
+      "type": "string",
+      "const": "project-analyzer",
+      "description": "生成工具标识"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 时间戳"
+    },
+    "projectName": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "gitCommit": {
+      "type": "string",
+      "description": "分析时的 git commit hash"
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed"] },
+          "files": { "type": "array", "items": { "type": "string" } },
+          "confidence": { "type": "integer", "minimum": 0, "maximum": 100 }
+        }
+      }
+    },
+    "fixedOutputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "固定产出文件列表"
+    },
+    "statistics": {
+      "type": "object",
+      "description": "项目统计摘要",
+      "properties": {
+        "totalLines": { "type": "integer" },
+        "totalFiles": { "type": "integer" },
+        "totalComponents": { "type": "integer" },
+        "totalApiModules": { "type": "integer" }
+      }
+    }
+  }
+}

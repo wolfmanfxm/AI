@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Knowledge Graph",
+  "description": "项目结构关系图谱。由 Post Processing 从各维度汇总生成。",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "graph.schema.json 的版本"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "label", "group"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["layer", "component", "api", "infrastructure", "store", "view"] },
+          "label": { "type": "string" },
+          "refs": { "type": "integer", "description": "引用次数（组件）" },
+          "functions": { "type": "integer", "description": "导出函数数（API）" },
+          "group": { "type": "string" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "relation"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "relation": { "type": "string", "description": "关系描述：imports/使用/组合/配置/依赖" }
+        }
+      }
+    }
+  }
+}
