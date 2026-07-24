@@ -1,0 +1,13 @@
+{
+  "generatedBy": "project-analyzer",
+  "generatedAt": "{{date}}",
+  "project": "{{project}}",
+  "nodes": {
+    "components": [],
+    "pages": [],
+    "modules": [],
+    "patterns": [],
+    "apis": []
+  },
+  "edges": []
+}

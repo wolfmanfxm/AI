@@ -1,38 +1,26 @@
-# Architecture Analysis Prompt
+# Architecture Analysis
 
-参考模板：templates/architecture/overview.md（灵活扩展）
+## Goal
+理解项目的整体架构：技术栈、目录结构、模块划分、状态管理、路由设计。
 
-## 执行清单
+## Context
+本项目为通用前端项目分析，无特定框架预设。从 package.json 和目录结构推理。
 
-### 1. 技术栈（读 package.json）
-```bash
-cat package.json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'{k}: {v}') for k,v in d.get('dependencies',{}).items() if any(w in k for w in ['vue','react','angular','vite','webpack','pinia','redux','element','antd','ant-design','mui','axios','echarts','i18n','qiankun'])]"
-```
-从结果提取关键依赖和版本。
+## Evidence
+- `package.json` — 技术栈和依赖
+- 顶层目录结构 — 层级关系
+- 视图/页面目录 — 模块划分
+- Store 目录 — 状态管理方案
+- 路由配置 — 页面路由和权限
 
-### 2. 目录结构
-```bash
-find . -maxdepth 2 -type d ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*' | sort
-```
-标注每层目录用途。若存在多层架构（框架层+业务层），注明层级关系。
+## Analysis
+1. 从 package.json 提取框架、构建工具、UI库、状态管理、HTTP客户端
+2. 识别源码目录层级，标注每层用途，若有多层架构注明关系
+3. 扫描视图目录的一级子目录，统计代码规模，标注前5大模块
+4. 列出所有 store，标注名称、路径、职责
+5. 提取路由树、守卫、懒加载模式
+6. 搜索循环依赖、标注超大模块、标注未使用的 store
 
-### 3. 模块列表
-扫描页面/视图目录的一级子目录，每个视为一个业务模块：
-```bash
-for d in $(ls -d <views_dir>/*/); do echo "$(basename $d): $(find $d -name '*.vue' -o -name '*.tsx' -o -name '*.ts' -o -name '*.js' | xargs cat 2>/dev/null | wc -l) lines"; done | sort -t: -k2 -rn
-```
-标注前 5 大模块。
-
-### 4. 状态管理
-列出 store 目录下所有文件，标注名称、路径、职责。
-
-### 5. 路由
-搜索路由配置文件（`router/`、`routes/`），提取路由树、守卫、懒加载模式。
-
-### 6. 风险
-- 搜索循环依赖
-- 标注超大规模模块（>整体 15%）
-- 标注未使用的 store
-
-## 输出
-填充 Architecture.md 模板，技术栈用表格，模块用排序列表，风险用 🔴🟡🟢 标记。
+## Output
+`architecture/overview.md`（必选）
+按需：`modules.md`、`tech-stack.md`、`dependencies.md`、`directory-tree.md`

@@ -1,120 +1,88 @@
 # Example Output
 
-以下是执行一次 project-analyzer 后的产出示例（以某 Vue 3 + Element Plus 项目为例，实际输出取决于项目实际技术栈）。
+执行一次 project-analyzer 后的产出示例。
 
 ---
 
-## architecture/overview.md（示例片段）
+## architecture/overview.md
 
 ```markdown
 ---
-date: 2026-07-23
-project: my-web-app
-type: architecture
-version: 20260723.1
+id: architecture-overview
+generatedBy: project-analyzer
+generatedAt: 2026-07-24T14:00:00Z
+confidence: 95
+sources:
+  - package.json
+  - src/router/
+  - src/stores/
 ---
 
-# Architecture
+# Architecture Overview
 
-## Overview
-
-本项目是某企业后台管理系统，采用 Vue 3 + TypeScript + Vite 5 技术栈。
-整体为 src/（框架层）+ packages/（业务模块）双层架构。
+## 概述
+本项目是企业后台管理系统，采用 Vue 3 + TypeScript + Vite 5 技术栈。
+src/（框架层）+ packages/（业务模块）双层架构。
 
 ## Tech Stack
-
 | 维度 | 选型 | 版本 |
 |------|------|------|
 | 框架 | Vue 3 | 3.5.x |
 | 语言 | TypeScript | 5.6.x |
-| 构建工具 | Vite | 5.4.x |
 | UI 库 | Element Plus | 2.9.x |
 | 状态管理 | Pinia | 2.2.x |
-| HTTP 客户端 | Axios | 1.7.x |
-
-## Modules
-
-| 模块 | 路径 | 规模 | 职责 |
-|------|------|------|------|
-| user | packages/user/ | ~4200行 | 用户管理、权限分配 |
-| order | packages/order/ | ~3800行 | 订单管理、流程追踪 |
-...
 ```
 
 ---
 
-## components/catalog.md（示例片段）
+## components/catalog.md
 
 ```markdown
 ---
-date: 2026-07-23
-project: my-web-app
-type: component-patterns
-version: 20260723.1
+id: component-data-table
+generatedBy: project-analyzer
+generatedAt: 2026-07-24T14:00:00Z
+confidence: 98
+sources:
+  - src/components/DataTable.vue
+  - packages/user/pages/list.vue
 ---
 
-# Component Patterns
-
-## 1. 全局通用组件
+# Component Catalog
 
 ### DataTable
-- **路径**：`src/components/DataTable.vue`
-- **用途**：通用数据表格，支持分页、多选、排序、列配置
-- **Props**：`columns: ColumnConfig[]`, `fetchData: (params) => Promise<PageResult>`
-- **Emits**：`@selection-change(rows: Row[])`
-- **Slots**：`toolbar` — 自定义工具栏, `actions` — 自定义操作列
-- **引用次数**：18 次
-- **复用度**：高
-- **示例**（`packages/user/pages/list.vue:23`）：
-  ```vue
-  <DataTable :columns="userColumns" :fetch-data="fetchUsers" @selection-change="handleSelect">
-    <template #toolbar>
-      <el-button type="primary" @click="openCreate">新增用户</el-button>
-    </template>
-  </DataTable>
-  ```
+- **路径**：src/components/DataTable.vue
+- **用途**：通用数据表格，支持分页、多选、排序
+- **Props**：columns: ColumnConfig[], fetchData: (params) => Promise<PageResult>
+- **引用次数**：18 次，复用度：高
 ```
 
 ---
 
-## reports/migration.md（示例片段）
+## reports/migration.md
 
 ```markdown
 ---
-date: 2026-07-23
-project: my-web-app
-type: migration-notes
-version: 20260723.1
+id: migration-notes
+generatedBy: project-analyzer
+generatedAt: 2026-07-24T14:00:00Z
+confidence: 90
+sources: []
 ---
 
 # Migration Notes
 
-对比基线：20260716.1 → 20260723.1
+对比基线：20260716 → 20260724
 
-## Summary
-
-| Category    | 🆕 NEW | 🔄 CHANGED | ❌ REMOVED | ✅ CONFIRMED |
-|-------------|--------|------------|------------|-------------|
-| Components  | 2      | 1          | 0          | 21          |
-| Coding      | 1      | 1          | 0          | 7           |
-| UI          | 0      | 1          | 0          | 5           |
-| API         | 1      | 0          | 0          | 4           |
-| Architecture| 0      | 0          | 0          | 6           |
-| **Total**   | **4**  | **3**      | **0**      | **43**      |
-
-## Component Changes
+| Category    | 🆕 | 🔄 | ❌ | ✅ |
+|-------------|----|----|----|----|
+| Components  | 2  | 1  | 0  | 21 |
+| Patterns    | 1  | 1  | 0  | 7  |
+| API         | 1  | 0  | 0  | 4  |
 
 ### 🆕 NEW
-| 组件 | 路径 | 用途 | 复用度 |
-|------|------|------|--------|
-| FileUploader | src/components/FileUploader.vue | 通用文件上传+预览 | 高 |
-| StatusBadge | src/components/StatusBadge.vue | 状态标签渲染 | 中 |
+| FileUploader | src/components/FileUploader.vue | 通用文件上传 | 高 |
 
 ### 🔄 CHANGED
-| 组件 | 变更 | 来源 |
-|------|------|------|
-| DataTable | Props 新增 `rowKey`；Emits 新增 `@sort-change` | src/components/DataTable.vue:35 |
-
-### ✅ CONFIRMED
-21 个已有组件未变化。
+| DataTable | Props 新增 rowKey | src/components/DataTable.vue:35 |
 ```

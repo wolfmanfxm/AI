@@ -1,48 +1,61 @@
 # Output Format Specification
 
 ## 通用规则
+1. Markdown + YAML Frontmatter（分析产出用 `.md`，元数据用 `.json`）
+2. 源文件引用 `file:line` 格式
+3. 从源文件复制实际代码，不编造
+4. 中文为主体描述，代码原文
 
-1. **Markdown + YAML Frontmatter** — 分析产出用 `.md`，元数据用 `.json`
-2. **源文件引用** — `file:line` 格式
-3. **实际代码** — 从源文件复制，不编造
-4. **中文主体** — 描述用中文，代码原文
+## Evidence Header
 
-## 固定产出
-
-每次分析必定生成：
-
-| 文件 | 模板 |
-|------|------|
-| `manifest.json` | [templates/metadata/manifest.json](../templates/metadata/manifest.json) |
-| `index.md` | [templates/metadata/index.md](../templates/metadata/index.md) |
-| `search-index.json` | [templates/metadata/search-index.json](../templates/metadata/search-index.json) |
-| `architecture/overview.md` | [templates/architecture/overview.md](../templates/architecture/overview.md) |
-| `changelog/latest.md` | 记录本次知识变化 |
-
-## 按需产出
-
-根据分析发现动态创建，**有内容才建文件**。参考维度：
-
-- `architecture/` — modules.md, tech-stack.md, dependencies.md 等
-- `components/` — catalog.md, {{ComponentName}}.md 等
-- `api/` — request.md, auth.md, modules.md 等
-- `ui/` — layout.md, table.md, form.md, dialog.md 等
-- `coding-style/` — typescript.md, vue.md, naming.md 等
-- `patterns/` — crud.md, search.md 等（从 UI 和编码中提取的可复用模式）
-- `observations/` — statistics.md, duplicates.md, dead-code.md 等
-- `proposals/` — {{rule-name}}.md（候选规范，待人工确认）
-- `reports/` — latest.md, quality.md, coverage.md
-
-## 人工目录（仅 index.md）
-
-`rules/` `playbooks/` `experience/` `decisions/`
-
-## Frontmatter
+每个 `.md` 文件必须包含：
 
 ```yaml
 ---
-date: YYYY-MM-DD
-project: <项目名>
-version: <YYYYMMDD.N>
+id: component-search-form
+generatedBy: project-analyzer
+generatedAt: 2026-07-24T14:00:00Z
+confidence: 98
+sources:
+  - src/components/SearchForm.vue
+  - src/views/user/list.vue
 ---
 ```
+
+**confidence 分级**：
+
+| 范围 | 含义 | 示例 |
+|------|------|------|
+| 90-99 | 统计事实 | "SchemaTable 引用 569 次" |
+| 70-89 | 模式推断 | "项目使用 Schema 驱动模式" |
+| 50-69 | 人工标注 | 人工补充的经验 |
+
+## 固定产出结构
+
+```
+.project-knowledge/
+│
+├── manifest.json                # 元数据（knowledgeVersion, skillVersion, gitCommit）
+├── statistics.json              # 仪表盘数据（组件/API/模式/质量指标）
+├── graph.json                   # 结构化关系图谱（节点+边）
+├── search-index.json            # 关键词→文件检索索引
+├── index.md                     # 人类导航入口
+│
+├── architecture/                # 架构
+├── components/                  # 组件
+├── api/                         # API
+├── patterns/                    # 模式（UI + 编码 + 可复用模式）
+├── observations/                # 观察数据
+├── proposals/                   # 候选规范
+├── reports/                     # 报告（含 changelog）
+│
+├── rules/                       # 人工
+├── experience/                  # 人工
+├── playbooks/                   # 人工
+└── decisions/                   # 人工
+```
+
+- 元数据 JSON 每次必定生成
+- 目录初次运行时全部创建
+- 各目录下按分析发现动态创建 `.md` 文件，有内容才建
+- `rules/` `experience/` `playbooks/` `decisions/` 仅创建 index.md

@@ -1,42 +1,27 @@
-# Coding Style Analysis Prompt
+# Coding Style Analysis
 
-输出格式参见下方模板说明
+## Goal
+从现有代码中提取实际的编码规范，不推荐理想化方案。
 
-## 执行清单
+## Context
+编码规范取决于项目框架和语言，先读 architecture/overview.md 了解技术栈。
 
-### 1. 组件写法统计
-```bash
-# script setup vs Options API（Vue 项目）
-echo "script setup: $(grep -r '<script setup' <src_dir> --include='*.vue' | wc -l)"
-echo "Options API: $(grep -r '<script>' <src_dir> --include='*.vue' | grep -v setup | wc -l)"
-```
-如果是 React 项目：统计函数组件 vs Class 组件。
+## Evidence
+- 组件文件（`.vue` / `.tsx`）
+- API 目录
+- 类型定义文件
+- Import 语句
+- 错误处理代码
+- Hooks/Composables 目录
 
-### 2. 类型系统
-- `grep -r "interface\|type " <src_dir> --include='*.ts' | wc -l` — 类型定义总量
-- 抽样 5 个文件观察 interface vs type 偏好
-- `grep -rn ": any" <src_dir> --include='*.ts' --include='*.vue' | wc -l` — any 使用量
+## Analysis
+1. 统计不同组件写法的占比（script setup vs Options API、函数组件 vs Class）
+2. 统计 interface vs type 偏好、any 使用量、泛型模式
+3. 分类 API 命名风格（Swagger 生成 vs 手写），计算占比
+4. 抽样观察 import 排序规律，从构建配置读取路径别名
+5. 定位 HTTP 拦截器，统计 try/catch、async/await、.then() 使用量
+6. 按职责分类 hooks/composables（权限、数据请求、UI状态、工具函数）
 
-### 3. API 命名风格
-```bash
-# 统计命名模式
-grep -rn "export const\|export function" <api_dir> --include='*.ts' | head -30
-```
-分类：Swagger 生成（`verbNounUsingMethod`）vs 手写（`verbNoun`），计算占比。
-
-### 4. Import 组织
-抽样 10 个文件，观察 import 排序。从 `tsconfig.json` 或构建配置读取路径别名。
-
-### 5. 错误处理
-```bash
-echo "try/catch: $(grep -r 'try {' <src_dir> --include='*.ts' --include='*.vue' | wc -l)"
-echo "async/await: $(grep -r 'await ' <src_dir> --include='*.ts' --include='*.vue' | wc -l)"
-echo ".then(): $(grep -r '\.then(' <src_dir> --include='*.ts' --include='*.vue' | wc -l)"
-```
-定位 HTTP 拦截器，分析全局错误处理逻辑。
-
-### 6. Hooks/Composables
-列出目录，按职责分类（权限、数据请求、UI 状态、工具函数）。
-
-## 输出
-每个维度：1 个统计 + 1 个代码示例。标注"代码事实："vs"模式推断："。
+## Output
+`patterns/` 下按需创建：`vue.md`（或 `react.md`）、`typescript.md`、`naming.md`、`folder.md`
+每个结论：1个统计数据 + 1个代码示例 + 标注"代码事实/模式推断"

@@ -1,12 +1,17 @@
 {
+  "knowledgeVersion": "2.0",
+  "skillVersion": "1.0.0",
+  "generatedBy": "project-analyzer",
+  "generatedAt": "{{date}}",
   "project": "{{project}}",
-  "created": "{{date}}",
+  "gitCommit": "",
   "lastScan": "{{date}}",
-  "version": "{{version}}",
+  "sourceDirectories": [],
   "techStack": {},
   "statistics": {
     "totalFiles": 0, "totalLines": 0,
-    "components": 0, "modules": 0, "apiEndpoints": 0
+    "components": 0, "modules": 0, "apiEndpoints": 0,
+    "highConfidence": 0, "inferred": 0, "manual": 0
   },
   "files": {}
 }

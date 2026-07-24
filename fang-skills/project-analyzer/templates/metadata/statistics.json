@@ -1,0 +1,30 @@
+{
+  "project": "{{project}}",
+  "generatedAt": "{{date}}",
+  "totals": {
+    "files": 0,
+    "lines": 0
+  },
+  "structure": {
+    "components": 0,
+    "pages": 0,
+    "modules": 0,
+    "stores": 0,
+    "routes": 0,
+    "apis": 0
+  },
+  "patterns": {
+    "crud": 0,
+    "search": 0,
+    "dialog": 0,
+    "upload": 0,
+    "table": 0,
+    "total": 0
+  },
+  "quality": {
+    "anyUsage": 0,
+    "deadCode": 0,
+    "duplicates": 0,
+    "zeroRefComponents": 0
+  }
+}

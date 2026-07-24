@@ -1,40 +1,25 @@
-# UI Pattern Analysis Prompt
+# UI Pattern Analysis
 
-输出格式参见下方模板说明
+## Goal
+识别项目中反复出现的 UI 组合模式，提取可复用的交互范式。
 
-## 前置
+## Context
+UI 模式依赖项目使用的 UI 库（从 package.json 确定组件标签前缀）。先读 components/catalog.md 了解可用组件。
 
-从项目 UI 库确定组件标签前缀（如 Element Plus 的 `el-`、Ant Design 的 `a-`、MUI 的 `Mui`）。
+## Evidence
+- 项目 UI 库的组件标签
+- 页面/视图目录下的模板代码
 
-## 执行清单
+## Analysis
+按以下维度扫描，每种模式至少出现 2 次才认定为"模式"：
+1. **表格**：分页方式、列配置、操作列、工具栏
+2. **表单**：布局偏好、校验方式、提交 loading
+3. **搜索/筛选**：布局列数、展开/收起、触发方式
+4. **对话框**：新增/编辑/详情/确认四种模式
+5. **上传**：组件选择、状态管理、与表单集成
+6. **布局**：页面标准结构
 
-### 1. 表格
-```bash
-# 搜索表格使用
-grep -r "<${prefix}-table\|<${prefix}table" <src_dir> --include='*.vue' --include='*.tsx' | wc -l
-```
-抽样 3-5 个，提取：分页方式、列配置、操作列、多选模式。输出 1 个标准模板。
-
-### 2. 表单
-```bash
-grep -r "<${prefix}-form\|<${prefix}form" <src_dir> --include='*.vue' --include='*.tsx' | wc -l
-```
-提取：布局偏好、校验方式、提交 loading 模式。
-
-### 3. 搜索/筛选
-搜索 `searchForm\|filterForm\|queryParams`，提取布局模式（列数、展开/收起）。
-
-### 4. 对话框
-搜索 `Dialog\|Modal\|dialog\|modal`，区分新增/编辑/详情/确认四种模式。
-
-### 5. 上传
-搜索 `upload\|Upload`，提取组件使用和状态管理模式。
-
-### 6. 布局
-提取页面标准结构：面包屑→标题→筛选→表格/内容→分页。
-
-## 输出规则
-- 每种模式 1 个标准代码模板（10-20 行，用实际组件标签名）
-- 标注至少 2 个使用页面作为证据
-- 标注推荐复用方式（复制模板 / 使用全局组件 / hook 封装）
-- **仅记录实际存在的模式，不存在的跳过**
+## Output
+`patterns/` 下按需创建：`layout.md`、`table.md`、`form.md`、`dialog.md`、`upload.md`
+每种模式：1个代码模板（10-20行）+ 至少2个使用页面作为证据
+仅记录实际存在的模式
