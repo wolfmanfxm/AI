@@ -22,8 +22,6 @@ description: >
 
 ## 开发前检查模式
 
-**两层保障机制**：
-
 **两层保障**：`.claude/CLAUDE.md` 自动加载（主） + skill 触发（辅）。先读知识文档，再写代码。
 
 ### 触发
@@ -71,30 +69,36 @@ description: >
 
 ### Phase 1：Discover（生成配置）
 
-1. 探测技术栈、目录结构、源码目录，定位 Vault 根路径。生成 `.project-knowledge/analysis-config.json`（模板：[templates/metadata/analysis-config.json](templates/metadata/analysis-config.json)），`status` 设为 `pending`。Vault 输出路径由 Q1 选择结果自动决定（`{VaultRoot}/Projects/{项目名}/`）。
-2. **使用 `AskUserQuestion` 工具逐项确认**，每项提供预设选项，最后一项固定为 `其他（自定义输入）`：
+1. **检测是否首次运行**：检查 `.project-knowledge/analysis-config.json` 是否存在且 `status == "completed"`
 
-   **Q1 — 项目名称**
-   - 选项：`package.json` 的 `name` + 当前目录名 + Vault 中已有名称 + 其他
-   - 默认选中 Vault 已有名称或目录名
-   - **Vault 输出路径将自动设为** `{VaultRoot}/Projects/{Q1选择结果}/`
+2. **首次运行** — 探测技术栈、目录结构、源码目录，定位 Vault 根路径。使用 `AskUserQuestion` 确认：
 
-   **Q2 — 分析深度**
-   - 选项：`🚀 快速（~2min）` / `📊 标准（~5min，推荐）` / `🔬 详尽（~10min）`
-   - 默认选中「标准」
+   | Q | 标题 | 选项 | 默认 |
+   |---|------|------|------|
+   | Q1 | 项目名称 | `package.json` name / 目录名 / Vault 已有名 / 其他 | Vault 已有名或目录名 |
+   | Q2 | 分析深度 | 🚀快速 / 📊标准 / 🔬详尽 | 标准 |
+   | Q3 | 扫描范围 | 全量 / 增量 | 全量 |
+   | Q4 | 输出位置 | Vault+本地 / 仅本地 / 仅 Vault | Vault+本地 |
 
-   **Q3 — 扫描范围**
-   - 选项：`全量（全部源码目录）` / `增量（近 10 次 commit 变更）`
-   - 默认选中「全量」
+3. **非首次运行** — 从已有 config 恢复项目名、输出位置，仅确认变化项：
 
-   **Q4 — 输出位置**
-   - 选项：`Vault + 本地` / `仅本地 .project-knowledge/` / `仅 Vault`
-   - 默认选中「Vault + 本地」
+   | Q | 标题 | 选项 | 默认 |
+   |---|------|------|------|
+   | Q1 | 项目名称 | （从 config 恢复，**跳过**） | — |
+   | Q2 | 分析深度 | 🚀快速 / 📊标准 / 🔬详尽 | 标准 |
+   | Q3 | 扫描范围 | **🔄 上次分析后的变更（推荐）** / 全量 / 增量 | 🔄 上次变更 |
+   | Q4 | 输出位置 | （从 config 恢复，**跳过**） | — |
 
-3. 用户完成全部选项后，将 config 的 `status` 更新为 `confirmed`，**立即进入 Phase 2**，无需用户再输入任何文字
+   非首次的 Q3 增量范围由 `manifest.json` 的 `lastScan` 字段决定（`git diff --name-only {lastScan} HEAD`），而非固定 10 次 commit。
 
-> `AskUserQuestion` 的 `header` 字段用 4-6 字中文简短标签（如「项目名称」「分析深度」），
-> 每个选项 `label` 用 3-8 字。单选模式，不启用 `multiSelect`。
+4. **增量更新与知识沉淀**：
+   - 已有知识文档**不被覆盖**，而是对比更新（标记 `[NEW]/[CHANGED]/[REMOVED]`）
+   - `proposals/` 中已被用户确认并移入 `rules/` 的规则，本次**不再重复提议**
+   - 知识库随每次分析持续累积，而非每次都从头重建
+
+5. 用户完成选项后，将 config 的 `status` 更新为 `confirmed`，**立即进入 Phase 2**
+
+> `AskUserQuestion` 的 `header` 用 4-6 字中文标签，`label` 用 3-8 字。单选，不启用 `multiSelect`。
 
 ### Phase 2：Resume（执行分析）
 
@@ -122,7 +126,7 @@ description: >
 
 ### Step 3：生成 Migration Notes
 
-对比 Obsidian Vault 上轮输出。指南：[prompts/change-analysis.md](prompts/change-analysis.md)，模板：[templates/metadata/manifest.json](templates/metadata/manifest.json)（参考 frontmatter 格式）。
+对比 Obsidian Vault 上轮输出。指南：[prompts/change-analysis.md](prompts/change-analysis.md)。
 
 首次执行全部标记 `[NEW]`。非首次逐项标记 `[NEW]/[CHANGED]/[REMOVED]/[CONFIRMED]`。
 

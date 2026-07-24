@@ -4,5 +4,7 @@
   "sourceDirectories": [],
   "analysis": {"mode": "standard", "scope": "full", "outputTargets": ["local"]},
   "status": "pending",
-  "generatedAt": ""
+  "generatedAt": "",
+  "lastScan": null,
+  "scanCount": 0
 }
