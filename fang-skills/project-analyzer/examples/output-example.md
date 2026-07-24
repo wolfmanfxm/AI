@@ -4,7 +4,7 @@
 
 ---
 
-## Architecture.md（示例片段）
+## architecture/overview.md（示例片段）
 
 ```markdown
 ---
@@ -43,7 +43,7 @@ version: 20260723.1
 
 ---
 
-## Component Patterns.md（示例片段）
+## components/catalog.md（示例片段）
 
 ```markdown
 ---
@@ -77,7 +77,7 @@ version: 20260723.1
 
 ---
 
-## Migration Notes.md（示例片段）
+## reports/migration.md（示例片段）
 
 ```markdown
 ---

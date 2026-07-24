@@ -1,6 +1,6 @@
 # API Pattern Analysis Prompt
 
-使用模板：[templates/APIGuide.md](../templates/APIGuide.md)
+使用模板：[templates/APIGuide.md](../templates/documents/APIGuide.md)
 
 ## 前置
 

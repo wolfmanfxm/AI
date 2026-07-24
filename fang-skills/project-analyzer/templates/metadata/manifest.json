@@ -1,0 +1,28 @@
+{
+  "project": "{{project}}",
+  "created": "{{date}}",
+  "lastScan": "{{date}}",
+  "version": "{{version}}",
+  "techStack": {
+    "framework": "",
+    "language": "",
+    "buildTool": "",
+    "uiLibrary": "",
+    "stateManagement": "",
+    "httpClient": ""
+  },
+  "sourceDirectories": [],
+  "files": {
+    "architecture/overview.md": "架构概述",
+    "components/catalog.md": "组件目录",
+    "patterns/coding.md": "编码规范",
+    "patterns/ui.md": "UI 风格指南",
+    "patterns/api.md": "API 规范",
+    "reports/migration.md": "变更记录",
+    "reports/analysis-{{date}}.md": "分析报告"
+  },
+  "directories": {
+    "experience": "人工沉淀：反模式与最佳实践",
+    "playbooks": "人工沉淀：操作手册"
+  }
+}

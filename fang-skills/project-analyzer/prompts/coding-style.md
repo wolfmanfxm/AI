@@ -1,6 +1,6 @@
 # Coding Style Analysis Prompt
 
-使用模板：[templates/CodingStyle.md](../templates/CodingStyle.md)
+使用模板：[templates/CodingStyle.md](../templates/documents/CodingStyle.md)
 
 ## 执行清单
 

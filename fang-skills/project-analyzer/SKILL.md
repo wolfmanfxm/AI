@@ -20,6 +20,11 @@ description: >
 
 ## 开发前检查模式
 
+**两层保障机制**：
+
+1. **CLAUDE.md（主）** — 项目根目录的 CLAUDE.md 在每次会话自动加载，指引 Claude 读取 `.project-knowledge/`。分析模式执行后自动创建/更新。
+2. **Skill 触发（辅）** — 当 CLAUDE.md 未配置或 skill 被显式调用时，主动读取知识文档。
+
 当用户提出编码需求时，**先读取项目知识文档，再写代码**。这样生成的代码符合项目实际规范，而非框架通用最佳实践。
 
 ### 触发
@@ -29,11 +34,11 @@ description: >
 ### 流程
 
 1. **定位知识文档**：先查 `.project-knowledge/`，若无则查 `{Knowledge Vault}/Projects/{project}/`
-2. **按需读取**（不需要全读，根据任务选择最相关的 1-2 份）：
-   - 写组件 → `Component Patterns.md` + `Coding Guidelines.md`
-   - 写页面 → `Architecture.md` + `UI Style Guide.md`
-   - 写 API → `API Conventions.md` + `Coding Guidelines.md`
-   - 不确定 → 先读 `Coding Guidelines.md`
+2. **按需读取**（根据任务选择最相关的 1-2 份）：
+   - 写组件 → `components/catalog.md` + `patterns/coding.md`
+   - 写页面 → `architecture/overview.md` + `patterns/ui.md` + `patterns/coding.md`
+   - 写 API → `patterns/api.md` + `patterns/coding.md`
+   - 不确定 → 先读 `patterns/coding.md`
 3. **提取关键约定**：命名风格、导入顺序、组件选用、错误处理模式
 4. **基于约定编码**：用项目实际模式生成代码，引用知识文档中的具体条目
 5. 🛑 **若知识文档不存在**：停止编码，提示用户先运行分析模式生成知识文档
@@ -82,11 +87,11 @@ description: >
 
 | 维度 | Prompt | Template | 输出 |
 |------|--------|----------|------|
-| 架构 | [prompts/architecture.md](prompts/architecture.md) | [templates/Architecture.md](templates/Architecture.md) | Architecture.md |
-| 组件 | [prompts/components.md](prompts/components.md) | [templates/ComponentPattern.md](templates/ComponentPattern.md) | Component Patterns.md |
-| 编码 | [prompts/coding-style.md](prompts/coding-style.md) | [templates/CodingStyle.md](templates/CodingStyle.md) | Coding Guidelines.md |
-| UI | [prompts/ui-pattern.md](prompts/ui-pattern.md) | [templates/UIGuide.md](templates/UIGuide.md) | UI Style Guide.md |
-| API | [prompts/api-pattern.md](prompts/api-pattern.md) | [templates/APIGuide.md](templates/APIGuide.md) | API Conventions.md |
+| 架构 | [prompts/architecture.md](prompts/architecture.md) | [templates/documents/Architecture.md](templates/documents/Architecture.md) | architecture/overview.md |
+| 组件 | [prompts/components.md](prompts/components.md) | [templates/documents/ComponentPattern.md](templates/documents/ComponentPattern.md) | components/catalog.md |
+| 编码 | [prompts/coding-style.md](prompts/coding-style.md) | [templates/documents/CodingStyle.md](templates/documents/CodingStyle.md) | patterns/coding.md |
+| UI | [prompts/ui-pattern.md](prompts/ui-pattern.md) | [templates/documents/UIGuide.md](templates/documents/UIGuide.md) | patterns/ui.md |
+| API | [prompts/api-pattern.md](prompts/api-pattern.md) | [templates/documents/APIGuide.md](templates/documents/APIGuide.md) | patterns/api.md |
 
 **核心原则**：
 - 先读 prompt 和 template，再分析
@@ -96,7 +101,7 @@ description: >
 
 ### Step 3：生成 Migration Notes
 
-对比 Obsidian Vault 上轮输出。指南：[prompts/migration-notes.md](prompts/migration-notes.md)，模板：[templates/MigrationNotes.md](templates/MigrationNotes.md)。
+对比 Obsidian Vault 上轮输出。指南：[prompts/change-analysis.md](prompts/change-analysis.md)，模板：[templates/documents/MigrationNotes.md](templates/documents/MigrationNotes.md)。
 
 首次执行全部标记 `[NEW]`。非首次逐项标记 `[NEW]/[CHANGED]/[REMOVED]/[CONFIRMED]`。
 
@@ -105,13 +110,28 @@ description: >
 **主输出 — Obsidian Vault**：
 ```
 {Knowledge Vault}/Projects/{project}/
-├── Architecture.md / Component Patterns.md / Coding Guidelines.md
-├── UI Style Guide.md / API Conventions.md / Migration Notes.md
+├── manifest.json / index.md / search-index.json
+├── architecture/    overview.md
+├── components/      catalog.md
+├── patterns/        coding.md / ui.md / api.md
+├── reports/         migration.md / analysis-YYYY-MM-DD.md
+└── rules/            (空，人工沉淀)
 ```
 
 **本地副本 — `.project-knowledge/`**（同结构）
 
-写入规则：Obsidian Flavored Markdown、frontmatter 含 `date/project/type/version`、目录不存在则创建。
+写入时自动创建子目录。同时创建 `rules/`、`experience/`、`playbooks/` 空目录（人工沉淀用，analyzer 不填充）。
+
+写入规则：Obsidian Flavored Markdown、frontmatter 含 `date/project/version`、目录不存在则创建。
+
+### Step 4.5：确保 CLAUDE.md 规则
+
+知识文档写入后，**检查项目根目录是否存在 `CLAUDE.md`**：
+
+- **若不存在**：创建 `CLAUDE.md`，内容指引 Claude 在编码前先读取 `.project-knowledge/` 中的知识文档（按任务类型匹配对应的 1-3 份文档）
+- **若已存在**：检查是否包含 `.project-knowledge/` 引用，若无则追加"开发前必读"段落
+
+这样即使 skill 未被触发，Claude 每次会话启动时也能自动加载编码规范，确保生成的代码符合项目实际模式。
 
 ### Step 5：摘要
 

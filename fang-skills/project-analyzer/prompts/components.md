@@ -1,6 +1,6 @@
 # Component Analysis Prompt
 
-使用模板：[templates/ComponentPattern.md](../templates/ComponentPattern.md)
+使用模板：[templates/ComponentPattern.md](../templates/documents/ComponentPattern.md)
 
 ## 执行清单
 

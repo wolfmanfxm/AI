@@ -1,6 +1,6 @@
 # UI Pattern Analysis Prompt
 
-使用模板：[templates/UIGuide.md](../templates/UIGuide.md)
+使用模板：[templates/UIGuide.md](../templates/documents/UIGuide.md)
 
 ## 前置
 

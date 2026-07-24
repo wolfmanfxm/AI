@@ -1,6 +1,6 @@
 # Migration Notes Prompt
 
-使用模板：[templates/MigrationNotes.md](../templates/MigrationNotes.md)
+使用模板：[templates/MigrationNotes.md](../templates/documents/MigrationNotes.md)
 
 ## 对比流程
 
