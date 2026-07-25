@@ -1,8 +1,39 @@
 # Runtime Protocol
 
-## 执行契约
+## Operating Mode
 
-本协议是 Runtime Specification 在运行时的具体行为约束。SKILL.md 中的 Contracts 声明"保证什么"，本协议定义"如何保证"。
+Production · Deterministic · Incremental OK · Dev OK
+Goal: Generate stable, reusable project knowledge.
+
+## Resource Boundaries
+
+> 以下为执行建议，非强制保证。随 context 演进自行调整。
+
+### 行为原则
+
+| 原则 | 说明 |
+|------|------|
+| 优先并行分析 | 无依赖的维度并行执行 |
+| manifest 存在时避免全量扫描 | 非首次运行优先增量 |
+| 优先增量更新 | 增量模式回退全量前先尝试 git diff 范围 |
+| 跳过大型二进制文件 | PDF/图片/视频等不参与文本分析 |
+| 不扫描构建产物 | 跳过 `node_modules/` `dist/` `.git/` 等 |
+| 遵循 ignore 文件 | 遵循 `.gitignore` 排除规则 |
+| 非必要不读取 vendor 依赖 | `node_modules/` 中的代码不分析 |
+
+### 项目规模自适应策略
+
+```
+小型项目               中型项目               大型项目
+(少量文件)             (中等规模)             (海量文件)
+    │                      │                      │
+    ▼                      ▼                      ▼
+ 单次扫描               并行                  增量
+ 主 agent 直接扫描      维度 agent 并行       优先增量 + 变更维度
+ 不 spawn 子 agent      按需 spawn            仅变更模块全量重扫
+```
+
+---
 
 ## manifest 状态机
 
@@ -14,31 +45,36 @@ confirmed → in_progress → completed
            interrupted ────────┘ (resume)
 ```
 
-- `confirmed`：Phase 1 完成，维度清单已写入，尚未开始执行
-- `in_progress`：至少一个维度 agent 已启动，尚未全部完成
+- `confirmed`：Phase 1 完成，尚未开始执行
+- `in_progress`：至少一个维度 agent 已启动
 - `partial`：token 耗尽或超时，部分维度已完成
 - `interrupted`：外部中断（用户取消 / session 丢失）
 - `completed`：所有维度完成，固定产出已生成
 
-## 维度状态
+schemaVersion 主版本号变化表示破坏性变更。knowledgeVersion 仅全量刷新时递增。
 
-manifest.dimensions 中每个维度的状态独立管理：
+---
 
-```
-pending → in_progress → completed
-              ↓
-          (agent 失败) → 主 agent 合成，标注 ⚠️
-```
+## Failure Contract
 
-## 恢复协议
+### 若架构无法推断
 
-1. 读 manifest.status
-2. 若 `interrupted` / `partial` / `in_progress`：进入 Phase 2 Resume
-3. 遍历 dimensions：跳过 `completed`，仅执行 `pending` 和 `partial`
-4. 注意：`partial` 维度的已有文件可能不完整，需全量重跑该维度
+→ 输出部分知识，推断章节标注 `confidence: <50`。
+  manifest 标记 `status: partial`，列出缺失维度。
 
-## 版本兼容
+### 若分析中途 token 耗尽
 
-- schemaVersion 变更：主版本号变化（1.x→2.x）表示破坏性变更，需升级解析器
-- knowledgeVersion 变更：仅全量刷新时递增，增量不递增
-- skillVersion（analysis-config.json）：记录生成配置的 skill 版本，用于审计
+→ 立即持久化所有已完成章节文件。
+  manifest 更新各维度状态（`completed` / `pending` / `partial`）。
+  下次运行读 manifest → 从第一个 `pending` 维度恢复。
+
+### 若分析被中断
+
+→ manifest 状态更新为 `interrupted`。
+  恢复时：读 manifest，跳过 `completed` 维度，重新执行 `pending`。
+  已写入文件保留。
+
+### 若某维度 agent 失败
+
+→ 主 agent 从部分数据合成产出，标记 `⚠️ 子agent超时，数据由主agent补充`。
+  不阻塞其他维度。

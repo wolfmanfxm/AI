@@ -6,3 +6,4 @@ timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
 2026-07-24T12:00	r4	project-analyzer	76.1	78.9	keep	D2/D6/D7	目录重组：metadata/documents分离、路径修复、rules目录	dry_run
 2026-07-24T14:00	r5	project-analyzer	78.9	80.2	keep	D1/D4	双阶段工作流+统一AskUserQuestion确认	dry_run
 2026-07-24T16:00	r6	project-analyzer	80.2	84.3	keep	D2/D5/D7	Orchestrator+GEAO格式+metadata/documents分层	 dry_run
+2026-07-24T10:15	r7	project-analyzer	74.6	83.7	keep	D1/D5/D7/D9	Frontmatter中文+触发词内联+Agent类型指定+JSON产出+7条操作反例	full_test
