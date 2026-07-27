@@ -7,8 +7,10 @@
 依赖 Obsidian Vault 中上轮输出的知识文档，需要先完成所有维度的分析再进行对比。
 
 ## Evidence
-- Obsidian Vault 中上轮输出的知识文档
+- **优先**：本地 `.project-knowledge/` 的上轮输出（若存在）
+- **其次**：Obsidian Vault 中 `{vaultPath}/Projects/{projectName}/` 的上轮输出
 - 本次新生成的分析结果
+- 若两者均不存在 → 本次为首轮扫描，全部标记 `[NEW]`，直接输出
 
 ## Analysis
 逐文件对比以下维度：

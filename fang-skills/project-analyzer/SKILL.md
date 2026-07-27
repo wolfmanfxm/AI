@@ -1,9 +1,14 @@
 ---
 name: project-analyzer
 description: >
-  分析软件项目并生成可复用的项目知识库，覆盖 7 个维度（标准模式）。
+  分析软件项目并生成可复用的项目知识库，覆盖 8 个维度（标准模式 7 个 + 详尽模式 +1）。
   触发词见 references/trigger-words.md。
   产出: .project-knowledge/ + Knowledge Vault。仅写知识文件，不修改源码。
+  不做: 业务需求分析、运行时分析、安全审计、性能基准、部署验证、代码重构、测试生成。
+  mode: Production · owner: fangxm · review: 大版本发布前
+  input_files: [SKILL.md, protocol/*.md, prompts/*.md, references/*.md, schema/*.json, templates/**/*]
+  output_contract: .project-knowledge/ + Knowledge Vault 同步
+  rollback_boundary: git revert 到上一稳定版本, 已生成知识文件不受影响
 ---
 
 ## Quick Start
@@ -41,9 +46,15 @@ manifest status = interrupted/
 |------|------|
 | 维度 Prompts | [prompts/](prompts/) |
 | 阶段协议 | [protocol/](protocol/) |
+| Agent 接口契约 | [agents/interface.yaml](agents/interface.yaml) |
+| 知识版本与生命周期 | [protocol/knowledge-protocol.md](protocol/knowledge-protocol.md) · [protocol/knowledge-lifecycle.md](protocol/knowledge-lifecycle.md) |
 | 能力边界与覆盖策略 | [references/capability-matrix.md](references/capability-matrix.md) |
 | 运行时约束与故障恢复 | [protocol/runtime-protocol.md](protocol/runtime-protocol.md) |
 | 反例与禁止操作 | [references/anti-patterns.md](references/anti-patterns.md) |
 | 步骤异常处理 | [references/exceptions.md](references/exceptions.md) |
+| 触发词与排除规则 | [references/trigger-words.md](references/trigger-words.md) |
+| 测试用例与验证 | [test-prompts.json](test-prompts.json) · [trigger_eval.py](trigger_eval.py) |
 | Schemas | [schema/](schema/) |
 | 模板与示例 | [templates/](templates/) · [examples/](examples/) |
+| 信任与质量 | [reports/trust-report.md](reports/trust-report.md) · [reports/output_quality_scorecard.md](reports/output_quality_scorecard.md) |
+| 变更记录 | [CHANGELOG.md](CHANGELOG.md) |

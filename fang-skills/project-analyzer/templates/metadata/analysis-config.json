@@ -1,10 +1,14 @@
 {
-  "project": {"name": "", "vaultPath": ""},
+  "projectName": "",
+  "schemaVersion": "1.0.0",
+  "mode": "standard",
+  "scope": ["src"],
+  "output": ["local"],
+  "vaultPath": "",
   "techStack": {},
   "sourceDirectories": [],
-  "analysis": {"mode": "standard", "scope": "full", "outputTargets": ["local"]},
   "status": "pending",
-  "generatedAt": "",
+  "createdAt": "",
   "lastScan": null,
   "scanCount": 0
 }

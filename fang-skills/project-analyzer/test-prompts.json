@@ -1,17 +1,62 @@
 [
   {
     "id": 1,
+    "category": "analysis",
     "prompt": "帮我分析这个项目的架构",
-    "expected": "进入分析模式 Phase 1 Discover，探测技术栈和目录结构，AskUserQuestion 确认配置，然后执行架构维度分析生成 architecture/overview.md"
+    "expected": "Phase 1 Discover → 探测技术栈 → AskUserQuestion 确认配置 → 执行架构维度 → architecture/overview.md"
   },
   {
     "id": 2,
+    "category": "development",
     "prompt": "我要新增一个用户列表页面，帮我写代码",
-    "expected": "进入开发前检查模式，先读 .project-knowledge/index.md，查 components/catalog.md + patterns/crud.md，用项目实际模式生成代码"
+    "expected": "开发前检查 → 读 .project-knowledge/index.md → components/catalog.md + patterns/crud.md → 用项目实际模式生成"
   },
   {
     "id": 3,
+    "category": "resume",
     "prompt": "继续分析",
-    "expected": "识别为 Phase 2 Resume 触发词，读 analysis-config.json 恢复上次配置，从断点维度继续执行分析"
+    "expected": "Phase 2 Resume → 读 manifest → 列出维度状态 → 跳过 completed → 执行 pending/partial"
+  },
+  {
+    "id": 4,
+    "category": "resume-edge",
+    "prompt": "上次分析被中断了，继续",
+    "expected": "Phase 2 Resume → manifest status = interrupted → 恢复执行 → 保留已完成维度"
+  },
+  {
+    "id": 5,
+    "category": "refresh",
+    "prompt": "项目的 API 接口有更新，刷新项目知识",
+    "expected": "检测 manifest status = completed → 询问全量刷新/增量更新/取消 → 用户选增量 → 仅更新 api/ + change-analysis"
+  },
+  {
+    "id": 6,
+    "category": "not-trigger",
+    "prompt": "帮我分析一下这个 bug 的原因",
+    "expected": "不触发 project-analyzer → '分析' 在此上下文中是调试意图 → 路由到 systematic-debugging"
+  },
+  {
+    "id": 7,
+    "category": "not-trigger",
+    "prompt": "分析下日志看看哪里慢了",
+    "expected": "不触发 project-analyzer → 性能/日志分析意图 → 路由到 performance-optimization"
+  },
+  {
+    "id": 8,
+    "category": "vault-edge",
+    "prompt": "扫描这个项目，结果同时存到本地和 Obsidian",
+    "expected": "Phase 1 → output 选 vault+local → Phase 2 收尾执行 Vault 同步步骤"
+  },
+  {
+    "id": 9,
+    "category": "deep-mode",
+    "prompt": "帮我做一次详尽的代码分析，包括变更历史",
+    "expected": "Phase 1 → mode 选 deep → 8 个维度全执行含 change-analysis → reports/change-log.md"
+  },
+  {
+    "id": 10,
+    "category": "missing-knowledge",
+    "prompt": "写一个审批流程组件",
+    "expected": "开发前检查 → .project-knowledge/ 不存在 → AskUserQuestion：运行分析/通用规范/手动路径"
   }
 ]

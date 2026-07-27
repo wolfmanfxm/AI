@@ -67,7 +67,6 @@ rules/     experience/     playbooks/     decisions/
 
 | Prompt | 输入 | 输出目录 | 依赖 |
 |--------|------|---------|------|
-|--------|------|---------|------|
 | [prompts/architecture.md](../prompts/architecture.md) | `package.json` + 目录结构 | `architecture/` | 无 |
 | [prompts/components.md](../prompts/components.md) | `src/components/` `workspace/components/` | `components/` | architecture（组件目录位置） |
 | [prompts/coding-style.md](../prompts/coding-style.md) | `.vue` `.ts` 文件抽样 | `patterns/` | architecture（技术栈确认） |

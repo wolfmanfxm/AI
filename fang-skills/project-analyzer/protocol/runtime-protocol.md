@@ -25,13 +25,15 @@ Goal: Generate stable, reusable project knowledge.
 
 ```
 小型项目               中型项目               大型项目
-(少量文件)             (中等规模)             (海量文件)
+(<200 源文件)          (200-800 源文件)       (>800 源文件)
     │                      │                      │
     ▼                      ▼                      ▼
  单次扫描               并行                  增量
  主 agent 直接扫描      维度 agent 并行       优先增量 + 变更维度
  不 spawn 子 agent      按需 spawn            仅变更模块全量重扫
 ```
+
+> 阈值基于源码文件数（排除 `node_modules/` `dist/` `.git/`）。首次运行用 `find . -type f \( -name "*.vue" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) ! -path "*/node_modules/*" ! -path "*/dist/*" | wc -l` 判断。
 
 ---
 

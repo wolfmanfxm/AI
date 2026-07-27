@@ -13,6 +13,32 @@
 
 🔴 **CHECKPOINT · 🛑 STOP**：展示预计产出清单，用户确认后执行。
 
+**预执行清单**（按当前 mode + scope 生成，逐项列出）：
+
+```
+📋 本次分析计划
+─────────────────────────────────────
+项目：{projectName}
+模式：{mode}（quick/standard → 7维度 | deep → 8维度）
+范围：{scope}
+输出：{output targets}
+─────────────────────────────────────
+预计产出文件：
+  architecture/   → overview.md {+ 按需 N 个}
+  components/     → catalog.md {+ 按需 N 个}
+  api/            → overview.md, request.md {+ 按需 N 个}
+  patterns/       → {mode-specific} {+ 按需 N 个}
+  observations/   → statistics.md {+ 按需 N 个}
+  reports/        → {deep模式: latest.md} {标准/快速: 跳过}
+─────────────────────────────────────
+固定产出：manifest.json, statistics.json, graph.json, search-index.json, index.md
+Vault 同步：{是/否}
+─────────────────────────────────────
+预计耗时：{quick: ~3min | standard: ~6min | deep: ~10min}
+```
+
+> 并行策略见 `capability-matrix.md` 的 Wave 0→1→2→3。
+
 快速/标准模式跳过 `change-analysis`，详尽模式全执行。
 读 config → 按 scope、mode 并行执行（各维度独立，无依赖的可并行）。
 

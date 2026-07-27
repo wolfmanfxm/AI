@@ -1,0 +1,247 @@
+# Agent Interface Contract
+# yao-meta-skill Production mode · Governed Package
+# 定义本 skill 使用的所有 agent 类型、权限、超时、输入输出契约
+
+version: "1.0.0"
+generated_by: yao-meta-skill
+generated_at: "2026-07-27"
+
+# ── Agent 类型定义 ──────────────────────────────
+
+agents:
+
+  # Wave 0 — 无依赖，可立即启动
+  architecture:
+    type: general-purpose
+    description: 分析项目架构：技术栈、目录结构、模块划分、状态管理、路由
+    required_permissions:
+      - read           # 读取 package.json、目录结构、源码文件
+      - write          # 写入 architecture/*.md
+    tools_required:
+      - Read
+      - Write
+      - Bash           # find/grep/wc 统计
+      - Glob           # 目录扫描
+    timeout_ms: 180000           # 3 分钟
+    retry_on_failure: false       # 架构分析不可重试，失败由主 agent 兜底
+    input:
+      - package.json
+      - 顶层目录结构
+    output:
+      required:
+        - architecture/overview.md
+      optional:
+        - architecture/modules.md
+        - architecture/tech-stack.md
+        - architecture/directory-tree.md
+    failure_mode: "主 agent 从部分数据合成，标注 confidence<50"
+
+  # Wave 1 — 依赖 architecture，4 个可并行
+  components:
+    type: general-purpose
+    description: 编目可复用组件，标注接口、引用次数、耦合度
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash           # grep 引用计数
+      - Glob
+    timeout_ms: 240000           # 4 分钟（大型项目组件多）
+    retry_on_failure: false
+    input:
+      - architecture/overview.md  # 确定组件目录位置
+      - src/components/
+      - workspace/components/
+    output:
+      required:
+        - components/catalog.md
+      optional:
+        - components/{component-name}.md  # 高复用组件独立文档
+    failure_mode: "引用计数=0 时标注而非报错"
+
+  coding-style:
+    type: general-purpose
+    description: 从代码中提取实际编码规范，不推荐理想化方案
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash           # grep 统计
+      - Glob
+    timeout_ms: 180000
+    retry_on_failure: false
+    input:
+      - architecture/overview.md  # 技术栈确认
+      - .vue/.ts 文件抽样
+    output:
+      optional:                   # 全部按需
+        - patterns/vue.md
+        - patterns/typescript.md
+        - patterns/naming.md
+        - patterns/folder.md
+    failure_mode: "标注 ⚠️ 子agent超时，数据由主agent补充"
+
+  api-pattern:
+    type: general-purpose
+    description: 分析 API 层组织方式和请求规范
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash
+      - Glob
+    timeout_ms: 180000
+    retry_on_failure: false
+    input:
+      - architecture/overview.md  # API 目录位置
+      - src/api/
+      - workspace/api/
+    output:
+      required:
+        - api/overview.md
+        - api/request.md
+      optional:
+        - api/modules.md
+        - api/auth.md
+    failure_mode: "抽样不足时标注 ⚠️"
+
+  change-analysis:
+    type: general-purpose
+    description: 对比本次和上次扫描结果生成变更记录。仅 deep 模式执行
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash           # git diff
+    timeout_ms: 120000
+    retry_on_failure: false
+    input:
+      - architecture/overview.md  # 模块结构
+      - 本地 .project-knowledge/ 或 Vault 上轮输出
+      - 本次新生成的分析结果
+    output:
+      required:
+        - reports/latest.md
+      optional:
+        - reports/migration.md
+    failure_mode: "本地和Vault均无上轮数据 → 全部标记 [NEW]"
+
+  # Wave 2 — 依赖 Wave 1
+  ui-pattern:
+    type: general-purpose
+    description: 识别反复出现的 UI 组合模式，提取可复用交互范式
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash
+      - Glob
+    timeout_ms: 240000
+    retry_on_failure: false
+    input:
+      - components/catalog.md     # 已知可用组件
+      - 视图模板代码抽样
+    output:
+      optional:                   # 全部按需
+        - patterns/table.md
+        - patterns/form.md
+        - patterns/dialog.md
+        - patterns/layout.md
+        - patterns/upload.md
+    failure_mode: "模式<2次不输出，标注 ⚠️ 不足"
+
+  patterns:
+    type: general-purpose
+    description: 从 UI 和编码分析结果中提取跨模块可复用执行模式
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash
+      - Glob
+    timeout_ms: 180000
+    retry_on_failure: false
+    input:
+      - architecture/overview.md
+      - components/catalog.md
+      - api/overview.md
+    output:
+      optional:                   # 全部按需
+        - patterns/crud.md
+        - patterns/approval.md
+        - patterns/import-export.md
+    failure_mode: "交叉验证 ui-pattern.md 避免重复"
+
+  # Wave 3 — 依赖全部前序
+  observations:
+    type: general-purpose
+    description: 生成纯数据报告，只记录事实不做推断
+    required_permissions:
+      - read
+      - write
+    tools_required:
+      - Read
+      - Write
+      - Bash           # wc/cloc 统计
+      - Glob
+    timeout_ms: 120000
+    retry_on_failure: false
+    input:
+      - 全部已有产出
+    output:
+      required:
+        - observations/statistics.md
+      optional:
+        - observations/component-usage.md
+        - observations/api-usage.md
+        - observations/dead-code.md
+    failure_mode: "零匹配标注 ⚠️ 未检测到，不编造"
+
+# ── 并行执行策略 ──────────────────────────────
+
+execution:
+  strategy: wave
+  waves:
+    - id: 0
+      agents: [architecture]
+      description: 无依赖，立即启动
+    - id: 1
+      agents: [components, coding-style, api-pattern, change-analysis]
+      description: 依赖 architecture，4 个可并行
+      depends_on: [architecture]
+    - id: 2
+      agents: [ui-pattern, patterns]
+      description: 依赖 Wave 1 产出
+      depends_on: [components, api-pattern]
+    - id: 3
+      agents: [observations]
+      description: 依赖全部前序
+      depends_on: [architecture, components, api-pattern, ui-pattern, patterns]
+
+# ── 全局约束 ──────────────────────────────────
+
+global:
+  # 所有 agent 禁止使用只读 Explore 类型——分析结果需要写入文件
+  forbidden_agent_types:
+    - Explore
+  # 若环境仅支持只读 agent，主 agent 必须在 agent 返回后自行写文件
+  fallback_write_mode: "主 agent 接管 Write"
+  # 任一 agent 失败不阻塞其他维度
+  failure_isolation: true
+  # 模式过滤：quick/standard 跳过 change-analysis
+  mode_filter:
+    quick:  { exclude: [change-analysis] }
+    standard: { exclude: [change-analysis] }
+    deep: { include: all }
