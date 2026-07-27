@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifest",
+  "description": "Skill 执行状态文件。所有 skill 通用，由 runtime/engine/checkpoint.md 定义结构。",
+  "type": "object",
+  "required": ["skillVersion", "schemaVersion", "status", "generatedBy", "generatedAt"],
+  "properties": {
+    "skillVersion": {
+      "type": "string",
+      "description": "skill 自身版本号"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "manifest.schema.json 版本，用于升级兼容"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["idle", "discover", "confirmed", "in_progress", "partial", "interrupted", "completed"],
+      "description": "执行状态，见 runtime/engine/state-machine.md"
+    },
+    "generatedBy": {
+      "type": "string",
+      "description": "生成 skill 名称，如 analyzer / planner / generator"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 时间戳"
+    },
+    "lastCheckpoint": {
+      "type": "string",
+      "format": "date-time",
+      "description": "最后一次 checkpoint 时间"
+    },
+    "projectName": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "gitCommit": {
+      "type": "string",
+      "description": "执行时的 git commit hash"
+    },
+    "subtasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "failed"] },
+          "files": { "type": "array", "items": { "type": "string" } },
+          "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "error": { "type": "string", "description": "失败原因（仅 status=failed 时）" }
+        }
+      }
+    },
+    "fixedOutputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "固定产出文件列表"
+    },
+    "nextSuggestion": {
+      "type": "string",
+      "description": "推荐的下游 skill 名称，用于编排链"
+    },
+    "extends": {
+      "type": "object",
+      "description": "skill 特定扩展字段，见 runtime/protocols/orchestration.md",
+      "properties": {
+        "projectKnowledgePath": { "type": "string" },
+        "planPath": { "type": "string" },
+        "architecturePath": { "type": "string" },
+        "changedFiles": { "type": "array", "items": { "type": "string" } },
+        "testReportPath": { "type": "string" },
+        "reviewPath": { "type": "string" },
+        "allOutputs": { "type": "array", "items": { "type": "string" } },
+        "changeSummary": { "type": "string" }
+      }
+    },
+    "executionLog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "startedAt": { "type": "string", "format": "date-time" },
+          "finishedAt": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" },
+          "subtasksCompleted": { "type": "integer" },
+          "subtasksTotal": { "type": "integer" },
+          "tokensUsed": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
