@@ -1,5 +1,6 @@
 ---
 name: project-releaser
+metadata: skill.yaml
 description: >
   发布管理：semver 版本号推荐（基于 conventional commits）、changelog 自动合成
   （git log + PR + REVIEW.md）、发布前检查清单（测试/文档/breaking change/回滚方案）、
@@ -32,6 +33,7 @@ description: >
 1. 读 `git log` → 解析 conventional commits（feat/fix/refactor/docs/...）
 2. 读 `CHANGELOG.md`（若存在）→ 追加/新建
 3. 读 REVIEW.md（若存在）→ 确认审查状态
+4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### Execute
 

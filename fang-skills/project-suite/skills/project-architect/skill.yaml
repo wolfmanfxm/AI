@@ -1,0 +1,15 @@
+id: project-architect
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 3
+requires: []
+produces: [Architecture]
+consumes: [KnowledgeBase, Plan, Context]
+depends_on: [project-planner]
+boundary: 只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改
+
+context_contract:
+  must_read: [architecture/, components/catalog, api/overview]
+  should_read: [patterns/, api/modules]
+  neednt_read: [observations/, reports/]

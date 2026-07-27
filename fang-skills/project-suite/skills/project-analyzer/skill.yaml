@@ -1,0 +1,15 @@
+id: project-analyzer
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 1
+requires: [general-purpose agent]
+produces: [KnowledgeBase, Context]
+consumes: []
+depends_on: []
+boundary: 只分析项目生成知识文件，不修改源码
+
+context_contract:
+  must_read: []
+  should_read: []
+  neednt_read: []

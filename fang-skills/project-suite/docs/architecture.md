@@ -36,7 +36,7 @@ skill 之间不通过内存或函数调用通信，而是通过 manifest.json + 
 
 ```
 project-suite/
-├── SUITE.md              ← 入口
+├── README.md              ← 入口
 ├── skills/               ← 9 个独立 skill（可插拔）
 ├── runtime/              ← 共享运行时协议（不包含 skill 专属内容）
 │   ├── engine/           ← 单 skill 执行层

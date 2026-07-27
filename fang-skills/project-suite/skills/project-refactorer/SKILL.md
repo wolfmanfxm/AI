@@ -1,5 +1,6 @@
 ---
 name: project-refactorer
+metadata: skill.yaml
 description: >
   改善代码结构不改变外部行为：提取函数/组件、简化条件逻辑、移除死代码、语义化重命名、
   拆分过大模块。每次重构必须安全可逆，有测试跑测试，无测试先加表征测试。
@@ -31,7 +32,8 @@ description: >
 
 1. 识别坏味道：长函数/重复代码/过深嵌套/God Class/魔数
 2. 确认测试覆盖：有测试→跑一遍；无测试→加表征测试
-3. 选重构手法（9种）→ [prompts/refactor-catalog.md](prompts/refactor-catalog.md)
+3. 选重构手法（9种）→ [prompts/extract-method.md](prompts/extract-method.md)
+4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### Execute（小步）
 

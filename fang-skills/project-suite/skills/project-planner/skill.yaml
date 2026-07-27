@@ -1,0 +1,15 @@
+id: project-planner
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 2
+requires: []
+produces: [Plan]
+consumes: [KnowledgeBase, Context]
+depends_on: [project-analyzer]
+boundary: 只做计划不写代码，发现问题记录在风险矩阵不直接修改
+
+context_contract:
+  must_read: [architecture/modules, components/catalog]
+  should_read: [patterns/table, patterns/form, patterns/crud]
+  neednt_read: [observations/, reports/]

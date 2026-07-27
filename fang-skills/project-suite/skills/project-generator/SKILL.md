@@ -1,5 +1,6 @@
 ---
 name: project-generator
+metadata: skill.yaml
 description: >
   根据需求和项目规范生成生产级代码：Vue 3 组件、页面、API 模块、工具函数、类型定义。
   必须遵循项目现有模式，从 .project-knowledge/ 提取规范而非凭记忆。
@@ -29,19 +30,22 @@ description: >
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
-| 1 | `.project-knowledge/index.md` | 提示运行 analyzer，降级通用模式 |
+| 0 | **`context.json`**（[Context Protocol](../../runtime/context/context.md)）| 🔴 BLOCK 若缺 REQUIRED 字段 → [priority](../../runtime/context/context-priority.md)；不存在则从 `.project-knowledge/` 提取 |
+| 1 | `.project-knowledge/index.md` | 降级通用模式 |
 | 2 | `PLAN.md`，**若存在必读** | 标注"⚠️ 无规划" |
 | 3 | `ARCHITECTURE.md`，**若存在必读** | 标注"⚠️ 无架构约束" |
 
-## 项目知识读取
+> `context.json` 来自 analyzer 的 Finish 阶段，包含技术栈/路径别名/编码约定/模块清单。加载后不再需逐个读 `.project-knowledge/` 文件。
 
-| 生成类型 | 必读 | 按需 |
-|---------|------|------|
-| 组件 | `components/catalog.md` + `patterns/vue.md` | `patterns/table.md` `form.md` `dialog.md` |
-| 页面 | `architecture/overview.md` + `patterns/table.md` | `patterns/form.md` `crud.md` |
-| API 模块 | `api/overview.md` + `api/request.md` | `api/modules.md` |
-| 工具函数 | `patterns/typescript.md` | `patterns/naming.md` |
-| 类型定义 | `patterns/typescript.md` + `api/overview.md` | `architecture/tech-stack.md` |
+## 项目知识读取（context.json 覆盖后按需补充）
+
+| 生成类型 | context.json 已覆盖 | 按需补充 |
+|---------|-------------------|---------|
+| 组件 | 技术栈、别名、组件风格、已有组件列表 | `components/catalog.md`（组件详情） |
+| 页面 | 路径别名、分页参数、路由模块 | `architecture/overview.md`（路由架构） |
+| API 模块 | API 前缀、封装函数名、响应类型 | `api/request.md`（拦截器细节） |
+| 工具函数 | 语言版本、import 规范 | `patterns/typescript.md` |
+| 类型定义 | 语言版本、路径别名 | `patterns/typescript.md` |
 
 ## 工作流
 
@@ -50,7 +54,7 @@ description: >
 1. 读项目知识库 + PLAN.md/ARCHITECTURE.md
 2. 🔴 代码存在性检查 → [references/code-audit.md](references/code-audit.md)
 3. 找类似实现，确认技术栈
-4. 🔴 CHECKPOINT → 展示过滤后的范围 → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+4. 🔴 CHECKPOINT → 展示过滤后的范围 → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### Execute
 

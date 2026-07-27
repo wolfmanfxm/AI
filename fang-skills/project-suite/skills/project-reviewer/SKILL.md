@@ -1,5 +1,6 @@
 ---
 name: project-reviewer
+metadata: skill.yaml
 description: >
   对代码变更进行五轴审查：正确性、安全性、可读性、架构、性能。问题分级（BLOCKER/HIGH/MEDIUM/LOW）
   附带精确的 file:line 引用和可操作的修复建议。
@@ -56,7 +57,7 @@ description: >
 ## 工作流
 
 1. 确认审查范围 → 读项目规范
-2. 🔴 CHECKPOINT → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+2. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 3. 五轴扫描 → 记录问题 → 统一分级
 4. 输出 `reports/REVIEW-<topic>.md`
 

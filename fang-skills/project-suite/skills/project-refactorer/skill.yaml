@@ -1,0 +1,15 @@
+id: project-refactorer
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 7
+requires: [existing tests]
+produces: [RefactoredCode]
+consumes: [Code, Test, KnowledgeBase]
+depends_on: [project-reviewer]
+boundary: 只改善结构不改行为，没测试保护不重构
+
+context_contract:
+  must_read: [patterns/vue, patterns/typescript, components/catalog]
+  should_read: [architecture/, patterns/table]
+  neednt_read: [observations/, reports/]

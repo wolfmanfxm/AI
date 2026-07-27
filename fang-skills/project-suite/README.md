@@ -2,10 +2,13 @@
 
 > 软件项目全生命周期 skill 套件 — 9 个 skill，从分析到发布，覆盖完整 SDLC。
 > 每个 skill 可独立触发，也可编排为工作流链。每个 skill 只做本阶段的事，不越界。
+>
+> **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) — 定义了成为一个合格 suite skill 的目录结构、文件契约、质量门禁。
 
-## 当前版本：0.5.0
+## 当前版本：0.6.0
 
-本次更新：职责边界硬约束 + AskUserQuestion 全 CHECKPOINT + 现状探查 + 知识库同步策略 + 上下游显式衔接 + 反例黑名单。
+v0.5.0: 职责边界 + AskUserQuestion + 现状探查 + 知识库同步 + 反例黑名单 + Context Protocol
+v0.6.0: Capability Registry + skill.yaml + DAG Scheduler + 自动路由
 
 ## Skill 矩阵
 
@@ -31,6 +34,27 @@
 | **上游必读** | generator 启动时检查 PLAN.md/ARCHITECTURE.md 是否存在，存在则必须读取 |
 | **现状探查先于产出** | planner（现状探查）和 architect（现状核实）在产出前先确认代码现状 |
 | **每个 skill 有反例黑名单** | references/boundary.md 含 ≥3 条「不要做 X」的反例 |
+| **Context Protocol** | analyzer 产出 `context.json` → 下游 skill 一次加载技术栈/别名/约定（[runtime/context/](runtime/context/context.md)） |
+
+## 协议栈
+
+```
+runtime/
+├── context/                   ← skill 间知识传递
+│   ├── context.md
+│   ├── context-resolution.md
+│   └── context-priority.md
+├── registry/                  ← [NEW] 统一能力注册
+│   └── capabilities.yaml          9 skill produces/consumes + DAG
+├── engine/                    ← 单 skill 执行
+│   ├── state-machine.md
+│   ├── checkpoint.md
+│   ├── scheduler.md                DAG 调度 + 并行检测
+│   └── error-recovery.md
+└── protocols/                 ← 多 skill 协作
+    ├── routing.md                  自动生成（从 skill.yaml）
+    └── orchestration.md
+```
 
 ## 知识库同步策略
 
@@ -43,14 +67,31 @@
 
 ## 典型工作流
 
-### 全流程
+### 全流程（DAG 调度，自动识别并行）
+
 ```
-analyzer → planner → architect → generator → tester → reviewer → documenter → releaser
-  ✅Vault   ❌Vault   ❌Vault     ❌Vault    ❌Vault   ❌Vault    ✅Vault     ❌Vault
+Wave 1: analyzer
+         ↓
+Wave 2: planner
+         ↓
+Wave 3: architect
+         ↓
+Wave 4: generator
+         ↓
+Wave 5: tester
+         ↓
+Wave 6: reviewer
+         ↓
+Wave 7: refactorer ┊ documenter   ← 并行
+         ↓             ↓
+Wave 8:          releaser
 ```
 
 ### 轻量改动: generator → reviewer
-### 重构: analyzer → refactorer → tester → reviewer
+### 重构: reviewer → refactorer → tester → reviewer
+### Bug修复: generator → tester → reviewer
+
+> 完整 Workflow Catalog: [runtime/workflows/](runtime/workflows/) — feature / bugfix / refactor / greenfield
 
 ## 如何使用
 

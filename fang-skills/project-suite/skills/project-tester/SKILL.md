@@ -1,5 +1,6 @@
 ---
 name: project-tester
+metadata: skill.yaml
 description: >
   生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架，
   遵循现有测试风格，生成 Given-When-Then 结构的测试用例。
@@ -32,6 +33,7 @@ description: >
 1. 检测测试框架（jest/vitest/mocha/playwright）
 2. 定位测试目录和命名约定
 3. 确认测试范围
+4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### Execute
 
@@ -57,5 +59,5 @@ tester 完成 → 有失败→分析记录 / 通过→ /project-reviewer / 需�
 |------|------|
 | 单元测试 | [prompts/unit-test.md](prompts/unit-test.md) |
 | 组件测试 | [prompts/component-test.md](prompts/component-test.md) |
-| 集成测试 | [prompts/integration-test.md](prompts/integration-test.md) |
+| 集成测试 | [prompts/test-strategy.md](prompts/test-strategy.md) |
 | 职责边界 | [references/boundary.md](references/boundary.md) |

@@ -1,0 +1,15 @@
+id: project-releaser
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 8
+requires: []
+produces: [Release]
+consumes: [Documentation, Review, Test]
+depends_on: [project-documenter]
+boundary: 只检查建议不执行发布命令，不 npm publish / git push --tags
+
+context_contract:
+  must_read: []
+  should_read: []
+  neednt_read: []

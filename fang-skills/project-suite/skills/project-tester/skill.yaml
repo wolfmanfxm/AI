@@ -1,0 +1,15 @@
+id: project-tester
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 5
+requires: []
+produces: [Test]
+consumes: [Code, KnowledgeBase]
+depends_on: [project-generator]
+boundary: 只写测试不修被测代码，测试失败记录报告不修改源码
+
+context_contract:
+  must_read: [patterns/vue, patterns/typescript]
+  should_read: [architecture/]
+  neednt_read: [observations/, reports/]

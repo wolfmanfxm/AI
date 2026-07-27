@@ -1,0 +1,15 @@
+id: project-generator
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 4
+requires: [PLAN.md, ARCHITECTURE.md]
+produces: [Code]
+consumes: [KnowledgeBase, Plan, Architecture, Context]
+depends_on: [project-architect]
+boundary: 只写代码不做设计，缺少上游产物时提示先执行 planner/architect
+
+context_contract:
+  must_read: [patterns/vue, patterns/typescript, api/request, api/overview, components/catalog]
+  should_read: [architecture/, patterns/table, patterns/form, patterns/dialog]
+  neednt_read: [observations/, reports/]

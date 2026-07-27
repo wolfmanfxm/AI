@@ -16,7 +16,7 @@
 - [x] runtime/ 核心协议完成（state-machine, checkpoint, scheduler, error-recovery, routing, orchestration）
 - [x] shared/ 基础设施完成（schemas, templates, conventions, examples）
 - [x] docs/ 完成（architecture, roadmap, migration）
-- [x] SUITE.md 入口完成
+- [x] README.md 入口完成
 - [x] analyzer 迁移完成（从独立 skill → suite skills/analyzer/，protocol 提升到 runtime/）
 - [x] 8 个新 skill 骨架创建（SKILL.md + prompts/main.md + references/capability-matrix.md）
 
@@ -94,7 +94,7 @@ analyzer → planner → architect → generator → tester → reviewer → ref
 - [ ] 全部 9 个 skill 经过实际项目验证
 - [ ] 每个 skill 有完整的 evals（至少 5 个测试用例 + benchmark）
 - [ ] 有至少 3 个真实项目的使用案例
-- [ ] SUITE.md + all skill SKILL.md 文档完整
+- [ ] README.md + all skill SKILL.md 文档完整
 - [ ] runtime/ 协议经过多 skill 协作验证
 - [ ] shared/ schemas 兼容性经过验证
 - [ ] 至少 1 个外部用户成功上手

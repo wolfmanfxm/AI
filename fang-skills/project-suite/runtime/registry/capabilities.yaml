@@ -1,0 +1,148 @@
+# Capability Registry
+#
+# 统一的能力注册中心。每个 skill 声明 produces（产出什么）和 consumes（依赖什么）。
+# Scheduler 读取此文件构建 DAG，自动识别并行分支。
+
+version: "1.0.0"
+generated: 2026-07-27
+
+# --- 能力类型定义 ---
+capability_types:
+  KnowledgeBase:    # .project-knowledge/ + context.json
+    description: 项目结构化知识（架构/组件/API/模式/编码约定）
+    format: [.md, .json]
+  Context:          # context.json
+    description: 下游 skill 标准上下文（技术栈/路径别名/约定/模块清单）
+    format: [.json]
+  Plan:             # PLAN.md
+    description: 任务拆解 + 依赖分析 + 工作量评估 + 风险矩阵
+    format: [.md]
+  Architecture:     # ARCHITECTURE.md
+    description: 技术选型 + 模块设计 + API 契约（ADR 格式）
+    format: [.md]
+  Code:             # .vue / .ts / .js
+    description: 生产级代码
+    format: [.vue, .ts, .js]
+  Test:             # .test.ts / .spec.ts + TEST-REPORT.md
+    description: 测试文件 + 测试报告
+    format: [.ts, .md]
+  Review:           # REVIEW.md
+    description: 五轴审查报告（分级问题 + 修复建议）
+    format: [.md]
+  RefactoredCode:   # .vue / .ts / .js（重构后）
+    description: 重构后代码（行为不变）+ REFACTOR.md
+    format: [.vue, .ts, .js, .md]
+  Documentation:    # API/组件/Changelog 文档
+    description: 结构化技术文档
+    format: [.md]
+  Release:          # CHANGELOG.md + RELEASE-CHECKLIST.md
+    description: 发布产物
+    format: [.md]
+
+# --- Skill 注册 ---
+skills:
+
+  project-analyzer:
+    produces: [KnowledgeBase, Context]
+    consumes: []
+    description: 7 维度代码分析，生成项目知识库
+    triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 更新项目知识, 刷新项目知识]
+    triggers_en: [analyze codebase, scan project, project refresh]
+
+  project-planner:
+    produces: [Plan]
+    consumes: [KnowledgeBase, Context]
+    description: 需求拆解为可执行任务列表
+    triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量]
+    triggers_en: [break down tasks, plan sprint, estimate effort]
+
+  project-architect:
+    produces: [Architecture]
+    consumes: [KnowledgeBase, Plan, Context]
+    description: 技术选型 + 模块设计 + API 契约
+    triggers_cn: [架构设计, 技术选型, 模块设计, API 设计]
+    triggers_en: [design architecture, tech stack, system design]
+
+  project-generator:
+    produces: [Code]
+    consumes: [KnowledgeBase, Plan, Architecture, Context]
+    description: 遵循项目模式生成生产级代码
+    triggers_cn: [写一个, 实现, 创建组件, 开发, 生成代码]
+    triggers_en: [implement, create, build, generate code]
+
+  project-tester:
+    produces: [Test]
+    consumes: [Code, KnowledgeBase]
+    description: 生成并执行测试
+    triggers_cn: [写测试, 测试用例, 单元测试, 集成测试]
+    triggers_en: [write tests, test cases, unit test]
+
+  project-reviewer:
+    produces: [Review]
+    consumes: [Code, Plan, KnowledgeBase]
+    description: 五轴代码审查 + 分级问题
+    triggers_cn: [代码审查, review, 检查代码, 审查 PR]
+    triggers_en: [code review, security review, audit code]
+
+  project-refactorer:
+    produces: [RefactoredCode]
+    consumes: [Code, KnowledgeBase, Test]
+    description: 安全重构（行为不变）
+    triggers_cn: [重构, 优化结构, 提取公共, 简化代码]
+    triggers_en: [refactor, clean up, extract method, simplify]
+
+  project-documenter:
+    produces: [Documentation]
+    consumes: [Code, Review, KnowledgeBase]
+    description: 生成结构化技术文档
+    triggers_cn: [生成文档, API 文档, 组件文档, 写文档]
+    triggers_en: [generate docs, api docs, write documentation]
+
+  project-releaser:
+    produces: [Release]
+    consumes: [Documentation, Review, Test]
+    description: 版本 bump + Changelog + 发布检查
+    triggers_cn: [发布, 上线, 发版, changelog]
+    triggers_en: [release, ship, deploy, version bump]
+
+# --- DAG 边（从 consumes/produces 自动推导） ---
+# 规则：若 skill_B.consumes 包含 skill_A.produces 的任一类型，则 A → B
+#
+# analyzer        → planner, architect, generator, reviewer, refactorer, documenter
+# planner         → architect, generator
+# architect       → generator
+# generator       → tester, reviewer, refactorer, documenter
+# tester          → reviewer, refactorer
+# reviewer        → documenter（Review 用于 Changelog）
+# refactorer      → reviewer
+# documenter      → releaser
+# reviewer+tester → releaser（via documenter）
+
+# --- 并行分支 ---
+# 以下 skill 对可并行执行（无直接依赖）：
+#
+# [planner, architect]          ← 都只依赖 analyzer，互相不依赖
+#   ❌ 实际 planner → architect（architect 需要 Plan）
+#
+# [tester, documenter]          ← 都只依赖 generator，互相不依赖
+#   ✅ tester 只需 Code，documenter 需要 Code+Review
+#   ❌ documenter 需要 Review（来自 reviewer）
+#
+# [reviewer, documenter]        ← 都依赖 generator
+#   ❌ documenter 需要 Review（来自 reviewer）
+#   → 实际: generator → reviewer → documenter
+#      generator → tester → reviewer → documenter
+#      但 tester 和 documenter 无直接依赖 → 可并行
+#
+# 结论：当前 DAG 中唯一确定的并行点是 tester || documenter（都直接依赖 generator，互相不依赖）
+
+# --- 调度顺序（拓扑排序） ---
+schedule_order:
+  wave_1: [project-analyzer]                                      # 无依赖
+  wave_2: [project-planner]                                       # 依赖 analyzer
+  wave_3: [project-architect]                                     # 依赖 planner
+  wave_4: [project-generator]                                     # 依赖 architect
+  wave_5: [project-tester]                                        # 依赖 generator
+  wave_6: [project-reviewer]                                      # 依赖 tester（等 Code）
+  wave_7: [project-refactorer, project-documenter]                # 依赖 reviewer + generator
+  wave_8: [project-releaser]                                      # 依赖 documenter

@@ -1,0 +1,10 @@
+timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
+2026-07-28T00:00	reeval	project-analyzer	70.5	78	improved	dim9+3 dim3+2 dim2+2	反例+失败模式+瘦身	dry_run
+2026-07-28T00:00	reeval	project-planner	71.2	79	improved	dim9+3 dim5+2 dim2+2	反例+现状探查+瘦身	dry_run
+2026-07-28T00:00	reeval	project-architect	64.1	77	improved	dim9+3 dim3+4 dim2+3 dim6+2	反例+失败处理+code-audit+瘦身	dry_run
+2026-07-28T00:00	reeval	project-generator	70.9	78	improved	dim9+3 dim3+2 dim6+2	反例+code-audit+completion-report	dry_run
+2026-07-28T00:00	reeval	project-tester	65.0	76	improved	dim9+3 dim2+4 dim4+2 dim5+2	反例+瘦身+CHECKPOINT	dry_run
+2026-07-28T00:00	reeval	project-reviewer	70.0	79	improved	dim9+3 dim3+3 dim5+2	反例+失败处理+具体性	dry_run
+2026-07-28T00:00	reeval	project-refactorer	64.0	75	improved	dim9+3 dim2+4 dim4+2 dim5+2	反例+瘦身+CHECKPOINT	dry_run
+2026-07-28T00:00	reeval	project-documenter	66.4	78	improved	dim9+3 dim3+4 dim6+2 dim2+2	反例+失败处理+vault-sync+瘦身	dry_run
+2026-07-28T00:00	reeval	project-releaser	63.0	74	improved	dim9+3 dim2+4 dim4+2 dim5+2	反例+瘦身+CHECKPOINT	dry_run

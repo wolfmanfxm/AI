@@ -1,5 +1,6 @@
 ---
 name: project-documenter
+metadata: skill.yaml
 description: >
   生成和维护项目文档：API 文档（从 JSDoc/代码提取）、README、ADR、Changelog、组件文档。
   自动匹配项目已有文档风格，所有内容基于代码事实不编造。
@@ -37,7 +38,7 @@ description: >
 ### Discover
 
 1. 确认文档类型+范围，读 1-2 份已有文档提取风格
-2. 🔴 CHECKPOINT → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+2. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### Execute
 
@@ -47,7 +48,7 @@ description: >
 
 ### 知识库同步
 
-→ [vault-sync](../../../shared/conventions/vault-sync.md) — API/组件文档 ✅，README/Changelog ❌
+→ [vault-sync](../../shared/conventions/vault-sync.md) — API/组件文档 ✅，README/Changelog ❌
 
 ### 文档新鲜度
 

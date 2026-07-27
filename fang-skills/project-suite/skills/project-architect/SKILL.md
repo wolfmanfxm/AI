@@ -1,5 +1,6 @@
 ---
 name: project-architect
+metadata: skill.yaml
 description: >
   架构决策、技术选型、模块设计、API 契约设计。使用对比矩阵做技术选型，输出 ADR 格式的架构决策记录。
   触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、
@@ -29,6 +30,7 @@ description: >
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
+| 0 | **`context.json`** | 从 `.project-knowledge/architecture/` 提取 |
 | 1 | `.project-knowledge/architecture/` | 标注"未分析" |
 | 2 | `PLAN.md`，**若存在必读** | 标注"⚠️ 无规划" |
 | 3 | 上游源码，**现状核实必读** | 标注"⚠️ 未核实" |
@@ -38,7 +40,7 @@ description: >
 ### Discover
 
 1. 确认设计范围 + 收集约束
-2. 🔴 CHECKPOINT → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+2. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### 现状核实（Discover 后必做）
 

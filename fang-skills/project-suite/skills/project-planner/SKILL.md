@@ -1,5 +1,6 @@
 ---
 name: project-planner
+metadata: skill.yaml
 description: >
   将需求拆解为可执行的任务列表，分析依赖关系，评估工作量，识别风险，排序优先级。
   触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、
@@ -24,13 +25,20 @@ description: >
 
 > 🔴 planner 只做计划不写代码。发现问题记录在风险矩阵，不直接修改。
 
+## 前置条件
+
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 0 | **`context.json`** | 从 `.project-knowledge/` 提取模块/组件信息 |
+| 1 | `.project-knowledge/` | 标注"⚠️ 缺少项目知识库" |
+
 ## 工作流
 
 ### Discover
 
-1. 阅读用户输入 + `.project-knowledge/`、上游 PLAN.md
+1. 加载 `context.json` → 了解模块/组件/API 清单 + 读用户输入 + 上游 PLAN.md
 2. 一句话总结目标 + 列出关键约束
-3. 🔴 CHECKPOINT → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+3. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 
 ### 现状探查（Discover 后必做）
 

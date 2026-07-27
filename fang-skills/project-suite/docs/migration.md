@@ -20,7 +20,7 @@
 | `protocol/phase-2-execution.md` | → `runtime/engine/state-machine.md` | 同上 |
 | `protocol/phase-2-finish.md` | → `runtime/engine/state-machine.md` | 同上 |
 | `protocol/runtime-protocol.md` | → `runtime/engine/error-recovery.md` + `runtime/engine/checkpoint.md` | 拆分提升 |
-| `protocol/development-flow.md` | → `SUITE.md` + `skills/analyzer/references/development-flow.md` | 拆分：框架部分 → SUITE，skill 专属部分保留 |
+| `protocol/development-flow.md` | → `README.md` + `skills/analyzer/references/development-flow.md` | 拆分：框架部分 → SUITE，skill 专属部分保留 |
 | `schema/analysis-config.schema.json` | `shared/schemas/analysis-config.schema.json` | 提升 |
 | `schema/manifest.schema.json` | `shared/schemas/manifest.schema.json` | 提升 |
 | `schema/graph.schema.json` | `shared/schemas/graph.schema.json` | 提升 |

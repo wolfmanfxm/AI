@@ -1,0 +1,15 @@
+id: project-reviewer
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 6
+requires: []
+produces: [Review]
+consumes: [Code, Plan, KnowledgeBase]
+depends_on: [project-tester]
+boundary: 只审查不修代码，发现问题记录 file:line + 建议由 generator 修复
+
+context_contract:
+  must_read: [patterns/vue, patterns/typescript, patterns/naming]
+  should_read: [architecture/, api/overview]
+  neednt_read: [observations/]
