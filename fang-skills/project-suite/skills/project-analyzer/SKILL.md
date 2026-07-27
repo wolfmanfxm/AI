@@ -1,5 +1,5 @@
 ---
-name: analyzer
+name: project-analyzer
 description: >
   分析软件项目并生成可复用的项目知识库，覆盖架构、组件、API、模式、编码风格等维度。
   触发词：分析项目、代码分析、项目审计、扫描项目、梳理组件、更新项目知识、刷新项目知识、
@@ -46,6 +46,8 @@ manifest status = interrupted/
 
 快速/标准模式跳过 `change-analysis`，详尽模式全执行。
 读 config → 按 scope、mode 并行执行。
+
+> ⚠️ **反例警示**：以下操作严禁——用只读 agent 做维度分析、跳过 CHECKPOINT 直接执行、单 agent 串行所有维度、不读 manifest 全量重扫、覆盖人工维护目录。详见 [references/anti-patterns.md](references/anti-patterns.md)。
 
 **Agent 默认 `general-purpose`**（需 Write 权限）。若环境仅支持只读 agent，主 agent 必须在 agent 返回后自行写文件。
 

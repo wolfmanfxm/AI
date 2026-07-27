@@ -1,5 +1,5 @@
 ---
-name: reviewer
+name: project-reviewer
 description: >
   对代码变更进行五轴审查：正确性、安全性、可读性、架构、性能。问题分级（BLOCKER/HIGH/MEDIUM/LOW）
   附带精确的 file:line 引用和可操作的修复建议。
@@ -85,6 +85,16 @@ description: >
 - 这个改一下更好读吗？→ MEDIUM
 - 这个只是我不喜欢的风格？→ 不提，避免主观偏好
 
+**失败处理**（审查过程中高频异常，须显式编码）：
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 变更文件超过 20 个 | 只审查核心文件（按变更量+风险排序），列出跳过的文件 | AskUserQuestion：全审 / 仅核心 / 指定文件 |
+| 文件过大无法完整读取 | 分段读取关键区域（函数签名+分支+异常处理），标注 `⚠️ 未完整审查` | 限制审查深度，关注BLOCKER级问题 |
+| `.project-knowledge/` 不存在 | 使用通用代码质量标准，标注 `⚠️ 缺乏项目规范参考` | 不阻塞审查 |
+| 审查中遇到不熟悉的语言/框架 | 标注 `[超出审查范围]`，仅做通用检查 | 跳过语言特有问题，聚焦通用质量 |
+| 上下文不足以判断设计意图 | 标注 `[需确认] 缺少架构/需求上下文` | 不强制推断，记录为待确认 |
+
 ## 工作流
 
 ### Discover
@@ -111,6 +121,9 @@ description: >
 id: review-<pr-or-feature>
 generatedBy: reviewer
 generatedAt: <ISO-8601>
+last_scan: <ISO-8601>
+lifecycle: draft
+confidence: <0-100>
 sources:
   - <reviewed files>
 ---
@@ -150,7 +163,17 @@ sources:
 | 协议 | 路径 |
 |------|------|
 | 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
+| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
+| 调度 | [../../runtime/engine/scheduler.md](../../runtime/engine/scheduler.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | REVIEW.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
 
 ## References
 

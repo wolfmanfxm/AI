@@ -1,5 +1,5 @@
 ---
-name: releaser
+name: project-releaser
 description: >
   发布管理：semver 版本号推荐（基于 conventional commits）、changelog 自动合成
   （git log + PR + REVIEW.md）、发布前检查清单（测试/文档/breaking change/回滚方案）、
@@ -58,6 +58,8 @@ description: >
 如有问题，执行 `git revert <commit>` 或回滚到 tag `v1.2.0`
 ```
 
+🔴 **CHECKPOINT · 🛑 STOP**：展示检查清单结果，🔴项须全部 ✅ 才进入版本号推荐。
+
 #### Step 2: 版本号推荐
 
 遵循 semver 规则，基于 conventional commits 自动推荐：
@@ -74,7 +76,18 @@ description: >
 
 #### Step 3: Changelog 生成
 
-从 git log 和 PR 描述合成，按类别分组：
+从 git log 和 PR 描述合成，按类别分组。
+
+🔴 **CHECKPOINT · 🛑 STOP**：展示版本号建议 + Changelog 预览，用户确认后写入文件。
+
+**失败处理**：
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| git log 无可解析的 commit | 检查 tag 范围是否正确，尝试 `--all` | 生成空 Changelog 骨架，标注 `⚠️ 未检测到commit，请手动补充` |
+| 无 PR 描述可提取 | 从 commit message body 提取摘要 | 标注 `(#?)` 代替 PR 号 |
+| 🔴 检查项未通过 | 停止发布流程，告知用户具体阻断原因 | AskUserQuestion：跳过该项强制发布 / 修复后重试 |
+| 版本号建议与用户预期不符 | 展示推荐理由（哪个commit触发了哪种bump） | AskUserQuestion：使用推荐版本 / 手动指定
 
 ```markdown
 # Changelog — v1.3.0 (2026-07-27)
@@ -124,7 +137,18 @@ description: >
 
 | 协议 | 路径 |
 |------|------|
+| 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
+| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | CHANGELOG.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
+| Manifest Schema | [../../shared/schemas/manifest.schema.json](../../shared/schemas/manifest.schema.json) | 版本号字段定义 |
 
 ## References
 

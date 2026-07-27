@@ -1,5 +1,5 @@
 ---
-name: tester
+name: project-tester
 description: >
   生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架，
   遵循现有测试风格，生成 Given-When-Then 结构的测试用例。
@@ -34,6 +34,16 @@ description: >
 | Mock 方式 | 读 1 个含 mock 的测试 | `vi.mock()` / `jest.mock()` |
 
 若无法自动检测，AskUserQuestion 确认。
+
+**失败处理**（环境检测+测试生成阶段）：
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 检测不到测试框架 | 搜索 `package.json` 所有 devDeps 中 test 相关关键词 | AskUserQuestion：手动指定框架 / 跳过测试执行仅生成代码 |
+| 被测代码无法解析（语法错误/非TS/JS）| 标注 `⚠️ 代码无法解析`，跳过该文件 | 基于函数签名文本做最小推断 |
+| 框架不支持所需测试类型 | 降级：集成测试→单元测试，快照测试→断言测试 | 标注限制，生成骨架代码 |
+| `npm test` 不可用 | 尝试 `npx vitest run` `npx jest` 等直接调用 | 标注 `⚠️ 未执行`，仅生成测试文件 |
+| 覆盖率工具不可用 | 跳过覆盖率数据，仅统计测试用例数 | 标注 `⚠️ 无覆盖率数据` |
 
 ## 工作流
 
@@ -131,7 +141,16 @@ sources:
 | 协议 | 路径 |
 |------|------|
 | 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
+| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | TEST-REPORT.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
 
 ## References
 

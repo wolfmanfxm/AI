@@ -1,5 +1,5 @@
 ---
-name: planner
+name: project-planner
 description: >
   将需求拆解为可执行的任务列表，分析依赖关系，评估工作量，识别风险，排序优先级。
   触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、
@@ -38,6 +38,14 @@ description: >
 1. 阅读用户输入 + 关联上下文（PLAN.md 上游、ARCHITECTURE.md、`.project-knowledge/`）
 2. 一句话总结目标，列出关键约束（时间、技术栈、团队规模、外部依赖）
 3. 🔴 **CHECKPOINT** — 确认理解后进入拆解
+
+**失败处理**（Execute 阶段内联）：
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| `.project-knowledge/` 不存在 | 跳过项目已有能力分析，标注 `⚠️ 缺少项目知识库` | 基于通用模式拆解 |
+| 需求存在自相矛盾 | 标注矛盾点，AskUserQuestion 澄清 | 保留矛盾标注，给出两个方案 |
+| 时间约束不可行 | 标注冲突，给出"最小可行范围"和"完整范围"两个版本 | AskUserQuestion：接受最小范围 / 调整时间 / 取消 |
 
 **模糊需求处理**：若需求有歧义，用以下框架澄清：
 
@@ -175,6 +183,13 @@ T2(权限点管理) ──↗                        ↘ T5(前端指令)
 | 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
 | 编排 | [../../runtime/protocols/orchestration.md](../../runtime/protocols/orchestration.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | PLAN.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
 
 ## References
 

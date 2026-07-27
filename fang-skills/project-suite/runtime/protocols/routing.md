@@ -12,7 +12,7 @@
 
 ## 路由表
 
-### analyzer — 代码分析
+### project-analyzer — 代码分析
 
 **触发场景**：
 - 首次接触项目，需要了解代码结构
@@ -25,7 +25,7 @@
 
 **产出**：`.project-knowledge/` + Knowledge Vault
 
-### planner — 任务规划
+### project-planner — 任务规划
 
 **触发场景**：
 - 拿到需求后需要拆解为可执行任务
@@ -38,7 +38,7 @@
 
 **产出**：`PLAN.md`（任务列表、依赖图、预估工时）
 
-### architect — 架构设计
+### project-architect — 架构设计
 
 **触发场景**：
 - 新技术选型决策
@@ -53,7 +53,7 @@
 
 **产出**：`ARCHITECTURE.md`（决策记录、模块图、技术选型理由）
 
-### generator — 代码生成
+### project-generator — 代码生成
 
 **触发场景**：
 - 实现新功能/组件/页面
@@ -67,7 +67,7 @@
 
 **产出**：代码文件（`.vue` / `.ts` / `.js` 等）
 
-### tester — 测试
+### project-tester — 测试
 
 **触发场景**：
 - 为新功能写测试
@@ -81,7 +81,7 @@
 
 **产出**：测试文件 + 测试报告
 
-### reviewer — 代码审查
+### project-reviewer — 代码审查
 
 **触发场景**：
 - PR review
@@ -95,7 +95,7 @@
 
 **产出**：`REVIEW.md`（分级问题列表 + 修复建议）
 
-### refactorer — 重构
+### project-refactorer — 重构
 
 **触发场景**：
 - 改善代码结构不改变行为
@@ -109,7 +109,7 @@
 
 **产出**：重构后的代码 + `REFACTOR.md`（变更说明）
 
-### documenter — 文档
+### project-documenter — 文档
 
 **触发场景**：
 - 生成/更新 API 文档
@@ -123,7 +123,7 @@
 
 **产出**：文档文件（`.md`）
 
-### releaser — 发布
+### project-releaser — 发布
 
 **触发场景**：
 - 准备发布新版本
@@ -142,7 +142,7 @@
 当用户意图同时命中多个 skill（如"帮我实现并测试这个功能"），按工作流链推荐：
 
 ```
-generator → tester（而非同时触发）
+project-generator → project-tester（而非同时触发）
 ```
 
 先完成上游，再建议下游。不自动级联触发。

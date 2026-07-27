@@ -1,5 +1,5 @@
 ---
-name: refactorer
+name: project-refactorer
 description: >
   改善代码结构不改变外部行为：提取函数/组件、简化条件逻辑、移除死代码、语义化重命名、
   拆分过大模块。每次重构必须安全可逆，有测试跑测试，无测试先加表征测试。
@@ -46,6 +46,8 @@ Step 1: 确保有安全网
   └─ 无测试 → 先加表征测试（characterization test）
        记录当前行为，不判断对错，只记录"现在是这样的"
 
+🔴 **CHECKPOINT · 🛑 STOP**：确认安全网就绪（基线测试通过/表征测试已加），用户确认后开始重构。
+
 Step 2: 执行重构
   └─ 每次只做一个动作
 
@@ -57,6 +59,17 @@ Step 4: 记录
   ├─ 采用的重构模式
   ├─ 改善指标（圈复杂度/行数/重复度）
   └─ 验证结果
+
+🔴 **CHECKPOINT · 🛑 STOP**：展示重构diff+验证结果，用户确认后输出 REFACTOR.md。
+
+**失败处理**（SKILL.md 主体内联，与 safety-protocol.md 互补）：
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 基线测试不通过 | 终止重构，告知用户"重构前须修复已有测试失败" | 用户确认忽略 → 标注 ⚠️ 继续 |
+| 重构后测试失败 | git diff 分析变更，定位失败原因 | 无法定位 → `git checkout <file>` 回滚该文件 |
+| git 仓库不可用 | 手动备份文件 `cp file.ts file.ts.bak` | 告知用户风险后继续 |
+| 表征测试无法覆盖所有路径 | 标注 `⚠️ 部分路径无测试覆盖` | 限制重构范围（仅改有覆盖的部分） |
 ```
 
 ### 重构手法目录
@@ -118,7 +131,17 @@ sources:
 
 | 协议 | 路径 |
 |------|------|
+| 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
+| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | REFACTOR.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
 
 ## References
 

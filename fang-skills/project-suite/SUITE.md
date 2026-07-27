@@ -11,15 +11,15 @@
 
 | # | Skill | 职责 | 文件 | 亮点 |
 |---|-------|------|------|------|
-| 1 | **analyzer** | 7 维度代码分析 → `.project-knowledge/` | 14 | 并行 agent、增量刷新、开发前检查 |
-| 2 | **planner** | 需求 → 任务拆解 → 依赖分析 → 风险矩阵 | 8 | 3 种依赖标注、t-shirt size 估算、里程碑规划 |
-| 3 | **architect** | 技术选型 + 模块设计 + API 契约 | 10 | 候选×维度矩阵、ADR 格式、决策陷阱警告 |
-| 4 | **generator** | 需求 + 项目知识 → 生产级代码 | 9 | 9 项自检清单、按生成类型分策略、安全反例 |
-| 5 | **tester** | 测试生成 + 环境检测 + 覆盖率报告 | 10 | 6 项环境自动检测、Mock 策略、覆盖矩阵 |
-| 6 | **reviewer** | 五轴代码审查 + 分级 + 修复建议 | 9 | 严重度决策树、correctness/security 专项审查 |
-| 7 | **refactorer** | 安全重构：9 种手法 + 4 层安全协议 | 9 | 表征测试、单步操作、过度重构警告 |
-| 8 | **documenter** | 代码 → 结构化文档（API/README/组件） | 10 | 风格匹配框架、JSDoc→Markdown 提取、新鲜度检查 |
-| 9 | **releaser** | 版本 bump + Changelog + 发布检查 | 10 | Conventional Commits 解析、7 类 Changelog 分组 |
+| 1 | **project-analyzer** | 7 维度代码分析 → `.project-knowledge/` | 14 | 并行 agent、增量刷新、开发前检查 |
+| 2 | **project-planner** | 需求 → 任务拆解 → 依赖分析 → 风险矩阵 | 8 | 3 种依赖标注、t-shirt size 估算、里程碑规划 |
+| 3 | **project-architect** | 技术选型 + 模块设计 + API 契约 | 10 | 候选×维度矩阵、ADR 格式、决策陷阱警告 |
+| 4 | **project-generator** | 需求 + 项目知识 → 生产级代码 | 9 | 9 项自检清单、按生成类型分策略、安全反例 |
+| 5 | **project-tester** | 测试生成 + 环境检测 + 覆盖率报告 | 10 | 6 项环境自动检测、Mock 策略、覆盖矩阵 |
+| 6 | **project-reviewer** | 五轴代码审查 + 分级 + 修复建议 | 9 | 严重度决策树、correctness/security 专项审查 |
+| 7 | **project-refactorer** | 安全重构：9 种手法 + 4 层安全协议 | 9 | 表征测试、单步操作、过度重构警告 |
+| 8 | **project-documenter** | 代码 → 结构化文档（API/README/组件） | 10 | 风格匹配框架、JSDoc→Markdown 提取、新鲜度检查 |
+| 9 | **project-releaser** | 版本 bump + Changelog + 发布检查 | 10 | Conventional Commits 解析、7 类 Changelog 分组 |
 
 ## 架构
 
@@ -28,15 +28,15 @@ project-suite/
 ├── SUITE.md                  ← 你在这里
 │
 ├── skills/                   ← 9 个 skill（各自 SKILL.md + prompts/ + references/）
-│   ├── analyzer/   14 files  ✅ 完整版
-│   ├── planner/     8 files  ✅ 正式版
-│   ├── architect/  10 files  ✅ 正式版
-│   ├── generator/   9 files  ✅ 正式版
-│   ├── tester/     10 files  ✅ 正式版
-│   ├── reviewer/    9 files  ✅ 正式版
-│   ├── refactorer/  9 files  ✅ 正式版
-│   ├── documenter/ 10 files  ✅ 正式版
-│   └── releaser/   10 files  ✅ 正式版
+│   ├── project-analyzer/   14 files  ✅ 完整版
+│   ├── project-planner/     8 files  ✅ 正式版
+│   ├── project-architect/  10 files  ✅ 正式版
+│   ├── project-generator/   9 files  ✅ 正式版
+│   ├── project-tester/     10 files  ✅ 正式版
+│   ├── project-reviewer/    9 files  ✅ 正式版
+│   ├── project-refactorer/  9 files  ✅ 正式版
+│   ├── project-documenter/ 10 files  ✅ 正式版
+│   └── project-releaser/   10 files  ✅ 正式版
 │
 ├── runtime/                  ← 共享运行时协议（所有 skill 共用）
 │   ├── engine/               ← 单 skill 执行层
@@ -65,32 +65,32 @@ project-suite/
 ### 全流程（绿field 项目）
 
 ```
-analyzer → planner → architect → generator → tester → reviewer → refactorer → documenter → releaser
+project-analyzer → project-planner → project-architect → project-generator → project-tester → project-reviewer → project-refactorer → project-documenter → project-releaser
  知识库    PLAN.md   ARCH.md      代码      测试报告   REVIEW.md    REFACTOR.md   文档     CHANGELOG
 ```
 
 ### 日常功能开发
 
 ```
-planner → architect → generator → tester → reviewer
+project-planner → project-architect → project-generator → project-tester → project-reviewer
 ```
 
 ### 轻量改动
 
 ```
-generator → reviewer
+project-generator → project-reviewer
 ```
 
 ### 重构
 
 ```
-analyzer → refactorer → tester → reviewer
+project-analyzer → project-refactorer → project-tester → project-reviewer
 ```
 
 ### 发布
 
 ```
-documenter → releaser
+project-documenter → project-releaser
 ```
 
 ## 如何使用
@@ -100,20 +100,20 @@ documenter → releaser
 直接说需求，`runtime/protocols/routing.md` 定义意图→skill 路由：
 
 ```
-"分析这个项目的代码结构"          → analyzer
-"这个需求拆成哪些任务"            → planner
-"选什么状态管理库比较好"          → architect
-"帮我实现这个搜索功能"            → generator
-"给 formatPrice 写单元测试"       → tester
-"帮我 review 这个 PR"            → reviewer
-"这个函数太长了帮我重构"          → refactorer
-"给 user 模块生成 API 文档"       → documenter
-"准备发布，帮我生成 changelog"    → releaser
+"分析这个项目的代码结构"          → project-analyzer
+"这个需求拆成哪些任务"            → project-planner
+"选什么状态管理库比较好"          → project-architect
+"帮我实现这个搜索功能"            → project-generator
+"给 formatPrice 写单元测试"       → project-tester
+"帮我 review 这个 PR"            → project-reviewer
+"这个函数太长了帮我重构"          → project-refactorer
+"给 user 模块生成 API 文档"       → project-documenter
+"准备发布，帮我生成 changelog"    → project-releaser
 ```
 
 ### 歧义处理
 
-路由表对每个 skill 定义了 `歧义处理` 规则（如 "设计系统" → architect vs planner），不确定时 `AskUserQuestion` 确认。
+路由表对每个 skill 定义了 `歧义处理` 规则（如 "设计系统" → project-architect vs project-planner），不确定时 `AskUserQuestion` 确认。
 
 ### 安装使用
 

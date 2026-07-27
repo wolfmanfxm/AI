@@ -1,5 +1,5 @@
 ---
-name: architect
+name: project-architect
 description: >
   架构决策、技术选型、模块设计、API 契约设计。使用对比矩阵做技术选型，输出 ADR 格式的架构决策记录。
   触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、
@@ -37,11 +37,18 @@ description: >
 
 ### Execute
 
-按需执行以下维度（用户可能只需要其中一个）：
+按以下决策树选择执行维度（可多选，独立执行时跳过不相关维度）：
+
+```
+用户意图含"选什么技术/对比方案" → 执行 1.技术选型
+用户意图含"模块划分/系统拆分"   → 执行 2.模块设计
+用户意图含"API设计/接口定义"     → 执行 3.API契约
+三者都需要（综合架构设计）       → 按 1→2→3 顺序执行，每步完成后 CHECKPOINT
+```
 
 #### 1. 技术选型
 
-**流程**：候选方案列出 → 评估维度确定 → 对比矩阵 → 推荐 + 理由
+**流程**：候选方案列出 → 评估维度确定 → 对比矩阵 → 🔴 CHECKPOINT → 推荐 + 理由
 
 评估维度模板：
 
@@ -66,6 +73,8 @@ description: >
 结论：Pinia，理由：团队已有经验 + Vue 官方推荐 + TS 原生支持
 ```
 
+🔴 **CHECKPOINT · 🛑 STOP**：确认技术选型推荐，用户确认后进入模块设计（若还需模块设计）。
+
 #### 2. 模块设计
 
 设计模块划分 + 职责 + 边界 + 通信方式。
@@ -89,6 +98,8 @@ description: >
 | auth | 登录/注册/权限校验 | `getUser()`, `hasPermission()` | - |
 | order | CRUD + 状态流转 + 查询 | `createOrder()`, `queryOrderList()` | auth, product |
 | payment | 支付发起/回调/退款 | `pay()`, `refund()`, `handleCallback()` | order |
+
+🔴 **CHECKPOINT · 🛑 STOP**：确认模块划分，用户确认后进入 API 契约（若还需 API 设计）。
 
 #### 3. API 契约
 
@@ -121,8 +132,18 @@ Response 422: { error: 'VALIDATION_ERROR', details: [...] }
 | 协议 | 路径 |
 |------|------|
 | 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
+| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
 | 编排 | [../../runtime/protocols/orchestration.md](../../runtime/protocols/orchestration.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | ARCHITECTURE.md 产出模板 |
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
+| ADR 格式示例 | [../../shared/examples/analyzer-output.md](../../shared/examples/analyzer-output.md) | 产出格式参考 |
 
 ## References
 

@@ -1,5 +1,5 @@
 ---
-name: documenter
+name: project-documenter
 description: >
   生成和维护项目文档：API 文档（从 JSDoc/代码提取）、README、ADR、Changelog、组件文档。
   自动匹配项目已有文档风格，所有内容基于代码事实不编造。
@@ -62,6 +62,21 @@ description: >
 | HTTP 方法 + URL + 请求体 | 接口的设计意图 |
 | 导出内容的依赖关系 | 架构决策理由 |
 
+#### 失败处理
+
+> 以下场景在文档生成中高频出现，必须显式编码恢复路径，不静默跳过。
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 源文件不可读/不存在 | 搜索同名文件其他扩展名（`.ts` → `.js`），检查是否移动 | 标注 `⚠️ 源文件不可读: <path>`，跳过该接口/组件 |
+| 已有文档风格无参考 | 使用 doc-style-guide.md 默认风格（`#` 一级标题、中文描述、代码块带语言标注） | AskUserQuestion：选择参考文档 / 使用默认风格 / 跳过 |
+| 目标文档已存在 | 对比生成内容与已有内容，仅更新差异（不覆盖人工手写章节） | 若差异 > 50%，AskUserQuestion：🔁覆盖 / 📝仅补充 / ❌跳过 |
+| 代码中无 JSDoc/注释 | 从函数名+参数类型推断用途，标注 `[推断]` | 无法推断 → 标注 `[待补充]` |
+| 风格特征无法判定 | 逐个特征默认：中文描述、代码块带语言标注、表格不强制对齐、语气正式 | AskUserQuestion：手动指定风格模板 |
+| 生成内容与已有文档严重冲突 | 对比冲突行，标记 `[CONFLICT]` | AskUserQuestion：保留已有 / 替换为新 / 合并 |
+
+🔴 **CHECKPOINT · 🛑 STOP**：展示文档预览（标题+结构+前2段正文），用户确认后写入文件。
+
 ### Output
 
 所有产出文件包含 Evidence Header（[../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md)）：
@@ -91,6 +106,7 @@ sources:
 |------|------|
 | 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
 
 ## References
 

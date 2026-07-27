@@ -1,5 +1,5 @@
 ---
-name: generator
+name: project-generator
 description: >
   根据需求和项目规范生成生产级代码：Vue 3 组件、页面、API 模块、工具函数、类型定义。
   必须遵循项目现有模式，从 .project-knowledge/ 提取规范而非凭记忆。
@@ -74,6 +74,8 @@ description: >
 - [ ] loading 状态：异步操作有 loading 变量
 - [ ] 空状态：列表为空时有 `el-empty` 或提示
 - [ ] TypeScript 类型：无 `any`（除非确实需要），导出类型定义
+
+🔴 **CHECKPOINT · 🛑 STOP**：自检清单全部 ✅ 后，展示生成代码摘要（文件名+行数+关键模式），用户确认后输出。
 
 #### 不同类型生成规范
 
@@ -165,7 +167,15 @@ export function fetchList(
 |------|------|
 | 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
 | 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
+| 调度 | [../../runtime/engine/scheduler.md](../../runtime/engine/scheduler.md) |
 | 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
+| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
+
+## Shared 资源
+
+| 资源 | 路径 | 用途 |
+|------|------|------|
+| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定（代码生成须与项目一致） |
 
 ## References
 
