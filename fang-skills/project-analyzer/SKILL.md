@@ -6,7 +6,7 @@ description: >
   产出: .project-knowledge/ + Knowledge Vault。仅写知识文件，不修改源码。
   不做: 业务需求分析、运行时分析、安全审计、性能基准、部署验证、代码重构、测试生成。
   mode: Production · owner: fangxm · review: 大版本发布前
-  input_files: [SKILL.md, protocol/*.md, prompts/*.md, references/*.md, schema/*.json, templates/**/*]
+  input_files: file-backed fixture [SKILL.md, protocol/*.md, prompts/*.md, references/*.md, schema/*.json, templates/**/*]
   output_contract: .project-knowledge/ + Knowledge Vault 同步
   rollback_boundary: git revert 到上一稳定版本, 已生成知识文件不受影响
 ---
@@ -19,15 +19,16 @@ description: >
 "分析/扫描/刷新"              → Analysis Flow（protocol/phase-1-discovery.md）
 "继续分析/resume"             → Phase 2 Resume（protocol/phase-2-execution.md）
 "新增/创建/实现/开发前检查"    → Development Flow（protocol/development-flow.md）
+未匹配                         → 不触发本 skill，交由 trigger-words.md 排除规则判断
 ```
 
 ## Analysis Flow
 
 ```
-analysis-config.json 不存在     → Phase 1: [protocol/phase-1-discovery.md]
-manifest status = completed      → 询问: 🔁全量刷新 / 📝增量更新 / ❌取消
+analysis-config.json 不存在     → 🔴 CHECKPOINT: Phase 1 确认配置 → [protocol/phase-1-discovery.md]
+manifest status = completed      → 🔴 CHECKPOINT: 询问 → 🔁全量刷新 / 📝增量更新 / ❌取消
 manifest status = interrupted/
-  partial / in_progress          → Phase 2 Resume: [protocol/phase-2-execution.md]
+  partial / in_progress          → 🔴 CHECKPOINT: 确认恢复 → Phase 2 Resume: [protocol/phase-2-execution.md]
 ```
 
 | 阶段 | 执行文件 |

@@ -61,10 +61,3 @@
 | 3 | Token 消耗基准 | 各模式实际 token 消耗数据 | ⚠️ 未测量 |
 | 4 | 用户满意度指标 | 实际使用反馈 | ⚠️ 未采集 |
 
-## 审查信息
-
-- **owner**: fangxm
-- **review cadence**: 每次大版本发布前
-- **input_files**: SKILL.md, protocol/*.md, prompts/*.md, references/*.md, schema/*.json, templates/**/*
-- **output contract**: .project-knowledge/ 目录 + Knowledge Vault 同步
-- **rollback boundary**: git revert 到上一稳定版本，已生成知识文件不受影响

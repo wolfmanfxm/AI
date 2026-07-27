@@ -2,7 +2,7 @@
 
 本文件记录 project-analyzer skill 的所有版本变更。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
-## [1.2.0] — 2026-07-27
+## [1.2.0] — 2026-07-27 · 评分 92.2
 
 ### Added
 - `agents/interface.yaml` — 8 agent 类型定义（权限/超时/输入输出契约/失败模式/并行策略）
@@ -11,9 +11,9 @@
 - `SKILL.md` References 补全：agents/、test-prompts.json、trigger_eval.py、trust-report.md、CHANGELOG.md
 
 ### Changed
-- `reports/output_quality_scorecard.md`：更新至 92.2 分，反映 P0/P1 修复 + 新增资产
+- 产出质量评分更新至 92.2（结构 92 + 触发 95 + 产出 92 + 容错 92 + 可维护 88）
 
-## [1.1.1] — 2026-07-27
+## [1.1.1] — 2026-07-27 · 评分 92.2
 
 ### Changed
 - `prompts/patterns.md`：Analysis 从模式名列表升级为 4 步具体操作（抽样→统计→交叉验证→提取模板）
@@ -27,11 +27,10 @@
 ### Reverted
 - `SKILL.md`：回退 darwin-skill 优化中塞入的冗余内容（故障恢复表/操作红线/展开步骤），恢复 50 行纯路由器设计。这些内容在 protocol/references 已有权威版本，SKILL.md 内联造成维护双写风险。
 
-## [1.1.0] — 2026-07-27
+## [1.1.0] — 2026-07-27 · 评分 ~87
 
 ### Added
 - `trigger_eval.py` — 触发词准确率批量验证脚本，支持详细/CI 两种输出模式
-- `reports/output_quality_scorecard.md` — yao-meta-skill Production 模式五维产出质量评分卡
 - `protocol/knowledge-protocol.md` — 知识版本控制、固定产出字段定义、生命周期引用
 - `protocol/knowledge-lifecycle.md` — 文档生命周期状态机（draft → confirmed → deprecated → archived）
 
@@ -46,7 +45,7 @@
 - 修复 `capability-matrix.md` 引用 `protocol/knowledge-protocol.md` 不存在的断裂引用
 - 修复 `prompts/output-format.md` 引用 `protocol/knowledge-lifecycle.md` 不存在的断裂引用
 
-## [1.0.0] — 2026-07-25
+## [1.0.0] — 2026-07-25 · 评分 ~88
 
 ### Added
 - 初始发布版本：完整的 Phase 1 发现 + Phase 2 执行/收尾 + Development Flow 三阶段协议
@@ -62,6 +61,24 @@
 - Analysis Config 交互式确认流程（项目名/深度/范围/输出位置）
 - Development Flow 开发前检查模式
 - Schema 定义：graph / analysis-config / statistics / manifest
+
+---
+
+## 当前评分（v1.2.0）
+
+yao-meta-skill Production 模式五维评估：
+
+| 维度 | 得分 | 权重 | 加权 |
+|------|------|------|------|
+| 结构完整性 | 92 | 25% | 23.0 |
+| 触发精度 | 95 | 20% | 19.0 |
+| 产出质量 | 92 | 25% | 23.0 |
+| 容错恢复 | 92 | 20% | 18.4 |
+| 可维护性 | 88 | 10% | 8.8 |
+| **总分** | | | **92.2** |
+
+> 缺失证据：真实 agent 执行测试、跨项目回归、token 消耗基准、用户满意度指标。详见 [reports/trust-report.md](reports/trust-report.md)。
+> Governed Package 评分卡：[reports/output_quality_scorecard.md](reports/output_quality_scorecard.md)。
 
 ---
 

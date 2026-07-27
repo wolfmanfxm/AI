@@ -1,7 +1,0 @@
-timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
-2026-07-27T19:00	baseline	project-analyzer	-	68.9	baseline	-	初始基线评估：dim4(2.4) dim3(6.0) dim5(11.9)为主要短板	dry_run
-2026-07-27T19:05	r1	project-analyzer	68.9	75.4	keep	dim4	HL-1：SKILL.md加3处🔴CHECKPOINT+阶段表新增检查点列+Development Flow展开，dim2+1/dim4+4/dim5+1/dim7+1	dry_run
-2026-07-27T19:10	r2	project-analyzer	75.4	80.2	keep	dim3	HL-2：新增故障恢复表(6场景三段式)，dim3+3/dim7+1	dry_run
-2026-07-27T19:15	r3	project-analyzer	80.2	83.1	keep	dim5	Quick Start路由展开为"下一步"可执行步骤，dim2+1/dim5+1	dry_run
-2026-07-27T19:20	r4	project-analyzer	83.1	84.3	keep	dim9	新增操作红线(7条禁止+正确替代)，dim9+2	dry_run
-2026-07-27T19:25	r5	project-analyzer	84.3	85.5	keep	dim3	Development Flow加3条异常处理分支，dim3+1	dry_run
