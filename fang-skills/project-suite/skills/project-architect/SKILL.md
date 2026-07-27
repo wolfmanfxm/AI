@@ -14,146 +14,57 @@ description: >
 
 ## 核心原则
 
-1. **决策可追溯** — 每个决策记录：问题 → 候选方案 → 选择 → 理由
-2. **上下文驱动** — 没有银弹，选型基于项目约束（团队、时间、规模、生态）
-3. **够用就好** — 不过度设计，当前需求 + 可预见扩展，不设计"可能永远不需要"的能力
-4. **基于事实** — 有 `.project-knowledge/` 时基于现有架构，不凭空设计
+1. **决策可追溯** — 问题 → 候选方案 → 选择 → 理由
+2. **上下文驱动** — 选型基于项目约束，不追求银弹
+3. **够用就好** — 当前需求 + 可预见扩展
+4. **基于事实** — 有 `.project-knowledge/` 时基于现有架构
+
+## 职责边界
+
+→ [references/boundary.md](references/boundary.md)
+
+> 🔴 architect 只做设计不写代码。
 
 ## 前置条件
 
-| 优先级 | 资源 | 作用 | 缺失时 |
-|--------|------|------|--------|
-| 1 | `.project-knowledge/architecture/` | 了解现有架构，避免重复造轮子 | 标注"未分析现有架构" |
-| 2 | `PLAN.md` | 了解任务范围和约束 | 不阻塞 |
-| 3 | 用户描述 | 设计需求 | 必须 |
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 1 | `.project-knowledge/architecture/` | 标注"未分析" |
+| 2 | `PLAN.md`，**若存在必读** | 标注"⚠️ 无规划" |
+| 3 | 上游源码，**现状核实必读** | 标注"⚠️ 未核实" |
 
 ## 工作流
 
 ### Discover
 
-1. 确认设计范围：全系统 / 某模块 / 某技术选型 / API 设计
-2. 收集约束：现有技术栈、团队经验、性能要求、部署环境、时间压力
-3. 🔴 **CHECKPOINT** — 确认范围 + 约束
+1. 确认设计范围 + 收集约束
+2. 🔴 CHECKPOINT → [checkpoint 模式](../../../shared/conventions/checkpoint-pattern.md)
+
+### 现状核实（Discover 后必做）
+
+→ [references/code-audit.md](references/code-audit.md)
+
+> 标注 `[已实现][部分实现][未实现]`。已实现的不再出设计方案。
 
 ### Execute
 
-按以下决策树选择执行维度（可多选，独立执行时跳过不相关维度）：
-
 ```
-用户意图含"选什么技术/对比方案" → 执行 1.技术选型
-用户意图含"模块划分/系统拆分"   → 执行 2.模块设计
-用户意图含"API设计/接口定义"     → 执行 3.API契约
-三者都需要（综合架构设计）       → 按 1→2→3 顺序执行，每步完成后 CHECKPOINT
-```
-
-#### 1. 技术选型
-
-**流程**：候选方案列出 → 评估维度确定 → 对比矩阵 → 🔴 CHECKPOINT → 推荐 + 理由
-
-评估维度模板：
-
-| 维度 | 权重 | 说明 |
-|------|------|------|
-| 团队熟悉度 | 高 | 学习曲线、现有经验 |
-| 生态成熟度 | 中 | 社区活跃度、插件、文档 |
-| 性能 | 按需 | 是否满足项目性能目标 |
-| 维护成本 | 中 | 升级难度、breaking change 频率 |
-| 许可合规 | 高 | 商业使用是否有限制 |
-
-输出格式：
-
-```
-决策：状态管理方案
-| 方案 | 团队熟悉 | 生态 | 性能 | TS支持 | 推荐 |
-|------|---------|------|------|--------|------|
-| Pinia | ✅ 已有项目用 | ✅ 官方推荐 | ✅ | ✅ | ⭐ 推荐 |
-| Vuex 4 | ⚠️ 需学习 | ⚠️ 迁移中 | ✅ | ⚠️ | 不推荐 |
-| 自研 | ❌ 成本高 | ❌ | ⚠️ | ⚠️ | 不推荐 |
-
-结论：Pinia，理由：团队已有经验 + Vue 官方推荐 + TS 原生支持
-```
-
-🔴 **CHECKPOINT · 🛑 STOP**：确认技术选型推荐，用户确认后进入模块设计（若还需模块设计）。
-
-#### 2. 模块设计
-
-设计模块划分 + 职责 + 边界 + 通信方式。
-
-输出：模块图（mermaid/ASCII）+ 各模块职责说明。
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   auth      │────→│   order     │←────│   product   │
-│  认证+鉴权   │     │  订单管理    │     │  商品管理    │
-└─────────────┘     └──────┬──────┘     └─────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │   payment   │
-                    │  支付模块    │
-                    └─────────────┘
-```
-
-| 模块 | 职责 | 对外接口 | 依赖 |
-|------|------|---------|------|
-| auth | 登录/注册/权限校验 | `getUser()`, `hasPermission()` | - |
-| order | CRUD + 状态流转 + 查询 | `createOrder()`, `queryOrderList()` | auth, product |
-| payment | 支付发起/回调/退款 | `pay()`, `refund()`, `handleCallback()` | order |
-
-🔴 **CHECKPOINT · 🛑 STOP**：确认模块划分，用户确认后进入 API 契约（若还需 API 设计）。
-
-#### 3. API 契约
-
-| 要素 | 说明 |
-|------|------|
-| 方法 + 路径 | `POST /api/orders` |
-| 请求参数 | 类型 + 必填/可选 + 示例值 |
-| 响应结构 | 正常 + 错误（含 HTTP 状态码） |
-| 鉴权 | 是否需要登录/权限 |
-| 幂等性 | 重复调用是否安全 |
-
-```typescript
-// POST /api/orders — 创建订单
-Request: {
-  productId: number   // 必填
-  quantity: number    // 必填，1-999
-  couponCode?: string // 可选
-}
-Response 200: { orderId: number, totalPrice: number, status: 'pending' }
-Response 401: { error: 'UNAUTHORIZED' }
-Response 422: { error: 'VALIDATION_ERROR', details: [...] }
+"选什么技术" → 1.技术选型 → [prompts/tech-selection.md](prompts/tech-selection.md)
+"模块划分"   → 2.模块设计 → [prompts/module-design.md](prompts/module-design.md)
+"API设计"    → 3.API契约  → [prompts/api-design.md](prompts/api-design.md)
+综合设计     → 1→2→3 顺序，每步 CHECKPOINT
 ```
 
 ### Output
 
-生成 `ARCHITECTURE.md` — 一个或多个 ADR 格式的决策记录。
+`decisions/ARCHITECTURE-<topic>.md`
 
-## Runtime 协议
+## 失败处理
 
-| 协议 | 路径 |
-|------|------|
-| 状态机 | [../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md) |
-| 断点续传 | [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md) |
-| 异常恢复 | [../../runtime/engine/error-recovery.md](../../runtime/engine/error-recovery.md) |
-| 路由 | [../../runtime/protocols/routing.md](../../runtime/protocols/routing.md) |
-| 编排 | [../../runtime/protocols/orchestration.md](../../runtime/protocols/orchestration.md) |
+→ [references/failure-handling.md](references/failure-handling.md)
 
-## Shared 资源
+## 完成后下一步
 
-| 资源 | 路径 | 用途 |
-|------|------|------|
-| Evidence Header | [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) | ARCHITECTURE.md 产出模板 |
-| Conventions | [../../shared/conventions/README.md](../../shared/conventions/README.md) | 命名与格式约定 |
-| ADR 格式示例 | [../../shared/examples/analyzer-output.md](../../shared/examples/analyzer-output.md) | 产出格式参考 |
-
-## References
-
-| 资源 | 路径 |
-|------|------|
-| 技术选型 Prompt | [prompts/tech-selection.md](prompts/tech-selection.md) |
-| 模块设计 Prompt | [prompts/module-design.md](prompts/module-design.md) |
-| API 设计 Prompt | [prompts/api-design.md](prompts/api-design.md) |
-| 决策框架指南 | [references/decision-framework.md](references/decision-framework.md) |
-| 触发词 | [references/trigger-words.md](references/trigger-words.md) |
-| 能力边界 | [references/capability-matrix.md](references/capability-matrix.md) |
-| 反例清单 | [references/anti-patterns.md](references/anti-patterns.md) |
-| 设计示例 | [references/examples.md](references/examples.md) |
+```
+architect 完成 → /project-generator 或 /project-reviewer
+```
