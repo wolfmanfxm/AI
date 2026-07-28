@@ -1,6 +1,6 @@
 # Trust Report
 
-> yao-meta-skill Governed Package 要求 · project-analyzer v1.1.1
+> yao-meta-skill Governed Package 要求 · project-dissection v1.1.1
 > 评估日期: 2026-07-27 · 评估框架: yao-meta-skill Production mode
 
 ## 保证 (Guarantees)

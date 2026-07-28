@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-project-analyzer 触发词准确率验证脚本
+project-dissection 触发词准确率验证脚本
 
 用法:
     python3 trigger_eval.py                    # 默认读取 test-prompts.json
@@ -300,7 +300,7 @@ def print_report(results: list[EvalResult], patterns: list[Pattern], exclusions:
     # ── 头部 ──
     if not ci:
         print()
-        print(color("═══ trigger_eval · project-analyzer ═══", Colors.BOLD, use_color))
+        print(color("═══ trigger_eval · project-dissection ═══", Colors.BOLD, use_color))
         print(f"  测试用例: {total}  触发词: {len(patterns)}  排除词: {len(exclusions)}")
         print()
 

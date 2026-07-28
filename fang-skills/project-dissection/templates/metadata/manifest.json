@@ -1,7 +1,7 @@
 {
   "knowledgeVersion": "2.0",
   "skillVersion": "1.0.0",
-  "generatedBy": "project-analyzer",
+  "generatedBy": "project-dissection",
   "generatedAt": "{{date}}",
   "project": "{{project}}",
   "gitCommit": "",

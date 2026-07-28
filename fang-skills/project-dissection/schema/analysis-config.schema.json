@@ -42,7 +42,7 @@
     },
     "skillVersion": {
       "type": "string",
-      "description": "project-analyzer skill 版本"
+      "description": "project-dissection skill 版本"
     }
   }
 }

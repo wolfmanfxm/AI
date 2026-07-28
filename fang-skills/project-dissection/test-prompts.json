@@ -33,13 +33,13 @@
     "id": 6,
     "category": "not-trigger",
     "prompt": "帮我分析一下这个 bug 的原因",
-    "expected": "不触发 project-analyzer → '分析' 在此上下文中是调试意图 → 路由到 systematic-debugging"
+    "expected": "不触发 project-dissection → '分析' 在此上下文中是调试意图 → 路由到 systematic-debugging"
   },
   {
     "id": 7,
     "category": "not-trigger",
     "prompt": "分析下日志看看哪里慢了",
-    "expected": "不触发 project-analyzer → 性能/日志分析意图 → 路由到 performance-optimization"
+    "expected": "不触发 project-dissection → 性能/日志分析意图 → 路由到 performance-optimization"
   },
   {
     "id": 8,

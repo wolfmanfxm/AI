@@ -1,6 +1,6 @@
 # Example Output
 
-执行一次 project-analyzer 后的产出示例。
+执行一次 project-dissection 后的产出示例。
 
 ---
 
@@ -9,7 +9,7 @@
 ```markdown
 ---
 id: architecture-overview
-generatedBy: project-analyzer
+generatedBy: project-dissection
 generatedAt: 2026-07-24T14:00:00Z
 confidence: 95
 sources:
@@ -40,7 +40,7 @@ src/（框架层）+ packages/（业务模块）双层架构。
 ```markdown
 ---
 id: component-data-table
-generatedBy: project-analyzer
+generatedBy: project-dissection
 generatedAt: 2026-07-24T14:00:00Z
 confidence: 98
 sources:
@@ -64,7 +64,7 @@ sources:
 ```markdown
 ---
 id: migration-notes
-generatedBy: project-analyzer
+generatedBy: project-dissection
 generatedAt: 2026-07-24T14:00:00Z
 confidence: 90
 sources: []

@@ -20,7 +20,7 @@
     },
     "generatedBy": {
       "type": "string",
-      "const": "project-analyzer",
+      "const": "project-dissection",
       "description": "生成工具标识"
     },
     "generatedAt": {

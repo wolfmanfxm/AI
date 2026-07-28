@@ -1,0 +1,9 @@
+timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
+2026-07-23T12:20	baseline	project-dissection	-	68.3	baseline	-	初始基线评估	dry_run
+2026-07-23T12:25	r1	project-dissection	68.3	71.5	keep	D4检查点设计	添加3个显性🔴/🛑检查点	dry_run
+2026-07-23T12:28	r2	project-dissection	71.5	74.8	keep	D3失败模式编码	添加6条三段式异常处理表	dry_run
+2026-07-23T12:30	r3	project-dissection	74.8	76.1	keep	D9反例黑名单	添加7条独立反例清单	dry_run
+2026-07-24T12:00	r4	project-dissection	76.1	78.9	keep	D2/D6/D7	目录重组：metadata/documents分离、路径修复、rules目录	dry_run
+2026-07-24T14:00	r5	project-dissection	78.9	80.2	keep	D1/D4	双阶段工作流+统一AskUserQuestion确认	dry_run
+2026-07-24T16:00	r6	project-dissection	80.2	84.3	keep	D2/D5/D7	Orchestrator+GEAO格式+metadata/documents分层	 dry_run
+2026-07-24T10:15	r7	project-dissection	74.6	83.7	keep	D1/D5/D7/D9	Frontmatter中文+触发词内联+Agent类型指定+JSON产出+7条操作反例	full_test

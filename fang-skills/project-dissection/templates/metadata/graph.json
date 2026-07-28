@@ -1,5 +1,5 @@
 {
-  "generatedBy": "project-analyzer",
+  "generatedBy": "project-dissection",
   "generatedAt": "{{date}}",
   "project": "{{project}}",
   "nodes": {

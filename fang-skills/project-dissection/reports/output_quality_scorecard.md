@@ -1,6 +1,6 @@
 # Output Quality Scorecard
 
-> project-analyzer v1.2.0 · 2026-07-27 · yao-meta-skill Production mode
+> project-dissection v1.2.0 · 2026-07-27 · yao-meta-skill Production mode
 
 | 维度 | 得分 | 权重 | 加权 |
 |------|------|------|------|

@@ -1,6 +1,6 @@
 # Changelog
 
-本文件记录 project-analyzer skill 的所有版本变更。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
+本文件记录 project-dissection skill 的所有版本变更。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
 ## [1.2.0] — 2026-07-27 · 评分 92.2
 

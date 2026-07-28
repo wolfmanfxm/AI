@@ -17,7 +17,7 @@
 {
   "knowledgeVersion": "2.0",
   "skillVersion": "1.0.0",
-  "generatedBy": "project-analyzer",
+  "generatedBy": "project-dissection",
   "generatedAt": "ISO-8601",
   "project": "项目名称",
   "gitCommit": "abc1234",

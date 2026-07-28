@@ -1,11 +1,11 @@
 ---
-name: project-analyzer
+name: project-dissection
 description: >
-  分析软件项目并生成可复用的项目知识库，覆盖 8 个维度（标准模式 7 个 + 详尽模式 +1）。
-  触发词见 references/trigger-words.md。
+  独立可用的项目知识库分析 skill，覆盖 8 个维度（标准模式 7 个 + 详尽模式 +1），含完整 protocol/agents/schema/templates。
+  触发词：/project-dissection、项目解剖、代码解剖、dissect project。
   产出: .project-knowledge/ + Knowledge Vault。仅写知识文件，不修改源码。
   不做: 业务需求分析、运行时分析、安全审计、性能基准、部署验证、代码重构、测试生成。
-  mode: Production · owner: fangxm · review: 大版本发布前
+  mode: Standalone · owner: fangxm · review: 大版本发布前
   input_files: file-backed fixture [SKILL.md, protocol/*.md, prompts/*.md, references/*.md, schema/*.json, templates/**/*]
   output_contract: .project-knowledge/ + Knowledge Vault 同步
   rollback_boundary: git revert 到上一稳定版本, 已生成知识文件不受影响
