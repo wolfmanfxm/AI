@@ -1,29 +1,56 @@
 # Interface: project-tester
 
-> 对外契约。改变本文件只有在 skill 的本质 capability 变化时。
+> 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **Test** — `.test.ts / .spec.ts` + `reports/TEST-REPORT.md`
+- **test** — `.test.ts / .spec.ts` + `reports/TEST-REPORT.md`
 
 ## Consumes
-- 🔴 **Code**（被测代码，缺失则 BLOCKED）
-- 🔴 **Plan Acceptance Criteria** — `PLAN.md > # Acceptance Criteria`（**必读**：每条 AC 至少一个测试用例）
-- 🟡 **Plan Task Breakdown** — `PLAN.md > # Task Breakdown`（了解任务范围和 Verification 要求）
-- 🟡 **Plan Risk Assessment** — `PLAN.md > # Risk Assessment`（HIGH 风险任务优先加测）
-- 🟡 **KnowledgeBase**（`.project-knowledge/patterns/`，缺失则 DEGRADED）
-- 🟡 **Architecture**（`ARCHITECTURE.md`，API 契约用于集成测试）
+| artifact | 优先级 | 缺失行为 |
+|----------|--------|---------|
+| implementation | 🔴 | BLOCKED |
+| planning | 🔴 | DEGRADED — 从代码推断 |
+| knowledge | 🟡 | DEGRADED |
+| design | 🟡 | SKIP |
 
-## Guarantees
-- 自动检测测试框架（jest/vitest/mocha）
-- Given-When-Then / describe-it-expect 结构
-- 覆盖 happy path + 边界（null/空/超长/并发）+ 异常
-- **对照 Acceptance Criteria 生成测试** — 每条 AC 至少一个测试用例
-- 测试失败记录原因，不修改被测代码
+## Input
+| 字段 | 来源 | 必须 |
+|------|------|------|
+| 被测代码 | generator | 🔴 |
+| PLAN.md > # Acceptance Criteria | planner | 🔴 |
+| PLAN.md > # Risk Assessment | planner | 🟡 |
+| ARCHITECTURE.md | architect | 🟡 |
+
+## Output
+- `*.test.ts / *.spec.ts`
+- `reports/TEST-REPORT.md` — 覆盖率 + AC 对照表
+- `result.md`
+
+## Confidence
+- 最低: 70%
+- 计算: 100 - AC不可验证(15) - 被测代码复杂(10) - 无测试框架(10)
 
 ## Failure
 | 条件 | 模式 | 行为 |
 |------|------|------|
-| 被测代码不可读 | BLOCKED | 拒绝执行 |
-| PLAN.md Acceptance Criteria 缺失 | DEGRADED | 从代码推断测试策略，标注"⚠️ 无验收标准" |
-| 无测试框架检测到 | DEGRADED | 默认 jest 风格 |
-| 测试执行失败 | DEGRADED | 记录失败原因到报告，不修改代码 |
+| implementation 不可读 | BLOCKED | 拒绝执行 |
+| planning AC 缺失 | DEGRADED | 从代码推断 |
+| 无测试框架 | DEGRADED | 默认 jest |
+| 测试执行失败 | DEGRADED | 记录报告，不修改源码 |
+
+## Checkpoint
+| 位置 | 触发条件 |
+|------|---------|
+| Discover 后 | 确认测试范围 + 框架选择 |
+
+## Resume
+- 支持: true
+- 方式: state.json
+
+## State
+- 读: state.json
+- 写: state.json（追加 history）
+
+## Artifacts
+- 入: [implementation, planning, knowledge]
+- 出: [test]

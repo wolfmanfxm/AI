@@ -1,44 +1,59 @@
 # Interface: project-planner
 
-> Project Planning Engine — 对外契约。
+> 标准化接口契约。Scheduler 可只读此文件即可调用 Skill。
+> Artifact types 与 `runtime/artifacts/artifact-types.yaml` 对齐。
 
 ## Produces
-- **Plan** — `proposals/PLAN-<feature>.md`（9 模块 Contract）
-
-| # | Section | 下游消费者 |
-|---|---------|-----------|
-| 1 | `# Goal` | 全部 Skill |
-| 2 | `# Scope` | Generator、Reviewer |
-| 3 | `# Context` | Architect、Generator |
-| 4 | `# Reuse Analysis` | Generator |
-| 5 | `# Decision` | Architect |
-| 6 | `# Task Breakdown` | Generator |
-| 7 | `# Dependency Graph` | Generator、Runtime |
-| 8 | `# Risk Assessment` | Reviewer、Tester |
-| 9 | `# Acceptance Criteria` | Tester、Reviewer |
+- **planning** — `proposals/PLAN-<feature>.md`（9 模块 Contract）
 
 ## Consumes
-- 🔴 **Context**（`context.json`，缺失则 DEGRADED）
-- 🔴 **KnowledgeBase**（`.project-knowledge/`，缺失则 DEGRADED — 跳过 Reuse Analysis）
-- 🟢 Requirement（用户需求描述，缺失则 BLOCKED）
+| artifact | 优先级 | 缺失行为 |
+|----------|--------|---------|
+| knowledge | 🔴 | DEGRADED — 跳过 Reuse Analysis |
+| context | 🔴 | DEGRADED — 从 knowledge 提取 |
+| graph | 🟡 | SKIP — 有则用于模块关系分析 |
 
-## Guarantees
-- 每个 Section 标注 Primary Consumer — 下游 Skill 只读自己关心的
-- Task 含：ID / 依赖 / 估时 / 优先级 / 风险 / Decision Deps / Verification
-- 依赖标注：→硬依赖 / ⇢软依赖 / ⤳外部依赖，Wave 分组
-- 现状探查：`[新][有骨架][基本完成][已完成]`
-- Risk Assessment 含：类别/级别/概率/影响任务/缓解措施 + 下游行为指引表
-- Reuse Analysis 含：已有组件/模式/API/规则 — Generator 直接引用
-- Decision 含：决策点 + ≥2 候选方案 + 影响 Tasks — Architect 入口
-- Scope 含：In/Out 边界 + Confidence 评分 + Gap List
-- Confidence < 40% 拒绝产出，只输出 `# Goal` + `# Scope`（含 Gap List）
+## Input
+| 字段 | 来源 | 必须 |
+|------|------|------|
+| context.json | analyzer | 🔴 |
+| state.json | .project-runtime/ | 🟡 |
+| knowledge.md | .project-knowledge/ | 🟡 |
+| 用户需求 | User Prompt | 🔴 |
+
+## Output
+- `proposals/PLAN-<feature>.md` — 9 模块 Contract
+- `state.json` — 追加 history（含 confidence + suggested_next）
+- `result.md` — Status + Confidence + Summary + What Was Done + Issues + Workflow Hint
+
+## Confidence
+- 最低: 40%（低于此拒绝产出完整计划）
+- 计算: 100 - 需求模糊(20) - API缺失(15) - 规则不明(15) - 缺参考(10) - 新库(10) - 假设×5(max20)
 
 ## Failure
 | 条件 | 模式 | 行为 |
 |------|------|------|
-| context.json 缺失 | DEGRADED | 从 `.project-knowledge/` 提取 |
-| `.project-knowledge/` 缺失 | DEGRADED | 跳过 Reuse Analysis，标注"⚠️ 缺少知识库" |
-| 需求自相矛盾 | DEGRADED | 标注于 Context 假设表，产出两个方案 |
-| 现状探查无结果 | DEGRADED | 标注 `⚠️ 未找到现有代码`，假定全部 [新] |
-| Confidence < 40% | DEGRADED | 拒绝产出完整 PLAN.md，只输出 Goal + Scope + Gap List |
-| 无任何需求输入 | BLOCKED | 拒绝执行 |
+| knowledge 缺失 | DEGRADED | 跳过 Reuse Analysis |
+| context 缺失 | DEGRADED | 从 knowledge 提取 |
+| 需求自相矛盾 | DEGRADED | 标注于 Context 假设表 |
+| Confidence < 40% | DEGRADED | 拒绝产出完整 PLAN.md |
+| 无需求输入 | BLOCKED | 拒绝执行 |
+
+## Checkpoint
+| 位置 | 触发条件 |
+|------|---------|
+| Discover 后 | 展示 Goal + Scope，用户确认 |
+| 现状探查后 | 展示标注结果 + 修正估时 |
+| Execute 后 | 展示 PLAN.md 摘要（任务数+估时+风险TOP3） |
+
+## Resume
+- 支持: true
+- 方式: 读 `state.json` → 定位当前 phase → 从断点继续
+
+## State
+- 读: state.json / knowledge.json / graph.json
+- 写: state.json（追加 history + suggested_next）
+
+## Artifacts
+- 入: [knowledge, context, graph]
+- 出: [planning]

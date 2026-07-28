@@ -1,0 +1,35 @@
+# Scheduler Configuration v1.0.0
+# 机器可读的调度配置。替代 scheduler.md 中的自然语言描述。
+
+version: "1.0.0"
+
+strategy:
+  mode: parallel           # parallel | sequential | adaptive
+  max_parallel: 6          # 同 Wave 最大并行 skill 数
+  dag_source: capabilities.yaml  # DAG 来源
+
+resume:
+  enabled: true            # 断点续传
+  state_source: .project-runtime/state.json
+  detect_stale: true       # 检测上游产出是否过期
+
+checkpoint:
+  mode: per_skill          # per_skill | per_wave | manual
+  auto_approve: false      # 是否自动通过 CHECKPOINT
+  timeout_minutes: 30      # CHECKPOINT 超时（0 = 不限）
+
+failure:
+  retry: 2                 # 失败重试次数
+  retry_delay_seconds: 5   # 重试间隔
+  on_exhausted: pause      # pause | skip | abort
+
+confidence:
+  source: skill_output     # 从 Skill 的 result.md 读取
+  thresholds:
+    auto_advance: 90       # ≥ 90 建议自动推进
+    warn: 70               # < 70 建议人工确认
+    block: 40              # < 40 建议阻断
+
+logging:
+  level: info              # debug | info | warn | error
+  output: .project-runtime/scheduler.log

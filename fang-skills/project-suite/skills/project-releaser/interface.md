@@ -1,23 +1,51 @@
 # Interface: project-releaser
 
-> 对外契约。改变本文件只有在 skill 的本质 capability 变化时。
+> 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **Release** — `CHANGELOG.md` + `RELEASE-CHECKLIST.md`
+- **release** — `CHANGELOG.md` + `RELEASE-CHECKLIST.md`
 
 ## Consumes
-- 🔴 **Documentation**（`CHANGELOG.md` + git log 变更历史，缺失则从 conventional commits 生成）
-- 🟡 **Review**（`REVIEW.md`，确认审查状态）
+| artifact | 优先级 | 缺失行为 |
+|----------|--------|---------|
+| documentation | 🔴 | DEGRADED — 从 git log 生成 |
+| review | 🟡 | DEGRADED — 标注"⚠️ 未审查" |
 
-## Guarantees
-- 版本号从 conventional commits 推导（breaking→MAJOR / feat→MINOR / fix→PATCH）
-- Changelog 从 git log + PR + REVIEW.md 合成
-- Breaking Change 显式标注 + 迁移步骤
-- **不执行** `npm publish` / `git push --tags`
+## Input
+| 字段 | 来源 | 必须 |
+|------|------|------|
+| git log | git | 🔴 |
+| CHANGELOG.md | documenter | 🟡 |
+| REVIEW.md | reviewer | 🟡 |
+
+## Output
+- `CHANGELOG.md` — 从 conventional commits + PR + REVIEW 合成
+- `RELEASE-CHECKLIST.md`
+- `result.md`
+
+## Confidence
+- 最低: 70%
+- 计算: 100 - 非标准commit(15) - 无review(10) - breaking change无说明(15)
 
 ## Failure
 | 条件 | 模式 | 行为 |
 |------|------|------|
-| 无 conventional commits | DEGRADED | 按 commit 首词推断，标注"⚠️ 非标准 commit" |
-| 无法确定版本号 | DEGRADED | 读 `package.json` 当前版本建议小版本 bump |
-| 无 REVIEW.md | DEGRADED | 标注"⚠️ 未审查" |
+| 无 conventional commits | DEGRADED | 按首词推断 |
+| 无法确定版本号 | DEGRADED | 建议 PATCH bump |
+| review 缺失 | DEGRADED | 标注"⚠️ 未审查" |
+
+## Checkpoint
+| 位置 | 触发条件 |
+|------|---------|
+| Discover 后 | 展示版本建议 + Changelog 预览 |
+
+## Resume
+- 支持: false（每次独立执行）
+
+## State
+- 读: state.json
+- 写: state.json（追加 history）
+
+## Artifacts
+- 入: [documentation, review]
+- 出: [release]

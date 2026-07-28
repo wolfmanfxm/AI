@@ -1,0 +1,129 @@
+# Artifact Type Registry v1.0.0
+#
+# 统一的产出物类型系统。Skill 不直接知道哪个 Skill 产生什么文件——
+# 而是声明"我消费 planning 类型的 artifact"，Runtime 自动找到 producer。
+#
+# 这是 Suite 最大的解耦：数据层先统一，调度层才有意义。
+
+version: "1.0.0"
+
+types:
+
+  knowledge:
+    description: 项目结构化知识（架构/组件/API/模式/编码约定）
+    schema: shared/schemas/manifest.schema.json
+    location: .project-knowledge/
+    lifecycle: [draft, verified, accepted, archived]
+    producer: project-analyzer
+    consumers: [project-planner, project-architect, project-generator, project-reviewer, project-tester, project-refactorer, project-documenter]
+
+  context:
+    description: 下游 skill 标准项目上下文（技术栈/路径别名/约定/模块清单）
+    schema: runtime/context/context.md
+    location: .project-knowledge/context.json
+    producer: project-analyzer
+    consumers: [project-planner, project-architect, project-generator, project-reviewer, project-tester, project-refactorer, project-documenter]
+
+  graph:
+    description: 项目结构关系图谱（节点+边）
+    schema: shared/schemas/graph.schema.json
+    location: .project-knowledge/graph.json
+    producer: project-analyzer
+    consumers: [project-planner, project-architect, project-generator, project-reviewer]
+
+  planning:
+    description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）
+    schema: skills/project-planner/prompts/task-breakdown.md
+    location: proposals/PLAN-*.md | artifacts/plans/
+    producer: project-planner
+    consumers: [project-architect, project-generator, project-reviewer, project-tester]
+
+  design:
+    description: 架构决策记录（ADR 格式）— 技术选型/模块设计/API 契约
+    schema: skills/project-architect/SKILL.md
+    location: decisions/ARCHITECTURE-*.md | artifacts/decisions/
+    producer: project-architect
+    consumers: [project-generator, project-reviewer]
+
+  implementation:
+    description: 生产级代码（.vue / .ts / .js）
+    location: workspace/ | src/ | 项目源码目录
+    producer: project-generator
+    consumers: [project-tester, project-reviewer, project-refactorer, project-documenter]
+
+  test:
+    description: 测试文件 + 测试报告
+    location: "*.test.ts | *.spec.ts + reports/TEST-REPORT.md"
+    producer: project-tester
+    consumers: [project-reviewer, project-refactorer, project-releaser]
+
+  review:
+    description: 五轴审查报告（分级问题 + 修复建议 + AC 对照）
+    location: reports/REVIEW-*.md | artifacts/reviews/
+    producer: project-reviewer
+    consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
+
+  refactored-code:
+    description: 重构后代码 + REFACTOR.md（变更记录 + 改善指标）
+    location: workspace/ | src/ + reports/REFACTOR.md
+    producer: project-refactorer
+    consumers: [project-reviewer, project-tester]
+
+  documentation:
+    description: API/组件/Changelog 文档（.md + Evidence Header）
+    location: api/ | components/ | CHANGELOG.md
+    producer: project-documenter
+    consumers: [project-releaser]
+
+  release:
+    description: 发布产物（版本建议 + Changelog + 检查清单）
+    location: CHANGELOG.md + RELEASE-CHECKLIST.md
+    producer: project-releaser
+    consumers: []
+
+  state:
+    description: 项目持久化状态（执行历史 + 知识生命周期 + 置信度追踪）
+    schema: runtime/state/state.md
+    location: .project-runtime/state.json + knowledge.json
+    producer: null
+    consumers: [all]
+
+# Skill → Artifact 映射
+# 每个 Skill 通过 artifact type 声明输入输出，不知道 producer/consumer 是谁
+
+mapping:
+  project-analyzer:
+    produces: [knowledge, context, graph]
+    consumes: []
+
+  project-planner:
+    produces: [planning]
+    consumes: [knowledge, context, graph]
+
+  project-architect:
+    produces: [design]
+    consumes: [knowledge, context, graph, planning]
+
+  project-generator:
+    produces: [implementation]
+    consumes: [knowledge, context, graph, planning, design]
+
+  project-tester:
+    produces: [test]
+    consumes: [knowledge, context, implementation, planning]
+
+  project-reviewer:
+    produces: [review]
+    consumes: [knowledge, implementation, planning, design, test]
+
+  project-refactorer:
+    produces: [refactored-code]
+    consumes: [knowledge, implementation, test, review]
+
+  project-documenter:
+    produces: [documentation]
+    consumes: [knowledge, context, implementation, review]
+
+  project-releaser:
+    produces: [release]
+    consumes: [documentation, review, test]

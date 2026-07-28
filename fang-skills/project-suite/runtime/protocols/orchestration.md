@@ -1,69 +1,96 @@
-# Orchestration
+# Orchestration v0.7.0
 
-> 跨 skill 工作流编排。DAG 从 `runtime/registry/capabilities.yaml` 自动推导，Scheduler 执行调度。
+> 跨 skill 工作流编排。用户是 Dispatcher。Skill 通过 State 文件通信，不直接串联。
 
-## DAG 构建
-
-Scheduler 读取 `capabilities.yaml` → 按 produces/consumes 自动构建依赖图：
+## 核心模式：User-as-Dispatcher
 
 ```
-若 skill_B.consumes 包含 skill_A.produces 的任一类型 → A → B
+用户
+ │
+ │  读 state.json（了解当前状态）
+ │  读 Skill 建议（完成后下一步）
+ │
+ ├──→ 决定执行哪个 Skill
+ │
+ ▼
+Skill
+ │  读 State（state.json + knowledge.json + 上游 artifacts）
+ │  执行
+ │  写 State（更新 state.json + knowledge.json）
+ │  输出 result.md（含 confidence + 建议下一步）
+ │  结束
+ │
+ ▼
+用户（再次决策）
 ```
 
-## 当前 DAG（v0.6.0）
+**Skill 之间互相不知道对方存在。** 通信只靠 `.project-runtime/` 中的文件。Skill 完成后给出建议，用户决定是否采纳。
+
+## State 层
+
+`.project-runtime/` 是 Skill 间的共享记忆：
 
 ```
-Wave 1: analyzer ───────────────────── (无依赖)
-         │ produces: KnowledgeBase, Context
-         ↓
-Wave 2: planner ────────────────────── (consumes: KnowledgeBase, Context)
-         │ produces: Plan
-         ↓
-Wave 3: architect ──────────────────── (consumes: KnowledgeBase, Plan)
-         │ produces: Architecture
-         ↓
-Wave 4: generator ──────────────────── (consumes: KnowledgeBase, Plan, Architecture)
-         │ produces: Code
-         ↓
-Wave 5: tester ─────────────────────── (consumes: Code)
-         │ produces: Test
-         ↓
-Wave 6: reviewer ───────────────────── (consumes: Code, Test)
-         │ produces: Review
-         ↓
-Wave 7: refactorer ┊ documenter ────── 并行（无互依赖，独立 consumes）
-         │             │
-         │ produces:   │ produces:
-         │ RefCode      │ Documentation
-         ↓             ↓
-Wave 8:          releaser ──────────── (consumes: Documentation, Review, Test)
+.project-runtime/
+├── state.json         # 项目当前状态 + 执行历史
+├── knowledge.json      # 知识文件生命周期追踪
+└── artifacts/          # 统一产出目录
+    ├── plans/          # PLAN-*.md
+    ├── decisions/      # ARCHITECTURE-*.md
+    ├── reviews/        # REVIEW-*.md
+    ├── reports/        # TEST-REPORT.md, REFACTOR.md
+    └── releases/       # CHANGELOG.md
 ```
 
-## 并行检测
+→ 详细规范：[../state/state.md](../state/state.md)
+
+## Workflow 模板
+
+`runtime/workflows/` 中的 YAML 是**参考模板**，不是自动执行引擎：
+
+| 模板 | 文件 | 适用场景 |
+|------|------|---------|
+| full-sdlc | `workflows/full-sdlc.yaml` | 完整生命周期 |
+| quick-change | `workflows/quick-change.yaml` | 轻量改动 |
+| (自定义) | `workflows/*.yaml` | 用户按需创建 |
+
+每个 Skill 的 `完成后下一步` 参考这些模板给建议，但最终由用户决定。
+
+## 并行建议
+
+当同 Wave 的 Skill 互不依赖时，建议用户可并行执行：
 
 ```
-同 Wave 条件:
-  skill_B 的所有 consumes 已被前序 Wave 满足
-  && skill_B 不依赖 skill_C
-  && skill_C 不依赖 skill_B
-  → B ∥ C 同 Wave 并行
+planner + architect（都只依赖 analyzer，互不依赖）→ 可并行
+tester + documenter（都只依赖 generator，互不依赖）→ 可并行
 ```
 
-## 编排原则
+## Confidence 作为决策参考
 
-1. **不自动级联** — 上游完成后建议用户，不自动触发下游
-2. **数据文件传递** — skill 间通过 context.json + 产出文件通信
-3. **可跳过** — 用户可跳过任意环节
-4. **并行优先** — 同 Wave 无依赖的 skill 并行 execute
+每个 Skill 完成后输出 confidence（0-100）。用户根据分数决定下一步：
 
-## 轻量/重构/发布流程
+| Confidence | 含义 | 用户参考 |
+|-----------|------|---------|
+| ≥ 90 | 产出可靠 | 正常推进 |
+| 70-89 | 有标注假设 | 建议检查假设再推进 |
+| 40-69 | 信息不足 | 建议补充信息后重新执行 |
+| < 40 | 不可靠 | 不应直接用于下游 |
 
+**这不是自动阻断。** 用户始终拥有最终决策权。
+
+## State 更新协议
+
+每个 Skill 执行完成后更新 `.project-runtime/state.json`：
+
+```json
+{
+  "phase": "architecture",
+  "status": "in_progress",
+  "history": [
+    {"skill": "project-analyzer", "status": "completed", "confidence": 92, "at": "..."},
+    {"skill": "project-planner", "status": "completed", "confidence": 85, "at": "..."}
+  ]
+}
 ```
-轻量: generator → reviewer
-重构: analyzer → refactorer → tester → reviewer
-发布: reviewer → documenter → releaser
-```
 
-## 编排信号
-
-上游 skill 写入 manifest `nextSuggestion` → 用户看到下一步建议。不自动级联。
+Skill 只追加 history，不删除。用户可随时查看完整执行链路。

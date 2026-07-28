@@ -61,10 +61,14 @@ description: >
 ## 工作流
 
 1. 读 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
-2. 按 Risk Assessment 确定审查强度（HIGH→Full audit / MEDIUM→Spot check / LOW→Standard）
-3. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
-4. 五轴扫描 → 逐条对照 AC 验证 → 检查 Scope 边界
-5. 输出 `reports/REVIEW-<topic>.md`
+2. **Graph 影响分析** → [Graph Query Protocol](../../runtime/contracts/graph-query.md)：
+   - `findImpacted([变更文件列表])` → 本次修改影响哪些节点
+   - `findConsumers(<受影响 API>)` → 修改 API 时了解下游影响
+   - 影响节点 > 5 → 审查强度自动升级为 HIGH
+3. 按 Risk Assessment 确定审查强度（HIGH→Full audit / MEDIUM→Spot check / LOW→Standard）
+4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
+5. 五轴扫描 → 逐条对照 AC 验证 → 检查 Scope 边界
+6. 输出 `reports/REVIEW-<topic>.md`
 
 失败处理 → [references/failure-handling.md](references/failure-handling.md)
 

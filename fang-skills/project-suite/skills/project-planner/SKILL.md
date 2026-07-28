@@ -42,13 +42,15 @@ description: >
 1. 加载 `context.json` → 模块/组件/API 清单
 2. 读用户输入 + 上游 PLAN.md/ARCHITECTURE.md
 3. 一句话总结 Goal + 划定 Scope
-4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
+4. 🔴 CHECKPOINT — 展示 Goal + Scope，用户确认后进入现状探查
 
 ### 现状探查（Discover 后必做）
 
 → [references/code-audit.md](references/code-audit.md)
 
 > 标注 `[新][有骨架][基本完成][已完成]`，修正估时。
+>
+> 🔴 CHECKPOINT — 展示现状标注结果 + 修正后估时，用户确认后进入 Execute。
 
 ### Execute — 9 步 Pipeline
 
@@ -67,6 +69,8 @@ description: >
 → 详细 Prompt：[prompts/task-breakdown.md](prompts/task-breakdown.md)
 → 工作量评估：[prompts/estimation.md](prompts/estimation.md)
 
+🔴 CHECKPOINT — 9 步 Pipeline 完成后，展示 PLAN.md 摘要（任务数+估时+风险TOP3），用户确认后写入文件。
+
 ### Output
 
 `proposals/PLAN-<feature>.md`
@@ -76,16 +80,32 @@ description: >
 | 触发 | 行为 |
 |------|------|
 | `.project-knowledge/` 不存在 | 跳过 Reuse Analysis，标注"⚠️ 缺少知识库" |
-| 需求自相矛盾 | 标注于 Context 假设表 |
+| 需求自相矛盾 | 标注于 Context 假设表，给出两个方案分别覆盖矛盾分支 |
 | 时间不可行 | 给最小可行 + 完整两版，AskUserQuestion |
 | Confidence < 40% | **拒绝产出**，只输出 `# Goal` + `# Scope`（含 Gap List） |
 | 无任何需求输入 | BLOCKED — 拒绝执行 |
+| 上游 PLAN.md 存在但代码已大幅变更 | 标注"⚠️ 上游规划可能过期"，重新执行现状探查，diff 后修正 |
+| API 文档路径与代码不一致 | 标注为 `⤳ 待确认` 外部依赖，记录在 Dependency Graph |
+| 用户中途修改需求范围 | 重新划定 Scope，标记已废弃任务为 `[deprecated]`，AskUserQuestion 确认新范围 |
 
-## 完成后下一步
+## 输出末尾：Workflow Hint 块
 
+PLAN.md 结尾必须附带以下结构，让用户基于信息决策下一步，而非硬编码命令：
+
+```markdown
+## Workflow Hint
+
+| # | capability | confidence | reason |
+|---|-----------|:----------:|--------|
+| 1 | {capability} | {0-100} | {一句话理由，为什么推荐} |
+| 2 | {capability} | {0-100} | {备选，什么情况下选它} |
+
+> 💡 这是建议不是命令。高 confidence 项可直接执行，低 confidence 项建议人工确认。
+> 能力→技能映射见 `shared/routing.tsv`。
 ```
-planner 完成 → /project-architect（读 # Decision + # Context）
-            → /project-generator（读 # Reuse Analysis + # Task Breakdown + # Dependency Graph）
-            → /project-reviewer（读 # Scope + # Risk Assessment + # Acceptance Criteria）
-            → /project-tester（读 # Acceptance Criteria）
-```
+
+**产出 cap 规则**：
+- plan 包含未 resolve Decision → 推荐 `architecture-review`（confidence: 75+）
+- plan 全 resolved → 推荐 `code-generation`（confidence: 85+）
+- plan 含高风险项 → 推荐 `architecture-review`（confidence: 65+）作为备选
+- 始终最多推荐 2 项，超过则取 confidence 最高的 2 项

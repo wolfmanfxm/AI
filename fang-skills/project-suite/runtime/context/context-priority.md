@@ -1,5 +1,28 @@
 # Context Priority
 
+> 两个维度：**Source Priority**（哪个来源更权威）+ **Field Priority**（哪些字段必须传）。
+
+## Source Priority（跨源优先级栈）
+
+所有 Skill 统一按此栈加载上下文，不再各自决定先读谁：
+
+```
+优先级 高 ↑
+  1. User Prompt            ← 用户显式指令，最高优先级
+  2. .project-runtime/       ← 项目当前状态 + 上游产出
+  3. .project-knowledge/     ← 项目结构化知识（组件/模式/API）
+  4. CLAUDE.md               ← 项目强制约束（安全/编码规范）
+  5. Knowledge Vault         ← 跨项目经验参考
+  6. Skill References        ← Skill 内置默认值，兜底
+优先级 低 ↓
+```
+
+**合并规则** → [merge.md](merge.md)：override / append / ignore
+
+---
+
+## Field Priority（context.json 字段分级）
+
 > 哪些 context 字段必须传、哪些可降级、哪些可忽略。
 
 ## 三级分类

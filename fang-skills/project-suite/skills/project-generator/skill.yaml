@@ -3,7 +3,7 @@ version: "1.0.0"
 mode: Production
 owner: project-suite
 priority: 4
-requires: [PLAN.md, ARCHITECTURE.md]
+requires: []
 produces: [Code]
 consumes: [KnowledgeBase, Plan, Architecture, Context]
 depends_on: [project-architect]

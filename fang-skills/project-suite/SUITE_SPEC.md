@@ -135,11 +135,15 @@ RefactoredCode | Documentation | Release
 
 | 协议 | 路径 | 所有 skill 必须遵循 |
 |------|------|-------------------|
+| Project State | `runtime/state/state.md` | ✅（读写 .project-runtime/state.json） |
+| Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted） |
+| Unified I/O | `runtime/contracts/skill-io.md` | 🟡（建议遵循，非强制） |
 | 状态机 | `runtime/engine/state-machine.md` | ✅ |
 | 断点续传 | `runtime/engine/checkpoint.md` | ✅（manifest.json 读写） |
 | DAG 调度 | `runtime/engine/scheduler.md` | ✅（按 capabilities.yaml 优先级） |
 | Context Protocol | `runtime/context/context.md` | ✅（下游 skill 读 context.json） |
 | 能力注册 | `runtime/registry/capabilities.yaml` | ✅（定义 produces/consumes） |
+| Workflow 模板 | `runtime/workflows/*.yaml` | 🟢（参考模板，用户是 Dispatcher） |
 
 ---
 

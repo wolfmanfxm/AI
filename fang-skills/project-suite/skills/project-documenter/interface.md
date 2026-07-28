@@ -1,25 +1,54 @@
 # Interface: project-documenter
 
-> 对外契约。改变本文件只有在 skill 的本质 capability 变化时。
+> 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **Documentation** — API/组件/Changelog 文档（`.md` + Evidence Header）
+- **documentation** — API/组件/Changelog 文档（`.md` + Evidence Header）
 
 ## Consumes
-- 🔴 **Code**（源码文件，缺失则 BLOCKED）
-- 🟡 **Review**（`REVIEW.md`，Changelog 生成时使用）
-- 🟢 **KnowledgeBase**（`.project-knowledge/`，有则参考风格，无则默认）
+| artifact | 优先级 | 缺失行为 |
+|----------|--------|---------|
+| implementation | 🔴 | BLOCKED |
+| review | 🟡 | SKIP |
+| knowledge | 🟢 | SKIP — 无则默认风格 |
 
-## Guarantees
-- 文档基于源码提取，标注 `file:line`
-- 匹配已有文档风格（读 1-2 份现有文档）
-- 不确定内容标 `[推断]` 或 `[待补充]`
-- API/组件文档 → Vault 同步；Changelog → 保留本地
+## Input
+| 字段 | 来源 | 必须 |
+|------|------|------|
+| 源码文件 | generator | 🔴 |
+| REVIEW.md | reviewer | 🟡 |
+| .project-knowledge/ | analyzer | 🟢 |
+
+## Output
+- API/组件文档（含 Evidence Header + `file:line`）
+- `result.md`
+
+## Confidence
+- 最低: 60%
+- 计算: 100 - 源码不可读(20) - JSDoc缺失(15) - 无风格参考(10)
 
 ## Failure
 | 条件 | 模式 | 行为 |
 |------|------|------|
-| 源文件不可读 | DEGRADED | 标注 `⚠️ 源文件不可读`，跳过 |
-| 无已有文档风格参考 | DEGRADED | 使用默认风格 |
-| 目标文档已存在 | DEGRADED | 仅更新差异，不覆盖人工章节 |
-| content 冲突已有文档 | DEGRADED | 标记 `[CONFLICT]`，AskUserQuestion |
+| 源码不可读 | DEGRADED | 标注跳过 |
+| 无风格参考 | DEGRADED | 默认模板 |
+| 文档已存在 | DEGRADED | 增量更新，不覆盖人工章节 |
+| content 冲突 | DEGRADED | 标记 [CONFLICT] |
+
+## Checkpoint
+| 位置 | 触发条件 |
+|------|---------|
+| Discover 后 | 确认文档类型 + 范围 |
+| Execute 后 | 展示文档预览 |
+
+## Resume
+- 支持: true
+- 方式: state.json
+
+## State
+- 读: state.json
+- 写: state.json（追加 history）
+
+## Artifacts
+- 入: [implementation, review]
+- 出: [documentation]

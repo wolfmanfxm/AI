@@ -1,32 +1,60 @@
 # Interface: project-generator
 
-> 对外契约。改变本文件只有在 skill 的本质 capability 变化时。
+> 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **Code** — `.vue / .ts / .js` 文件
+- **implementation** — `.vue / .ts / .js`（生产级代码）
 
 ## Consumes
-- 🔴 **Context**（`context.json`，缺 REQUIRED 字段则 BLOCKED）
-- 🔴 **Plan Reuse Analysis** — `PLAN.md > # Reuse Analysis`（**必读**：已有组件/模式/API/规则清单）
-- 🔴 **Plan Task Breakdown** — `PLAN.md > # Task Breakdown`（**必读**：任务列表 + Decision Deps）
-- 🔴 **Plan Dependency Graph** — `PLAN.md > # Dependency Graph`（**必读**：执行顺序 + Wave 分组）
-- 🟡 **KnowledgeBase**（`.project-knowledge/`，缺失则 DEGRADED）
-- 🟡 **Architecture**（`ARCHITECTURE.md`，若存在则必须读入 — Decision 已 resolve）
-- 🟡 **Plan Risk Assessment** — `PLAN.md > # Risk Assessment`（风险级别驱动生成行为的保守程度）
+| artifact | 优先级 | 缺失行为 |
+|----------|--------|---------|
+| context | 🔴 | BLOCKED（缺 REQUIRED 字段） |
+| knowledge | 🔴 | DEGRADED — 降级通用模式 |
+| planning | 🔴 | DEGRADED — 标注"⚠️ 无规划" |
+| graph | 🔴 | DEGRADED — 跳过 graph 查询 |
+| design | 🟡 | DEGRADED — 降级生成 |
 
-## Guarantees
-- 遵循 context.json 中声明的技术栈/别名/约定
-- **优先复用** `# Reuse Analysis` 中声明的已有组件/模式/API — 不重复造轮子
-- 代码含 loading / error / empty 全状态
-- TypeScript 无 `any`（除非必要）
-- 生成后输出 plan vs actual 完成报告
-- **RISK HIGH 任务**：保守模式 — 额外错误处理、详细日志、完整类型
+## Input
+| 字段 | 来源 | 必须 |
+|------|------|------|
+| context.json | analyzer | 🔴 |
+| PLAN.md > # Task Breakdown + # Dependency Graph | planner | 🔴 |
+| PLAN.md > # Reuse Analysis | planner | 🔴 |
+| graph.json | analyzer | 🔴 |
+| ARCHITECTURE.md | architect | 🟡 |
+
+## Output
+- 代码文件（`.vue / .ts / .js`）
+- `state.json` — 追加 history
+- `result.md` — 含 plan vs actual 完成报告
+
+## Confidence
+- 最低: 70%
+- 计算: 100 - knowledge非accepted(15) - design未resolve(15) - 全新模式(10) - 无参考实现(10)
 
 ## Failure
 | 条件 | 模式 | 行为 |
 |------|------|------|
-| context.json 缺 REQUIRED 字段 | BLOCKED | 拒绝执行，提示运行 analyzer |
-| PLAN.md 缺失 + 需求复杂 | DEGRADED | 标注"⚠️ 无规划"，尽量生成 |
-| `# Decision` 未全部 resolve | DEGRADED | 标注"⚠️ 存在未 resolve 决策"，对受影响任务降级生成 |
-| 代码已存在（重复生成） | DEGRADED | 标注 `[已存在]`，跳过 |
-| 需新增依赖 | DEGRADED | 标注 `TODO: 安装`，不修改 package.json |
+| context 缺 REQUIRED 字段 | BLOCKED | 拒绝执行 |
+| planning 缺失 | DEGRADED | 标注"⚠️ 无规划" |
+| design 未全部 resolve | DEGRADED | 降级生成 |
+| 代码已存在 | DEGRADED | 标注 [已存在] |
+| 需新增依赖 | DEGRADED | 标注 TODO |
+
+## Checkpoint
+| 位置 | 触发条件 |
+|------|---------|
+| Discover 后 | 展示改动范围（文件清单+预估行数） |
+| Execute 后 | 展示代码摘要 |
+
+## Resume
+- 支持: true
+- 方式: state.json
+
+## State
+- 读: state.json / knowledge.json / graph.json
+- 写: state.json（追加 history）
+
+## Artifacts
+- 入: [knowledge, context, graph, planning, design]
+- 出: [implementation]
