@@ -14,8 +14,8 @@ capability_types:
   Context:          # context.json
     description: 下游 skill 标准上下文（技术栈/路径别名/约定/模块清单）
     format: [.json]
-  Plan:             # PLAN.md
-    description: 任务拆解 + 依赖分析 + 工作量评估 + 风险矩阵
+  Plan:             # PLAN.md（9 模块 Contract）
+    description: Goal / Scope / Context / Reuse Analysis / Decision / Task Breakdown / Dependency Graph / Risk Assessment / Acceptance Criteria
     format: [.md]
   Architecture:     # ARCHITECTURE.md
     description: 技术选型 + 模块设计 + API 契约（ADR 格式）
@@ -52,7 +52,7 @@ skills:
   project-planner:
     produces: [Plan]
     consumes: [KnowledgeBase, Context]
-    description: 需求拆解为可执行任务列表
+    description: Project Planning Engine — 模糊需求收敛为 9 模块执行契约
     triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量]
     triggers_en: [break down tasks, plan sprint, estimate effort]
 

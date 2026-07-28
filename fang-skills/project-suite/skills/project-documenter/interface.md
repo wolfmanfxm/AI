@@ -8,7 +8,7 @@
 ## Consumes
 - 🔴 **Code**（源码文件，缺失则 BLOCKED）
 - 🟡 **Review**（`REVIEW.md`，Changelog 生成时使用）
-- 🟡 **KnowledgeBase**（`.project-knowledge/`，缺失则 DEGRADED）
+- 🟢 **KnowledgeBase**（`.project-knowledge/`，有则参考风格，无则默认）
 
 ## Guarantees
 - 文档基于源码提取，标注 `file:line`

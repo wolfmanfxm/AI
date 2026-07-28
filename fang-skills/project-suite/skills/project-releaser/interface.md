@@ -3,12 +3,11 @@
 > 对外契约。改变本文件只有在 skill 的本质 capability 变化时。
 
 ## Produces
-- **Release** — `CHANGELOG.md` + `reports/RELEASE-CHECKLIST.md`
+- **Release** — `CHANGELOG.md` + `RELEASE-CHECKLIST.md`
 
 ## Consumes
-- 🔴 **Documentation**（`CHANGELOG.md` + 变更历史，缺失则从 git log 生成）
+- 🔴 **Documentation**（`CHANGELOG.md` + git log 变更历史，缺失则从 conventional commits 生成）
 - 🟡 **Review**（`REVIEW.md`，确认审查状态）
-- 🟡 **Test**（测试报告，确认测试通过）
 
 ## Guarantees
 - 版本号从 conventional commits 推导（breaking→MAJOR / feat→MINOR / fix→PATCH）

@@ -26,5 +26,5 @@
 | 6 | **不创建 CLAUDE.md** | 后续会话无法自动加载项目知识，skill 触发链路断裂 | Finalize 阶段必须检查/创建 |
 | 7 | **Finish 阶段忘记 Vault 同步** | analysis-config 中 output 含 "vault" 但只写到本地，Knowledge Vault 知识断层 | 检查 output 配置，若含 "vault" 则执行 phase-2-finish.md 步骤 6a |
 | 8 | **Agent 内 spawn 子 agent 后提前返回** | 维度 agent 内并行分析多个子任务（如 TS/composables/API）时，主 agent 先于子 agent 结束，产出文件未写入 | 必须等待全部子 agent 完成后统一写入；Finish 阶段逐文件验证，缺失的由主 agent 补写 |
-| 9 | **manifest.json 被外部进程覆盖** | 执行期间 manifest 可能被 linter/IDE/git hook 等外部进程 revert，导致 mode/scope 与本次执行不一致 | Finish 步骤 6.5 强制校验 mode/scope/dimensions/files/executionLog，以本次执行参数覆盖 |
+| 9 | **manifest.json 被外部进程覆盖** | 执行期间 manifest 可能被 linter/IDE/git hook 等外部进程 revert，导致 mode/scope 与本次执行不一致 | Finish 步骤 7 强制校验 mode/scope/dimensions/files/executionLog，以本次执行参数覆盖 |
 | 10 | **主 agent 逐文件拼装 prompt** | 每次执行时手动从 prompts/ + 项目上下文 + 失败处理三处组合 prompt，质量不稳定 | 使用 Prompt 组合模板（4 部分：任务+上下文+产出+失败处理），确保每个维度 prompt 完整一致 |

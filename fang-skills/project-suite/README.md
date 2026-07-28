@@ -5,17 +5,18 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) — 定义了成为一个合格 suite skill 的目录结构、文件契约、质量门禁。
 
-## 当前版本：0.6.0
+## 当前版本：0.7.0
 
 v0.5.0: 职责边界 + AskUserQuestion + 现状探查 + 知识库同步 + 反例黑名单 + Context Protocol
 v0.6.0: Capability Registry + skill.yaml + DAG Scheduler + 自动路由
+v0.7.0: Project Planning Engine — 9 模块 Contract（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）+ 下游接口对齐
 
 ## Skill 矩阵
 
 | # | Skill | 职责 | 产出 | 知识库同步 |
 |---|-------|------|------|----------|
 | 1 | **project-analyzer** | 7 维度代码分析 | `.project-knowledge/` | ✅ 全量 |
-| 2 | **project-planner** | 需求 → 任务拆解（现状探查先行） | `proposals/PLAN.md` | ❌ 任务产物 |
+| 2 | **project-planner** | Project Planning Engine — 模糊需求 → 9 模块执行契约 | `proposals/PLAN.md` | ❌ 任务产物 |
 | 3 | **project-architect** | 技术选型 + 模块设计（现状核实先行） | `decisions/ARCHITECTURE.md` | ❌ 任务产物 |
 | 4 | **project-generator** | 项目知识 → 生产级代码 + 完成报告 | 代码文件 | ❌ 源码 |
 | 5 | **project-tester** | 测试生成 + 覆盖率报告 | 测试文件 + 报告 | ❌ 测试产物 |
@@ -95,7 +96,25 @@ Wave 8:          releaser
 
 ## 如何使用
 
-每个 skill 用 `/project-<name>` 触发，完成后提示下一步操作。详见 `shared/conventions/checkpoint-pattern.md`。
+每个 skill 用 `/project-<name>` 触发，完成后提示下一步操作。
+
+### PLAN.md Contract（v0.7.0）
+
+planner 产出 9 模块契约，下游各取所需：
+
+| # | Section | 消费者 |
+|---|---------|--------|
+| 1 | `# Goal` | 全部 Skill |
+| 2 | `# Scope` | Generator、Reviewer |
+| 3 | `# Context` | Architect、Generator |
+| 4 | `# Reuse Analysis` | Generator |
+| 5 | `# Decision` | Architect |
+| 6 | `# Task Breakdown` | Generator |
+| 7 | `# Dependency Graph` | Generator、Runtime |
+| 8 | `# Risk Assessment` | Reviewer、Tester |
+| 9 | `# Acceptance Criteria` | Tester、Reviewer |
+
+详见 `shared/conventions/checkpoint-pattern.md`。
 
 ## 参与
 

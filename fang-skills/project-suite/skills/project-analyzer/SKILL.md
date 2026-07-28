@@ -47,42 +47,14 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
 
 ### Agent 协调规则
 
-> 防止维度 agent 内部子 agent 状态混乱导致文件未写入。
+- **禁止提前返回**：spawn 子 agent 必须等待全部完成后才返回
+- **写入时机**：全部子任务完成 → 验证完整性 → 一次性写入所有产出文件
+- **写入失败处理**：重试一次 → 仍失败标注 `❌ FAILED: [原因]`，主流程兜底补写
+- **写入后验证**：`ls -la` 确认每个文件存在且 >100 bytes
 
-- **禁止提前返回**：若 agent 内部 spawn 子 agent（如同时分析 TypeScript + composables + API 命名），必须等待**全部**子 agent 完成后才返回结果
-- **写入时机**：所有子任务完成 → 验证结果完整性 → 一次性写入所有产出文件
-- **写入后验证**：每个文件写完后 `ls -la` 确认存在且非空（>100 bytes）
-- **写入失败处理**：
-  1. 重试一次写入
-  2. 仍失败 → 在对应文件写入 `❌ FAILED: [具体原因]` 占位内容
-  3. 返回结果中明确标注失败项，由主流程二次处理
-- **主流程兜底**：Finish 阶段逐文件验证，发现未更新或缺失的由主 agent 补写
+### Agent Prompt 组合
 
-### Agent Prompt 组合模板
-
-每个维度 agent 的 prompt 按以下结构组装，4 部分缺一不可：
-
-```
-## 任务：[维度名称]分析
-[从 prompts/ 读取 Goal + Analysis 步骤]
-
-## 项目上下文（必须注入）
-- 框架：[版本] · UI库：[名称+版本+命名空间前缀]
-- 路径别名：@/ → src, @workspace/ → workspace, [其他]
-- 分层：src/ = 框架层, workspace/ = 业务层
-- ⚠️ 优先参考 workspace/ 下的内容（组件、API、编码模式等）
-
-## 产出要求
-- 文件路径：`.project-knowledge/[category]/[file].md`
-- Evidence Header：[../../shared/templates/evidence-header.md]
-- 最小节要求：[列出必选节标题]
-
-## 失败处理
-- 写入完成 → stat 验证文件存在且 >100 bytes
-- 失败 → 重试一次 → 仍失败标注 `❌ FAILED: [原因]`
-- 不存在的目录标注 `⚠️ 未找到期望路径 [path]`
-- 不确定的结论标注 `⚠️ 待确认`
-```
+每个维度 agent prompt 按 4 部分组装：任务描述 + 项目上下文（框架/路径别名/分层）+ 产出要求（路径/Evidence Header/最小节）+ 失败处理。详细模板 → [prompts/output-format.md](prompts/output-format.md)
 
 ### Finish
 

@@ -11,28 +11,32 @@ description: >
 
 # Reviewer
 
-> 代码变更 → 五轴审查 → 问题分级 → REVIEW.md
+> 代码变更 + Acceptance Criteria + Risk Assessment → 五轴审查 → 问题分级 → REVIEW.md
 
 ## 核心原则
 
 1. **精确引用** — 每个发现标注 `file:line`
-2. **可操作** — 每个问题附带具体修复建议
-3. **正向反馈** — 做得好的也记录（PRAISE）
+2. **AC 对照** — 逐条验证 `PLAN.md > # Acceptance Criteria`
+3. **可操作** — 每个问题附带具体修复建议
 4. **分级明确** — BLOCKER 必须有明确阻断理由
 
 ## 职责边界
 
 → [references/boundary.md](references/boundary.md)
 
-> 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 建议。
+> 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 建议。对照 Scope 检查范围蔓延。
 
 ## 前置条件
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
-| 1 | `.project-knowledge/patterns/` | 标注"⚠️ 缺乏项目规范" |
-| 2 | `PLAN.md` | 不阻塞 |
-| 3 | `ARCHITECTURE.md` | 不阻塞 |
+| 0 | **变更 Code**（diff / 文件列表）| 🔴 BLOCKED — 拒绝执行 |
+| 1 | **`PLAN.md > # Acceptance Criteria`** | DEGRADED — 标注"⚠️ 无验收标准" |
+| 2 | **`PLAN.md > # Risk Assessment`** | DEGRADED — 标准审查强度 |
+| 3 | **`PLAN.md > # Scope`** | DEGRADED — 无法检查范围蔓延 |
+| 4 | `.project-knowledge/patterns/` | 标注"⚠️ 缺乏项目规范" |
+| 5 | `PLAN.md > # Task Breakdown` | 不阻塞 — 判断是否超出规划范围 |
+| 6 | `ARCHITECTURE.md` | 不阻塞 — 对照决策检查一致性 |
 
 ## 审查轴
 
@@ -56,10 +60,11 @@ description: >
 
 ## 工作流
 
-1. 确认审查范围 → 读项目规范
-2. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
-3. 五轴扫描 → 记录问题 → 统一分级
-4. 输出 `reports/REVIEW-<topic>.md`
+1. 读 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
+2. 按 Risk Assessment 确定审查强度（HIGH→Full audit / MEDIUM→Spot check / LOW→Standard）
+3. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
+4. 五轴扫描 → 逐条对照 AC 验证 → 检查 Scope 边界
+5. 输出 `reports/REVIEW-<topic>.md`
 
 失败处理 → [references/failure-handling.md](references/failure-handling.md)
 
