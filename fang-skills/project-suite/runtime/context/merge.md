@@ -36,15 +36,23 @@ CLAUDE.md:     "Element Plus 使用 el-mp 前缀"
   前缀: CLAUDE.md override → el-mp 前缀（强制约束）
 ```
 
-## 合并优先级规则
+## 冲突裁决规则
 
+> 加载顺序（读）≠ 冲突裁决（谁赢）。两个独立维度：
+
+**加载顺序**（从上到下依次读取，后读到的可以补充前序）：
 ```
-1. 安全/强制约束（CLAUDE.md rules）     → 最高，不可被 override
-2. 用户显式指令（User Prompt）          → 可 override 除安全外的所有
-3. 代码事实（grep/read 确认的当前状态）  → override context.json
-4. 项目知识（.project-knowledge/）       → override 通用默认
-5. 跨项目经验（Knowledge Vault）         → append 到项目知识
-6. Skill 内置默认（Skill References）    → 兜底
+1. User Prompt → 2. .project-runtime/ → 3. .project-knowledge/ → 4. CLAUDE.md → 5. Knowledge Vault → 6. Skill References
+```
+
+**冲突裁决**（当两个源对同一字段给出不同值时，谁赢）：
+```
+1. CLAUDE.md 安全/强制约束    → 最高，不可被 override
+2. 用户显式指令（User Prompt） → 可 override 除安全外的所有
+3. 代码事实（grep/read 确认）  → override context.json
+4. 项目知识（.project-knowledge/）→ override 通用默认
+5. 跨项目经验（Knowledge Vault）→ append 不覆盖
+6. Skill 内置默认              → 兜底
 ```
 
 ## 所有 Skill 的统一 Context 加载流程

@@ -28,15 +28,7 @@ description: >
 
 ## 反例黑名单
 
-| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
-|---|---------|-------------|-----------|
-| 1 | **跳过现状核实直接设计** | 已有实现被忽略，设计出与现有架构冲突的方案 | 先读源码标注 `[已实现][部分实现][未实现]`，已实现的不再出方案 |
-| 2 | **候选方案只有一个就定案** | 未探索替代方案，决策缺乏对比依据 | 每个决策点至少列 2-3 个候选方案，对比矩阵分差 < 10% 时 AskUserQuestion |
-| 3 | **跳过对比矩阵直接选** | 选型理由不可追溯，后续 review 无法理解为什么选 A 不选 B | 用对比矩阵（维度横轴 + 候选纵轴），标注每项优劣 |
-| 4 | **设计超出当前需求范围** | "万一将来需要"驱动过度设计，增加复杂度却无当前价值 | "够用就好"原则：满足当前需求 + 可预见扩展（≤ 1 个迭代），不为远期假设设计 |
-| 5 | **忽略 PLAN.md 的 `# Decision` 标注** | planner 已识别的决策点被跳过，架构设计不完整 | 先读 PLAN.md `# Decision` 节，逐项 resolve；为空则自行识别并标注 |
-| 6 | **ADR 只写结论不写理由** | 决策不可追溯，后续 review 或返工时不知道当时为什么这样选 | 每个决策：问题 → 候选方案 → 选择 → 理由（含被拒绝方案的原因） |
-| 7 | **API 契约只写路径不写请求/响应** | Generator 不知道传什么参数、期望什么返回，实现时反复猜测 | API 契约包含：方法、路径、请求参数表、响应字段表、错误码 |
+→ [references/boundary.md](references/boundary.md)
 
 ## 前置条件
 
@@ -98,22 +90,10 @@ description: >
 
 → 详细: [references/failure-handling.md](references/failure-handling.md)
 
+## 完成后下一步
+
+architect 完成 → /project-generator 或 /project-reviewer
+
 ## 输出末尾：Workflow Hint 块
 
-ARCHITECTURE.md 结尾必须附带：
-
-```markdown
-## Workflow Hint
-
-| # | capability | confidence | reason |
-|---|-----------|:----------:|--------|
-| 1 | {capability} | {0-100} | {一句话理由} |
-| 2 | {capability} | {0-100} | {备选理由} |
-
-> 💡 能力→技能映射见 `shared/routing.tsv`。
-```
-
-**产出 cap 规则**：
-- ARCHITECTURE 包含完整 API 契约 → 推荐 `code-generation`（confidence: 85+）
-- ARCHITECTURE 含新模块设计 → 推荐 `code-generation`（confidence: 80+），备选 `code-review`（confidence: 60+）
-- 始终最多 2 项
+→ [references/workflow-hint.md](references/workflow-hint.md)

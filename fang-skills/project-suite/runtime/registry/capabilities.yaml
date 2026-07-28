@@ -17,6 +17,9 @@ capability_types:
   State:            # .project-runtime/state.json + knowledge.json
     description: 项目持久化状态（执行历史/置信度/知识生命周期），Skill 共享记忆
     format: [.json]
+  Graph:            # graph.json
+    description: 项目结构关系图谱（nodes+edges），支持 graph-query.md 6种标准查询
+    format: [.json]
   Plan:             # PLAN.md（9 模块 Contract）
     description: Goal / Scope / Context / Reuse Analysis / Decision / Task Breakdown / Dependency Graph / Risk Assessment / Acceptance Criteria
     format: [.md]
@@ -46,7 +49,7 @@ capability_types:
 skills:
 
   project-analyzer:
-    produces: [KnowledgeBase, Context]
+    produces: [KnowledgeBase, Context, Graph]
     consumes: []
     description: 7 维度代码分析，生成项目知识库
     triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 更新项目知识, 刷新项目知识]
@@ -57,7 +60,7 @@ skills:
 
   project-planner:
     produces: [Plan]
-    consumes: [KnowledgeBase, Context]
+    consumes: [KnowledgeBase, Context, Graph]
     description: Project Planning Engine — 模糊需求收敛为 9 模块执行契约
     triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量]
     triggers_en: [break down tasks, plan sprint, estimate effort]
@@ -68,7 +71,7 @@ skills:
 
   project-architect:
     produces: [Architecture]
-    consumes: [KnowledgeBase, Plan, Context]
+    consumes: [KnowledgeBase, Plan, Context, Graph]
     description: 技术选型 + 模块设计 + API 契约
     triggers_cn: [架构设计, 技术选型, 模块设计, API 设计]
     triggers_en: [design architecture, tech stack, system design]
@@ -79,7 +82,7 @@ skills:
 
   project-generator:
     produces: [Code]
-    consumes: [KnowledgeBase, Plan, Architecture, Context]
+    consumes: [KnowledgeBase, Plan, Architecture, Context, Graph]
     description: 遵循项目模式生成生产级代码
     triggers_cn: [写一个, 实现, 创建组件, 开发, 生成代码]
     triggers_en: [implement, create, build, generate code]
@@ -90,7 +93,7 @@ skills:
 
   project-tester:
     produces: [Test]
-    consumes: [Code, Plan, KnowledgeBase]
+    consumes: [Code, Plan, KnowledgeBase, Context]
     description: 生成并执行测试，对照 Acceptance Criteria 验证
     triggers_cn: [写测试, 测试用例, 单元测试, 集成测试]
     triggers_en: [write tests, test cases, unit test]
@@ -101,7 +104,7 @@ skills:
 
   project-reviewer:
     produces: [Review]
-    consumes: [Code, Plan, KnowledgeBase]
+    consumes: [Code, Plan, KnowledgeBase, Architecture, Test]
     description: 五轴代码审查 + 分级问题
     triggers_cn: [代码审查, review, 检查代码, 审查 PR]
     triggers_en: [code review, security review, audit code]
@@ -112,7 +115,7 @@ skills:
 
   project-refactorer:
     produces: [RefactoredCode]
-    consumes: [Code, KnowledgeBase, Test]
+    consumes: [Code, KnowledgeBase, Test, Review]
     description: 安全重构（行为不变）
     triggers_cn: [重构, 优化结构, 提取公共, 简化代码]
     triggers_en: [refactor, clean up, extract method, simplify]
@@ -123,7 +126,7 @@ skills:
 
   project-documenter:
     produces: [Documentation]
-    consumes: [Code, Review, KnowledgeBase]
+    consumes: [Code, Review, KnowledgeBase, Context]
     description: 生成结构化技术文档
     triggers_cn: [生成文档, API 文档, 组件文档, 写文档]
     triggers_en: [generate docs, api docs, write documentation]

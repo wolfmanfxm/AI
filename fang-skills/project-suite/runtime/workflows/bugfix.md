@@ -1,5 +1,11 @@
 # Workflow: bugfix
 
+> ⚠️ **v0.7.0: 此 .md 工作流已废弃。** 保留为历史参考。
+> 当前工作流模板：`runtime/workflows/quick-change.yaml`（YAML 格式，User-as-Dispatcher）
+> 编排协议：`runtime/protocols/orchestration.md`
+
+## 历史（v0.4.0 自动流水线，已废弃）
+
 > Bug 修复。最小化流程，跳过规划和架构。
 
 ## 触发

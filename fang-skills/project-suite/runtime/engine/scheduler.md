@@ -1,8 +1,11 @@
-# Scheduler
+# Scheduler v0.7.0
 
-> 跨 skill 任务调度。从 capabilities.yaml 构建 DAG，按依赖调度，识别并行分支。
+> 调度策略已迁移至机器可读配置。本文件保留为设计文档。
+> **配置入口：** `runtime/config/scheduler.yaml`
+> **编排协议：** `runtime/protocols/orchestration.md`（User-as-Dispatcher）
+> **用户始终是 Dispatcher。不自动级联。**
 
-## 调度模式
+## 历史（v0.4.0 DAG 模式，已废弃）
 
 ### DAG 调度
 

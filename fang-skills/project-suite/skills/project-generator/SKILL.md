@@ -48,16 +48,9 @@ description: >
 | 2 | `PLAN.md`，**若存在必读** | 标注"⚠️ 无规划" |
 | 3 | `ARCHITECTURE.md`，**若存在必读** | 标注"⚠️ 无架构约束" |
 
-> `context.json` 来自 analyzer 的 Finish 阶段，包含技术栈/路径别名/编码约定/模块清单。加载后不再需逐个读 `.project-knowledge/` 文件。
+## 项目知识读取
 
-## 项目知识读取（context.json 覆盖后按需补充）
-
-| 生成类型 | context.json 已覆盖 | 按需补充 |
-|---------|-------------------|---------|
-| 组件 | 技术栈、别名、组件风格、已有组件列表 | `components/catalog.md`（组件详情） |
-| 页面 | 路径别名、分页参数、路由模块 | `architecture/overview.md`（路由架构） |
-| API 模块 | API 前缀、封装函数名、响应类型 | `api/request.md`（拦截器细节） |
-| 工具函数 | 语言版本、import 规范 | `patterns/typescript.md` |
+`context.json` 覆盖技术栈/别名/约定/模块清单。按需补充详见 [runtime/context/context.md](../../runtime/context/context.md)。
 | 类型定义 | 语言版本、路径别名 | `patterns/typescript.md` |
 
 ## 工作流
@@ -76,16 +69,16 @@ description: >
 ### Execute
 
 ```
-读知识库 → 找参考实现 → 提取模式 → 套用模式生成 → 自检
+读知识库 → Graph查询 → 找参考实现 → 提取模式 → 套用模式生成 → 自检
 ```
 
 自检清单 → [references/self-check.md](references/self-check.md)
 
-🔴 CHECKPOINT — 展示代码摘要（文件清单+关键片段），用户确认后写入文件
+🔴 CHECKPOINT — 展示代码摘要（文件清单+关键片段），用户确认后写入文件。
 
 ### 完成报告
 
-→ [references/completion-report.md](references/completion-report.md)
+→ [references/completion-report.md](references/completion-report.md)（含 Knowledge Used 反馈 + Candidate 发现）
 
 ## 失败处理
 
@@ -98,23 +91,10 @@ description: >
 | 需新增依赖（package.json 未安装） | 使用已有依赖的替代方案 | 标注 `TODO: 安装 {package}`，不修改 package.json |
 | 无类似实现可参考（全新模式） | 使用 `context.json` 中的项目约定生成 | 标注"⚠️ 全新模式，建议人工审核" |
 
+## 完成后下一步
+
+generator 完成 → /project-reviewer 或 /project-tester 或 /project-documenter
+
 ## 输出末尾：Workflow Hint 块
 
-生成完成报告结尾必须附带：
-
-```markdown
-## Workflow Hint
-
-| # | capability | confidence | reason |
-|---|-----------|:----------:|--------|
-| 1 | {capability} | {0-100} | {一句话理由} |
-| 2 | {capability} | {0-100} | {备选理由} |
-
-> 💡 能力→技能映射见 `shared/routing.tsv`。
-```
-
-**产出 cap 规则**：
-- 新建/修改 > 5 个文件 → 推荐 `code-review`（confidence: 85+），备选 `code-testing`（confidence: 70+）
-- 涉及 API 对接 → 备选 `code-testing`（confidence: 75+）
-- 仅 1-3 个小改动 → 推荐 `code-review`（confidence: 70+），备选 `documentation`（confidence: 50+）
-- 始终最多 2 项
+→ [references/workflow-hint.md](references/workflow-hint.md)

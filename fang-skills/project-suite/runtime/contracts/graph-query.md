@@ -1,7 +1,7 @@
 # Graph Query Protocol v1.0.0
 
 > 统一的 graph.json 查询协议。所有 Skill 通过这 6 个标准查询消费 Knowledge Graph。
-> graph.json 由 project-analyzer 生成，schema 见 `shared/schemas/graph.schema.json`。
+> graph.json 由 project-analyzer 生成，schema 见 `../../shared/schemas/graph.schema.json`。
 
 ## 设计原则
 

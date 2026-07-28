@@ -50,5 +50,5 @@
 - 写: state.json（追加 history）
 
 ## Artifacts
-- 入: [implementation, test, knowledge]
+- 入: [implementation, test, knowledge, review]
 - 出: [refactored-code]

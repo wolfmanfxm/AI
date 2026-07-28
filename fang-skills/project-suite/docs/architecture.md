@@ -1,6 +1,13 @@
-# Suite Architecture
+# Suite Architecture v0.7.0
 
 > project-suite 自身的架构设计决策记录。
+
+**当前版本: v0.7.0** — 核心变化：
+- Knowledge Lifecycle v2.0（Artifact→Candidate→Accepted→Deprecated）
+- 10 字段标准 Interface（9 Skill 对齐）
+- Artifact Registry（12 个统一类型）
+- User-as-Dispatcher（用户始终是 Dispatcher）
+- YAML 配置（scheduler.yaml + gates.yaml + artifact-types.yaml + workflow YAML）
 
 ## 设计原则
 
@@ -82,7 +89,7 @@ skills/<name>/
     └── capability-matrix.md
 ```
 
-### 正式版 skill（当前 v0.4.0 标准）
+### 正式版 skill（当前 v0.7.0 标准）
 
 ```
 skills/<name>/

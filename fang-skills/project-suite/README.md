@@ -44,7 +44,7 @@ runtime/
 ├── state/                      ← 项目持久化状态层
 │   ├── state.md                     state.json + knowledge.json 规范
 │   └── schemas/
-│       └── knowledge-lifecycle.md   draft→verified→accepted→archived
+│       └── knowledge-lifecycle.md   Artifact→Candidate→Accepted→Deprecated
 ├── artifacts/                  ← 统一 Artifact 类型注册
 │   └── artifact-types.yaml         12 个类型（knowledge/planning/design/...）+ 生命周期
 ├── config/                     ← 机器可读 Runtime 配置
@@ -101,13 +101,15 @@ Skill → 读 State → 执行 → 写 State → 输出 result.md → 结束
 └── artifacts/          # 统一产出
 ```
 
-### Knowledge Lifecycle
+### Knowledge Lifecycle v2.0
 
-每个知识文件有生命周期状态。Generator **只读** `accepted` — 不把猜测当事实。
+价值驱动。**90% 产出停留在 Artifact 层，永不进入知识库。**
 
 ```
-draft → verified → accepted → archived
+Artifact → Candidate → Accepted → Deprecated
 ```
+
+Generator **只读** `Accepted` — 不把猜测当事实。Candidate 需满足 ≥3/5 晋升规则才能成为 Accepted。
 
 ### Confidence 作为决策参考
 

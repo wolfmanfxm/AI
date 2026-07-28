@@ -26,6 +26,14 @@ description: >
 
 > 🔴 refactorer 只改善结构不改行为。没测试保护不重构。
 
+## 前置条件
+
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 0 | **待重构代码** | 🔴 BLOCKED |
+| 1 | 现有测试 | 🟡 DEGRADED — 无测试保护不重构 |
+| 2 | `.project-knowledge/patterns/` | 🟡 DEGRADED |
+
 ## 工作流
 
 ### Discover

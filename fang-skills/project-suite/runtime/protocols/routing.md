@@ -1,6 +1,8 @@
-# Intent Routing
+# Intent Routing v0.7.0
 
 > 用户意图 → skill 路由。路由表从 `skills/*/skill.yaml` + `runtime/registry/capabilities.yaml` 自动生成。
+> **用户始终是 Dispatcher。路由只是建议，不自动级联。**
+> Artifact 类型详见 `runtime/artifacts/artifact-types.yaml`，Interface 详见各 Skill 的 `interface.md`。
 
 ## 路由来源
 

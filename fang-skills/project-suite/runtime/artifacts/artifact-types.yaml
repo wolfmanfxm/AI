@@ -26,7 +26,7 @@ types:
 
   graph:
     description: 项目结构关系图谱（节点+边）
-    schema: shared/schemas/graph.schema.json
+    schema: ../../shared/schemas/graph.schema.json
     location: .project-knowledge/graph.json
     producer: project-analyzer
     consumers: [project-planner, project-architect, project-generator, project-reviewer]
@@ -94,7 +94,7 @@ types:
 mapping:
   project-analyzer:
     produces: [knowledge, context, graph]
-    consumes: []
+    consumes: [implementation]
 
   project-planner:
     produces: [planning]

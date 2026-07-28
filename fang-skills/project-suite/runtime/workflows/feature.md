@@ -1,5 +1,11 @@
 # Workflow: feature
 
+> ⚠️ **v0.7.0: 此 .md 工作流已废弃。** 保留为历史参考。
+> 当前工作流模板：`runtime/workflows/full-sdlc.yaml`（YAML 格式，User-as-Dispatcher）
+> 编排协议：`runtime/protocols/orchestration.md`
+
+## 历史（v0.4.0 自动流水线，已废弃）
+
 > 新功能开发。从需求到代码审查的完整流程。
 
 ## 触发

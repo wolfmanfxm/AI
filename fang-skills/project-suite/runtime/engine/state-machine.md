@@ -1,8 +1,18 @@
-# State Machine
+# State Machine v0.7.0
 
-> 所有 skill 共享的通用生命周期协议。每个 skill 引用本文件，不自行定义状态机。
+> 两个独立的状态模型，不要混淆：
 
-## 状态定义
+## Skill 执行状态（本文件）
+
+所有 Skill 共享的执行生命周期。**本文件描述的是 Skill 的执行状态，不是产物的生命周期。**
+
+## Artifact 生命周期（独立于 Skill 状态）
+
+产出物的价值演化属于另一个模型：**Artifact → Candidate → Accepted → Deprecated**。
+
+→ `runtime/state/schemas/knowledge-lifecycle.md`
+
+## 历史（v0.4.0 执行状态，保留兼容）
 
 ```
 idle ─→ discover ─→ confirmed ─→ in_progress ─→ completed

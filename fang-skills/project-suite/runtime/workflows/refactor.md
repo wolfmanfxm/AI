@@ -1,5 +1,10 @@
 # Workflow: refactor
 
+> ⚠️ **v0.7.0: 此 .md 工作流已废弃。** 保留为历史参考。
+> 当前编排协议：`runtime/protocols/orchestration.md`（User-as-Dispatcher）
+
+## 历史（v0.4.0 自动流水线，已废弃）
+
 > 代码重构。改善结构不改变行为。
 
 ## 触发

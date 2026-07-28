@@ -54,5 +54,5 @@
 - 写: state.json（追加 history）
 
 ## Artifacts
-- 入: [implementation, planning, graph, knowledge, design]
+- 入: [implementation, planning, knowledge, design, test]
 - 出: [review]

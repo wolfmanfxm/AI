@@ -6,7 +6,7 @@ version: "1.0.0"
 strategy:
   mode: parallel           # parallel | sequential | adaptive
   max_parallel: 6          # 同 Wave 最大并行 skill 数
-  dag_source: capabilities.yaml  # DAG 来源
+  dag_source: ../registry/capabilities.yaml  # DAG 来源
 
 resume:
   enabled: true            # 断点续传

@@ -16,6 +16,13 @@ description: >
 
 → [references/boundary.md](references/boundary.md)
 
+## 前置条件
+
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 0 | **项目源码**（工作目录）| 🔴 BLOCKED |
+| 1 | Knowledge Vault 路径 | 🟡 DEGRADED — 跳过 Vault 同步 |
+
 ## Quick Start
 
 ```

@@ -50,5 +50,5 @@
 - 写: state.json（追加 history）
 
 ## Artifacts
-- 入: [implementation, review]
+- 入: [implementation, review, knowledge, context]
 - 出: [documentation]

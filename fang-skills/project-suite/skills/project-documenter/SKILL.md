@@ -24,6 +24,14 @@ description: >
 
 → [references/boundary.md](references/boundary.md)
 
+## 前置条件
+
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 0 | **源码文件** | 🔴 BLOCKED |
+| 1 | 已有文档（风格参考） | 🟡 DEGRADED — 默认模板 |
+| 2 | `.project-knowledge/` | 🟢 SKIP — 无则默认风格 |
+
 ## 文档类型
 
 | 类型 | 产出 | Vault | 指南 |

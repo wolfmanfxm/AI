@@ -89,6 +89,42 @@ analyzer → planner → architect → generator → tester → reviewer → ref
 
 ---
 
+## v0.5.0 — 职责边界 + Context Protocol ✅ 已完成
+
+- [x] 每个 skill 增加 `references/boundary.md`（≥3 条反例黑名单）
+- [x] 统一 CHECKPOINT 模式（`shared/conventions/checkpoint-pattern.md`）
+- [x] 现状探查先于产出（planner + architect）
+- [x] Context Protocol v1.0（`runtime/context/context.md` + `context.json` Schema）
+- [x] Knowledge Vault 同步策略
+
+---
+
+## v0.6.0 — Capability Registry + DAG ✅ 已完成
+
+- [x] Capability Registry（`runtime/registry/capabilities.yaml`）— 9 skill produces/consumes
+- [x] `skill.yaml` 统一元数据（每个 skill）
+- [x] DAG Scheduler（`runtime/engine/scheduler.md`）+ 并行检测
+- [x] 自动路由（`runtime/protocols/routing.md`）
+
+---
+
+## v0.7.0 — Planning Engine + Artifact Lifecycle ✅ 已完成
+
+- [x] **Project Planning Engine** — Task Planner → 9 模块 Contract（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）
+- [x] **Artifact Registry**（`runtime/artifacts/artifact-types.yaml`）— 12 个统一类型
+- [x] **Knowledge Lifecycle v2.0** — Artifact→Candidate→Accepted→Deprecated 价值驱动
+- [x] **Promotion Protocol** — 5 条晋升规则（≥3/5）+ ADR 准入标准
+- [x] **Knowledge Scoring** — Generator 反向评分 + 知识进化
+- [x] **Graph Query Protocol**（`runtime/contracts/graph-query.md`）— 6 个标准查询
+- [x] **Runtime YAML 配置** — `scheduler.yaml` + `gates.yaml`
+- [x] **Context Resolution** — 6 层 Source Priority + merge 策略
+- [x] **10 字段标准 Interface** — 9 个 Skill 对齐统一格式
+- [x] **User-as-Dispatcher** — State 层 + Workflow 参考模板
+- [x] 下游接口全对齐（architect/generator/reviewer/tester interface.md）
+- [x] darwin dim3 失败模式全覆盖（9 个 skill 全部添加 if-then-fallback 表）
+
+---
+
 ## v1.0.0 — 稳定版
 
 - [ ] 全部 9 个 skill 经过实际项目验证

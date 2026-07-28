@@ -85,34 +85,38 @@ Skill
 {
   "files": {
     "patterns/table.md": {
-      "status": "accepted",
+      "status": "Accepted",
+      "occurrences": 3,
+      "promotion_rules_met": ["r1", "r2", "r3"],
       "source": "project-analyzer",
-      "verified_by": "human",
       "created": "2026-07-28T14:00:00",
-      "verified_at": "2026-07-28T14:30:00",
-      "confidence": 92
+      "promoted_at": "2026-07-28T14:30:00",
+      "confidence": 92,
+      "score": 92
     },
-    "components/catalog.md": {
-      "status": "draft",
+    "candidate/upload-pattern.md": {
+      "status": "Candidate",
+      "occurrences": 1,
       "source": "project-analyzer",
-      "verified_by": null,
       "created": "2026-07-28T14:00:00",
-      "confidence": 78
+      "confidence": 65,
+      "score": 65
     }
   }
 }
 ```
 
-**生命周期状态：**
+**生命周期状态（v2.0）：**
 
 | 状态 | 含义 | 下游可用？ |
 |------|------|----------|
-| `draft` | 初步生成，未验证 | ❌ 仅供参考 |
-| `verified` | Reviewer 或人工确认通过 | ⚠️ 可用但标注来源 |
-| `accepted` | 确认准确，用于生产决策 | ✅ 直接引用 |
-| `archived` | 过时 / 不再适用 | ❌ 不再使用 |
+| `Artifact` | 任务产物，任务结束即清理 | ❌ 不进入知识库 |
+| `Candidate` | 首次出现，等待验证 | ⚠️ 仅供 Planner/Architect 参考 |
+| `Accepted` | 满足晋升规则（≥3/5），正式知识 | ✅ 全部 Skill，Generator 优先 |
+| `Deprecated` | 不再推荐，保留历史 | ❌ 仅供追溯 |
 
-**关键规则：Generator 只读 `accepted` 状态的知识 — 不把猜测当事实。**
+**关键规则：Generator 只读 `Accepted` 状态的知识 — 不把猜测当事实。**
+**90% 的产出停留在 `Artifact` 层，永不进入知识库。**
 
 → 详细状态机：[schemas/knowledge-lifecycle.md](schemas/knowledge-lifecycle.md)
 

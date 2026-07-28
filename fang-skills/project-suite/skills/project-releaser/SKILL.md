@@ -26,6 +26,14 @@ description: >
 
 > 🔴 releaser 只检查建议不执行发布命令。
 
+## 前置条件
+
+| 优先级 | 资源 | 缺失时 |
+|--------|------|--------|
+| 0 | **git log** | 🔴 BLOCKED |
+| 1 | `CHANGELOG.md`（若存在） | 🟡 DEGRADED — 从 git log 生成 |
+| 2 | `REVIEW.md` | 🟡 DEGRADED — 标注"⚠️ 未审查" |
+
 ## 工作流
 
 ### Discover
