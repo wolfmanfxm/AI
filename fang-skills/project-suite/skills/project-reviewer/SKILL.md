@@ -68,7 +68,8 @@ description: >
 3. 按 Risk Assessment 确定审查强度（HIGH→Full audit / MEDIUM→Spot check / LOW→Standard）
 4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
 5. 五轴扫描 → 逐条对照 AC 验证 → 检查 Scope 边界
-6. 输出 `reports/REVIEW-<topic>.md`
+6. **Candidate 验证**：若 Generator 产出了 Candidate 知识 → 验证准确性 → 标注 confidence → 满足 R3（Reviewer 确认 > 85）→ 更新 knowledge.json
+7. 输出 `reports/REVIEW-<topic>.md`
 
 失败处理 → [references/failure-handling.md](references/failure-handling.md)
 

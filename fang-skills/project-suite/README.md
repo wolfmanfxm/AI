@@ -67,7 +67,8 @@ runtime/
 │   └── error-recovery.md
 ├── protocols/                  ← 多 skill 协作
 │   ├── routing.md                  自动生成（从 skill.yaml）
-│   └── orchestration.md            User-as-Dispatcher + State 层
+│   ├── knowledge-resolver.md        Task→Graph→TopK→Generator（不自己搜索）
+└── orchestration.md            User-as-Dispatcher + Stateless Skill
 └── workflows/                  ← 参考模板（用户是 Dispatcher）
     ├── full-sdlc.yaml              全流程参考
     └── quick-change.yaml           轻量改动参考

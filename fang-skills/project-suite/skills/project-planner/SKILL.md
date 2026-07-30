@@ -73,7 +73,8 @@ description: >
 
 ### Output
 
-`proposals/PLAN-<feature>.md`
+- `proposals/PLAN-<feature>.md`（9 模块 Contract）
+- `knowledge-list.json`（Generator 精确加载清单，不含多余文件）
 
 ## 失败处理
 

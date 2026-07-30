@@ -77,13 +77,46 @@ jq --arg id "comp-01" '
 查找修改指定文件会影响哪些节点。输入文件路径列表，返回受影响节点。
 
 ```bash
-# 传入变更文件列表，找出受影响节点
 jq --argjson files '["workspace/views/customer/index.vue"]' '
   [.edges[] | select(.from as $f | $files | index($f)) | .to] | unique
 ' graph.json
 ```
 
 **返回：** 受影响节点 ID 列表
+
+### 7. `findTransitiveDeps(nodeId)`
+查找指定节点的传递依赖链（深度2-3层），用于精确加载知识文件。
+
+```bash
+# 查找 OrderForm 组件的所有传递依赖
+jq --arg id "comp-OrderForm" '
+  def deps($id):
+    [.edges[] | select(.from==$id) | .to] | unique;
+  def trans($ids; $depth):
+    if $depth > 3 then empty
+    else $ids + ([$ids[] | deps(.)] | flatten | unique - $ids) end;
+  trans([$id]; 1) | .[]
+' graph.json
+```
+
+**返回：** 传递依赖节点 ID 列表（去重）
+**用途：** Generator 生成 OrderForm → 查 graph → 依赖 Upload、API、Validation → 只加载对应知识文件
+
+## 知识加载流程（Planner → Generator）
+
+```
+Planner:
+  1. 分析需求 → 确定涉及哪些组件/API
+  2. 查 graph: findTransitiveDeps("comp-Target") → 得到依赖链
+  3. 生成 knowledge-list.json: 列出需要加载的知识文件（不是整个 patterns/）
+  4. 写入 artifacts/plans/
+
+Generator:
+  1. 读 knowledge-list.json → 知道要加载哪些文件
+  2. 只加载 files 列表中的文件（~3-5个，不是整个目录）
+  3. 不搜索 .project-knowledge/ — 不知道还有别的知识
+  4. Context 恒定、可预测
+```
 
 ## 各 Skill 使用方式
 

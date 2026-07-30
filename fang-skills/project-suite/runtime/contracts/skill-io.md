@@ -46,6 +46,32 @@
 ### knowledge.md（知识摘要）
 仅包含 `status: accepted` 的知识条目摘要，避免上下文膨胀。
 
+### knowledge-list.json（精确加载清单）
+
+Planner 产出，Generator 消费。Generator 不搜索知识库——只读这个清单里指定的文件。
+
+```json
+{
+  "plan": "PLAN-credit-activate.md",
+  "generated_by": "project-planner",
+  "files": [
+    "components/catalog.md",
+    "patterns/form.md",
+    "api/quotaManage.ts"
+  ],
+  "graph_queries": [
+    {"type": "component", "name": "FormSelect"},
+    {"type": "api", "name": "quotaManage"}
+  ]
+}
+```
+
+**规则：**
+- Planner 在 `# Reuse Analysis` 中已经列出了可复用资产 → 同时生成 `knowledge-list.json`
+- Generator 启动时读 `knowledge-list.json`，只加载 `files` 列表中的文件
+- Generator **不搜索** `.project-knowledge/` — 不知道还有别的知识
+- Context 恒定、可预测、不膨胀
+
 ## 输出：3 个标准出口
 
 ```

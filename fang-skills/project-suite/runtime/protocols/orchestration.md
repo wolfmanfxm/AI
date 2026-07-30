@@ -94,3 +94,54 @@ tester + documenter（都只依赖 generator，互不依赖）→ 可并行
 ```
 
 Skill 只追加 history，不删除。用户可随时查看完整执行链路。
+
+## Fresh Context 模式
+
+每个 Skill 在独立的 `/clear` 上下文中执行。上下文不累积：
+
+```
+/clear
+/project-planner
+  → 读 context.json + state.json + .project-knowledge/
+  → 写 PLAN.md + knowledge-list.json + state.json
+  → 结束（上下文丢弃）
+
+/clear
+/project-generator
+  → 读 knowledge-list.json（精确文件列表，~3-5个）
+  → 读 PLAN.md > # Task Breakdown
+  → 生成代码
+  → 写 result.md + state.json
+  → 结束（上下文丢弃）
+
+/clear
+/project-reviewer
+  → 读 state.json（了解变更范围）
+  → 读 PLAN.md > # Acceptance Criteria
+  → 审查
+  → 写 REVIEW.md + state.json
+  → 结束（上下文丢弃）
+```
+
+**每个 Skill 的上下文只有几 KB，不是几十万 token。**
+
+**State 层是唯一的信息传递媒介。** Skill 不依赖对话历史——所有需要的信息都从 `.project-runtime/` 和 artifact 文件中读取。
+
+### Stateless Skill 原则
+
+```
+✅ 每个 Skill:
+   1. 启动（/clear 后的 fresh context）
+   2. 读 .project-runtime/state.json（了解当前状态）
+   3. 读 artifact 文件（PLAN.md / knowledge-list.json / diff）
+   4. 执行
+   5. 写 .project-runtime/state.json + artifact 文件
+   6. 结束
+
+❌ 禁止:
+   - 依赖上一轮对话中的信息
+   - 假设上下文中有上次执行的结果
+   - 跳过 state.json 直接读"我上次写的那个文件"
+```
+
+这本质上就是 serverless function 的模型：启动 → 读入 → 计算 → 写出 → 销毁。Skill 是 stateless 的，State 是 persistent 的。

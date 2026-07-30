@@ -50,7 +50,7 @@ description: >
 
 ## 项目知识读取
 
-`context.json` 覆盖技术栈/别名/约定/模块清单。按需补充详见 [runtime/context/context.md](../../runtime/context/context.md)。
+**不搜索知识库。** 读 `knowledge-list.json`（Planner 产出）→ 只加载列表中指定的 ~3-5 个文件。不知道还有别的知识。若缺失则从 PLAN.md `# Reuse Analysis` 提取。
 | 类型定义 | 语言版本、路径别名 | `patterns/typescript.md` |
 
 ## 工作流

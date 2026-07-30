@@ -99,6 +99,43 @@ Confidence > 85 → R3 满足
    - 超过 6 个月未晋升 → 标记为 deprecated
 ```
 
+## 闭环工作流（Generator → Reviewer → Knowledge）
+
+```
+Generator:
+  1. 完成代码生成
+  2. 完成报告 → Candidate Discovery:
+     - 标注首次出现的新模式
+     - 标注 one_off / reusable
+     - 写入 candidate/{name}.md
+     - 更新 knowledge.json（status: Candidate, occurrences: 1）
+
+Reviewer:
+  3. 审查代码 + Candidate 知识:
+     - 验证 Candidate 是否准确描述实现
+     - 标注 confidence（满足 R3 需要 > 85）
+     - 验证 graph.json 中的跨模块引用（R2）
+  4. 更新 knowledge.json（confidence, verified）
+
+Architect（可选，下次出现时触发）:
+  5. 第二次出现 → 评估 R5（可复用性）
+  6. 第三次出现 → 检查是否满足 ≥3/5 → 晋升 Accepted
+     从 candidate/ → patterns/ 或 architecture/
+```
+
+## 知识库演化
+
+```
+初始: .project-knowledge/ 只有 analyzer 生成的基础知识
+  ↓
+每次 Generator → Reviewer 循环:
+  - 新 Candidate 进入候选池
+  - 已有 Candidate 获得第二次/第三次验证 → 晋升 Accepted
+  - 低分 Accepted 被自然淘汰 → Deprecated
+  ↓
+结果: 知识库越来越精，不会越来越大
+```
+
 ## ADR 准入标准
 
 | 准入条件（满足任一） | 反例（不记录） |
