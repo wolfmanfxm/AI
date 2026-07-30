@@ -55,10 +55,23 @@ description: >
 
 ### Execute
 
-1. **版本号推荐**：breaking change → MAJOR / feat → MINOR / fix → PATCH
+1. **版本号推荐** — 输入: git log 解析结果 → 输出: 推荐版本号
+   - breaking change 存在 → MAJOR
+   - feat 存在且无 breaking → MINOR
+   - 仅 fix/refactor/docs → PATCH
 2. **Changelog 合成** → [prompts/changelog-gen.md](prompts/changelog-gen.md)
-3. **检查清单** → [prompts/release-checklist.md](prompts/release-checklist.md)
-4. **输出**：CHANGELOG.md + RELEASE-CHECKLIST.md
+   - 输入: git log + PR 描述 + REVIEW.md（若存在）
+   - 输出: 按版本分组的 CHANGELOG.md（Added/Changed/Fixed/Deprecated/Removed）
+3. **发布检查清单** → [prompts/release-checklist.md](prompts/release-checklist.md)
+   - 逐项验证：测试通过 / 文档更新 / breaking change 迁移说明 / 回滚方案
+
+### Output
+
+| 文件 | 内容 | 消费者 |
+|------|------|--------|
+| `CHANGELOG.md` | 按版本分组的变更记录 | 团队 / 下游用户 |
+| `RELEASE-CHECKLIST.md` | 发布前逐项检查结果 | 发布负责人 |
+| 版本号推荐 | semver 版本号 + 推荐理由 | 发布决策 |
 
 ## 失败处理
 
