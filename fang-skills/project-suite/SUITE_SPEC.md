@@ -148,7 +148,9 @@ RefactoredCode | Documentation | Release
 | 协议 | 路径 | 所有 skill 必须遵循 |
 |------|------|-------------------|
 | Project State | `runtime/state/state.md` | ✅（读写 .project-runtime/state.json） |
-| Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted） |
+| Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted；Reviewer 验证 Candidate） |
+| Knowledge Index | `runtime/state/schemas/knowledge-index.md` | ✅（analyzer 生成，下游按 capability 查询） |
+| Confidence Gate | `runtime/engine/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |
 | Unified I/O | `runtime/contracts/skill-io.md` | 🟡（建议遵循，非强制） |
 | 状态机 | `runtime/engine/state-machine.md` | ✅ |
 | 断点续传 | `runtime/engine/checkpoint.md` | ✅（manifest.json 读写） |

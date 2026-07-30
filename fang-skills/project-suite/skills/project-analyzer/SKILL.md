@@ -67,8 +67,13 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
 
 1. 写 `.md`（Evidence Header → [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md)）
 2. 生成 `graph.json` `statistics.json` `search-index.json` **`context.json`**
-3. 非首次：标记 `[NEW]/[CHANGED]/[CONFIRMED]`
-4. 写 `manifest.json` `index.md`
+3. 生成 **`knowledge-index.json`** → [../../runtime/state/schemas/knowledge-index.md](../../runtime/state/schemas/knowledge-index.md)
+   - 扫描 `.project-knowledge/` 所有文件 → 按内容聚类为 capability
+   - 每个 capability：description / files / keywords / confidence
+   - 生成 aliases（中文简称 → capability 名）
+   - 只包含 `status: Accepted` 的知识 → Candidate 不进入 index
+4. 非首次：标记 `[NEW]/[CHANGED]/[CONFIRMED]`
+5. 写 `manifest.json` `index.md`
 5. **manifest 完整性校验**（防止外部进程覆盖）：
   - `mode` 字段 = 本次实际执行模式（`full` / `incremental` / `standard`）
   - `scope` 字段 = 本次实际扫描范围

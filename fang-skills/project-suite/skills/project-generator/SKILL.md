@@ -50,8 +50,15 @@ description: >
 
 ## 项目知识读取
 
-**不搜索知识库。** 读 `knowledge-list.json`（Planner 产出）→ 只加载列表中指定的 ~3-5 个文件。不知道还有别的知识。若缺失则从 PLAN.md `# Reuse Analysis` 提取。
-| 类型定义 | 语言版本、路径别名 | `patterns/typescript.md` |
+**不搜索知识库。** 按 capability 标签精确加载：
+
+1. 读 `knowledge-list.json`（Planner 产出）→ 获取 `capabilities: ["VueConvention", "TablePattern", ...]`
+2. 读 `knowledge-index.json`（analyzer 产出）→ lookup capability → 解析为具体文件列表
+3. 只加载解析出的 ~3-5 个文件，不知道还有别的知识
+4. 若 `knowledge-list.json` 缺失 → 从 PLAN.md `# Reuse Analysis` 提取 capability 标签
+5. 若 `knowledge-index.json` 缺失 → 降级为文件路径模式（旧版兼容）
+
+→ 详细协议：[../../runtime/state/schemas/knowledge-index.md](../../runtime/state/schemas/knowledge-index.md)
 
 ## 工作流
 

@@ -67,8 +67,12 @@ Scheduler 自动检测：若 skill_B 和 skill_C 的所有 consumes 均已被前
 
 1. **context.json 优先** — 下游 skill 先读 context，不存在才降级
 2. **依赖满足优先** — 所有 consumes 已就绪的 skill 优先调度
-3. **并行优先** — 同 Wave 内无依赖 skill 并行 execute
-4. **用户意图优先** — 精确匹配触发词 > 上下文推断 > 链式推断
+3. **priority 动态排序（NEW v1.2.0）** — 同 Wave 内多 skill 按 `capabilities.yaml` 中的 `priority` 字段排序（值小优先）
+4. **Confidence Gate（NEW v1.2.0）** — 上游 confidence 不达标 → 🟠 GATE 或 🔴 BLOCK，阻止下游调度
+5. **并行优先** — 同 Wave 内无依赖 skill 并行 execute
+6. **用户意图优先** — 精确匹配触发词 > 上下文推断 > 链式推断
+
+→ Confidence Gate 详细规则：[confidence-gate.md](confidence-gate.md)
 
 ## 调度日志
 

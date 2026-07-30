@@ -74,7 +74,16 @@ description: >
 ### Output
 
 - `proposals/PLAN-<feature>.md`（9 模块 Contract）
-- `knowledge-list.json`（Generator 精确加载清单，不含多余文件）
+- `knowledge-list.json`（capability 标签清单，Generator 通过 knowledge-index.json 解析到具体文件）
+
+**knowledge-list.json 格式（v2.0）：**
+```json
+{
+  "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],
+  "plan": "PLAN-<feature>.md"
+}
+```
+使用 capability 标签而非文件路径 → 目录变更不影响 Planner 和 Generator。
 
 ## 失败处理
 

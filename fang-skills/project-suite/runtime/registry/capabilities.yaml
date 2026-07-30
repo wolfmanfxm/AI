@@ -3,14 +3,17 @@
 # 统一的能力注册中心。每个 skill 声明 produces（产出什么）和 consumes（依赖什么）。
 # Scheduler 读取此文件构建 DAG，自动识别并行分支。
 
-version: "1.1.0"
-generated: 2026-07-28
+version: "1.2.0"
+generated: 2026-07-30
 
 # --- 能力类型定义 ---
 capability_types:
   KnowledgeBase:    # .project-knowledge/ + context.json
     description: 项目结构化知识（架构/组件/API/模式/编码约定），含生命周期状态
     format: [.md, .json]
+  KnowledgeIndex:   # knowledge-index.json（NEW v1.2.0）
+    description: Capability→文件映射，Skill 按能力标签而非文件路径查询知识
+    format: [.json]
   Context:          # context.json
     description: 下游 skill 标准上下文（技术栈/路径别名/约定/模块清单）
     format: [.json]
@@ -49,24 +52,26 @@ capability_types:
 skills:
 
   project-analyzer:
-    produces: [KnowledgeBase, Context, Graph]
+    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
     consumes: []
-    description: 7 维度代码分析，生成项目知识库
+    description: 7 维度代码分析，生成项目知识库 + capability→文件索引
     triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 更新项目知识, 刷新项目知识]
     triggers_en: [analyze codebase, scan project, project refresh]
     cost: high
     confidence_min: 70
     parallel: false
+    priority: 10
 
   project-planner:
     produces: [Plan]
-    consumes: [KnowledgeBase, Context, Graph]
+    consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
     description: Project Planning Engine — 模糊需求收敛为 9 模块执行契约
     triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量]
     triggers_en: [break down tasks, plan sprint, estimate effort]
     cost: medium
     confidence_min: 70
     parallel: false
+    priority: 20
     artifact_output: artifacts/plans/PLAN-*.md
 
   project-architect:
@@ -78,17 +83,19 @@ skills:
     cost: medium
     confidence_min: 70
     parallel: false
+    priority: 30
     artifact_output: artifacts/decisions/ARCHITECTURE-*.md
 
   project-generator:
     produces: [Code]
-    consumes: [KnowledgeBase, Plan, Architecture, Context, Graph]
-    description: 遵循项目模式生成生产级代码
+    consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
+    description: 遵循项目模式生成生产级代码，按 capability 标签精确定位知识文件
     triggers_cn: [写一个, 实现, 创建组件, 开发, 生成代码]
     triggers_en: [implement, create, build, generate code]
     cost: high
     confidence_min: 70
     parallel: true
+    priority: 40
     requires_checkpoint: true
 
   project-tester:
@@ -100,17 +107,19 @@ skills:
     cost: medium
     confidence_min: 70
     parallel: true
+    priority: 50
     artifact_output: reports/TEST-REPORT.md
 
   project-reviewer:
     produces: [Review]
-    consumes: [Code, Plan, KnowledgeBase, Architecture, Test]
-    description: 五轴代码审查 + 分级问题
+    consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+    description: 五轴代码审查 + 分级问题 + Candidate 知识验证
     triggers_cn: [代码审查, review, 检查代码, 审查 PR]
     triggers_en: [code review, security review, audit code]
     cost: medium
     confidence_min: 70
     parallel: false
+    priority: 55
     artifact_output: artifacts/reviews/REVIEW-*.md
 
   project-refactorer:
@@ -122,6 +131,7 @@ skills:
     cost: medium
     confidence_min: 70
     parallel: false
+    priority: 60
     requires_tests: true
 
   project-documenter:
@@ -133,16 +143,18 @@ skills:
     cost: medium
     confidence_min: 60
     parallel: true
+    priority: 65
 
   project-releaser:
     produces: [Release]
     consumes: [Documentation, Review, Test]
-    description: 版本 bump + Changelog + 发布检查
+    description: 版本 bump + Changelog + 发布检查 + 全链路 Confidence Gate
     triggers_cn: [发布, 上线, 发版, changelog]
     triggers_en: [release, ship, deploy, version bump]
     cost: low
     confidence_min: 70
     parallel: false
+    priority: 90
     requires_review: true
 
 # --- DAG 边（从 consumes/produces 自动推导） ---

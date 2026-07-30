@@ -28,14 +28,15 @@ Skill
 
 ```
 .project-runtime/
-├── state.json           # 项目当前状态 + 执行历史
-├── knowledge.json        # 知识文件生命周期追踪
-└── artifacts/            # 统一产出目录
-    ├── plans/            # PLAN-*.md
-    ├── decisions/        # ARCHITECTURE-*.md
-    ├── reviews/          # REVIEW-*.md
-    ├── reports/          # TEST-REPORT.md, REFACTOR.md
-    └── releases/         # CHANGELOG.md
+├── state.json              # 项目当前状态 + 执行历史（含 confidence gate）
+├── knowledge.json           # 知识文件生命周期追踪
+├── knowledge-index.json     # Capability→文件映射（NEW v1.2.0）
+└── artifacts/               # 统一产出目录
+    ├── plans/               # PLAN-*.md
+    ├── decisions/           # ARCHITECTURE-*.md
+    ├── reviews/             # REVIEW-*.md
+    ├── reports/             # TEST-REPORT.md, REFACTOR.md
+    └── releases/            # CHANGELOG.md
 ```
 
 ## state.json

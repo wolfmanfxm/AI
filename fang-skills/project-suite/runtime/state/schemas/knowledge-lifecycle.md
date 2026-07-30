@@ -75,6 +75,51 @@ GoF 的思想：一次出现叫代码，两次叫经验，三次才叫模式。
 
 单次出现是巧合。多次出现才是可复用的模式。
 
+## Candidate 强制执行规则（v1.2.0）
+
+以下规则由 Runtime 校验，各 Skill 必须遵守：
+
+### 读取规则
+
+| Skill | Candidate 可读？ | 规则 |
+|-------|:---:|------|
+| Generator | ❌ | 只读 `Accepted`，Candidate 视为不存在 |
+| Planner | ⚠️ | 可读但标注"⚠️ 未验证"，不能作为 Reuse Analysis 的推荐项 |
+| Architect | ⚠️ | 可读但标注"⚠️ 候选模式"，不能用于技术选型依据 |
+| Reviewer | ✅ | 唯一可验证 Candidate 并晋升为 Accepted 的 Skill |
+| Tester | ❌ | 不读 Candidate |
+| Documenter | ❌ | 不读 Candidate |
+| Refactorer | ❌ | 不读 Candidate |
+| Releaser | ❌ | 不读 Candidate |
+
+### 晋升执行规则
+
+Reviewer 执行时必须检查 Candidate 知识：
+
+```
+for each Candidate in knowledge.json:
+  1. 验证 candidate 的 claims 是否与实际代码一致
+  2. 评估 promotion_rules 满足几条（≥3/5 → 晋升）
+  3. 标注验证 confidence（基于实际代码审查，非推断）
+  4. 更新 knowledge.json：
+     - 满足 ≥3/5 → status: "Accepted", promoted_at: now
+     - 满足 <3/5 → 保持 Candidate，记录验证结果
+     - claims 不实 → confidence 降为 0，标注 [REJECTED]
+```
+
+### 过期淘汰规则
+
+| 状态 | 条件 | 动作 |
+|------|------|------|
+| Candidate | 6 个月内未被晋升 | 标记 Deprecated，reason: "expired" |
+| Candidate | confidence < 40 且已验证 | 标记 Deprecated，reason: "low_confidence" |
+| Candidate | 被 Reviewer 明确 REJECTED | 标记 Deprecated，reason: "rejected_by_reviewer" |
+
+### knowledge-index.json 与 Candidate
+
+`knowledge-index.json` 中只列出 `status: Accepted` 的 capability。
+Candidate 知识不进入 index → Generator 通过 index 加载时自动过滤 Candidate。
+
 ## Deprecated：停止推荐
 
 ```

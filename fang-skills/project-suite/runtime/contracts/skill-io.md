@@ -48,17 +48,14 @@
 
 ### knowledge-list.json（精确加载清单）
 
-Planner 产出，Generator 消费。Generator 不搜索知识库——只读这个清单里指定的文件。
+Planner 产出，Generator 消费。Generator 不搜索知识库——只读这个清单里指定的 capability。
 
 ```json
 {
   "plan": "PLAN-credit-activate.md",
   "generated_by": "project-planner",
-  "files": [
-    "components/catalog.md",
-    "patterns/form.md",
-    "api/quotaManage.ts"
-  ],
+  "schemaVersion": "2.0.0",
+  "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],
   "graph_queries": [
     {"type": "component", "name": "FormSelect"},
     {"type": "api", "name": "quotaManage"}
@@ -66,11 +63,19 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
 }
 ```
 
+**v2.0 变更（capability 替代 file path）：**
+- `files: [...]` → `capabilities: [...]` — 使用 capability 标签代替具体文件路径
+- Generator 通过 `knowledge-index.json` 解析 capability → 文件列表 → 加载
+- Planner 只需声明 capability，不需要知道文件在哪
+- 文件路径变更 → 只改 `knowledge-index.json`，Planner + Generator 不受影响
+
 **规则：**
 - Planner 在 `# Reuse Analysis` 中已经列出了可复用资产 → 同时生成 `knowledge-list.json`
-- Generator 启动时读 `knowledge-list.json`，只加载 `files` 列表中的文件
+- Generator 启动时读 `knowledge-list.json` → 通过 `knowledge-index.json` 解析 capability → 只加载对应文件
 - Generator **不搜索** `.project-knowledge/` — 不知道还有别的知识
 - Context 恒定、可预测、不膨胀
+
+→ 详细协议：[../state/schemas/knowledge-index.md](../state/schemas/knowledge-index.md)
 
 ## 输出：3 个标准出口
 
@@ -135,12 +140,12 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 
 **所有 Skill 输出必须包含 Confidence 评分。**
 
-| Score | 含义 | 用户参考 |
-|-------|------|---------|
-| 90-100 | 高置信度，产出可靠 | 正常推进 |
-| 70-89 | 中等置信度，有标注的假设 | 建议检查假设再推进 |
-| 40-69 | 低置信度，信息不足 | 建议补充信息后重新执行 |
-| < 40 | 不可靠 | 不应直接用于下游 |
+| Score | 含义 | Gate | 行为 |
+|-------|------|------|------|
+| 90-100 | 高置信度，产出可靠 | 🟢 PASS | 直接进入下游 |
+| 70-89 | 中等置信度，有标注的假设 | 🟡 REVIEW | 建议 Review 后推进 |
+| 40-69 | 低置信度，信息不足 | 🟠 GATE | 强制 Review，禁止 Release |
+| < 40 | 不可靠 | 🔴 BLOCK | 阻断，必须重做或人工介入 |
 
 Confidence 计算规则（各 Skill 通用框架）：
 ```
@@ -152,3 +157,11 @@ confidence = 100
 - 10 if 使用了降级/fallback 模式
 - 5  per 未验证假设（max -20）
 ```
+
+**Confidence Gate 行为：**
+- 🟢 PASS → 下游正常执行，state.json 记录 `gate: "PASS"`
+- 🟡 REVIEW → 下游正常执行，state.json 标注 `gate: "REVIEW"` + AskUserQuestion
+- 🟠 GATE → Reviewer 强制执行后才能进入 Generator；Releaser 拒绝执行
+- 🔴 BLOCK → state.json 写入 blocker，下游 Skill 启动时检测到 blocker → 拒绝执行
+
+→ 完整 Gate 协议：[../engine/confidence-gate.md](../engine/confidence-gate.md)
