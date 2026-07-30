@@ -92,7 +92,7 @@ description: >
 | `.project-knowledge/` 不存在 | 跳过 Reuse Analysis，标注"⚠️ 缺少知识库" |
 | 需求自相矛盾 | 标注于 Context 假设表，给出两个方案分别覆盖矛盾分支 |
 | 时间不可行 | 给最小可行 + 完整两版，AskUserQuestion |
-| Confidence < 40% | **拒绝产出**，只输出 `# Goal` + `# Scope`（含 Gap List） |
+| Confidence < 40% | **拒绝产出**，只输出 `# Goal` + `# Scope`（含 Gap List） | → [../../runtime/engine/confidence-gate.md](../../runtime/engine/confidence-gate.md) |
 | 无任何需求输入 | BLOCKED — 拒绝执行 |
 | 上游 PLAN.md 存在但代码已大幅变更 | 标注"⚠️ 上游规划可能过期"，重新执行现状探查，diff 后修正 |
 | API 文档路径与代码不一致 | 标注为 `⤳ 待确认` 外部依赖，记录在 Dependency Graph |

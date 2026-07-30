@@ -55,6 +55,11 @@ description: >
 
 ### Execute
 
+0. **全链路 Confidence Gate** → [../../runtime/engine/confidence-gate.md](../../runtime/engine/confidence-gate.md)
+   - 扫描 `state.json` history → 逐一检查上游 skill confidence
+   - 任一 confidence < 40 → 🔴 BLOCK，拒绝发布
+   - 任一 confidence < 70 → 🟠 GATE，AskUserQuestion 确认
+   - 全部 ≥ 90 → 🟢 PASS，正常发布
 1. **版本号推荐** — 输入: git log 解析结果 → 输出: 推荐版本号
    - breaking change 存在 → MAJOR
    - feat 存在且无 breaking → MINOR

@@ -85,7 +85,9 @@ description: >
 
 ### 完成报告
 
-→ [references/completion-report.md](references/completion-report.md)（含 Knowledge Used 反馈 + Candidate 发现）
+→ [references/completion-report.md](references/completion-report.md)（含 Knowledge Used 反馈 + Candidate 发现 + timeline 写入）
+
+**Confidence Gate**：confidence < 70 → 🟠 GATE，必须 Review 后才能进入 tester/releaser；confidence ≥ 95 → 🟢 直通。 → [../../runtime/engine/confidence-gate.md](../../runtime/engine/confidence-gate.md)
 
 ## 失败处理
 

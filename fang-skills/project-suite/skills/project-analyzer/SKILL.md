@@ -90,6 +90,7 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
    - 不阻断 — 健康检查不影响主流程
 8. 🔴 Vault 同步（若 `output` 含 `"vault"`）→ [vault-sync](../../shared/conventions/vault-sync.md)
 9. 检查 `.claude/CLAUDE.md` → manifest `status` 置为 `completed`
+10. 写 `timeline.json` → [../../runtime/metrics/timeline.md](../../runtime/metrics/timeline.md)
 
 **`context.json`** 是下游 skill 的标准化项目上下文（技术栈/路径别名/编码约定/模块清单）。Schema → [../../runtime/context/context.md](../../runtime/context/context.md)
 
