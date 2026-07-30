@@ -31,8 +31,9 @@ Skill
 ├── state.json              # 项目当前状态 + 执行历史（含 confidence gate）
 ├── knowledge.json           # 知识文件生命周期追踪
 ├── knowledge-index.json     # Capability→文件映射
-├── metrics/                 # 可观测层（NEW v1.3.0）
+├── metrics/                 # 可观测层（v1.3.0）
 │   ├── timeline.json        # 全量执行历史指标
+│   ├── knowledge-health.json # 知识库质量检测报告
 │   └── archive/             # 归档的旧 timeline（按季度）
 └── artifacts/               # 统一产出目录
     ├── plans/               # PLAN-*.md

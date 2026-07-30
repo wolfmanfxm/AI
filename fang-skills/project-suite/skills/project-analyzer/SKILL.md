@@ -74,16 +74,22 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
    - 只包含 `status: Accepted` 的知识 → Candidate 不进入 index
 4. 非首次：标记 `[NEW]/[CHANGED]/[CONFIRMED]`
 5. 写 `manifest.json` `index.md`
-5. **manifest 完整性校验**（防止外部进程覆盖）：
-  - `mode` 字段 = 本次实际执行模式（`full` / `incremental` / `standard`）
-  - `scope` 字段 = 本次实际扫描范围
-  - `dimensions` 所有维度 = `completed`
-  - `files` 列表覆盖全部实际产出文件
-  - `executionLog` 含本次执行记录（startedAt/finishedAt/scope/changedFiles/unchangedFiles）
-  - **若任何字段被外部进程篡改**，以本次执行参数覆盖，不依赖磁盘缓存
-  - 校验通过后才进入 Vault 同步
-6. 🔴 Vault 同步（若 `output` 含 `"vault"`）→ [vault-sync](../../shared/conventions/vault-sync.md)
-7. 检查 `.claude/CLAUDE.md` → manifest `status` 置为 `completed`
+6. **manifest 完整性校验**（防止外部进程覆盖）：
+   - `mode` 字段 = 本次实际执行模式（`full` / `incremental` / `standard`）
+   - `scope` 字段 = 本次实际扫描范围
+   - `dimensions` 所有维度 = `completed`
+   - `files` 列表覆盖全部实际产出文件
+   - `executionLog` 含本次执行记录（startedAt/finishedAt/scope/changedFiles/unchangedFiles）
+   - **若任何字段被外部进程篡改**，以本次执行参数覆盖，不依赖磁盘缓存
+   - 校验通过后才进入后续步骤
+7. **知识库健康检查** → [../../runtime/metrics/knowledge-health.md](../../runtime/metrics/knowledge-health.md)
+   - 扫描 `.project-knowledge/` 全量 → 执行 7 种检测（broken_link / empty_document / duplicate_content / outdated_evidence / missing_evidence_header / stale_reference / orphan_knowledge）
+   - 增量模式：只扫 `[CHANGED]` 文件 + 其引用目标，duplicate_content 全量对比
+   - 生成 `knowledge-health.json`（含 summary / issues[] / trend）
+   - error > 0 → manifest 标注 ⚠️；warning > 5 → context.json 标注 ⚠️
+   - 不阻断 — 健康检查不影响主流程
+8. 🔴 Vault 同步（若 `output` 含 `"vault"`）→ [vault-sync](../../shared/conventions/vault-sync.md)
+9. 检查 `.claude/CLAUDE.md` → manifest `status` 置为 `completed`
 
 **`context.json`** 是下游 skill 的标准化项目上下文（技术栈/路径别名/编码约定/模块清单）。Schema → [../../runtime/context/context.md](../../runtime/context/context.md)
 
