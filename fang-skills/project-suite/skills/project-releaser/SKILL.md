@@ -15,7 +15,7 @@ description: >
 
 ## 核心原则
 
-1. **不执行发布命令** — 只检查、建议、生成，不 `npm publish` / `git push --tags`
+1. **不执行发布命令** — 只检查、推荐、生成，不 `npm publish` / `git push --tags`
 2. **基于事实** — 版本号从 commit 推导，changelog 从 git log + PR 合成
 3. **Breaking Change 显式** — 必须标注、必须写迁移步骤
 4. **可回滚** — 每次发布有回滚方案
@@ -24,7 +24,17 @@ description: >
 
 → [references/boundary.md](references/boundary.md)
 
-> 🔴 releaser 只检查建议不执行发布命令。
+> 🔴 releaser 只检查不执行发布命令。
+
+## 反例黑名单
+
+| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
+|---|---------|-------------|-----------|
+| 1 | **执行 `npm publish` / `git push --tags`** | releaser 是检查门禁不是部署工具，自动推送不可逆 | 只生成 CHANGELOG + CHECKLIST，发布命令由人工执行 |
+| 2 | **不看 git log 直接建议版本号** | 忽略 commit 历史导致版本跳跃（PATCH→MAJOR） | 先解析 conventional commits，按 breaking/feat/fix 规则推算 |
+| 3 | **Breaking change 无迁移步骤** | 下游使用者升级时不知道该改什么，导致线上事故 | 每个 BREAKING CHANGE 附带具体迁移步骤（旧API→新API） |
+| 4 | **无回滚方案就标记发布就绪** | 发布失败时无法快速恢复，延长故障时间 | RELEASE-CHECKLIST.md 必须包含回滚方案（git revert 命令+验证步骤） |
+| 5 | **REVIEW.md 未通过仍标记可发布** | 已知 BLOCKER 问题进入生产环境 | REVIEW.md 存在 BLOCKER → 🔴 拒绝生成发布产物，提示先修复 |
 
 ## 前置条件
 
