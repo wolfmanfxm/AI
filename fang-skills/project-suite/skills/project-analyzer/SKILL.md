@@ -82,6 +82,16 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
 
 **`context.json`** 是下游 skill 的标准化项目上下文（技术栈/路径别名/编码约定/模块清单）。Schema → [../../runtime/context/context.md](../../runtime/context/context.md)
 
+## 失败处理
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 子 agent 超时或返回空（维度分析） | 重试一次（同 agent 同 prompt） | 标注 `❌ FAILED: [维度名] agent timeout`，主流程用已有信息补写该维度 |
+| 写入文件失败（权限/磁盘满） | 重试一次 | 标注 `❌ FAILED: [原因]`，主流程记录失败维度到 manifest，不阻塞其他维度 |
+| `.claude/CLAUDE.md` 不存在 | 直接生成 `.project-knowledge/`，Vault 同步照常 | 标注 `⚠️ 无 CLAUDE.md`，路径别名/命名空间从源码 package.json + tsconfig 推断 |
+| Knowledge Vault 路径不可达 | 跳过 Vault 同步 | 标注 `⚠️ Vault 不可达`，`.project-knowledge/` 仍写入 |
+| graph.json 生成失败（jq 不可用/JSON 格式错误） | 用 grep + 纯文本解析回退 | 标注 `⚠️ graph.json 未生成`，不影响其他产出 |
+
 ## 完成后下一步
 
 ```
