@@ -24,7 +24,17 @@ description: >
 
 → [references/boundary.md](references/boundary.md)
 
-> 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 建议。对照 Scope 检查范围蔓延。
+> 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 修复方案。对照 Scope 检查范围蔓延。
+
+## 反例黑名单
+
+| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
+|---|---------|-------------|-----------|
+| 1 | **发现问题后动手修改代码** | reviewer 的 diff 与 generator 的修复混在一起，无法追溯 | 只记录 file:line + 修复方案，修复由 generator 或人工执行 |
+| 2 | **没有 file:line 就报告问题** | 开发者找不到问题位置，审查结论无法验证 | 每个发现必须标注精确的 `file:line` 引用 |
+| 3 | **跳过 AC 对照直接审查** | 不知道需求是什么，审查变成主观代码风格评判 | 先读 PLAN.md `# Acceptance Criteria`，逐条验证 |
+| 4 | **BLOCKER 无明确阻断理由** | 滥用最高级别导致审查失信（"狼来了"效应） | 每个 🔴 BLOCKER 必须附：触发条件 + 生产影响 + 必须在合并前修复的理由 |
+| 5 | **仅给负面评价无 PRAISE** | 审查变成挑刺，团队抵触情绪积累 | 值得学习的代码用 🔵 PRAISE 标注，说明好在哪里 |
 
 ## 前置条件
 
@@ -60,18 +70,37 @@ description: >
 
 ## 工作流
 
-1. 读 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
+### Discover
+
+1. 加载 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
 2. **Graph 影响分析** → [Graph Query Protocol](../../runtime/contracts/graph-query.md)：
    - `findImpacted([变更文件列表])` → 本次修改影响哪些节点
    - `findConsumers(<受影响 API>)` → 修改 API 时了解下游影响
    - 影响节点 > 5 → 审查强度自动升级为 HIGH
-3. 按 Risk Assessment 确定审查强度（HIGH→Full audit / MEDIUM→Spot check / LOW→Standard）
-4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
-5. 五轴扫描 → 逐条对照 AC 验证 → 检查 Scope 边界
-6. **Candidate 验证**：若 Generator 产出了 Candidate 知识 → 验证准确性 → 标注 confidence → 满足 R3（Reviewer 确认 > 85）→ 更新 knowledge.json
-7. 输出 `reports/REVIEW-<topic>.md`
+3. 按 Risk Assessment 确定审查强度：HIGH → Full audit / MEDIUM → Spot check / LOW → Standard
+4. 🔴 CHECKPOINT — 展示审查范围+影响节点+审查强度，用户确认后进入 Execute
 
-失败处理 → [references/failure-handling.md](references/failure-handling.md)
+### Execute
+
+5. **五轴扫描** → 每轴逐文件检查，每个发现标注 `file:line` + 修复方案
+6. **AC 逐条验证** → 对照 `# Acceptance Criteria`，标注 ✅/❌/⚠️
+7. **Scope 边界检查** → 变更是否超出 PLAN.md `# Scope`，超出标注 `[SCOPE CREEP]`
+8. **Candidate 验证**（若 Generator 产出了 Candidate 知识）→ 验证准确性 → 标注 confidence → 满足 R3（> 85）→ 更新 knowledge.json
+
+### Output
+
+`reports/REVIEW-<topic>.md`：问题列表（按 BLOCKER→HIGH→MEDIUM→LOW 排序）+ PRAISE + AC 对照表 + 审查结论
+
+## 失败处理
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| 变更文件 > 20 | 只审查核心文件（按变更量+风险排序），其余标注 `⚠️ 未审查` | AskUserQuestion：全审 / 核心 / 指定文件 |
+| 文件过大无法完整读取 | 分段读关键区域（函数签名+分支+异常处理），标注 `⚠️ 未完整审查` | 限审查深度，优先发现 BLOCKER |
+| `.project-knowledge/` 不存在 | 使用通用代码质量标准审查，标注 `⚠️ 缺乏项目规范` | 不阻塞 — 通用标准仍有效 |
+| 不熟悉的语言/框架 | 仅做通用检查（命名/结构/注释），标注 `[超出审查范围]` | 跳过语言特有检查，不强制推断 |
+| PLAN.md 缺失无法对照 AC | 从代码推断功能意图，标注 `⚠️ 无验收标准` | 不阻塞 — 降级为纯代码审查 |
+| Graph 不可用（graph.json 缺失） | 手动分析 import 依赖链（grep import），标注 `⚠️ 无 Graph` | 影响范围分析降级为静态 import 扫描 |
 
 ## 完成后下一步
 
