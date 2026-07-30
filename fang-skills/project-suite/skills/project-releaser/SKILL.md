@@ -54,11 +54,11 @@ description: >
 
 | 触发条件 | 一线修复 | 仍失败兜底 |
 |---------|---------|-----------|
-| `git log` 无 conventional commits | 按 commit 首词推断类型（feat→MINOR, fix→PATCH） | 读 `package.json` 当前版本建议 PATCH bump，标注"⚠️ 非标准 commit" |
-| 无法确定版本号（无历史 tag） | 从 `package.json` 读当前版本，建议首个正式版 | AskUserQuestion 让用户指定版本号 |
+| `git log` 无 conventional commits | 按 commit 首词推断类型（feat→MINOR, fix→PATCH） | 读 `package.json` 当前版本，默认 PATCH bump，标注"⚠️ 非标准 commit" |
+| 无法确定版本号（无历史 tag） | 从 `package.json` 读当前版本，推荐 `1.0.0` 为首个正式版 | AskUserQuestion 让用户指定版本号 |
 | CHANGELOG.md 不存在 | 从 git log 生成全新 CHANGELOG.md | 标注"⚠️ 首次生成，请人工审核" |
 | REVIEW.md 不存在 | 标注"⚠️ 未审查"，继续生成 | 不阻塞 — Changelog 独立于审查状态 |
-| 检测到 breaking change 但无迁移说明 | 在 CHANGELOG 显式标注 BREAKING CHANGE + 建议迁移步骤 | AskUserQuestion 确认是否有遗漏的迁移需求 |
+| 检测到 breaking change 但无迁移说明 | 在 CHANGELOG 显式标注 BREAKING CHANGE + 生成迁移步骤 | AskUserQuestion 确认是否有遗漏的迁移需求 |
 
 ## 完成后下一步
 
