@@ -24,6 +24,16 @@ description: >
 
 → [references/boundary.md](references/boundary.md)
 
+## 反例黑名单
+
+| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
+|---|---------|-------------|-----------|
+| 1 | **不读源码直接从类型定义编造文档** | 类型定义不反映实际行为（中间件/拦截器/运行时逻辑），文档与行为不符 | 先 Read 源文件理解逻辑，再结合类型定义撰写，不确定的标 `[推断]` |
+| 2 | **忽略项目已有文档风格另起炉灶** | 同一项目出现两种文档格式，后来者困惑哪个是"正确格式" | Discover 阶段必读 1-2 份已有文档，提取标题层级/表格样式/代码块语言标注 |
+| 3 | **覆盖已有文档的人工撰写章节** | 人工补充的业务背景/注意事项/已知坑点被覆盖后丢失 | 对比差异，仅更新变更部分，保留人工撰写的章节，冲突处标注 `[CONFLICT]` |
+| 4 | **API 文档不标注 file:line 溯源** | 源码更新后文档无人敢改——不知道哪段对应哪行代码 | 每个关键信息（方法/参数/返回值）标注 `file:line` 指向源文件 |
+| 5 | **文档发布后不同步 Knowledge Vault** | API/组件文档只在本地 .md，其他项目无法复用 | 检查 document 类型标识，API/组件文档 → Vault 同步 |
+
 ## 前置条件
 
 | 优先级 | 资源 | 缺失时 |
@@ -50,19 +60,18 @@ description: >
 
 ### Execute
 
-风格匹配 → [references/doc-style-guide.md](references/doc-style-guide.md)
+1. **读源码** — Read 目标源文件，提取关键信息（函数签名/参数/返回值/使用示例）
+2. **匹配风格** → [references/doc-style-guide.md](references/doc-style-guide.md) — 套用 Discover 阶段提取的标题/表格/代码块格式
+3. **标注溯源** — 每个关键信息标注 `file:line`（如 `workspace/api/user.ts:42`）
+4. 🔴 CHECKPOINT → 展示文档预览，确认后写入。
 
-🔴 CHECKPOINT → 展示文档预览，确认后写入。
+### Output
 
-### 知识库同步
+**写入文件**：按文档类型路由到对应路径（`api/<module>.md` / `components/<name>.md` / `README.md`）
 
-→ [vault-sync](../../shared/conventions/vault-sync.md) — API/组件文档 ✅，README/Changelog ❌
+**Vault 同步** → [vault-sync](../../shared/conventions/vault-sync.md)：API/组件文档 ✅ 同步，README/Changelog ❌ 不同步
 
-### 文档新鲜度
-
-建议 analyzer 增量后执行：读 manifest → 变更文件 → 交叉命中文档 `sources` → `[OUTDATED][MATCH][NEW]`
-
-失败处理 → [references/failure-handling.md](references/failure-handling.md)
+**文档新鲜度**（推荐在 analyzer 增量后执行）：读 manifest → 变更文件 → 交叉命中文档 `sources` → 标注 `[OUTDATED][MATCH][NEW]`
 
 ## 失败处理
 
