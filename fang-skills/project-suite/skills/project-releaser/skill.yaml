@@ -1,15 +1,19 @@
 id: project-releaser
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 8
+priority: 90
 requires: []
 produces: [Release]
 consumes: [Documentation, Review, Test]
 depends_on: [project-documenter]
-boundary: 只检查建议不执行发布命令，不 npm publish / git push --tags
+parallel_with: []
+boundary: 只检查推荐不执行发布命令，不 npm publish / git push --tags
+
+triggers_cn: [发布, 上线, 发版, release, changelog, 版本号, 发布检查, 准备发布, 发布前检查]
+triggers_en: [release, ship, deploy, version bump, publish]
 
 context_contract:
-  must_read: []
+  must_read: [state.json]
   should_read: []
   neednt_read: []

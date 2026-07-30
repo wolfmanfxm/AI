@@ -1,15 +1,19 @@
 id: project-planner
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 2
+priority: 20
 requires: []
 produces: [Plan]
-consumes: [KnowledgeBase, Context]
+consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
 depends_on: [project-analyzer]
+parallel_with: []
 boundary: 只做计划不写代码，发现问题记录在风险矩阵不直接修改
 
+triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量, 分解任务, sprint 规划, 任务规划]
+triggers_en: [break down tasks, plan sprint, estimate effort, create dev plan]
+
 context_contract:
-  must_read: [architecture/modules, components/catalog]
-  should_read: [patterns/table, patterns/form, patterns/crud]
+  must_read: [knowledge-index.json, context.json]
+  should_read: [architecture/overview.md, components/catalog.md]
   neednt_read: [observations/, reports/]

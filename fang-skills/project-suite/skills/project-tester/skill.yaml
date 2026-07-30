@@ -1,15 +1,19 @@
 id: project-tester
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 5
+priority: 50
 requires: []
 produces: [Test]
-consumes: [Code, Plan, KnowledgeBase]
+consumes: [Code, Plan, KnowledgeBase, Context]
 depends_on: [project-generator]
+parallel_with: []
 boundary: 只写测试不修被测代码，测试失败记录报告不修改源码
 
+triggers_cn: [写测试, 测试用例, 单元测试, 集成测试, 组件测试, 测试覆盖, 跑测试, 加测试]
+triggers_en: [write tests, test cases, unit test, test coverage, add test, generate test]
+
 context_contract:
-  must_read: [patterns/vue, patterns/typescript]
-  should_read: [architecture/]
+  must_read: [context.json, PLAN.md]
+  should_read: [patterns/vue.md, patterns/typescript.md]
   neednt_read: [observations/, reports/]

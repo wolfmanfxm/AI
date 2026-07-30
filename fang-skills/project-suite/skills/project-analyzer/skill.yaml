@@ -1,13 +1,17 @@
 id: project-analyzer
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 1
+priority: 10
 requires: [general-purpose agent]
-produces: [KnowledgeBase, Context]
+produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
 consumes: []
 depends_on: []
+parallel_with: []
 boundary: 只分析项目生成知识文件，不修改源码
+
+triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
+triggers_en: [analyze codebase, scan project, project refresh]
 
 context_contract:
   must_read: []

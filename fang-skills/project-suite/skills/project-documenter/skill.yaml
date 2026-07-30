@@ -1,16 +1,19 @@
 id: project-documenter
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 7
+priority: 65
 requires: []
 produces: [Documentation]
-consumes: [Code, Review, KnowledgeBase]
+consumes: [Code, Review, KnowledgeBase, Context]
 depends_on: [project-reviewer]
 parallel_with: [project-refactorer]
 boundary: 只生成文档不改代码，API/组件文档同步 Vault 其他留在本地
 
+triggers_cn: [生成文档, 写文档, 补文档, API 文档, README, 更新文档, 补全文档, 组件文档]
+triggers_en: [generate docs, write documentation, update README, api docs]
+
 context_contract:
-  must_read: [api/overview, api/request, patterns/vue]
+  must_read: [context.json, api/overview.md]
   should_read: [architecture/]
   neednt_read: [observations/]

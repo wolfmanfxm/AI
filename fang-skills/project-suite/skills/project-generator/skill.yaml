@@ -1,15 +1,19 @@
 id: project-generator
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 4
+priority: 40
 requires: []
 produces: [Code]
-consumes: [KnowledgeBase, Plan, Architecture, Context]
+consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
 depends_on: [project-architect]
+parallel_with: []
 boundary: 只写代码不做设计，缺少上游产物时提示先执行 planner/architect
 
+triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加]
+triggers_en: [implement, create component, build feature, generate code, write a]
+
 context_contract:
-  must_read: [patterns/vue, patterns/typescript, api/request, api/overview, components/catalog]
-  should_read: [architecture/, patterns/table, patterns/form, patterns/dialog]
+  must_read: [knowledge-index.json, knowledge-list.json, context.json, PLAN.md]
+  should_read: [ARCHITECTURE.md, graph.json]
   neednt_read: [observations/, reports/]

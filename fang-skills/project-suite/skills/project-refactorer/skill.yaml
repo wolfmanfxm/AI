@@ -1,15 +1,19 @@
 id: project-refactorer
-version: "1.0.0"
+version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 7
+priority: 60
 requires: [existing tests]
 produces: [RefactoredCode]
-consumes: [Code, Test, KnowledgeBase]
+consumes: [Code, KnowledgeBase, Test, Review]
 depends_on: [project-reviewer]
+parallel_with: [project-documenter]
 boundary: 只改善结构不改行为，没测试保护不重构
 
+triggers_cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码]
+triggers_en: [refactor, clean up, extract method, simplify, reduce complexity]
+
 context_contract:
-  must_read: [patterns/vue, patterns/typescript, components/catalog]
-  should_read: [architecture/, patterns/table]
+  must_read: [context.json]
+  should_read: [patterns/vue.md, patterns/typescript.md, components/catalog.md]
   neednt_read: [observations/, reports/]
