@@ -151,6 +151,7 @@ RefactoredCode | Documentation | Release
 | Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted；Reviewer 验证 Candidate） |
 | Knowledge Index | `runtime/state/schemas/knowledge-index.md` | ✅（analyzer 生成，下游按 capability 查询） |
 | Confidence Gate | `runtime/engine/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |
+| Timeline | `runtime/metrics/timeline.md` | ✅（所有 Skill 追加执行指标到 timeline.json） |
 | Unified I/O | `runtime/contracts/skill-io.md` | 🟡（建议遵循，非强制） |
 | 状态机 | `runtime/engine/state-machine.md` | ✅ |
 | 断点续传 | `runtime/engine/checkpoint.md` | ✅（manifest.json 读写） |

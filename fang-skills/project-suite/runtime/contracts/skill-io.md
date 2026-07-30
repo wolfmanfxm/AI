@@ -119,6 +119,60 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 - `history[]` → 追加本次执行记录
 - `blockers[]` → 追加/解除阻塞项
 
+### timeline.json（执行指标追加）
+
+**所有 Skill 在 Output 阶段必须向 timeline.json 追加一条 run 记录。**
+
+最简写入（必填字段）：
+```json
+{
+  "runId": "run-20260730-NNN",
+  "skill": "project-xxx",
+  "wave": 4,
+  "status": "completed",
+  "timing": { "startedAt": "ISO-8601", "finishedAt": "ISO-8601", "durationMs": 125000 },
+  "output": { "filesGenerated": 3 },
+  "quality": { "confidence": 85 }
+}
+```
+
+完整写入（建议能填就填）：
+```json
+{
+  "runId": "run-20260730-NNN",
+  "skill": "project-xxx",
+  "wave": 4,
+  "status": "completed",
+  "timing": { "startedAt": "...", "finishedAt": "...", "durationMs": 125000 },
+  "input": {
+    "planFile": "...",
+    "capabilitiesUsed": ["VueConvention","TablePattern"],
+    "knowledgeFilesRead": 4,
+    "contextSizeEstimate": "~45k tokens"
+  },
+  "output": {
+    "filesGenerated": 3,
+    "artifacts": ["..."],
+    "linesOfCode": 320,
+    "approxTokens": 28000
+  },
+  "quality": {
+    "confidence": 85,
+    "warnings": 2,
+    "errors": 0
+  },
+  "dependencies": {
+    "upstreamSkills": ["project-analyzer","project-planner"],
+    "upstreamConfidenceMin": 90
+  }
+}
+```
+
+**写入时机**：state.json 写入之后，result.md 输出之前。
+**写入方式**：读 timeline.json → 追加 runs[] → 增量更新 aggregates → 写回。
+
+→ 完整协议：[../metrics/timeline.md](../metrics/timeline.md)
+
 ### artifacts/
 按类型放入对应子目录：`plans/` / `decisions/` / `reviews/` / `reports/` / `releases/`
 

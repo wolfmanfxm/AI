@@ -30,7 +30,10 @@ Skill
 .project-runtime/
 ├── state.json              # 项目当前状态 + 执行历史（含 confidence gate）
 ├── knowledge.json           # 知识文件生命周期追踪
-├── knowledge-index.json     # Capability→文件映射（NEW v1.2.0）
+├── knowledge-index.json     # Capability→文件映射
+├── metrics/                 # 可观测层（NEW v1.3.0）
+│   ├── timeline.json        # 全量执行历史指标
+│   └── archive/             # 归档的旧 timeline（按季度）
 └── artifacts/               # 统一产出目录
     ├── plans/               # PLAN-*.md
     ├── decisions/           # ARCHITECTURE-*.md
@@ -137,6 +140,7 @@ Skill
 3. 写 State:
    - state.json → 追加 history（含 confidence + suggested_next）
    - knowledge.json → 更新知识状态（analyzer/reviewer）
+   - timeline.json → 追加 run 记录（timing/quality/dependencies）
    - artifacts/ → 写入产出文件
 
 4. 输出 result.md:
