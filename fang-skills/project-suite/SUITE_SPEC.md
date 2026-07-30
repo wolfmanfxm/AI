@@ -86,7 +86,19 @@ context_contract:           # 🔴 Context 裁剪（减少 context 膨胀）
 boundary: <string>          # 一行职责边界
 ```
 
-### 3.2 Capability 类型枚举（🔴 REQUIRED，不可自定义）
+### 3.2 版本兼容声明（🟡 IMPORTANT）
+
+```yaml
+compatibility:
+  context_schema: ">=1.0.0"   # 所需 context.json schema 最低版本
+  state_schema: ">=1.0.0"     # 所需 state.json schema 最低版本
+  suite: ">=0.7.0"            # 所需 suite 最低版本
+```
+
+Skill 独立迭代版本号时，必须声明对上游 schema 的最低版本要求。
+上游 schema 变更（如 context.json 新增 REQUIRED 字段）→ 下游 skill 的 `context_schema` 版本跟进。
+
+### 3.3 Capability 类型枚举（🔴 REQUIRED，不可自定义）
 
 ```
 KnowledgeBase | Context | Plan | Architecture | Code | Test | Review |
@@ -153,7 +165,7 @@ RefactoredCode | Documentation | Release
 
 | # | 检查项 | 级别 | 验证方式 |
 |---|--------|------|---------|
-| G1 | SKILL.md 存在且 ≤100 行 | 🔴 | `wc -l` |
+| G1 | SKILL.md 存在且 ≤120 行 | 🔴 | `wc -l` |
 | G2 | skill.yaml 存在且字段完整 | 🔴 | YAML 解析 + 字段校验 |
 | G3 | boundary.md 含 ≥3 条反例 | 🔴 | 搜索 `❌ 反模式` 计数 |
 | G4 | 至少 1 个 `🔴 CHECKPOINT` | 🔴 | 搜索 `CHECKPOINT` |

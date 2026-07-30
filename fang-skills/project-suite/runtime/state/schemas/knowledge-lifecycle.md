@@ -131,6 +131,32 @@ GoF 的思想：一次出现叫代码，两次叫经验，三次才叫模式。
 }
 ```
 
+## GC 策略（Deprecated → Purge）
+
+Deprecated 条目何时可被物理删除的规则：
+
+1. **Purge 条件**（全部满足才可删除）:
+   - status = deprecated 超过 90 天
+   - 最近 90 天内没有任何 Skill 查询过该条目
+   - 不被任何 Accepted 条目的 `related_to` 引用
+
+2. **Purge 流程**:
+   ```
+   Deprecated ──(90天+无引用+无查询)──→ Purge（物理删除）
+   ```
+
+3. **安全机制**:
+   - Purge 前在 knowledge.json 的 `purge_log` 数组记录: file path + deprecated_at + purged_at + reason
+   - 对应的 .md 文件移动到 `.project-knowledge/.archive/`（不立即删除，保留 30 天）
+   - archive 超过 30 天 → 物理删除
+
+4. **Candidate 淘汰**:
+   - 补充已有的"6 个月未晋升"规则：Candidate 超过 180 天未满足 promotion rules → status 变为 expired → 从 knowledge.json 移除（不归档，因为从未被验证过）
+
+5. **GC 触发时机**:
+   - analyzer 全量执行时自动检查
+   - 不设定时触发（避免依赖外部调度）
+
 ## 这套机制的本质
 
 不是"生成知识库"。是建立一套**知识筛选与演化机制**。

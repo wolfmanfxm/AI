@@ -1,6 +1,6 @@
 # Graph Query Protocol v1.0.0
 
-> 统一的 graph.json 查询协议。所有 Skill 通过这 6 个标准查询消费 Knowledge Graph。
+> 统一的 graph.json 查询协议。所有 Skill 通过这 7 个标准查询消费 Knowledge Graph。
 > graph.json 由 project-analyzer 生成，schema 见 `../../shared/schemas/graph.schema.json`。
 
 ## 设计原则
@@ -9,7 +9,7 @@
 - **协议稳定** — 换存储（Neo4j/MCP/SQLite）时 Skill 不用改
 - **只读** — Skill 查询 graph，不修改。写入只由 analyzer 负责
 
-## 6 个标准查询
+## 7 个标准查询
 
 ### 1. `findNode(type, name)`
 查找指定类型的节点。

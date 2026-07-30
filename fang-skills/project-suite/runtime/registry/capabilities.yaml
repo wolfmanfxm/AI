@@ -149,32 +149,26 @@ skills:
 # 规则：若 skill_B.consumes 包含 skill_A.produces 的任一类型，则 A → B
 #
 # analyzer        → planner, architect, generator, reviewer, refactorer, documenter
-# planner         → architect, generator
+# planner         → architect, generator, tester, reviewer
 # architect       → generator
 # generator       → tester, reviewer, refactorer, documenter
 # tester          → reviewer, refactorer
-# reviewer        → documenter（Review 用于 Changelog）
-# refactorer      → reviewer
+# reviewer        → documenter, releaser
 # documenter      → releaser
-# reviewer+tester → releaser（via documenter）
 
-# --- 并行分支 ---
-# 以下 skill 对可并行执行（无直接依赖）：
+# --- 并行度分析（v0.7.0 结论） ---
 #
-# [planner, architect]          ← 都只依赖 analyzer，互相不依赖
-#   ❌ 实际 planner → architect（architect 需要 Plan）
+# 当前 DAG 唯一确定的并行点：wave_7（refactorer ‖ documenter）
 #
-# [tester, documenter]          ← 都只依赖 generator，互相不依赖
-#   ✅ tester 只需 Code，documenter 需要 Code+Review
-#   ❌ documenter 需要 Review（来自 reviewer）
+# 为什么并行度有限？
+#   1. reviewer 依赖 Test（tester 产出）→ tester 必须先于 reviewer
+#   2. documenter 依赖 Review（reviewer 产出）→ reviewer 必须先于 documenter
+#   3. planner → architect 是串行的（architect 需要 Plan）
+#   4. generator 依赖 architect 产出 → 不可与 architect 并行
 #
-# [reviewer, documenter]        ← 都依赖 generator
-#   ❌ documenter 需要 Review（来自 reviewer）
-#   → 实际: generator → reviewer → documenter
-#      generator → tester → reviewer → documenter
-#      但 tester 和 documenter 无直接依赖 → 可并行
-#
-# 结论：当前 DAG 中唯一确定的并行点是 tester || documenter（都直接依赖 generator，互相不依赖）
+# 这是正确的！严格的依赖链保证了信息完整性。
+# 用户可通过跳过非必要 skill（如不需 architect 时直接 planner → generator）
+# 来缩短链路，而非强行并行化有依赖关系的 skill。
 
 # --- 调度顺序（拓扑排序） ---
 schedule_order:
