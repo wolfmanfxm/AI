@@ -1,6 +1,8 @@
 # Confidence Gate v1.0.0
 
 > 置信度驱动的自动化门禁。Skill 输出的 confidence 不再只是"建议"——Runtime 根据置信度自动决定：直通 / 建议Review / 阻断下游。
+>
+> 📖 **人类读这里**（消费端行为） · ⚙️ **计算规则: [confidence.yaml](confidence.yaml)**
 
 ## 三级 Gate
 

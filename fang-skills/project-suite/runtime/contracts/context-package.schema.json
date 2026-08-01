@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fang-skills/project-suite/runtime/contracts/context-package.schema.json",
+  "title": "Context Package — Pre-digested Knowledge Bundle",
+  "description": "Structured knowledge bundle that Generator consumes directly without parsing files. Replaces raw file-list approach: instead of 'read patterns/table.md and figure it out', Generator iterates knowledge[].pattern and injects.",
+
+  "type": "object",
+  "required": ["schemaVersion", "generatedBy", "generatedAt", "context"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "generatedBy": {
+      "type": "string",
+      "const": "knowledge-resolver"
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "plan": {
+      "type": "string",
+      "description": "Source PLAN.md path"
+    },
+    "confidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Aggregate confidence: min of all knowledge entries + upstream artifacts"
+    },
+
+    "context": {
+      "type": "object",
+      "required": ["knowledge"],
+      "properties": {
+
+        "knowledge": {
+          "type": "array",
+          "description": "Extracted patterns/conventions that Generator directly applies. Each entry is a pre-digested rule — no file reading needed.",
+          "items": { "$ref": "#/$defs/knowledgeEntry" }
+        },
+
+        "artifacts": {
+          "type": "array",
+          "description": "Upstream artifacts (PLAN/ARCHITECTURE) with relevant sections noted",
+          "items": { "$ref": "#/$defs/artifactRef" }
+        },
+
+        "components": {
+          "type": "array",
+          "description": "Existing components that should be reused (not regenerated). From graph.json lookup.",
+          "items": { "$ref": "#/$defs/componentRef" }
+        },
+
+        "api": {
+          "type": "array",
+          "description": "API modules and functions relevant to this task",
+          "items": { "$ref": "#/$defs/apiRef" }
+        },
+
+        "rules": {
+          "type": "array",
+          "description": "Mandatory constraints that must be followed",
+          "items": { "$ref": "#/$defs/ruleEntry" }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "knowledgeEntry": {
+      "type": "object",
+      "required": ["capability", "pattern", "source"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "description": "Capability label from knowledge-index.json"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "The actual convention/pattern — Generator injects this directly. Example: 'PageTable + SchemaTable + SchemaSearch'"
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hard constraints within this pattern. Example: ['pageIndex/pageSize 数字类型', 'el-mp 命名空间']"
+        },
+        "anti_pattern": {
+          "type": "string",
+          "description": "What NOT to do. Example: '不要手写 el-table + el-pagination'"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source file in .project-knowledge/"
+        },
+        "confidence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+
+    "artifactRef": {
+      "type": "object",
+      "required": ["type", "path"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["planning", "design", "review"]
+        },
+        "path": { "type": "string" },
+        "sections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Which sections are relevant for Generator. Example: ['Goal','Scope','Task Breakdown'] — skip 'Risk Assessment','Dependency Graph'"
+        },
+        "confidence": { "type": "integer" }
+      }
+    },
+
+    "componentRef": {
+      "type": "object",
+      "required": ["name", "path"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "usage": {
+          "type": "string",
+          "description": "How to use it. Example: 'v-model:visible + #footer 插槽'"
+        },
+        "import_path": {
+          "type": "string",
+          "description": "Import path. Example: '@workspace/components/common/DialogWrapper/index.vue'"
+        },
+        "reuse": {
+          "type": "boolean",
+          "description": "true = use existing, false = reference pattern only"
+        }
+      }
+    },
+
+    "apiRef": {
+      "type": "object",
+      "required": ["module", "functions"],
+      "properties": {
+        "module": { "type": "string" },
+        "functions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "conventions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "API conventions to follow. Example: ['export function 风格', 'data.result === \"1\" 判断成功']"
+        },
+        "source": { "type": "string" }
+      }
+    },
+
+    "ruleEntry": {
+      "type": "object",
+      "required": ["rule", "constraint"],
+      "properties": {
+        "rule": { "type": "string" },
+        "constraint": { "type": "string" },
+        "source": { "type": "string" },
+        "blocking": {
+          "type": "boolean",
+          "description": "true = Generator must follow or BLOCK. false = recommendation."
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,8 @@
 
 > Task → Knowledge Graph → Top K → Generator
 > Generator 永远不自己搜索知识库。Resolver 是唯一的检索入口。
+>
+> 📖 **人类读这里**（算法说明） · ⚙️ **Schema: [knowledge-index.schema.json](state/schemas/knowledge-index.schema.json)** · 📍 **输出: `.project-runtime/knowledge-index.json`**
 
 ## 核心原则
 
@@ -40,59 +42,123 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
    - 排序: 按节点在依赖链中的距离（直接依赖 > 间接依赖）
    - 限制: Top K（默认 5，可配置）
    
-5. 输出 knowledge-list.json
+5. 输出 Context Package（`context-package.json`）
 ```
 
-## knowledge-list.json
+## Context Package（主输出，v2.0）
+
+> ⚙️ **Schema: [context-package.schema.json](contracts/context-package.schema.json)**
+
+Context Package 是预消化的知识包。Generator 不再读文件、不再自己判断——直接遍历 `context.knowledge[]`，注入 pattern，遵守 constraints。
+
+**核心转变：**
+
+```
+Before:  knowledge-list.json = ["patterns/table.md", "api/quotaManage.md", ...]
+         Generator → 读每个文件 → 自己 parse → 自己判断用哪个段落 → 不可靠
+
+After:   context-package.json = { knowledge: [{ pattern: "PageTable + SchemaTable", constraints: [...] }], ... }
+         Generator → for (k of knowledge) { 注入 k.pattern; 遵守 k.constraints; 避免 k.anti_pattern } → 可靠
+```
+
+### 示例
+
+Plan: "新增品牌收件人 CRUD 页面" → Resolver 输出：
 
 ```json
 {
-  "plan": "PLAN-credit-activate.md",
-  "generated_by": "knowledge-resolver",
-  "generated_at": "2026-07-28T16:00:00",
-  "max_files": 5,
-  "files": [
-    {
-      "path": "patterns/form.md",
-      "reason": "FormSelect 组件的表单模式",
-      "graph_node": "comp-FormSelect",
-      "distance": 1
-    },
-    {
-      "path": "api/quotaManage.md",
-      "reason": "quotaManage API 模块文档",
-      "graph_node": "api-quotaManage",
-      "distance": 1
-    },
-    {
-      "path": "components/catalog.md",
-      "reason": "已有组件清单",
-      "graph_node": "comp-CustomerTable",
-      "distance": 2
-    },
-    {
-      "path": "patterns/dialog.md",
-      "reason": "FormSelect 依赖 Dialog 组件",
-      "graph_node": "comp-Dialog",
-      "distance": 2
-    },
-    {
-      "path": "rules/frontend-convention.md",
-      "reason": "强制编码约束",
-      "graph_node": null,
-      "distance": 0
-    }
-  ]
+  "plan": "PLAN-quota-mail-config.md",
+  "generatedBy": "knowledge-resolver",
+  "confidence": 91,
+  "context": {
+    "knowledge": [
+      {
+        "capability": "TablePattern",
+        "pattern": "PageTable + SchemaTable + SchemaSearch",
+        "constraints": ["pageIndex/pageSize 数字", "el-mp 命名空间"],
+        "anti_pattern": "不要手写 el-table + el-pagination",
+        "source": "patterns/table.md",
+        "confidence": 92
+      },
+      {
+        "capability": "DialogPattern",
+        "pattern": "DialogWrapper + FormWrapper + setDialogVisible(isNew, data?)",
+        "constraints": ["emit('reloadTab')", "ElMessage.success()"],
+        "anti_pattern": "不要用 el-dialog 裸写",
+        "source": "patterns/dialog.md",
+        "confidence": 88
+      },
+      {
+        "capability": "ApiPattern",
+        "pattern": "export function getXxxPageList(params): Promise<AxiosResponse<T>>",
+        "constraints": ["pageIndex/pageSize", "data.result === '1'", "GET=params POST=data"],
+        "anti_pattern": "不要用 export const 箭头函数 + method 小写",
+        "source": "api/overview.md",
+        "confidence": 90
+      }
+    ],
+    "components": [
+      {
+        "name": "DialogWrapper",
+        "path": "@workspace/components/common/DialogWrapper/index.vue",
+        "usage": "v-model:visible + #footer 插槽",
+        "reuse": true
+      },
+      {
+        "name": "FormWrapper",
+        "path": "@workspace/components/common/FormWrapper/index.vue",
+        "usage": "ref + .validate() 返回 Promise",
+        "reuse": true
+      }
+    ],
+    "api": [
+      {
+        "module": "quotaManage",
+        "functions": ["getBrandRecipientPage", "saveBrandRecipient", "deleteBrandRecipient"],
+        "conventions": ["export function 风格", "baseService URL 前缀"],
+        "source": "api/quotaManage.md"
+      }
+    ],
+    "rules": [
+      {
+        "rule": "workspace-priority",
+        "constraint": "组件从 @workspace/components/ 引入，不碰 src/components/",
+        "blocking": true
+      },
+      {
+        "rule": "defineOptions",
+        "constraint": "每个组件必须 defineOptions({ name: '...' })",
+        "blocking": true
+      }
+    ]
+  }
 }
 ```
 
-**字段说明:**
-| 字段 | 说明 |
-|------|------|
-| `files[].path` | 相对于 `.project-knowledge/` 的文件路径 |
-| `files[].reason` | 为什么需要这个文件（Generator 可据此判断是否适用） |
-| `files[].graph_node` | 关联的 graph.json 节点 ID（可为 null） |
-| `files[].distance` | 在依赖链中的距离（0=强制约束, 1=直接依赖, 2=间接依赖） |
+### Generator 消费方式
+
+```
+1. 读 context-package.json
+2. for (k of context.knowledge):
+     → 注入 k.pattern 作为生成模板
+     → 遵守 k.constraints[]
+     → 避免 k.anti_pattern
+3. for (c of context.components):
+     → if c.reuse → import c.path，不重新生成
+4. for (a of context.api):
+     → 按 a.conventions 生成 API 调用
+5. for (r of context.rules):
+     → if r.blocking → 必须遵守，否则报错
+```
+
+### 与 knowledge-list.json（已废弃）的对比
+
+| | knowledge-list.json (v1) | context-package.json (v2) |
+|---|---|---|
+| 内容 | 文件路径列表 | 预提取的 pattern/约束/组件 |
+| Generator 操作 | 读文件 → 自己理解 | 遍历 → 直接注入 |
+| 依赖 | Generator 需要知道每个文件的结构 | Generator 不需要知道文件在哪 |
+| 可靠性 | 依赖 Generator 的解析能力 | pattern 已提取，Generator 只管执行 |
 
 ## 集成点
 
@@ -111,13 +177,12 @@ Planner 在 Step 4（Reuse Analysis）之后调用 Resolver:
 Generator 启动时:
 
 ```
-1. 读 knowledge-list.json
-2. 只加载 files[].path 列表中的文件
-3. 按 distance 排序加载（distance=0 的规则最先读）
-4. 对每个文件，检查 reason 是否适用当前 Task
-   - 适用 → 完整加载
-   - 不适用 → 跳过
-5. 不知道还有别的知识文件
+1. 读 context-package.json（唯一知识入口）
+2. 遍历 context.knowledge → 直接注入 pattern + 遵守 constraints
+3. 遍历 context.components → reuse=true 的直接 import，不重新生成
+4. 遍历 context.api → 按 conventions 生成 API 调用
+5. 遍历 context.rules → blocking=true 的强制遵守
+6. 不知道文件在哪、不需要 parse markdown、不自己判断用哪个模式
 ```
 
 ### Reviewer 消费
@@ -125,10 +190,10 @@ Generator 启动时:
 Reviewer 审查时:
 
 ```
-1. 读 knowledge-list.json
-2. 验证 Generator 是否正确使用了指定的知识
-3. knowledge-list.json 中的文件被正确引用 → PRAISE
-4. Generator 使用了列表外的文件 → WARN（可能未授权）
+1. 读 context-package.json
+2. 验证 Generator 的代码是否符合 context.knowledge[].pattern
+3. 检查是否使用了 context.components[].reuse=true 的组件
+4. context.rules[].blocking=true 的约束被违反 → BLOCKER
 ```
 
 ## 降级

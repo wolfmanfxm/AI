@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fang-skills/project-suite/runtime/state/schemas/knowledge-index.schema.json",
+  "title": "Knowledge Index",
+  "description": "Capability-based knowledge lookup schema. Maps capability labels to knowledge files.",
+  "type": "object",
+  "required": ["schemaVersion", "generatedBy", "generatedAt", "capabilities"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for forward compatibility"
+    },
+    "generatedBy": {
+      "type": "string",
+      "const": "project-analyzer"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Capability label → definition mapping",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description", "files", "keywords", "confidence"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "One-line summary of what this capability covers"
+          },
+          "files": {
+            "type": "array",
+            "description": "Relative paths under .project-knowledge/",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Search keywords (Chinese + English)",
+            "items": { "type": "string" },
+            "minItems": 2
+          },
+          "confidence": {
+            "type": "integer",
+            "description": "Confidence score 0-100",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "depends_on": {
+            "type": "array",
+            "description": "Prerequisite capabilities that should be loaded first",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "description": "Chinese shorthand → capability name mapping",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

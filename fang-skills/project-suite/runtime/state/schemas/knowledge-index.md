@@ -2,6 +2,8 @@
 
 > Capability-based knowledge lookup。将"按文件路径读知识"升级为"按能力标签查询知识"。
 > Skill 不需要知道 `.project-knowledge/` 的目录结构——只需要声明需要什么能力。
+>
+> 📖 **人类读这里** · ⚙️ **Schema: [knowledge-index.schema.json](knowledge-index.schema.json)** · 📍 **输出: `.project-runtime/knowledge-index.json`**
 
 ## 设计目标
 

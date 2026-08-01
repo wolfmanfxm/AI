@@ -65,10 +65,11 @@ description: >
 ### Discover
 
 1. 读项目知识库 + PLAN.md/ARCHITECTURE.md
-2. **Graph 查询** → [Graph Query Protocol](../../runtime/contracts/graph-query.md)：
-   - `findNode("component", <当前组件>)` → 确认所属模块
-   - `findProducers(<当前组件>)` → 了解依赖的上游 API/Store
-   - `findNode("api", <关键词>)` → 已有 API 直接复用，不重复创建
+2. **Graph 查询** → [Graph Query Protocol](../../runtime/contracts/graph-query.md)。不搜索代码库，查 graph.json 即可：
+   - `findNode("component", <目标组件>)` → **已存在 → 不生成**，标记 `[REUSE]`，输出 import 路径
+   - `findNode("api", <目标函数>)` → **已存在 → 不复创建**，直接 import
+   - `findProducers(<当前模块>)` → 了解已有上游 API/Store，复用不重建
+   - 仅 graph.json 中不存在的组件/API → 进入生成流程
 3. 🔴 代码存在性检查 → [references/code-audit.md](references/code-audit.md)
 4. 找类似实现，确认技术栈
 5. 🔴 CHECKPOINT — 展示过滤后的改动范围（新建/修改文件清单+预估行数），用户确认后进入 Execute

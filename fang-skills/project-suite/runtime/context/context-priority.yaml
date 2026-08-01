@@ -1,0 +1,136 @@
+# Context Priority — Machine Readable Spec v1.0.0
+#
+# 从 context-priority.md 提取的可执行版本。
+# Skill 可以直接 YAML.parse() 然后按规则加载/校验/合并上下文。
+#
+# 人类读 .md（为什么这样设计）
+# 机器读 .yaml（执行这个规则）
+
+version: "1.0.0"
+
+# ═══ Source Priority Stack ═══
+# 按 index 升序：index 越小优先级越高（1 = 最高）
+# Skill 加载时从上到下合并，高优先级覆盖低优先级
+
+sources:
+  - index: 1
+    name: user_prompt
+    description: 用户显式指令
+    merge: override            # 用户说了算，覆盖一切
+  - index: 2
+    name: project_runtime
+    description: .project-runtime/ 项目状态与上游产出
+    merge: override
+  - index: 3
+    name: project_knowledge
+    description: .project-knowledge/ 结构化知识
+    merge: append              # 知识叠加不覆盖
+  - index: 4
+    name: claude_md
+    description: CLAUDE.md 项目强制约束
+    merge: override
+  - index: 5
+    name: knowledge_vault
+    description: Knowledge Vault 跨项目经验
+    merge: append
+  - index: 6
+    name: skill_defaults
+    description: Skill 内置默认值
+    merge: ignore              # 最低优先级，所有源都可以覆盖
+
+# ═══ Field Priority ═══
+# context.json 字段分级。下游 skill 的 Gate 行为：
+
+fields:
+  # 🔴 REQUIRED — 缺失则 BLOCK（拒绝执行）
+  required:
+    - path: techStack.framework
+      why: 决定语法/组件模式
+      affects: [generator, refactorer]
+    - path: techStack.language
+      why: 决定 TS/JS 语法
+      affects: [generator, reviewer]
+    - path: paths.sourceRoots
+      why: 决定代码在哪
+      affects: [all]
+    - path: paths.aliases
+      why: 决定 import 路径
+      affects: [generator]
+
+  # 🟡 IMPORTANT — 缺失则 DEGRADE（降级 + 标注 ⚠️）
+  important:
+    - path: techStack.uiLibrary
+      fallback: Element Plus
+      affects: [generator]
+    - path: techStack.buildTool
+      fallback: Vite
+      affects: [generator]
+    - path: conventions.componentStyle
+      fallback: "<script setup lang=\"ts\">"
+      affects: [generator]
+    - path: conventions.apiClient
+      fallback: fetch
+      affects: [generator]
+    - path: conventions.apiParams.pagination
+      fallback: { pageIndex: number, pageSize: number }
+      affects: [generator, reviewer]
+    - path: conventions.errorDisplay
+      fallback: console.error
+      affects: [generator]
+    - path: modules.views
+      fallback: []
+      affects: [generator, planner]
+    - path: modules.components.global
+      fallback: []
+      affects: [generator]
+
+  # 🟢 OPTIONAL — 缺失则 SKIP（静默）
+  optional:
+    - techStack.microFrontend
+    - modules.stores
+    - modules.apis
+    - quality.consoleLogTotal
+    - quality.unusedComponents
+    - techStack.cssPreprocessor
+    - conventions.formPattern
+
+# ═══ Gate Decision Tree ═══
+# Skill 启动时的 context 校验流程（可编程）
+
+gate:
+  check_context_exists:
+    exists:    → check_required
+    missing:   → try_extract_from_knowledge
+
+  check_required:
+    all_present:  → check_important
+    any_missing:  → action: BLOCK
+                    message: "🔴 context.json 缺少 REQUIRED: {fields}"
+                    fix: "运行 /project-analyzer"
+
+  check_important:
+    all_present:  → action: PASS
+    any_missing:  → action: DEGRADE
+                    message: "🟡 context.json 缺少: {fields}"
+                    fallback: "使用默认值 {fallbacks}"
+                    fix: "建议运行 /project-analyzer"
+
+  try_extract_from_knowledge:
+    success:  → action: DEGRADE
+                message: "⚠️ 从 .project-knowledge/ 推断 context"
+    failure:  → if_skill_is_generator: BLOCK
+                else: DEGRADE
+
+# ═══ Merge Rules ═══
+# 当多个 source 提供同一字段时的处理
+
+merge_rules:
+  override:
+    description: 高优先级源直接覆盖低优先级
+    used_by: [user_prompt, project_runtime, claude_md]
+  append:
+    description: 数组合并（去重），对象浅合并
+    used_by: [project_knowledge, knowledge_vault]
+  ignore:
+    description: 仅在没有其他源提供此字段时使用
+    used_by: [skill_defaults]

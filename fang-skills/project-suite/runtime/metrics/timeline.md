@@ -1,6 +1,8 @@
 # Timeline Protocol v1.0.0
 
 > 执行链路可观测。记录每个 Skill 的运行指标，解决"哪个 Skill 最慢？哪个最容易失败？"只能凭感觉的问题。
+>
+> 📖 **人类读这里** · ⚙️ **Schema: [timeline.schema.json](timeline.schema.json)** · 📍 **输出: `.project-runtime/metrics/timeline.json`**
 
 ## 定位
 

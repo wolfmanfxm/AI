@@ -19,21 +19,26 @@
 | [checkpoint.md](engine/checkpoint.md) | 断点续传协议，确保 Skill 中断后可从 manifest 恢复 |
 | [error-recovery.md](engine/error-recovery.md) | 异常分级（WARNING/DEGRADED/BLOCKED/FATAL）与恢复策略 |
 | [scheduler.md](engine/scheduler.md) | 调度器设计文档，DAG 构建与 Wave 批次执行（配置已迁至 YAML） |
+| [confidence-gate.md](engine/confidence-gate.md) | 📖 Confidence 消费端行为（PASS/REVIEW/GATE/BLOCK） |
+| [confidence.yaml](engine/confidence.yaml) | ⚙️ **可执行**：每个 Skill 的加减分规则 + Gate 阈值 |
 
 ### `context/` — 上下文协议
 
 | 文件 | 说明 |
 |------|------|
 | [context.md](context/context.md) | context.json Schema 定义，Skill 间传递项目知识的标准协议 |
-| [context-priority.md](context/context-priority.md) | 上下文来源优先级栈（User Prompt > runtime > knowledge > CLAUDE.md > Vault） |
+| [context-priority.yaml](context/context-priority.yaml) | ⚙️ **可执行**：优先级栈 + 字段校验 + Gate 决策树 |
+| [context-priority.md](context/context-priority.md) | 📖 **人类读**：优先级设计理由 |
 | [context-resolution.md](context/context-resolution.md) | context.json 与当前代码不一致时的裁决规则（代码事实 > context.json） |
-| [merge.md](context/merge.md) | 跨源知识冲突的合并策略（override / append / ignore） |
+| [merge.md](context/merge.md) | 📖 跨源冲突的合并策略（为什么 override/append/ignore） |
+| [merge.yaml](context/merge.yaml) | ⚙️ **可执行**：逐源策略 + 冲突裁决优先级 + 统一加载流程 |
 
 ### `contracts/` — 接口契约
 
 | 文件 | 说明 |
 |------|------|
 | [skill-io.md](contracts/skill-io.md) | Skill 统一输入输出格式（4 入口：context/state/task/knowledge） |
+| [context-package.schema.json](contracts/context-package.schema.json) | ⚙️ **可执行**：Generator 直接消费的预消化知识包 |
 | [graph-query.md](contracts/graph-query.md) | Knowledge Graph 的 7 个标准查询协议（零依赖，grep/jq 直查） |
 
 ### `state/` — 状态与知识生命周期
@@ -186,3 +191,24 @@ knowledge-resolver.md ──→ graph-query.md
 1. [orchestration.md](protocols/orchestration.md) — 理解核心模式
 2. [state.md](state/state.md) — 理解状态层
 3. [workflows/](workflows/) — 浏览工作流模板了解实际用法
+
+---
+
+## Capability Map（"我要改 X" → 读什么）
+
+> 20+ 个协议文件，不需要全记住。按你的目标查这张地图。
+
+| 我想做什么 | 先读 | 再读 | 可能需要 |
+|-----------|------|------|---------|
+| **新增一个 Skill** | [capabilities.yaml](registry/capabilities.yaml) | [skill-io.md](contracts/skill-io.md) | [state-machine.md](engine/state-machine.md) |
+| **修改 Knowledge 生命周期** | [state.md](state/state.md) | [promotion-rules.md](state/schemas/promotion-rules.md) | [knowledge-scoring.md](state/schemas/knowledge-scoring.md) |
+| **调整上下文优先级** | [context-priority.md](context/context-priority.md) | [context-resolution.md](context/context-resolution.md) | [merge.md](context/merge.md) |
+| **改调度/DAG 依赖** | [scheduler.yaml](config/scheduler.yaml) | [capabilities.yaml](registry/capabilities.yaml) | [scheduler.md](engine/scheduler.md) |
+| **改质量门禁** | [gates.yaml](config/gates.yaml) | [confidence-gate.md](engine/confidence-gate.md) | [state-machine.md](engine/state-machine.md) |
+| **改产出物类型** | [artifact-types.yaml](artifacts/artifact-types.yaml) | [skill-io.md](contracts/skill-io.md) | SUITE_SPEC.md |
+| **改断点续传** | [checkpoint.md](engine/checkpoint.md) | [manifest.schema.json](../shared/schemas/manifest.schema.json) | [state.md](state/state.md) |
+| **改知识图谱查询** | [graph-query.md](contracts/graph-query.md) | [graph.schema.json](../shared/schemas/graph.schema.json) | [knowledge-resolver.md](knowledge-resolver.md) |
+| **改错误恢复策略** | [error-recovery.md](engine/error-recovery.md) | [state-machine.md](engine/state-machine.md) | [checkpoint.md](engine/checkpoint.md) |
+| **排查 Skill 间通信问题** | [state.md](state/state.md) | [context.md](context/context.md) | [skill-io.md](contracts/skill-io.md) |
+| **查 Skill 性能/成功率** | [timeline.md](metrics/timeline.md) | [timeline.schema.json](metrics/timeline.schema.json) | [confidence-gate.md](engine/confidence-gate.md) |
+| **理解整体架构** | [orchestration.md](protocols/orchestration.md) | [scheduler.md](engine/scheduler.md) | [state.md](state/state.md) |

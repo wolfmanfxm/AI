@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fang-skills/project-suite/runtime/metrics/timeline.schema.json",
+  "title": "Timeline — Execution Observability",
+  "description": "Records every skill run with timing, quality, and dependency data. Skills append runs; aggregates are auto-computed.",
+  "type": "object",
+  "required": ["schemaVersion", "project", "runs"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "project": { "type": "string", "description": "Project name from analysis-config.json" },
+    "runs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/run" }
+    },
+    "aggregates": {
+      "type": "object",
+      "description": "Auto-computed on each append",
+      "properties": {
+        "totalRuns": { "type": "integer" },
+        "totalDurationMs": { "type": "integer" },
+        "bySkill": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/skillAggregate" }
+        },
+        "byStatus": {
+          "type": "object",
+          "properties": {
+            "completed": { "type": "integer" },
+            "degraded": { "type": "integer" },
+            "blocked": { "type": "integer" },
+            "failed": { "type": "integer" }
+          }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "run": {
+      "type": "object",
+      "required": ["runId", "skill", "status", "timing", "quality"],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Unique id: run-YYYYMMDD-NNN"
+        },
+        "skill": {
+          "type": "string",
+          "enum": ["project-analyzer","project-planner","project-architect","project-generator","project-tester","project-reviewer","project-refactorer","project-documenter","project-releaser"]
+        },
+        "wave": {
+          "type": "integer",
+          "description": "DAG wave number (0-8)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed","degraded","blocked","failed"]
+        },
+        "timing": {
+          "type": "object",
+          "required": ["startedAt","finishedAt","durationMs"],
+          "properties": {
+            "startedAt":  { "type": "string", "format": "date-time" },
+            "finishedAt": { "type": "string", "format": "date-time" },
+            "durationMs": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "scope":       { "type": "string" },
+            "mode":        { "type": "string" },
+            "filesScanned":{ "type": "integer" },
+            "dimensions":  { "type": "array", "items": { "type": "string" } },
+            "planFile":    { "type": "string" },
+            "capabilitiesUsed": { "type": "array", "items": { "type": "string" } },
+            "knowledgeFilesRead": { "type": "integer" },
+            "contextSizeEstimate": { "type": "string" }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "filesGenerated": { "type": "integer" },
+            "artifacts":      { "type": "array", "items": { "type": "string" } },
+            "linesOfCode":    { "type": "integer" },
+            "approxTokens":   { "type": "integer" }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "required": ["confidence"],
+          "properties": {
+            "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "warnings":   { "type": "integer", "minimum": 0 },
+            "errors":     { "type": "integer", "minimum": 0 },
+            "checkpointsPassed": { "type": "integer" },
+            "degradedDimensions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "properties": {
+            "upstreamSkills":         { "type": "array", "items": { "type": "string" } },
+            "upstreamConfidenceMin":  { "type": "integer" },
+            "knowledgeFilesRead":     { "type": "array", "items": { "type": "string" } },
+            "knowledgeCapabilitiesUsed": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "skillAggregate": {
+      "type": "object",
+      "properties": {
+        "runs":          { "type": "integer" },
+        "avgDurationMs": { "type": "integer" },
+        "avgConfidence": { "type": "integer" },
+        "failures":      { "type": "integer" }
+      }
+    }
+  }
+}

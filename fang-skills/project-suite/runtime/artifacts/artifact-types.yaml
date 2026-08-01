@@ -12,6 +12,7 @@ types:
   knowledge:
     description: 项目结构化知识（架构/组件/API/模式/编码约定）
     schema: shared/schemas/manifest.schema.json
+    schema_version: "1.2.0"
     location: .project-knowledge/
     lifecycle: [draft, verified, accepted, archived]
     producer: project-analyzer
@@ -20,6 +21,7 @@ types:
   context:
     description: 下游 skill 标准项目上下文（技术栈/路径别名/约定/模块清单）
     schema: runtime/context/context.md
+    schema_version: "1.0.0"
     location: .project-knowledge/context.json
     producer: project-analyzer
     consumers: [project-planner, project-architect, project-generator, project-reviewer, project-tester, project-refactorer, project-documenter]
@@ -27,6 +29,7 @@ types:
   graph:
     description: 项目结构关系图谱（节点+边）
     schema: ../../shared/schemas/graph.schema.json
+    schema_version: "1.0.0"
     location: .project-knowledge/graph.json
     producer: project-analyzer
     consumers: [project-planner, project-architect, project-generator, project-reviewer]
@@ -34,6 +37,7 @@ types:
   planning:
     description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）
     schema: skills/project-planner/prompts/task-breakdown.md
+    schema_version: "1.0.0"
     location: proposals/PLAN-*.md | artifacts/plans/
     producer: project-planner
     consumers: [project-architect, project-generator, project-reviewer, project-tester]
@@ -41,42 +45,49 @@ types:
   design:
     description: 架构决策记录（ADR 格式）— 技术选型/模块设计/API 契约
     schema: skills/project-architect/SKILL.md
+    schema_version: "1.0.0"
     location: decisions/ARCHITECTURE-*.md | artifacts/decisions/
     producer: project-architect
     consumers: [project-generator, project-reviewer]
 
   implementation:
     description: 生产级代码（.vue / .ts / .js）
+    schema_version: "1.0.0"
     location: workspace/ | src/ | 项目源码目录
     producer: project-generator
     consumers: [project-tester, project-reviewer, project-refactorer, project-documenter]
 
   test:
     description: 测试文件 + 测试报告
-    location: "*.test.ts | *.spec.ts + reports/TEST-REPORT.md"
+    schema_version: "1.0.0"
+    location: "*.test.ts | *.spec.ts + .project-knowledge/reports/TEST-REPORT.md"
     producer: project-tester
     consumers: [project-reviewer, project-refactorer, project-releaser]
 
   review:
     description: 五轴审查报告（分级问题 + 修复建议 + AC 对照）
-    location: reports/REVIEW-*.md | artifacts/reviews/
+    schema_version: "1.0.0"
+    location: .project-knowledge/reports/REVIEW-*.md | artifacts/reviews/
     producer: project-reviewer
     consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
 
   refactored-code:
     description: 重构后代码 + REFACTOR.md（变更记录 + 改善指标）
-    location: workspace/ | src/ + reports/REFACTOR.md
+    schema_version: "1.0.0"
+    location: workspace/ | src/ + .project-knowledge/reports/REFACTOR.md
     producer: project-refactorer
     consumers: [project-reviewer, project-tester]
 
   documentation:
     description: API/组件/Changelog 文档（.md + Evidence Header）
+    schema_version: "1.0.0"
     location: api/ | components/ | CHANGELOG.md
     producer: project-documenter
     consumers: [project-releaser]
 
   release:
     description: 发布产物（版本建议 + Changelog + 检查清单）
+    schema_version: "1.0.0"
     location: CHANGELOG.md + RELEASE-CHECKLIST.md
     producer: project-releaser
     consumers: []
@@ -84,6 +95,7 @@ types:
   state:
     description: 项目持久化状态（执行历史 + 知识生命周期 + 置信度追踪）
     schema: runtime/state/state.md
+    schema_version: "1.0.0"
     location: .project-runtime/state.json + knowledge.json
     producer: null
     consumers: [all]

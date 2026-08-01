@@ -1,6 +1,8 @@
 # Context Priority
 
 > 两个维度：**Source Priority**（哪个来源更权威）+ **Field Priority**（哪些字段必须传）。
+>
+> 📖 **人类读这里**（为什么这样设计） · ⚙️ **机器读 [context-priority.yaml](context-priority.yaml)**（执行规则）
 
 ## Source Priority（跨源优先级栈）
 

@@ -1,0 +1,129 @@
+# Context Merge Strategy — Machine Readable Spec v1.0.0
+#
+# 跨源知识冲突时的合并规则。所有 Skill 遵循同一策略。
+# Skill 加载时: YAML.parse() → 按 sources 顺序加载 → 按 conflict_resolution 裁决冲突。
+
+version: "1.0.0"
+
+# ═══ Merge Operations ═══
+operations:
+  override:
+    description: 高优先级完全覆盖低优先级
+    used_when: 用户指令 > 项目配置；代码事实 > context.json；安全约束 > 一切
+  append:
+    description: 高优先级追加到低优先级之后，不去重
+    used_when: 用户补充需求；多个参考实现；跨项目经验叠加
+  ignore:
+    description: 跳过该源，不参与合并
+    used_when: 知识库缺失；Vault 不可达
+
+# ═══ Per-Source Strategy ═══
+# 加载顺序 = index 升序。每个源指定对每个字段类别的 merge 策略。
+
+sources:
+  - index: 1
+    name: user_prompt
+    strategy:
+      constraints:   override    # 用户显式指令覆盖一切（安全约束除外）
+      references:    append
+      defaults:      ignore
+
+  - index: 2
+    name: project_runtime
+    strategy:
+      constraints:   append      # 上游产出叠加到需求
+      references:    append
+      defaults:      ignore
+
+  - index: 3
+    name: project_knowledge
+    strategy:
+      constraints:   override    # 项目约定覆盖通用默认
+      references:    append
+      defaults:      override
+
+  - index: 4
+    name: claude_md
+    strategy:
+      constraints:   override    # 强制约束，不可被任何源 override
+      references:    ignore
+      defaults:      ignore
+
+  - index: 5
+    name: knowledge_vault
+    strategy:
+      constraints:   ignore
+      references:    append      # 跨项目经验追加
+      defaults:      ignore
+
+  - index: 6
+    name: skill_defaults
+    strategy:
+      constraints:   ignore      # 仅上层全部缺失时兜底
+      references:    ignore
+      defaults:      ignore
+
+# ═══ Conflict Resolution ═══
+# 加载顺序（读）≠ 冲突裁决（谁赢）。两个独立维度。
+# 以下按裁决优先级从高到低排列（1 = 最高优先，谁也覆盖不了它）。
+
+conflict_resolution:
+  - priority: 1
+    source: claude_md_constraints
+    description: 安全/编码强制约束
+    can_be_overridden_by: []       # 无人能覆盖
+
+  - priority: 2
+    source: user_explicit
+    description: 用户显式指令
+    can_be_overridden_by: []       # 可覆盖除安全约束外的所有
+
+  - priority: 3
+    source: code_fact
+    description: grep/read 确认的代码事实
+    can_be_overridden_by: [user_explicit]
+
+  - priority: 4
+    source: project_knowledge
+    description: .project-knowledge/ 结构化知识
+    can_be_overridden_by: [user_explicit, code_fact]
+
+  - priority: 5
+    source: knowledge_vault
+    description: 跨项目经验
+    can_be_overridden_by: [user_explicit, code_fact, project_knowledge]
+
+  - priority: 6
+    source: skill_defaults
+    description: Skill 内置默认值
+    can_be_overridden_by: [user_explicit, code_fact, project_knowledge, knowledge_vault]
+
+# ═══ Unified Loading Flow ═══
+# 所有 Skill 启动时执行此流程
+
+loading_flow:
+  - step: 1
+    source: user_prompt
+    action: 读入种子上下文
+
+  - step: 2
+    source: project_runtime
+    action: append 当前状态 + 上游产出
+
+  - step: 3
+    source: project_knowledge
+    action:
+      constraints: override       # conventions/rules → 覆盖
+      references: append          # patterns/components → 追加
+
+  - step: 4
+    source: claude_md
+    action: override              # 项目强制约束，最高优先级
+
+  - step: 5
+    source: knowledge_vault
+    action: append                # 跨项目经验，可选
+
+  - step: 6
+    source: skill_defaults
+    action: ignore                # 仅上层全部缺失时兜底

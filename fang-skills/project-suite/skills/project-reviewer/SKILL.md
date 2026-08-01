@@ -83,11 +83,15 @@ description: >
 
 ### Execute
 
-5. **五轴扫描** → 每轴逐文件检查，每个发现标注 `file:line` + 修复方案
-6. **AC 逐条验证** → 对照 `# Acceptance Criteria`，标注 ✅/❌/⚠️
-7. **Scope 边界检查** → 变更是否超出 PLAN.md `# Scope`，超出标注 `[SCOPE CREEP]`
-8. **Candidate 验证**（若 Generator 产出了 Candidate 知识）→ 验证准确性 → 标注 confidence → 满足 R3（> 85）→ 更新 knowledge.json
-9. 🔴 CHECKPOINT — 展示审查摘要（BLOCKER/HIGH/MEDIUM/LOW/PRAISE 计数），用户确认后生成 REVIEW.md
+5. **Graph 结构检查** → [Graph Query Protocol](../../runtime/contracts/graph-query.md)：
+   - `findConsumers(<变更文件>)` → 本次改动影响哪些模块
+   - `findTransitiveDeps(<变更模块>)` → 传递依赖深度 ≤ 2，检查是否引入循环依赖
+   - 循环依赖检测命中 → 🔴 BLOCKER（架构级问题）
+6. **五轴扫描** → 每轴逐文件检查，每个发现标注 `file:line` + 修复方案
+7. **AC 逐条验证** → 对照 `# Acceptance Criteria`，标注 ✅/❌/⚠️
+8. **Scope 边界检查** → 变更是否超出 PLAN.md `# Scope`，超出标注 `[SCOPE CREEP]`
+9. **Candidate 验证**（若 Generator 产出了 Candidate 知识）→ 验证准确性 → 标注 confidence → 满足 R3（> 85）→ 更新 knowledge.json
+10. 🔴 CHECKPOINT — 展示审查摘要（BLOCKER/HIGH/MEDIUM/LOW/PRAISE 计数），用户确认后生成 REVIEW.md
 
 ### Output
 

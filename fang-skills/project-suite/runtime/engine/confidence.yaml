@@ -1,0 +1,172 @@
+# Confidence Spec — Machine Readable v1.0.0
+#
+# 贯穿整个 Runtime 的可信度体系。
+# 每个 Skill 输出时按 deduction_rules 计算 confidence，写入 state.json。
+
+version: "1.0.0"
+
+# ═══ Confidence Calculation ═══
+# 所有 Skill 统一的加减分规则（从 skill-io.md 提取）
+
+deduction_rules:
+  - id: D1
+    condition: 输入信息模糊或不完整
+    penalty: -20
+    example: "PLAN.md 缺失 Scope → architect confidence -20"
+
+  - id: D2
+    condition: 依赖的 knowledge 状态非 Accepted
+    penalty: -15
+    example: "引用了 lifecycle=draft 的知识 → -15"
+
+  - id: D3
+    condition: 上游 skill confidence < 70
+    penalty: -15
+    example: "planner confidence=55 → generator -15"
+
+  - id: D4
+    condition: 遇到未预见的边界条件
+    penalty: -10
+    example: "用户的需求在 task-breakdown 模板中没有对应类型"
+
+  - id: D5
+    condition: 使用了降级/fallback 模式
+    penalty: -10
+    example: "knowledge-index.json 缺失 → 降级为文件路径模式"
+
+  - id: D6
+    condition: 每个未验证假设
+    penalty: -5
+    max_penalty: -20
+    example: "\"假设后端 API 已就绪\" — 4 个未验证假设 → -20"
+
+# ═══ Confidence Gate ═══
+# 消费端行为。以前 confidence 只是数字，现在决定下游能不能执行。
+
+gates:
+  - level: PASS
+    threshold: 90
+    behavior:
+      downstream: 正常进入，无需 Review
+      release: 允许发布
+    color: 🟢
+
+  - level: REVIEW
+    threshold: 70
+    behavior:
+      downstream: 建议 Review，不阻断
+      release: CHANGELOG 标注 "⚠️ 部分环节 < 90"
+    color: 🟡
+
+  - level: GATE
+    threshold: 40
+    behavior:
+      downstream: Reviewer 强制检查后才能进 Generator；禁止进入 Releaser
+      release: 🔴 禁止发布
+    color: 🟠
+
+  - level: BLOCK
+    threshold: 0
+    behavior:
+      downstream: 拒绝执行下游，state.json 写入 blocker
+      release: 🔴 禁止发布
+    color: 🔴
+
+# ═══ Per-Skill Confidence Profile ═══
+# 每个 Skill 特有的 confidence 影响因素
+
+skills:
+  project-analyzer:
+    base_confidence: 95
+    primary_factors:
+      - 扫描是否覆盖全部 scope
+      - 是否有 agent 超时或返回空
+    gate_for_downstream: 70       # confidence < 70 → downstream BLOCK
+
+  project-planner:
+    base_confidence: 90
+    primary_factors:
+      - 需求信息完整度
+      - 现状探查覆盖率
+      - 未验证假设数量
+    output_rules:
+      confidence_lt_40: 拒绝产出完整 PLAN，只输出 Goal + Scope + Gap List
+
+  project-architect:
+    base_confidence: 88
+    primary_factors:
+      - 现状核实覆盖率
+      - 候选方案对比充分度
+      - 决策理由明确度
+    gate_for_generator: 70        # confidence < 70 → Generator DEGRADE
+
+  project-generator:
+    base_confidence: 85
+    primary_factors:
+      - knowledge 命中率（context-package 覆盖率）
+      - 上游 confidence 最低值
+      - 代码存在性检查通过率
+    output_rules:
+      confidence_lt_70: 必须 Review 后才能 merge
+      confidence_gte_95: 直通（PASS）
+
+  project-tester:
+    base_confidence: 82
+    primary_factors:
+      - 测试框架匹配度
+      - Mock 策略完整性
+      - 测试执行通过率
+    output_rules:
+      confidence_lt_70: 测试报告标注 ⚠️
+
+  project-reviewer:
+    base_confidence: 85
+    primary_factors:
+      - 审查覆盖比例
+      - AC 验证完整性
+      - 误报风险（不熟悉框架/语言）
+    note: 自身不受 gate，但检查上游 confidence
+
+  project-refactorer:
+    base_confidence: 80
+    primary_factors:
+      - 测试覆盖率
+      - 圈复杂度改善幅度
+      - safety-protocol 执行完整度
+    output_rules:
+      confidence_lt_70: 无测试保护 → 不重构
+
+  project-documenter:
+    base_confidence: 88
+    primary_factors:
+      - 源码可读性
+      - JSDoc 覆盖度
+      - 已有文档风格匹配度
+    output_rules:
+      confidence_lt_60: 标注推断项
+
+  project-releaser:
+    base_confidence: 90
+    primary_factors:
+      - 全链路 confidence 最低值
+      - conventional commit 覆盖率
+      - REVIEW.md 状态
+    output_rules:
+      任一上游_lt_40: 🔴 BLOCK 禁止发布
+      任一上游_lt_70: 🟠 GATE 禁止发布
+      全部_gte_90: 🟢 PASS
+
+# ═══ Runtime Integration ═══
+# Skill 在 Output 阶段写入 state.json 时附带 confidence + gate 判定
+
+output:
+  state_json_fields:
+    - history[].confidence       # 本 Skill 自评 confidence
+    - history[].gate             # PASS / REVIEW / GATE / BLOCK（Runtime 计算）
+    - history[].gate_reason      # 人类可读原因
+    - blockers[]                 # confidence < 40 或 GATE 触发时追加
+
+  timeline_json_fields:
+    - quality.confidence         # 每次 run 记录
+    - quality.warnings
+    - quality.errors
