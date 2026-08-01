@@ -83,6 +83,18 @@ description: >
 | JSDoc/JSDoc 注释缺失或不完整 | 从类型定义推断参数/返回值 | 标注 `[推断]`，不确定的标 `[待补充]` |
 | 代码逻辑复杂无法简单描述 | 写概要 + 标注 `详见: file:line` | 不编造不完整的逻辑描述 |
 
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| API 文档 | [prompts/api-doc.md](prompts/api-doc.md) |
+| 组件文档 | [prompts/component-doc.md](prompts/component-doc.md) |
+| README 生成 | [prompts/readme-gen.md](prompts/readme-gen.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 文档风格 | [references/doc-style-guide.md](references/doc-style-guide.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+
 ## 完成后下一步
 
 ```

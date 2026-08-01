@@ -98,6 +98,18 @@ description: >
 | API 文档路径与代码不一致 | 标注为 `⤳ 待确认` 外部依赖，记录在 Dependency Graph |
 | 用户中途修改需求范围 | 重新划定 Scope，标记已废弃任务为 `[deprecated]`，AskUserQuestion 确认新范围 |
 
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 任务拆解 | [prompts/task-breakdown.md](prompts/task-breakdown.md) |
+| 工作量估算 | [prompts/estimation.md](prompts/estimation.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 现状探查 | [references/code-audit.md](references/code-audit.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+| 触发词 | [references/trigger-words.md](references/trigger-words.md) |
+
 ## 完成后下一步
 
 ```

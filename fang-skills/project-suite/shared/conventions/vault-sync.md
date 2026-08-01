@@ -12,7 +12,12 @@
 2. 目标目录：`{vaultPath}/Projects/{projectName}/`
 3. `rsync -av --include='*/' --include='*.md' --include='*.json' --exclude='*' .project-knowledge/ "{vaultPath}/Projects/{projectName}/"`
 4. 保留 Vault 独有文件（不删除不覆盖）
-5. 验证：`find "{vaultPath}/Projects/{projectName}/" -type f | wc -l`
+5. 同步后验证：
+   - 本地计数：`find .project-knowledge/ -type f \( -name "*.md" -o -name "*.json" \) | wc -l`
+   - Vault 计数：`find "{vaultPath}/Projects/{projectName}/" -type f | wc -l`
+   - 差异 = 本地 - Vault
+   - 差异 ≤ 3 → ✅ 正常（允许 decisions/proposals 中的人工文件不同步）
+   - 差异 > 3 → ⚠️ 在 manifest.json 标注 `⚠️ Vault sync gap: {N} files`
 
 ## 同步内容
 

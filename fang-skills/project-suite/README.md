@@ -5,11 +5,12 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) — 定义了成为一个合格 suite skill 的目录结构、文件契约、质量门禁。
 
-## 当前版本：0.7.0
+## 当前版本：0.7.1
 
 v0.5.0: 职责边界 + AskUserQuestion + 现状探查 + 知识库同步 + 反例黑名单 + Context Protocol
 v0.6.0: Capability Registry + skill.yaml + DAG Scheduler + 自动路由
 v0.7.0: Project Planning Engine — 9 模块 Contract（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）+ Dispatcher Pattern + Knowledge Lifecycle + Unified I/O
+v0.7.1: analyzer v1.3.1 — Finish 4-Phase 重构（强制刷新 JSON + .project-runtime 初始化 + CLAUDE.md 自动更新 + emergence detection + vault sync 验证）
 
 ## Skill 矩阵
 

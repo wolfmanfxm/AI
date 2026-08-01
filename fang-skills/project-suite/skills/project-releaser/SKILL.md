@@ -69,6 +69,7 @@ description: >
    - 输出: 按版本分组的 CHANGELOG.md（Added/Changed/Fixed/Deprecated/Removed）
 3. **发布检查清单** → [prompts/release-checklist.md](prompts/release-checklist.md)
    - 逐项验证：测试通过 / 文档更新 / breaking change 迁移说明 / 回滚方案
+4. 🔴 CHECKPOINT — 展示版本号建议+Changelog摘要+检查清单结果，用户确认后生成发布产物
 
 ### Output
 
@@ -87,6 +88,18 @@ description: >
 | CHANGELOG.md 不存在 | 从 git log 生成全新 CHANGELOG.md | 标注"⚠️ 首次生成，请人工审核" |
 | REVIEW.md 不存在 | 标注"⚠️ 未审查"，继续生成 | 不阻塞 — Changelog 独立于审查状态 |
 | 检测到 breaking change 但无迁移说明 | 在 CHANGELOG 显式标注 BREAKING CHANGE + 生成迁移步骤 | AskUserQuestion 确认是否有遗漏的迁移需求 |
+
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 版本 Bump | [prompts/version-bump.md](prompts/version-bump.md) |
+| Changelog | [prompts/changelog-gen.md](prompts/changelog-gen.md) |
+| 发布检查 | [prompts/release-checklist.md](prompts/release-checklist.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| Semver 指南 | [references/semver-guide.md](references/semver-guide.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 
 ## 完成后下一步
 

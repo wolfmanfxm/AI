@@ -81,6 +81,17 @@ description: >
 | 重构范围过大（>5 文件） | 拆分为多次小重构，每次 1-2 文件 | AskUserQuestion 确认是否一次性重构 |
 | 圈复杂度改善不明显（<20%） | 尝试更激进的手法（提取策略模式、引入多态） | 标注"⚠️ 边际改善"，不强制继续 |
 
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 提取方法 | [prompts/extract-method.md](prompts/extract-method.md) |
+| 简化逻辑 | [prompts/simplify-logic.md](prompts/simplify-logic.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 安全协议 | [references/safety-protocol.md](references/safety-protocol.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+
 ## 完成后下一步
 
 ```

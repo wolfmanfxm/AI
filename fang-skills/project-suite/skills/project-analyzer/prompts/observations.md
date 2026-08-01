@@ -17,7 +17,8 @@
 2. 每个组件的引用次数，与上次对比的趋势
 3. 每个 API 模块的文件数和函数数
 4. 搜索高度相似的文件片段（大项目可跳过）
-5. 搜索零引用组件、大段注释代码
+5. 搜索零引用组件（含 `workspace/components/business/` 层）、大段注释代码
+6. **Emergence Detection**：对比 baseline manifest，检测本次扫描周期内新增的高频组件（引用 > 20 次），标记为 🆕 EMERGING 并建议补充独立文档
 
 ## Output
 `observations/` 下按需创建：`statistics.md`、`component-usage.md`、`api-usage.md`、`duplicate-code.md`、`dead-code.md`

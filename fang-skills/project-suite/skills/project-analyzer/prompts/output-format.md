@@ -73,3 +73,25 @@ sources:
 - 目录初次运行时全部创建
 - 各目录下按分析发现动态创建 `.md` 文件，有内容才建
 - `rules/` `experience/` `playbooks/` `decisions/` 仅创建 index.md
+
+## Refresh Rules（重扫时的更新策略）
+
+| 文件 | 刷新策略 | 触发条件 |
+|------|---------|---------|
+| `statistics.json` | **Always** — 每次扫描强制重新生成 | 任何扫描 |
+| `context.json` | **Always** — 每次扫描强制重新生成，所有数字从 statistics 重新提取 | 任何扫描 |
+| `graph.json` | **Always** — 每次扫描重建节点，自动追加新模块/移除已删模块 | 任何扫描 |
+| `search-index.json` | **Always** — 每次扫描重新提取关键词 | 任何扫描 |
+| `.md` 知识文件 | **On Change** — 仅内容变化时更新，未变化仅更新 `last_scan` | 维度分析发现变化 |
+| `manifest.json` | **Always** — 追加 executionLog，更新 gitCommit/updatedAt/statistics | 任何扫描 |
+| `index.md` | **Always** — 更新导航入口的数字和摘要 | 任何扫描 |
+| `knowledge-health.json` | **Always** — 每次扫描重新检测 | 任何扫描 |
+
+### 反例
+
+| ❌ 错误做法 | ✅ 正确做法 |
+|-----------|-----------|
+| context.json 中 layers.files 用上次缓存的数字 | 从 statistics.byLayer 重新提取 |
+| search-index.json 因为 markdown 没变就不重新生成 | 重新扫描全部 .md 提取关键词 |
+| graph.json 保留旧节点不追加新模块 | 从 modules 列表重建，自动补齐 |
+| "这个文件标记了 unchanged，跳过" | unchanged 只对 .md 生效，JSON 永远强制刷新 |
