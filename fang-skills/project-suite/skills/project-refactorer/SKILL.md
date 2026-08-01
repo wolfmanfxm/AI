@@ -65,7 +65,7 @@ description: >
 
 ### Output
 
-`reports/REFACTOR.md`：
+`.project-knowledge/reports/REFACTOR.md`：
 - 变更清单（每个重构动作 + commit hash）
 - 改善指标（圈复杂度/行数/重复率/依赖深度，Before→After）
 - 测试结果（通过数/失败数/跳过数）

@@ -76,7 +76,7 @@ description: >
 
 ### Output
 
-`decisions/ARCHITECTURE-<topic>.md`
+`.project-knowledge/decisions/ARCHITECTURE-<topic>.md`
 
 ## 失败处理
 

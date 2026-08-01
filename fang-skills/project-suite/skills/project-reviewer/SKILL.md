@@ -91,7 +91,7 @@ description: >
 
 ### Output
 
-`reports/REVIEW-<topic>.md`：问题列表（按 BLOCKER→HIGH→MEDIUM→LOW 排序）+ PRAISE + AC 对照表 + 审查结论
+`.project-knowledge/reports/REVIEW-<topic>.md`：问题列表（按 BLOCKER→HIGH→MEDIUM→LOW 排序）+ PRAISE + AC 对照表 + 审查结论
 
 ## 失败处理
 

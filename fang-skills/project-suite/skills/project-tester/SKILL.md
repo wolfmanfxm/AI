@@ -73,7 +73,7 @@ description: >
 | 文件 | 内容 |
 |------|------|
 | `*.test.ts` / `*.spec.ts` | Given-When-Then / describe-it-expect 结构测试 |
-| `reports/TEST-REPORT.md` | 覆盖率摘要 + AC 逐条对照表 + 失败分析（含 file:line） |
+| `.project-knowledge/reports/TEST-REPORT.md` | 覆盖率摘要 + AC 逐条对照表 + 失败分析（含 file:line） |
 
 ## 失败处理
 

@@ -73,7 +73,7 @@ description: >
 
 ### Output
 
-- `proposals/PLAN-<feature>.md`（9 模块 Contract）
+- `.project-knowledge/proposals/PLAN-<feature>.md`（9 模块 Contract）
 - `knowledge-list.json`（capability 标签清单，Generator 通过 knowledge-index.json 解析到具体文件）
 
 **knowledge-list.json 格式（v2.0）：**
