@@ -33,7 +33,16 @@
 
 ## Phase D — 质量验证与同步
 
-12. knowledge-health.json — 7 种检测（broken_link/empty_document/duplicate_content/outdated_evidence/missing_evidence_header/stale_reference/orphan_knowledge），error>0→manifest ⚠️，warning>5→context ⚠️，不阻断
+12. **knowledge-health.json** — 逐项执行以下检测，将结果写入 `.project-runtime/metrics/knowledge-health.json`：
+
+   a. **broken_link** — 扫描所有 `.md` 中的 `[text](path.md)` → 检查目标文件是否存在。任一不存在 → error。
+   b. **empty_document** — `wc -c < file.md`，< 200 bytes → warning。
+   c. **duplicate_content** — 比较所有 `.md` 的 `# 标题`（大小写归一），完全相同的标题 → warning。
+   d. **outdated_evidence** — 读 Evidence Header `generatedAt`，距今 > 90 天 → warning。
+   e. **missing_evidence_header** — 文件前 5 行无 `generatedAt:` → warning（`index.md` 豁免）。
+   f. **large_file** — `wc -l` > 500 → info。
+
+   error > 0 → manifest 标注 ⚠️；warning > 5 → context.json 标注 ⚠️。不阻断。
 13. CLAUDE.md 统计数字更新 — 读第一行，替换为 statistics.json 最新源文件数+代码行数
 14. Vault 同步 + 验证 — rsync → 对比文件数差异，>3 → 标注 `⚠️ Vault sync gap`
 15. 写 timeline.json

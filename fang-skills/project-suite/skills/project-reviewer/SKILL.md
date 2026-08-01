@@ -28,13 +28,7 @@ description: >
 
 ## 反例黑名单
 
-| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
-|---|---------|-------------|-----------|
-| 1 | **发现问题后动手修改代码** | reviewer 的 diff 与 generator 的修复混在一起，无法追溯 | 只记录 file:line + 修复方案，修复由 generator 或人工执行 |
-| 2 | **没有 file:line 就报告问题** | 开发者找不到问题位置，审查结论无法验证 | 每个发现必须标注精确的 `file:line` 引用 |
-| 3 | **跳过 AC 对照直接审查** | 不知道需求是什么，审查变成主观代码风格评判 | 先读 PLAN.md `# Acceptance Criteria`，逐条验证 |
-| 4 | **BLOCKER 无明确阻断理由** | 滥用最高级别导致审查失信（"狼来了"效应） | 每个 🔴 BLOCKER 必须附：触发条件 + 生产影响 + 必须在合并前修复的理由 |
-| 5 | **仅给负面评价无 PRAISE** | 审查变成挑刺，团队抵触情绪积累 | 值得学习的代码用 🔵 PRAISE 标注，说明好在哪里 |
+→ [references/boundary.md](references/boundary.md)（6 条，含修复代码/缺file:line/跳过AC/BLOCKER无理由/无PRAISE/跳过项目规范）
 
 ## 前置条件
 

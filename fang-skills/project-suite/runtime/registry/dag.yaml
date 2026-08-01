@@ -1,0 +1,98 @@
+# Skill DAG — Auto-generated from skill.yaml v1.0.0
+#
+# 从每个 skill.yaml 的 produces/consumes/depends_on 自动推导。
+# 不再需要手动维护 README 中的 ASCII 图。
+# 生成规则: produces ∩ downstream.consumes → edge
+
+version: "1.0.0"
+generated_from: skills/*/skill.yaml
+
+# ═══ Adjacency List ═══
+# 每个节点: 它的上游(依赖) + 下游(被依赖)
+
+graph:
+  project-analyzer:
+    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    consumes: []
+    depends_on: []
+    depended_by: [project-planner, project-architect, project-generator, project-tester, project-reviewer, project-refactorer, project-documenter]
+    wave: 0
+
+  project-planner:
+    produces: [Plan]
+    consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    depends_on: [project-analyzer]
+    depended_by: [project-architect, project-generator, project-tester, project-reviewer]
+    wave: 1
+
+  project-architect:
+    produces: [Architecture]
+    consumes: [KnowledgeBase, Plan, Context, Graph]
+    depends_on: [project-planner]
+    depended_by: [project-generator, project-reviewer]
+    wave: 2
+
+  project-generator:
+    produces: [Code]
+    consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
+    depends_on: [project-architect]
+    depended_by: [project-tester, project-reviewer, project-refactorer, project-documenter]
+    wave: 3
+
+  project-tester:
+    produces: [Test]
+    consumes: [Code, Plan, KnowledgeBase, Context]
+    depends_on: [project-generator]
+    depended_by: [project-reviewer, project-releaser]
+    wave: 4
+
+  project-reviewer:
+    produces: [Review]
+    consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+    depends_on: [project-tester]
+    depended_by: [project-refactorer, project-documenter, project-releaser]
+    wave: 4
+
+  project-refactorer:
+    produces: [RefactoredCode]
+    consumes: [Code, KnowledgeBase, Test, Review]
+    depends_on: [project-reviewer]
+    depended_by: []
+    parallel_with: [project-documenter]
+    wave: 5
+
+  project-documenter:
+    produces: [Documentation]
+    consumes: [Code, Review, KnowledgeBase, Context]
+    depends_on: [project-reviewer]
+    depended_by: [project-releaser]
+    parallel_with: [project-refactorer]
+    wave: 5
+
+  project-releaser:
+    produces: [Release]
+    consumes: [Documentation, Review, Test]
+    depends_on: [project-documenter]
+    depended_by: []
+    wave: 6
+
+# ═══ Visualization ═══
+# 拓扑排序 → Wave 分组
+
+waves:
+  - [project-analyzer]
+  - [project-planner]
+  - [project-architect]
+  - [project-generator]
+  - [project-tester, project-reviewer]
+  - [project-refactorer, project-documenter]
+  - [project-releaser]
+
+# ═══ Parallel Execution ═══
+# 同 wave 内可并行
+
+parallel_groups:
+  - group: [project-tester, project-reviewer]
+    reason: tester产Test, reviewer消费Test; 但两者无相互依赖
+  - group: [project-refactorer, project-documenter]
+    reason: 重构和文档独立, 可并行

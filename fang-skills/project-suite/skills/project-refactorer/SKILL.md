@@ -63,6 +63,8 @@ description: >
   4. 测试变红 → git revert → 分析原因 → 记录 REFACTOR.md → 继续下一个动作
 ```
 
+5. 🔴 CHECKPOINT — 展示重构摘要（改动文件数 + 改善指标 Before→After + 测试结果），用户确认后生成 REFACTOR.md
+
 ### Output
 
 `.project-knowledge/reports/REFACTOR.md`：

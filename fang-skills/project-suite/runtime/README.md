@@ -55,6 +55,8 @@
 | 文件 | 说明 |
 |------|------|
 | [capabilities.yaml](registry/capabilities.yaml) | 统一能力注册中心，声明每个 Skill 的 produces/consumes |
+| [dag.yaml](registry/dag.yaml) | ⚙️ **自动生成**：从 skill.yaml 推导的依赖图 + Wave 分组 + 并行检测 |
+| [compatibility.yaml](registry/compatibility.yaml) | ⚙️ **自动生成**：版本兼容矩阵 + 升级规则 + Migration Path |
 
 ### `config/` — 运行配置
 
@@ -62,6 +64,7 @@
 |------|------|
 | [scheduler.yaml](config/scheduler.yaml) | 调度器机器可读配置（并行策略/断点续传/checkpoint 模式） |
 | [gates.yaml](config/gates.yaml) | Confidence 驱动的质量门禁（阈值/阻断/自动接受规则） |
+| [rules.yaml](config/rules.yaml) | ⚙️ **可执行**：每个 Skill 的 when/gate/fallback, Engine不读Prompt读这个 |
 
 ### `artifacts/` — 产出物类型
 
@@ -79,6 +82,14 @@
 | [bugfix.md](workflows/bugfix.md) | (已废弃) Bug 修复工作流，保留为历史参考 |
 | [refactor.md](workflows/refactor.md) | (已废弃) 代码重构工作流，保留为历史参考 |
 | [greenfield.md](workflows/greenfield.md) | (已废弃) 全新项目工作流，保留为历史参考 |
+
+### `shared/prompts/` — 共享 Prompt 库
+
+| 文件 | 说明 |
+|------|------|
+| [evidence.md](../shared/prompts/evidence.md) | 📖 证据引用规范：file:line / 不编造 / 证据等级 |
+| [checkpoint.md](../shared/prompts/checkpoint.md) | 📖 CHECKPOINT → AskUserQuestion 统一确认模式 |
+| [verification.md](../shared/prompts/verification.md) | 📖 自检清单：loading/error/empty/类型边界 + Skill专属验证 |
 
 ### 根目录
 
@@ -203,7 +214,8 @@ knowledge-resolver.md ──→ graph-query.md
 | **新增一个 Skill** | [capabilities.yaml](registry/capabilities.yaml) | [skill-io.md](contracts/skill-io.md) | [state-machine.md](engine/state-machine.md) |
 | **修改 Knowledge 生命周期** | [state.md](state/state.md) | [promotion-rules.md](state/schemas/promotion-rules.md) | [knowledge-scoring.md](state/schemas/knowledge-scoring.md) |
 | **调整上下文优先级** | [context-priority.md](context/context-priority.md) | [context-resolution.md](context/context-resolution.md) | [merge.md](context/merge.md) |
-| **改调度/DAG 依赖** | [scheduler.yaml](config/scheduler.yaml) | [capabilities.yaml](registry/capabilities.yaml) | [scheduler.md](engine/scheduler.md) |
+| **改调度/DAG 依赖** | [dag.yaml](registry/dag.yaml) | [capabilities.yaml](registry/capabilities.yaml) | [scheduler.yaml](config/scheduler.yaml) |
+| **查版本兼容性** | [compatibility.yaml](registry/compatibility.yaml) | [skill.yaml](../skills/project-planner/skill.yaml) | SUITE_SPEC.md |
 | **改质量门禁** | [gates.yaml](config/gates.yaml) | [confidence-gate.md](engine/confidence-gate.md) | [state-machine.md](engine/state-machine.md) |
 | **改产出物类型** | [artifact-types.yaml](artifacts/artifact-types.yaml) | [skill-io.md](contracts/skill-io.md) | SUITE_SPEC.md |
 | **改断点续传** | [checkpoint.md](engine/checkpoint.md) | [manifest.schema.json](../shared/schemas/manifest.schema.json) | [state.md](state/state.md) |

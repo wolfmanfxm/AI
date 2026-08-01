@@ -7,6 +7,11 @@ requires: []
 produces: [Architecture]
 consumes: [KnowledgeBase, Plan, Context, Graph]
 depends_on: [project-planner]
+
+depends_on_skill:
+  project-analyzer: ">=1.3"
+  project-planner: ">=1.2"
+
 parallel_with: []
 boundary: 只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改
 

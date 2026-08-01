@@ -15,3 +15,5 @@
 | 1 | **执行 `git push --tags` 或 `npm publish`** | releaser 只检查建议，不执行危险操作 | 生成检查清单，由人工或 CI 执行发布 |
 | 2 | **不检查 breaking change 就建议版本号** | 可能建议错误的 semver bump | 从 conventional commits 解析，显式标注 BREAKING CHANGE |
 | 3 | **changelog 手工编造条目** | 与 git log 不一致 | 从 git log + PR + REVIEW.md 自动合成 |
+| 4 | **未检查 CI/Review 状态就标记发布就绪** | 测试未通过或有 BLOCKER 问题仍进入生产线 | RELEASE-CHECKLIST 必须逐项验证后才标记 ✅ |
+| 5 | **回滚方案只写"git revert"无具体步骤** | 紧急回滚时不知道版本号、影响范围、验证方法 | 回滚方案含：回滚到的 commit hash + revert 命令 + 验证步骤（至少1条） |

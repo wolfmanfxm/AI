@@ -17,3 +17,18 @@ context_contract:
   must_read: [context.json, PLAN.md, knowledge-index.json]
   should_read: [ARCHITECTURE.md, graph.json]
   neednt_read: [observations/]
+
+interface:
+  inputs:
+    - { name: 变更代码, type: implementation, required: true, source: project-generator, description: 待审查的diff/文件列表 }
+    - { name: PLAN.md, type: planning, required: false, source: project-planner, description: Acceptance Criteria对照 }
+    - { name: context-package.json, type: context, required: false, source: knowledge-resolver, description: 验证Generator是否正确使用知识 }
+    - { name: graph.json, type: graph, required: false, source: project-analyzer, description: 循环依赖检测+影响范围 }
+  outputs:
+    - { name: REVIEW-<topic>.md, type: review, confidence_range: "70-90", description: 五轴审查报告, BLOCKER→PRAISE }
+  side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 变更文件>20且无法全审, severity: DEGRADED, recovery: 只审核心文件,其余标注"⚠️未审查" }
+    - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
+  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: none, safe_to_retry: true, retry_max: 2 }

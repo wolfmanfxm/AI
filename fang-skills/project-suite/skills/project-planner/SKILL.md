@@ -74,9 +74,9 @@ description: >
 ### Output
 
 - `.project-knowledge/proposals/PLAN-<feature>.md`（9 模块 Contract）
-- `knowledge-list.json`（capability 标签清单，Generator 通过 knowledge-index.json 解析到具体文件）
+- **`context-package.json`**（预消化知识包，Generator 直接消费，无需读文件）→ [Context Package](../../runtime/contracts/context-package.schema.json)
 
-**knowledge-list.json 格式（v2.0）：**
+**context-package.json（v2.0，替代 knowledge-list.json）：**
 ```json
 {
   "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],

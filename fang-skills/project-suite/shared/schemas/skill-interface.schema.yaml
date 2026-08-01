@@ -1,0 +1,63 @@
+# Skill Interface Standard v1.0.0
+#
+# 所有 skill 的标准化接口定义。
+# Workflow Engine 不需要读 Prompt，直接解析 skill.yaml 即可调度。
+
+version: "1.0.0"
+
+# ═══ Interface Fields ═══
+# 每个 skill.yaml 在 context_contract 之后追加 interface: 块
+
+fields:
+
+  inputs:
+    description: 本 Skill 运行需要什么。Engine 据此检查前置条件。
+    type: array
+    item_schema:
+      name: string          # 资源名，如 "context.json"
+      type: string          # artifact-type: knowledge/context/planning/design/code/test/review/documentation/release/state
+      required: boolean     # true = 缺失时 BLOCK
+      source: string        # producer skill 或文件路径
+      description: string   # 在本 Skill 中的用途
+
+  outputs:
+    description: 本 Skill 产出什么。Engine 据此连接上下游。
+    type: array
+    item_schema:
+      name: string          # 产出文件名或资源名，如 "PLAN.md"
+      type: string          # artifact-type
+      confidence_range: string  # 典型置信度范围，如 "70-95"
+      depends_on_inputs: [string]  # 产出依赖哪些输入
+
+  side_effects:
+    description: 执行副作用。Engine 据此决定是否可并行、是否可重试。
+    type: object
+    properties:
+      writes_state: boolean       # 是否写入 .project-runtime/state.json
+      writes_knowledge: boolean   # 是否写入 .project-knowledge/
+      modifies_code: boolean      # 是否修改项目源码
+      writes_timeline: boolean    # 是否追加 timeline.json
+
+  failure_modes:
+    description: 已知失败模式。Engine 据此决定重试/降级/阻断。
+    type: array
+    item_schema:
+      condition: string     # 触发条件
+      severity: string      # BLOCKER | DEGRADED | WARNING
+      recovery: string      # 恢复动作
+
+  quality_gate:
+    description: 置信度门禁。Engine 据此决定 PASS/REVIEW/GATE/BLOCK。
+    type: object
+    properties:
+      min_confidence_for_pass: integer   # ≥此值 → 🟢 PASS，直接进入下游
+      requires_review_below: integer     # <此值 → 🟡 REVIEW，建议人工审查
+      blocks_downstream_below: integer   # <此值 → 🔴 BLOCK，拒绝下游执行
+
+  rollback:
+    description: 回滚策略。Engine 据此决定失败后如何处理。
+    type: object
+    properties:
+      method: string        # git_revert | manual | none
+      safe_to_retry: boolean  # 是否可以安全重试
+      retry_max: integer      # 最大重试次数，默认 1

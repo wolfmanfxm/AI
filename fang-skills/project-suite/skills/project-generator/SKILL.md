@@ -52,11 +52,12 @@ description: >
 
 **不搜索知识库。** 按 capability 标签精确加载：
 
-1. 读 `knowledge-list.json`（Planner 产出）→ 获取 `capabilities: ["VueConvention", "TablePattern", ...]`
-2. 读 `knowledge-index.json`（analyzer 产出）→ lookup capability → 解析为具体文件列表
-3. 只加载解析出的 ~3-5 个文件，不知道还有别的知识
-4. 若 `knowledge-list.json` 缺失 → 从 PLAN.md `# Reuse Analysis` 提取 capability 标签
-5. 若 `knowledge-index.json` 缺失 → 降级为文件路径模式（旧版兼容）
+1. 读 **`context-package.json`**（Planner 产出，唯一知识入口）→ [Context Package](../../runtime/contracts/context-package.schema.json)
+2. 遍历 `context.knowledge[]` → 直接注入 pattern + 遵守 constraints + 避免 anti_pattern
+3. 遍历 `context.components[]` → reuse=true 的直接 import，不重新生成
+4. 遍历 `context.api[]` → 按 conventions 生成 API 调用
+5. 遍历 `context.rules[]` → blocking=true 的强制遵守，否则 BLOCKER
+6. 若 `context-package.json` 缺失 → 降级读 `knowledge-list.json`（v1 兼容）
 
 → 详细协议：[../../runtime/state/schemas/knowledge-index.md](../../runtime/state/schemas/knowledge-index.md)
 
@@ -88,7 +89,7 @@ description: >
 
 → [references/completion-report.md](references/completion-report.md)（含 Knowledge Used 反馈 + Candidate 发现 + timeline 写入）
 
-**Confidence Gate**：confidence < 70 → 🟠 GATE，必须 Review 后才能进入 tester/releaser；confidence ≥ 95 → 🟢 直通。 → [../../runtime/engine/confidence-gate.md](../../runtime/engine/confidence-gate.md)
+**Confidence Gate** → [confidence.yaml](../../runtime/engine/confidence.yaml)：<70 🟠 GATE 必须Review，≥95 🟢 直通。
 
 ## 失败处理
 
@@ -106,12 +107,9 @@ description: >
 | 资源 | 路径 |
 |------|------|
 | 入口 Prompt | [prompts/main.md](prompts/main.md) |
-| 页面生成 | [prompts/page-gen.md](prompts/page-gen.md) |
-| 组件生成 | [prompts/component-gen.md](prompts/component-gen.md) |
-| API 生成 | [prompts/api-gen.md](prompts/api-gen.md) |
+| 页面/组件/API 生成 | [prompts/](prompts/) |
 | 职责边界 | [references/boundary.md](references/boundary.md) |
-| 代码审计 | [references/code-audit.md](references/code-audit.md) |
-| 自检清单 | [references/self-check.md](references/self-check.md) |
+| 代码审计+自检 | [references/code-audit.md](references/code-audit.md) + [self-check.md](references/self-check.md) |
 | 完成报告 | [references/completion-report.md](references/completion-report.md) |
 | 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 

@@ -1,0 +1,134 @@
+# Version Compatibility Matrix v1.0.0
+#
+# 每个 Skill 可以独立升级。此文件定义版本间的兼容性。
+# 当 Generator 升级到 2.0 时，不需要改 Planner——只要 Planner >=1.2 仍兼容即可。
+
+version: "1.0.0"
+
+# ═══ Current Versions ═══
+# 从 skill.yaml 提取，自动同步
+
+current:
+  project-analyzer:    "1.3.1"
+  project-planner:     "1.3.0"
+  project-architect:   "1.3.0"
+  project-generator:   "1.3.0"
+  project-tester:      "1.3.0"
+  project-reviewer:    "1.3.0"
+  project-refactorer:  "1.3.0"
+  project-documenter:  "1.3.0"
+  project-releaser:    "1.3.0"
+
+# ═══ Dependency Matrix ═══
+# 行 = consumer, 列 = dependency
+# 值 = 最低兼容版本
+
+matrix:
+  project-analyzer:
+    depends_on: {}
+    depended_by:
+      project-planner:    ">=1.3"
+      project-architect:  ">=1.3"
+      project-generator:  ">=1.3"
+      project-tester:     ">=1.0"
+      project-reviewer:   ">=1.0"
+      project-refactorer: ">=1.0"
+      project-documenter: ">=1.0"
+
+  project-planner:
+    depends_on:
+      project-analyzer: ">=1.3"
+    depended_by:
+      project-architect:  ">=1.2"
+      project-generator:  ">=1.2"
+      project-tester:     ">=1.0"
+      project-reviewer:   ">=1.0"
+
+  project-architect:
+    depends_on:
+      project-analyzer: ">=1.3"
+      project-planner:  ">=1.2"
+    depended_by:
+      project-generator: ">=1.2"
+      project-reviewer:  ">=1.0"
+
+  project-generator:
+    depends_on:
+      project-analyzer:  ">=1.3"
+      project-planner:   ">=1.2"
+      project-architect: ">=1.2"
+    depended_by:
+      project-tester:      ">=1.0"
+      project-reviewer:    ">=1.0"
+      project-refactorer:  ">=1.0"
+      project-documenter:  ">=1.0"
+
+  project-tester:
+    depends_on:
+      project-generator: ">=1.0"
+    depended_by:
+      project-reviewer: ">=1.0"
+      project-releaser: ">=1.0"
+
+  project-reviewer:
+    depends_on:
+      project-tester: ">=1.0"
+    depended_by:
+      project-refactorer: ">=1.0"
+      project-documenter: ">=1.0"
+      project-releaser:  ">=1.0"
+
+  project-refactorer:
+    depends_on:
+      project-reviewer: ">=1.0"
+    depended_by: {}
+
+  project-documenter:
+    depends_on:
+      project-reviewer: ">=1.0"
+    depended_by:
+      project-releaser: ">=1.0"
+
+  project-releaser:
+    depends_on:
+      project-documenter: ">=1.0"
+    depended_by: {}
+
+# ═══ Compatibility Rules ═══
+# 版本升级时的兼容性判断
+
+rules:
+  patch_bump:
+    description: "1.3.0 → 1.3.1: 修复bug, 不改变interface"
+    compatibility: always_compatible
+    requires_downstream_update: false
+
+  minor_bump:
+    description: "1.3.0 → 1.4.0: 新增interface字段, 不删除现有字段"
+    compatibility: backward_compatible
+    requires_downstream_update: false         # downstream可继续用旧版本约束
+    example: "analyzer 1.3→1.4: 新增knowledge-health.json产出, planner仍可用>=1.3"
+
+  major_bump:
+    description: "1.x → 2.0: 改变或删除interface字段"
+    compatibility: breaking
+    requires_downstream_update: true
+    example: "planner 1.x→2.0: knowledge-list.json废弃→context-package.json, generator必须>=2.0"
+    mitigation: "downstream skill的 depends_on_skill 约束自动阻止不兼容组合"
+
+# ═══ Migration Path ═══
+# 记录已发生和计划中的 breaking change
+
+migrations:
+  - version: "1.3 → 1.4 (planned)"
+    skill: project-analyzer
+    change: "context.json 新增 quality 字段"
+    impact: "下游 skill 可忽略新字段, 无 breaking"
+    type: minor
+
+  - version: "1.3 → 2.0 (planned)"
+    skill: project-planner
+    change: "knowledge-list.json → context-package.json"
+    impact: "generator 必须升级到 >=2.0 以消费新格式"
+    type: major
+    migration_guide: "generator 的 context_contract.must_read 从 knowledge-list.json 改为 context-package.json"

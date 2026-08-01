@@ -1,0 +1,208 @@
+# Runtime Rules — Machine Readable v1.0.0
+#
+# Engine doesn't read prompts. It reads these rules.
+# Defines: when each skill can run, what it needs, what happens on failure.
+
+version: "1.0.0"
+
+# ═══ Skill Execution Rules ═══
+# For each skill: preconditions → gate → fallback
+
+execution:
+
+  project-analyzer:
+    when:
+      require:
+        - type: implementation
+          source: workspace/
+          description: 项目源码必须可读取
+    gate:
+      min_confidence_for_pass: 70        # <70 → downstream BLOCK
+      blocks_downstream_below: 70
+    fallback:
+      on_missing_knowledge_vault: degraded
+      on_missing_claude_md: degraded
+
+  project-planner:
+    when:
+      require:
+        - type: context
+          name: context.json
+          from: project-analyzer
+          required: true
+        - type: knowledge
+          name: knowledge-index.json
+          from: project-analyzer
+          required: true
+      recommend:
+        - type: knowledge
+          name: architecture/overview.md
+        - type: knowledge
+          name: components/catalog.md
+    gate:
+      min_confidence_for_pass: 90
+      requires_review_below: 70
+      blocks_downstream_below: 40          # <40 → 只输出Goal+Scope, 拒绝完整PLAN
+    fallback:
+      on_missing_knowledge: 跳过ReuseAnalysis, 标注"⚠️缺少知识库"
+
+  project-architect:
+    when:
+      require:
+        - type: planning
+          name: PLAN.md
+          from: project-planner
+          required: true
+        - type: context
+          name: context.json
+          from: project-analyzer
+          required: true
+      recommend:
+        - type: knowledge
+          name: architecture/overview.md
+        - type: knowledge
+          name: components/catalog.md
+    gate:
+      min_confidence_for_pass: 88
+      requires_review_below: 70
+      blocks_downstream_below: 40
+    fallback:
+      on_missing_architecture_knowledge: 从代码结构推断, 标注"⚠️未分析现有架构"
+
+  project-generator:
+    when:
+      require:
+        - type: planning
+          name: PLAN.md
+          from: project-planner
+          required: true
+        - type: design
+          name: ARCHITECTURE.md
+          from: project-architect
+          required: false
+        - type: context
+          name: context-package.json
+          from: knowledge-resolver
+          required: true
+    gate:
+      min_confidence_for_pass: 95          # ≥95直通
+      requires_review_below: 70            # <70必须Review
+      blocks_downstream_below: 40
+    fallback:
+      on_missing_context_package: 降级读knowledge-list.json(v1兼容)
+      on_missing_architecture: 标注"⚠️无架构约束"
+
+  project-tester:
+    when:
+      require:
+        - type: implementation
+          from: project-generator
+          required: true
+      recommend:
+        - type: context
+          name: context.json
+          from: project-analyzer
+    gate:
+      min_confidence_for_pass: 82
+      requires_review_below: 70
+      blocks_downstream_below: 40
+    fallback:
+      on_missing_context: 通用测试框架检测, 标注"⚠️缺少项目规范"
+
+  project-reviewer:
+    when:
+      require:
+        - type: implementation
+          from: project-generator
+          required: true
+        - type: planning
+          name: PLAN.md
+          from: project-planner
+          required: false
+      recommend:
+        - type: design
+          name: ARCHITECTURE.md
+        - type: context
+          name: context.json
+    gate:
+      min_confidence_for_pass: 85
+      requires_review_below: 70
+      blocks_downstream_below: 40
+    fallback:
+      on_missing_plan: 标注"⚠️无验收标准", 降级为纯代码审查
+      on_missing_graph: grep import手动分析, 标注"⚠️无Graph"
+
+  project-refactorer:
+    when:
+      require:
+        - type: implementation
+          from: project-generator
+          required: true
+        - type: test
+          from: project-tester
+          required: false
+    gate:
+      min_confidence_for_pass: 80
+      requires_review_below: 70
+      blocks_downstream_below: 40
+    fallback:
+      on_no_tests: 先加表征测试, 标注"⚠️无测试保护"
+      on_test_failure_before_refactor: 🔴BLOCK, 拒绝重构
+
+  project-documenter:
+    when:
+      require:
+        - type: implementation
+          from: project-generator
+          required: true
+        - type: context
+          name: context.json
+          from: project-analyzer
+          required: false
+    gate:
+      min_confidence_for_pass: 88
+      requires_review_below: 60
+      blocks_downstream_below: 40
+    fallback:
+      on_missing_jsdoc: 从类型定义推断, 标注"[推断]"
+      on_missing_context: 通用文档模板, 标注"⚠️默认风格"
+
+  project-releaser:
+    when:
+      require:
+        - type: state
+          name: state.json
+          from: ALL
+          required: true
+        - type: review
+          name: REVIEW.md
+          from: project-reviewer
+          required: false
+    gate:
+      min_confidence_for_pass: 90
+      requires_review_below: 70
+      blocks_downstream_below: 40
+      special: 全链路扫描state.json, 任一上游<40→🔴BLOCK发布
+    fallback:
+      on_missing_conventional_commits: 按commit首词推断, 默认PATCH bump
+      on_missing_review: 标注"⚠️未审查", 继续生成CHANGELOG
+
+# ═══ Cross-Skill Rules ═══
+# 跨 Skill 的全局规则
+
+cross_skill:
+  context_loading:
+    description: 所有 Skill 的上下文加载统一按 context_contract 执行
+    priority: context-priority.yaml
+
+  confidence_flow:
+    description: confidence 沿 DAG 向下传播，下游取上游最低值作为基数
+    upstream_min_becomes: downstream_base
+
+  knowledge_lifecycle:
+    description: Generator 只读 Accepted 知识，Reviewer 验证 Candidate
+    rules_ref: state/schemas/knowledge-lifecycle.md
+
+  timeline:
+    description: 所有 Skill 在 Output 阶段追加 run 到 timeline.json
+    schema: metrics/timeline.schema.json
