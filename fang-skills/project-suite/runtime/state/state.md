@@ -24,6 +24,17 @@ Skill
 
 **Skill 不记忆。State 永远存在。**
 
+## 初始化
+
+**由 project-analyzer 在首次执行时创建 `.project-runtime/`**：
+
+1. analyzer Finish Phase B 检测 `.project-runtime/` 是否存在
+2. 不存在 → 创建目录结构：`state.json` + `knowledge.json` + `metrics/` + `artifacts/`
+3. 写入初始 state（`phase: analyzing, status: in_progress`）
+4. 后续 skill 通过读 state 了解当前阶段
+
+**其他 skill 不负责创建 `.project-runtime/`**，仅 analyzer 有这个职责。若 analyzer 未执行（如直接调用 generator），下游 skill 降级为无状态模式。
+
 ## 目录结构
 
 ```

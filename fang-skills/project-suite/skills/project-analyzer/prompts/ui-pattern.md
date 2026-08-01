@@ -18,6 +18,8 @@ UI 模式依赖项目使用的 UI 库（从 package.json 确定组件标签前�
 4. **对话框**：新增/编辑/详情/确认四种模式
 5. **上传**：组件选择、状态管理、与表单集成
 6. **布局**：页面标准结构
+7. **抽屉/侧边栏**：从侧边滑入的表单/详情面板。检测条件：`BaseDrawer` 或 `el-drawer` 引用 > 20 处
+8. **权限控制**：`v-role` 指令或 `useRole()` composable 的使用模式。检测条件：`directives/` 或 `composables/` 中存在 role 相关文件
 
 ## Output
 `patterns/` 下按需创建：`layout.md`、`table.md`、`form.md`、`dialog.md`、`upload.md`

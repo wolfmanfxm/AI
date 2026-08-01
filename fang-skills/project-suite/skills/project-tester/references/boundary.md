@@ -17,3 +17,5 @@
 | 1 | **测试失败后直接修业务代码** | 可能是测试写错了不是代码有 bug | 先分析：测试错误→修测试；代码bug→记录，引导 generator |
 | 2 | **不检测框架就用默认风格写测试** | 与项目已有测试风格不一致 | 先检测 jest/vitest/mocha，匹配已有命名和目录 |
 | 3 | **只写 happy path 不写边界** | 测试覆盖不完整 | Given-When-Then + 边界（null/空/超长/并发） |
+| 4 | **Mock 策略与项目请求拦截器冲突** | 未读 api/request.md 中的加密/签名/租户注入逻辑，mock 返回与真实响应结构不一致 | 先读 api/request.md → 确认响应解包层级（data.result/data.rows）→ mock 结构匹配 |
+| 5 | **测试文件生成后不跑验证** | 语法错误、import 路径不存在、框架 API 不兼容都不被发现 | 生成后立即 `npx vitest run <test-file>`，失败则修正再记录 |

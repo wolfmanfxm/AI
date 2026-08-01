@@ -87,6 +87,7 @@ description: >
 6. **AC 逐条验证** → 对照 `# Acceptance Criteria`，标注 ✅/❌/⚠️
 7. **Scope 边界检查** → 变更是否超出 PLAN.md `# Scope`，超出标注 `[SCOPE CREEP]`
 8. **Candidate 验证**（若 Generator 产出了 Candidate 知识）→ 验证准确性 → 标注 confidence → 满足 R3（> 85）→ 更新 knowledge.json
+9. 🔴 CHECKPOINT — 展示审查摘要（BLOCKER/HIGH/MEDIUM/LOW/PRAISE 计数），用户确认后生成 REVIEW.md
 
 ### Output
 
@@ -102,6 +103,17 @@ description: >
 | 不熟悉的语言/框架 | 仅做通用检查（命名/结构/注释），标注 `[超出审查范围]` | 跳过语言特有检查，不强制推断 |
 | PLAN.md 缺失无法对照 AC | 从代码推断功能意图，标注 `⚠️ 无验收标准` | 不阻塞 — 降级为纯代码审查 |
 | Graph 不可用（graph.json 缺失） | 手动分析 import 依赖链（grep import），标注 `⚠️ 无 Graph` | 影响范围分析降级为静态 import 扫描 |
+
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 正确性审查 | [prompts/correctness.md](prompts/correctness.md) |
+| 安全性审查 | [prompts/security.md](prompts/security.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 严重度分级 | [references/severity-guide.md](references/severity-guide.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 
 ## 完成后下一步
 

@@ -92,6 +92,18 @@ description: >
 tester 完成 → 有失败→分析记录 / 通过→ /project-reviewer / 需覆盖率→覆盖率模式
 ```
 
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 测试策略 | [prompts/test-strategy.md](prompts/test-strategy.md) |
+| 单元测试 | [prompts/unit-test.md](prompts/unit-test.md) |
+| 组件测试 | [prompts/component-test.md](prompts/component-test.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| Mock 策略 | [references/mock-strategy.md](references/mock-strategy.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+
 ---
 
 | 资源 | 路径 |

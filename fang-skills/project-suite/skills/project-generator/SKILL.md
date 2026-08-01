@@ -100,9 +100,21 @@ description: >
 | 需新增依赖（package.json 未安装） | 使用已有依赖的替代方案 | 标注 `TODO: 安装 {package}`，不修改 package.json |
 | 无类似实现可参考（全新模式） | 使用 `context.json` 中的项目约定生成 | 标注"⚠️ 全新模式，建议人工审核" |
 
-## 完成后下一步
+## 引用索引
 
-generator 完成 → /project-reviewer 或 /project-tester 或 /project-documenter
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 页面生成 | [prompts/page-gen.md](prompts/page-gen.md) |
+| 组件生成 | [prompts/component-gen.md](prompts/component-gen.md) |
+| API 生成 | [prompts/api-gen.md](prompts/api-gen.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 代码审计 | [references/code-audit.md](references/code-audit.md) |
+| 自检清单 | [references/self-check.md](references/self-check.md) |
+| 完成报告 | [references/completion-report.md](references/completion-report.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+
+## 完成后下一步 → /project-reviewer 或 /project-tester 或 /project-documenter
 
 ## 输出末尾：Workflow Hint 块
 

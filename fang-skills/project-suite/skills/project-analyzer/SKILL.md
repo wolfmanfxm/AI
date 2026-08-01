@@ -65,34 +65,22 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
 
 ### Finish
 
-1. 写 `.md`（Evidence Header → [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md)）
-2. 生成 `graph.json` `statistics.json` `search-index.json` **`context.json`**
-3. 生成 **`knowledge-index.json`** → [../../runtime/state/schemas/knowledge-index.md](../../runtime/state/schemas/knowledge-index.md)
-   - 扫描 `.project-knowledge/` 所有文件 → 按内容聚类为 capability
-   - 每个 capability：description / files / keywords / confidence
-   - 生成 aliases（中文简称 → capability 名）
-   - 只包含 `status: Accepted` 的知识 → Candidate 不进入 index
-4. 非首次：标记 `[NEW]/[CHANGED]/[CONFIRMED]`
-5. 写 `manifest.json` `index.md`
-6. **manifest 完整性校验**（防止外部进程覆盖）：
-   - `mode` 字段 = 本次实际执行模式（`full` / `incremental` / `standard`）
-   - `scope` 字段 = 本次实际扫描范围
-   - `dimensions` 所有维度 = `completed`
-   - `files` 列表覆盖全部实际产出文件
-   - `executionLog` 含本次执行记录（startedAt/finishedAt/scope/changedFiles/unchangedFiles）
-   - **若任何字段被外部进程篡改**，以本次执行参数覆盖，不依赖磁盘缓存
-   - 校验通过后才进入后续步骤
-7. **知识库健康检查** → [../../runtime/metrics/knowledge-health.md](../../runtime/metrics/knowledge-health.md)
-   - 扫描 `.project-knowledge/` 全量 → 执行 7 种检测（broken_link / empty_document / duplicate_content / outdated_evidence / missing_evidence_header / stale_reference / orphan_knowledge）
-   - 增量模式：只扫 `[CHANGED]` 文件 + 其引用目标，duplicate_content 全量对比
-   - 生成 `knowledge-health.json`（含 summary / issues[] / trend）
-   - error > 0 → manifest 标注 ⚠️；warning > 5 → context.json 标注 ⚠️
-   - 不阻断 — 健康检查不影响主流程
-8. 🔴 Vault 同步（若 `output` 含 `"vault"`）→ [vault-sync](../../shared/conventions/vault-sync.md)
-9. 检查 `.claude/CLAUDE.md` → manifest `status` 置为 `completed`
-10. 写 `timeline.json` → [../../runtime/metrics/timeline.md](../../runtime/metrics/timeline.md)
+4-Phase 执行，详见 [references/finish-workflow.md](references/finish-workflow.md)：
 
-**`context.json`** 是下游 skill 的标准化项目上下文（技术栈/路径别名/编码约定/模块清单）。Schema → [../../runtime/context/context.md](../../runtime/context/context.md)
+| Phase | 做什么 | 触发条件 |
+|-------|--------|---------|
+| **A** 强制刷新 | statistics / context / graph / search-index 必定重新生成 | 每次扫描 |
+| **B** 状态初始化 | 创建或追加 `.project-runtime/`（state + knowledge） | 首次/每次 |
+| **C** 差异化更新 | 写 `.md` + manifest + index，仅 `[CHANGED]` 维度 | 内容变化 |
+| **D** 质量验证 | knowledge-health + CLAUDE.md 更新 + Vault sync + timeline | 每次扫描 |
+
+核心规则：
+- ⚠️ Phase A JSON 产物**禁止复用缓存数字**，必须从本次扫描数据重新提取
+- ⚠️ Phase D CLAUDE.md 统计数字必须更新为最新值
+- ⚠️ Vault 同步后验证文件数差异，>3 时标注
+- 🔴 manifest 完整性校验后才置 `completed`
+
+**`context.json`** 是下游 skill 的标准化项目上下文。Schema → [../../runtime/context/context.md](../../runtime/context/context.md)
 
 ## 失败处理
 
@@ -103,6 +91,16 @@ manifest status = completed    → 询问: 🔁全量 / 📝增量 / ❌取消
 | `.claude/CLAUDE.md` 不存在 | 直接生成 `.project-knowledge/`，Vault 同步照常 | 标注 `⚠️ 无 CLAUDE.md`，路径别名/命名空间从源码 package.json + tsconfig 推断 |
 | Knowledge Vault 路径不可达 | 跳过 Vault 同步 | 标注 `⚠️ Vault 不可达`，`.project-knowledge/` 仍写入 |
 | graph.json 生成失败（jq 不可用/JSON 格式错误） | 用 grep + 纯文本解析回退 | 标注 `⚠️ graph.json 未生成`，不影响其他产出 |
+
+## 引用索引
+
+| 资源 | 路径 |
+|------|------|
+| Finish 详细步骤 | [references/finish-workflow.md](references/finish-workflow.md) |
+| 产出格式规范 | [prompts/output-format.md](prompts/output-format.md) |
+| 维度 Prompt | [prompts/](prompts/) |
+| 职责边界+反例 | [references/boundary.md](references/boundary.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 
 ## 完成后下一步
 

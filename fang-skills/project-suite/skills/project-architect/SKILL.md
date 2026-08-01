@@ -90,9 +90,20 @@ description: >
 
 → 详细: [references/failure-handling.md](references/failure-handling.md)
 
-## 完成后下一步
+## 引用索引
 
-architect 完成 → /project-generator 或 /project-reviewer
+| 资源 | 路径 |
+|------|------|
+| 入口 Prompt | [prompts/main.md](prompts/main.md) |
+| 技术选型 | [prompts/tech-selection.md](prompts/tech-selection.md) |
+| 模块设计 | [prompts/module-design.md](prompts/module-design.md) |
+| API 契约 | [prompts/api-design.md](prompts/api-design.md) |
+| 职责边界 | [references/boundary.md](references/boundary.md) |
+| 决策框架 | [references/decision-framework.md](references/decision-framework.md) |
+| 现状核实 | [references/code-audit.md](references/code-audit.md) |
+| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
+
+## 完成后下一步 → /project-generator 或 /project-reviewer
 
 ## 输出末尾：Workflow Hint 块
 
