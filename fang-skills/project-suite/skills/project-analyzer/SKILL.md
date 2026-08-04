@@ -11,8 +11,8 @@ description: >
 
 # Analyzer v2.0
 
-> 10 Extractor → Candidate → Triple Verify → Accepted/Rejected → Knowledge Graph
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — Multi-Extractor + Candidate→Verify + Evidence Score
+> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → knowledge-graph.yaml
+> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
 
 ## 核心原则
 
@@ -38,8 +38,8 @@ description: >
 ### Execution 四阶段
 
 ```
-Phase 1: 10 Extractors 并行 → candidates/
-Phase 2: Verifier → Triple Verify → Accepted/Rejected
+Phase 1: Registry-driven Extractors → candidates/accepted/*.yaml (Evidence Format)
+Phase 2: 5-Verify → Accepted/Adjusted/Rejected → candidates/{accepted,adjusted,rejected}/
 Phase 3: Knowledge Builder → .project-knowledge/
 Phase 4: INDEX Generator → INDEX.md (Knowledge Graph)
 ```

@@ -1,0 +1,72 @@
+# Extractor Registry v1.0
+#
+# Analyzer 的 Extractor 注册中心。新增 Extractor 只需在此注册，
+# 无需修改 execution.md 的硬编码表。
+
+version: "1.0.0"
+
+categories:
+  structural:
+    description: 结构提取 — 项目骨架和物理组织
+    extractors:
+      - id: directory
+        prompt: prompts/extractors/directory.md
+        produces: candidates/directory.yaml
+        description: 目录结构与职责标注
+
+      - id: framework
+        prompt: prompts/extractors/framework.md
+        produces: candidates/framework.yaml
+        description: 技术栈与配置提取
+
+      - id: architecture
+        prompt: prompts/extractors/architecture.md
+        produces: candidates/architecture.yaml
+        description: 分层架构与模块边界
+
+  semantic:
+    description: 语义提取 — 领域知识和设计意图
+    extractors:
+      - id: glossary
+        prompt: prompts/extractors/glossary.md
+        produces: candidates/glossary.yaml
+        description: 领域术语与歧义标注
+
+      - id: decision
+        prompt: prompts/extractors/decision.md
+        produces: candidates/decisions.yaml
+        description: 架构决策（为什么）
+
+      - id: principle
+        prompt: prompts/extractors/principle.md
+        produces: candidates/principles.yaml
+        description: Always/Never/Prefer/Avoid 原则
+
+  behavioral:
+    description: 行为提取 — 代码模式和编码习惯
+    extractors:
+      - id: pattern
+        prompt: prompts/extractors/pattern.md
+        produces: candidates/patterns.yaml
+        description: 设计模式与代码模式
+
+      - id: convention
+        prompt: prompts/extractors/convention.md
+        produces: candidates/conventions.yaml
+        description: 命名/import/目录规范
+
+  quality:
+    description: 质量提取 — 风险和反模式
+    extractors:
+      - id: risk
+        prompt: prompts/extractors/risk.md
+        produces: candidates/risks.yaml
+        description: 风险与技术债
+
+      - id: antipattern
+        prompt: prompts/extractors/antipattern.md
+        produces: candidates/antipatterns.yaml
+        description: 反模式与坏味道
+
+# Execution: Analyzer 读取此 registry → 按 category 并行 spawn extractor agent
+# 新增 Extractor: 在此文件加一条 + 写 prompts/extractors/<id>.md → 自动生效

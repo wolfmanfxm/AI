@@ -1,40 +1,59 @@
 # Execution — Analyzer
 
 > @engine: execution
-> v2.0: Multi-Extractor 架构 — 10 个专业化提取器 + Verifier + Knowledge Builder
+> v2.1: Multi-Extractor + 5-Verify + CHECKPOINT + Pipeline Resume
+
+## Resume
+
+启动时检查 `manifest.json`：
+- 若 `status = in_progress` → 跳过已完成的 Phase，从中断点继续
+- Phase 1 done → 从 Phase 2 开始
+- Phase 2 done → 从 Phase 3 开始
+- 依此类推
+- 每完成一个 Phase → 立即更新 manifest.phase_status
 
 ## Actions
 
-### Phase 1: Parallel Extraction（10 Extractors）
+### Phase 1: Parallel Extraction
 
-并行 spawn 10 个 Extractor agent，每个只提取一种知识：
+从 [extractor-registry.yaml](../../../runtime/registry/extractor-registry.yaml) 读取 Extractor 列表 → 按 category 并行 spawn agent。
 
-| # | Extractor | Prompt | 产出 |
-|---|-----------|--------|------|
-| 1 | Directory | [extractors/directory.md](extractors/directory.md) | `candidates/directory.md` |
-| 2 | Framework | [extractors/framework.md](extractors/framework.md) | `candidates/framework.md` |
-| 3 | Architecture | [extractors/architecture.md](extractors/architecture.md) | `candidates/architecture.md` |
-| 4 | Pattern | [extractors/pattern.md](extractors/pattern.md) | `candidates/patterns/*.md` |
-| 5 | Convention | [extractors/convention.md](extractors/convention.md) | `candidates/conventions/*.md` |
-| 6 | Glossary | [extractors/glossary.md](extractors/glossary.md) | `candidates/glossary.md` |
-| 7 | Decision | [extractors/decision.md](extractors/decision.md) | `candidates/decisions.md` |
-| 8 | Risk | [extractors/risk.md](extractors/risk.md) | `candidates/risks.md` |
-| 9 | AntiPattern | [extractors/antipattern.md](extractors/antipattern.md) | `candidates/antipatterns.md` |
-| 10 | Principle | [extractors/principle.md](extractors/principle.md) | `candidates/principles.md` |
+**Registry 驱动**：不硬编码 Extractor 表。读 registry → 对每个 category 下的 extractor spawn agent → 输出到 `candidates/accepted/<id>.yaml`。
 
-每个 Extractor 输出带 Evidence Score 的 Candidate。Agent 协调规则同 v1：禁止提前返回 → 全部完成后一次性写入 → 验证 ≥100 bytes。
+**两层架构**：
+
+| Category | Extractors |
+|----------|-----------|
+| **Structural** | directory, framework, architecture |
+| **Semantic** | glossary, decision, principle |
+| **Behavioral** | pattern, convention |
+| **Quality** | risk, antipattern |
+
+每个 Extractor 输出 [Evidence Format](extractors/evidence-format.md) 的 YAML Candidate → `candidates/accepted/<id>.yaml`。
+
+Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → 验证文件 ≥100 bytes。
 
 ### Phase 2: Candidate Verification
 
 → [prompts/verifier.md](verifier.md)
 
-对每个 Candidate 执行 Triple Verify：
+对每个 Candidate 执行 **5-Verify**（存在性 + 频率 + 反例 + 预测力 + 非显而易见性）：
 1. **存在性** — Claim 中的文件路径/行号是否真实存在？
 2. **频率** — Occurrences 计数是否准确？
 3. **反例** — 是否存在 Claim 不成立的反例？
+4. **预测力** — 能否回答代码未显式说明的问题？（cangjie V2）
+5. **非显而易见性** — 是否任何有经验的开发者都能一眼看出？（cangjie V3）
 
-判定：全部 3 项 + Occur ≥3 → ✅ Accepted → 进入 Phase 3
-      发现反例 >50% → ❌ Rejected → `candidates/rejected/`
+判定：全部 5 项 + Occur ≥3 → ✅ Accepted → 进入 CHECKPOINT
+      发现反例 >50% 或频率偏差 >50% → ❌ Rejected → `candidates/rejected/`
+
+🔴 **CHECKPOINT** — Phase 2 完成后暂停。展示 Verifier 结果（Accepted/Adjusted/Rejected 计数），用户确认后进入 Phase 2.5。
+
+### Phase 2.5: Cross-Extractor Validation
+
+→ [prompts/cross-validator.md](cross-validator.md)
+
+不同 Extractor 互相验证：Pattern↔Principle、Decision↔Architecture、Glossary↔Pattern/API、Risk↔AntiPattern 等 8 对交叉检查。发现矛盾 → 标注 + confidence 降级。发现互补 → confidence 提升。
 
 ### Phase 3: Knowledge Assembly
 
@@ -48,9 +67,24 @@
 
 生成 Zettelkasten 风格 `INDEX.md` — 可导航的知识链接图。
 
+## Phase Gates
+
+每个 Phase 完成后**必须**验证产出才进入下一 Phase：
+
+| Gate | 检查 | 不满足时 |
+|------|------|---------|
+| Phase 1→2 | 10 个 `candidates/*.md` 全部存在且 ≥500 bytes | 补跑缺失 Extractor |
+| Phase 2→2.5 | `candidates/verification-report.md` 存在 + 每个 Candidate 有 verdict | 返回 Verifier 补判定 |
+| Phase 2.5→3 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
+| Phase 3→4 | 最终产出文件已写入 `.project-knowledge/`（含 knowledge-graph.yaml 双轨输出）（至少 architecture/overview.md, components/catalog.md, patterns/, glossary.md, INDEX.md 旧路径兼容） | 补跑 Knowledge Builder |
+| Phase 4→Exit | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
+
+**禁止提前退出**：4 个 Phase 全部完成前不可进入 Delivery。每个 Phase 开始前验证上一 Phase Gate。
+
 ## Exit
 
-- 10 个 Extractor 全部返回结果
-- Verifier 已判定所有 Candidate
-- Knowledge Builder 已组装最终产出
-- INDEX.md 已生成
+- 10 个 Extractor 全部返回结果（Phase 1 ✅）
+- Verifier 已判定所有 Candidate（Phase 2 ✅）
+- Knowledge Builder 已将全部 Accepted Candidate 组装到 `.project-knowledge/`（Phase 3 ✅）
+- INDEX.md 已重新生成（Phase 4 ✅）
+- 旧 knowledge 文件（architecture/overview.md, components/catalog.md, api/overview.md, patterns/）已从 candidates 同步更新

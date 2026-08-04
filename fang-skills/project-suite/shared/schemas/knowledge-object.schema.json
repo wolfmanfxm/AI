@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "knowledge-object.schema.json",
+  "title": "Knowledge Object",
+  "description": "结构化知识节点。Machine-readable，下游 Skill 直接消费。",
+
+  "type": "object",
+  "required": ["id", "type", "confidence"],
+  "properties": {
+    "id": { "type": "string", "description": "唯一标识，如 pattern.repository" },
+    "type": {
+      "type": "string",
+      "enum": ["pattern", "convention", "principle", "decision", "risk", "antipattern", "component", "api", "module", "glossary", "framework"],
+      "description": "知识类型"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["structural", "semantic", "behavioral", "quality"],
+      "description": "Extractor 分类"
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "statement": { "type": "string", "description": "一句话描述这个知识" },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "type": { "type": "string", "enum": ["file", "pattern", "config", "count", "ratio"] },
+          "lines": { "type": "integer" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "关联知识对象的 id" },
+          "relation": { "type": "string", "enum": ["depends_on", "implements", "contradicts", "composes", "references", "example_of"] }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "extractor": { "type": "string" },
+        "extracted_at": { "type": "string", "format": "date-time" },
+        "verifier": { "type": "string" },
+        "verified_at": { "type": "string", "format": "date-time" },
+        "verdict": { "type": "string", "enum": ["accepted", "adjusted", "rejected"] }
+      }
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "occurrences": { "type": "integer" },
+    "predictive_power": { "type": "string" },
+    "obviousness": { "type": "string", "enum": ["non-obvious", "somewhat-obvious", "obvious"] }
+  }
+}

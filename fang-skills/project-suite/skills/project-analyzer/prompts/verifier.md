@@ -20,16 +20,36 @@
 - 例如：Claim "所有组件用 PascalCase"，但找到 5 个 kebab-case 组件
 - 存在反例 → 标注 Confidence 扣分，但不一定 Reject
 
+### Verify 4: 预测力（cangjie V2）
+- 这个知识**能否回答一个代码没有显式说明的问题**？
+- 例如：Claim "项目使用 Repository Pattern" → 能预测"新增数据源时只需加一个 Repository 文件"
+- 不能预测 → 扣分（-0.10）——说明只是描述性而非推理性知识
+- 能预测 → 加分（+0.05）——说明抓住了底层原理
+
+### Verify 5: 非显而易见性（cangjie V3）
+- 这个知识**是否任何有经验的开发者都能一眼看出**？
+- 例如："项目使用 Vue 3" → ❌ 太显然，package.json 第 3 行就能看到
+- 例如："项目禁止在 composable 外使用 useState" → ✅ 非显然，来自代码审查经验
+- 太显然的知识 → 扣分（-0.15），标注 `[OBVIOUS]` —— 降低其在 INDEX.md 中的排序权重
+- 非显然的知识 → 加分（+0.05），标注 `[INSIGHT]` ——在 INDEX.md 中提升排序
+
 ## 判定
 
 | 条件 | 判定 |
 |------|------|
-| 全部 3 项通过 + Occurrences ≥3 | ✅ Accepted |
-| 全部通过但 Occurrences = 1-2 | 🟡 Accepted (low confidence) |
-| Verify 1 失败（文件不存在） | ❌ Rejected — 证据错误 |
-| Verify 2 失败（频率偏差 >50%） | 🟡 Accepted (adjusted confidence) |
-| Verify 3 发现反例 >30% | 🟡 Accepted (marked with counter-examples) |
-| Verify 3 发现反例 >50% | ❌ Rejected — Claim 不成立 |
+| 全部 5 项通过 + Occurrences ≥3 | ✅ Accepted |
+| 全部通过但 Occurrences = 1-2 | 🟡 Accepted (confidence -0.20) |
+| Verify 1 失败（文件不存在） | ❌ Rejected → `candidates/rejected/` |
+| Verify 2 频率偏差 10-30% | 🟡 Accepted (confidence -0.10) |
+| Verify 2 频率偏差 30-50% | 🟡 Accepted (confidence -0.25), 标注 `⚠️ FREQUENCY GAP` |
+| Verify 2 频率偏差 >50% | ❌ Rejected → `candidates/rejected/` |
+| Verify 3 发现反例 10-30% | 🟡 Accepted (confidence -0.10), 标注 counter-examples |
+| Verify 3 发现反例 30-50% | 🟡 Accepted (confidence -0.25), 标注 `⚠️ COUNTER EXAMPLES` |
+| Verify 3 发现反例 >50% | ❌ Rejected → `candidates/rejected/` |
+| Verify 4 不能预测 | 🟡 Accepted (confidence -0.10), 标注 `[DESCRIPTIVE]` |
+| Verify 5 太显而易见 | 🟡 Accepted (confidence -0.15), 标注 `[OBVIOUS]` — INDEX.md 降权 |
+
+**Adjusted 但未 Rejected 的 Candidate**：在 Output 中列出 adjusted 清单，标注原 confidence → 调整后 confidence + 原因。不得静默调整。
 
 ## Output
 
