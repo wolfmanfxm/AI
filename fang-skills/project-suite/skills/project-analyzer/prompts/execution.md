@@ -1,56 +1,56 @@
 # Execution — Analyzer
 
 > @engine: execution
+> v2.0: Multi-Extractor 架构 — 10 个专业化提取器 + Verifier + Knowledge Builder
 
 ## Actions
 
-按 scope、mode 并行 spawn agent（每个维度一个独立 agent）。反例 → [references/anti-patterns.md](../references/anti-patterns.md)
+### Phase 1: Parallel Extraction（10 Extractors）
 
-### 维度表
+并行 spawn 10 个 Extractor agent，每个只提取一种知识：
 
-| 维度 | 指南 | 输出 |
-|------|------|------|
-| 架构 | [prompts/architecture.md](architecture.md) | `overview.md` + `modules.md` `tech-stack.md` |
-| 组件 | [prompts/components.md](components.md) | `catalog.md` |
-| 编码 | [prompts/coding-style.md](coding-style.md) | `vue.md` `typescript.md` `naming.md` |
-| UI | [prompts/ui-pattern.md](ui-pattern.md) | `table.md` `form.md` `dialog.md` |
-| API | [prompts/api-pattern.md](api-pattern.md) | `overview.md` `request.md` |
-| 模式 | [prompts/patterns.md](patterns.md) | `crud.md` 等 |
-| 观察 | [prompts/observations.md](observations.md) | `statistics.md` |
-| 变更 | [prompts/change-analysis.md](change-analysis.md) | `change-log.md`（详尽必选） |
+| # | Extractor | Prompt | 产出 |
+|---|-----------|--------|------|
+| 1 | Directory | [extractors/directory.md](extractors/directory.md) | `candidates/directory.md` |
+| 2 | Framework | [extractors/framework.md](extractors/framework.md) | `candidates/framework.md` |
+| 3 | Architecture | [extractors/architecture.md](extractors/architecture.md) | `candidates/architecture.md` |
+| 4 | Pattern | [extractors/pattern.md](extractors/pattern.md) | `candidates/patterns/*.md` |
+| 5 | Convention | [extractors/convention.md](extractors/convention.md) | `candidates/conventions/*.md` |
+| 6 | Glossary | [extractors/glossary.md](extractors/glossary.md) | `candidates/glossary.md` |
+| 7 | Decision | [extractors/decision.md](extractors/decision.md) | `candidates/decisions.md` |
+| 8 | Risk | [extractors/risk.md](extractors/risk.md) | `candidates/risks.md` |
+| 9 | AntiPattern | [extractors/antipattern.md](extractors/antipattern.md) | `candidates/antipatterns.md` |
+| 10 | Principle | [extractors/principle.md](extractors/principle.md) | `candidates/principles.md` |
 
-### Agent 协调规则
+每个 Extractor 输出带 Evidence Score 的 Candidate。Agent 协调规则同 v1：禁止提前返回 → 全部完成后一次性写入 → 验证 ≥100 bytes。
 
-- **禁止提前返回**：spawn 子 agent 必须等待全部完成后才返回
-- **写入时机**：全部子任务完成 → 验证完整性 → 一次性写入所有产出文件
-- **写入后验证**：`ls -la` 确认每个文件存在且 >100 bytes
-- **写入失败处理**：重试一次 → 仍失败标注 `❌ FAILED: [原因]`，主流程兜底补写
+### Phase 2: Candidate Verification
 
-### Agent Prompt 组装
+→ [prompts/verifier.md](verifier.md)
 
-每个维度 agent prompt 按 4 部分组装：
-1. 任务描述（该维度分析什么）
-2. 项目上下文（框架/路径别名/分层/命名空间）
-3. 产出要求（路径/Evidence Header/最小节）
-4. 失败处理（超时/空返回 → 标注 + 重试）
+对每个 Candidate 执行 Triple Verify：
+1. **存在性** — Claim 中的文件路径/行号是否真实存在？
+2. **频率** — Occurrences 计数是否准确？
+3. **反例** — 是否存在 Claim 不成立的反例？
 
-→ 详细模板：[prompts/output-format.md](output-format.md)
+判定：全部 3 项 + Occur ≥3 → ✅ Accepted → 进入 Phase 3
+      发现反例 >50% → ❌ Rejected → `candidates/rejected/`
+
+### Phase 3: Knowledge Assembly
+
+→ [prompts/knowledge-builder.md](knowledge-builder.md)
+
+合并 Accepted Candidates → 生成最终 `.project-knowledge/` 产出 + Evidence Score Section。
+
+### Phase 4: INDEX Generation
+
+→ [prompts/index-generator.md](index-generator.md)
+
+生成 Zettelkasten 风格 `INDEX.md` — 可导航的知识链接图。
 
 ## Exit
 
-- 所有维度 agent 返回结果（completed 或 gracefully failed）
-- 产出文件已验证存在（每个 ≥100 bytes）
-- `manifest.subtasks` 全部标记 completed/failed
-
-## Failure
-
-| Condition | Action |
-|-----------|--------|
-| 子 agent 超时 | 重试一次（同 agent 同 prompt）→ 仍失败标注 `❌ FAILED: [维度名] agent timeout`，主流程用已有信息补写该维度 |
-| 子 agent 返回空 | 标注 `❌ FAILED: [维度名] empty response`，主流程补写 |
-| 写入文件失败（权限/磁盘满） | 重试一次 → 仍失败标注 `❌ FAILED: [原因]`，不阻塞其他维度 |
-| `.claude/CLAUDE.md` 不存在 | 直接生成 `.project-knowledge/`，路径别名/命名空间从 package.json + tsconfig 推断 |
-
-## CHECKPOINT
-
-Execution 维度表是所有 agent 的调度依据。可以按依赖分 Wave：架构 → 组件+API → 编码+UI+模式 → 观察+变更。
+- 10 个 Extractor 全部返回结果
+- Verifier 已判定所有 Candidate
+- Knowledge Builder 已组装最终产出
+- INDEX.md 已生成
