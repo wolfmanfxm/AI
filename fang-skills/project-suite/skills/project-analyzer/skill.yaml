@@ -9,6 +9,10 @@ consumes: []
 depends_on: []
 parallel_with: []
 boundary: 只分析项目生成知识文件，不修改源码
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
+waivers:
+  - { gate: G3, reason: "反例在 references/boundary.md(2条) + references/anti-patterns.md(详细)中，SKILL.md 无内嵌表但边界文档完整", expires: "2026-11-04", approved_by: "dispatcher" }
 
 triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
 triggers_en: [analyze codebase, scan project, project refresh]
@@ -17,3 +21,23 @@ context_contract:
   must_read: []
   should_read: []
   neednt_read: []
+
+interface:
+  inputs:
+    - { name: 项目源码, type: code, required: true, source: user, fixture: false, description: 工作目录 }
+    - { name: Knowledge Vault, type: knowledge, required: false, source: user, fixture: false, description: Vault 同步目标路径 }
+  outputs:
+    - { name: .project-knowledge/, type: knowledge, confidence_range: "80-95", description: 7维度结构化知识库 }
+    - { name: context.json, type: context, confidence_range: "85-95", description: 标准化项目上下文 }
+    - { name: graph.json, type: graph, confidence_range: "75-90", description: 模块依赖图谱 }
+    - { name: statistics.json, type: state, confidence_range: "90-95", description: 项目统计数据 }
+  side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 子agent超时或返回空, severity: DEGRADED, recovery: 重试一次,仍失败标注FAILED并主流程补写 }
+    - { condition: Knowledge Vault路径不可达, severity: DEGRADED, recovery: 跳过Vault同步,标注⚠️ }
+    - { condition: 无package.json, severity: BLOCKER, recovery: AskUserQuestion手动指定框架 }
+  quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, delivery, validation]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }

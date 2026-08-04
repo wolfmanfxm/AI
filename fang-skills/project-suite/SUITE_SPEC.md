@@ -1,6 +1,11 @@
-# Suite Spec v1.0.0
+# Suite Spec v1.1.0
 
-> Project Suite 的正式 Framework 规范。定义一个合格的 suite skill 必须满足的目录结构、文件契约、质量门禁。
+> Project Suite 的正式 Framework 规范。v1.1 新增：Stage Template Injection、interface 统一、Governed 就绪。
+> v1.0 → v1.1 关键变化：
+> - G1 行数限制宽松至 130（为 workflow-engine 留空间）
+> - 新增 G13-G16：stage prompts、@engine 声明、interface.rollback、Skill Atlas
+> - 新增第 8 节：Governed Package Boundary
+> - 反例计数规则更新：SKILL.md 内嵌表计入 G3
 
 ---
 
@@ -169,36 +174,80 @@ RefactoredCode | Documentation | Release
 
 | # | 检查项 | 级别 | 验证方式 |
 |---|--------|------|---------|
-| G1 | SKILL.md 存在且 ≤120 行 | 🔴 | `wc -l` |
-| G2 | skill.yaml 存在且字段完整 | 🔴 | YAML 解析 + 字段校验 |
-| G3 | boundary.md 含 ≥3 条反例 | 🔴 | 搜索 `❌ 反模式` 计数 |
-| G4 | 至少 1 个 `🔴 CHECKPOINT` | 🔴 | 搜索 `CHECKPOINT` |
+| G1 | SKILL.md 存在且 ≤130 行 | 🔴 | `wc -l` |
+| G2 | skill.yaml 存在且字段完整（含 `interface:` 块） | 🔴 | YAML 解析 + 字段校验 |
+| G3 | boundary.md **或** SKILL.md 内嵌反例 ≥3 条 | 🔴 | 搜索 `❌` 计数（两处之和） |
+| G4 | 至少 1 个 `CHECKPOINT`（SKILL.md 或 prompts/） | 🔴 | 搜索 `CHECKPOINT` |
 | G5 | 职责边界表 ≥3 行 ✅/❌ | 🔴 | 搜索 `✅ 本阶段职责` |
-| G6 | frontmatter 含 description + 触发词 | 🔴 | YAML 解析 |
+| G6 | frontmatter 含 `description` + 触发词 + 产出 | 🔴 | YAML 解析 |
 | G7 | capabilities.yaml 中已注册 | 🟡 | grep skill id |
 | G8 | `完成后下一步` 章节存在 | 🟡 | 搜索 |
 | G9 | failure-handling.md 存在 | 🟡 | 文件存在检查 |
 | G10 | 无 runtime-specific 措辞 | 🟡 | grep `在 Claude Code` |
 | G11 | prompts/ 至少 1 个文件 | 🟢 | `ls` |
 | G12 | references/ 至少 2 个文件 | 🟢 | `ls` |
+| **G13** | **每个 `stages:` 声明有对应 `prompts/<stage>.md`** | 🔴 | 对比 skill.yaml stages 与 prompts/ 文件 |
+| **G14** | **每个 stage prompt 含 `@engine:` 声明** | 🔴 | 搜索 `@engine:` |
+| **G15** | **`interface.rollback` 存在** | 🔴 | grep `rollback:` |
+| **G16** | **Skill Atlas 条目完整** | 🟡 | 检查 `docs/skill-atlas.md` 含该 Skill |
+| **G17** | **last_reviewed 在 review_cadence_days 内** | 🟡 | 对比当前日期与 skill.yaml `last_reviewed` |
 
 ### 6.2 模式分级
 
 | 模式 | 门禁要求 |
 |------|---------|
-| **Governed** | G1-G12 全部 🔴🟡 通过 + 独立 judge 评估 + 实测验证 |
-| **Production** | G1-G8 全部 🔴🟡 通过 |
+| **Governed** | G1-G17 全部 🔴🟡 通过 + trust report + quality scorecard + 独立 judge + 实测验证 |
+| **Production** | G1-G16 全部 🔴🟡 通过 |
 | **Scaffold** | G1-G6 全部 🔴 通过 |
 
 ---
 
 ## 7. 合规验证
 
-运行时自动验证（analyzer 可触发）：
+自动验证（`shared/scripts/check-conformance.sh`）：
 
 ```
-check_spec_compliance(skill_path)
-  → 读取 SKILL.md + skill.yaml + references/boundary.md
-  → 按 G1-G12 逐项检查
-  → 输出 COMPLIANCE.md（通过/警告/阻断 + 修复建议）
+check_suite_compliance()
+  → 读取所有 skill 的 SKILL.md + skill.yaml + boundary.md + prompts/
+  → 按 G1-G16 逐项检查
+  → 输出 PASS/WARN/FAIL + 修复建议
+```
+
+触发词评测（`shared/scripts/trigger-eval.py`）：
+
+```
+trigger_eval()
+  → 读取所有 skill.yaml 的 triggers_cn / triggers_en
+  → 检测重叠（>1 skill 共享同一触发词）
+  → 检测缺失（无触发词的 skill）
+  → 输出 trigger-eval-report.md
+```
+
+---
+
+## 8. Governed Package Boundary (v1.1)
+
+> yao-meta-skill Governed 模式要求。所有 Production 模式 Skill 建议满足，Governed 模式 Skill 必须满足。
+
+### 8.1 要求清单
+
+| Requirement | 对应文件 |
+|-------------|---------|
+| `owner` | skill.yaml `owner:` 字段 |
+| `review cadence` | 每个 SUITE_SPEC 版本 bump 时审查 |
+| `input_files` (file-backed fixture) | skill.yaml `interface.inputs` |
+| `output contract` | skill.yaml `interface.outputs` |
+| `rollback boundary` | skill.yaml `interface.rollback` |
+| `trust report` | `reports/trust-report.md` |
+| `output_quality_scorecard` | `reports/output-quality-scorecard.md` |
+
+### 8.2 Missing Evidence
+
+以下项当前不可获取，标记为 `missing evidence`（不伪造）：
+
+- **telemetry**: Skills 运行在 Claude Code 会话中，无集中式指标采集
+- **approvals**: User-as-Dispatcher 模式，人在 CHECKPOINT 处审批
+- **metrics**: 无自动化质量指标流水线
+- **benchmarks**: 无标准化 skill 产出质量基准测试套件
+- **drift detection**: 无自动检测 skill 偏离其契约的机制
 ```

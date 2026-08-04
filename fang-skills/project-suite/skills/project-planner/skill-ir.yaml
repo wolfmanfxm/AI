@@ -1,0 +1,51 @@
+# Skill IR: project-planner
+# Generated: 2026-08-04T03:28:14Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-planner
+version: 1.3.0
+mode: Production
+priority: 20
+
+description: ""
+
+boundary: "只做计划不写代码，发现问题记录在风险矩阵不直接修改"
+
+capabilities:
+  produces: [Plan]
+  consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+
+dependencies:
+  depends_on: [project-analyzer]
+
+interface:
+  stages: [discovery, code-audit, execution, validation, output]
+  stage_prompts: 4
+  inputs: 5
+  fixtures: 3
+
+quality:
+  confidence_pass: 90
+70
+40
+  review_below: 90
+70
+40
+  block_below: 90
+70
+40
+  rollback: git_revertsafe_to_retry:trueretry_max:1}
+manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+
+reliability:
+  stability: mediumexpected_confidence_delta:10output_file_count_tolerance:"15%"}
+  confidence_delta: 10
+15
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 8

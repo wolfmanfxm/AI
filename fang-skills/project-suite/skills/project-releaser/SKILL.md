@@ -3,106 +3,66 @@ name: project-releaser
 metadata: skill.yaml
 description: >
   发布管理：semver 版本号推荐（基于 conventional commits）、changelog 自动合成
-  （git log + PR + REVIEW.md）、发布前检查清单（测试/文档/breaking change/回滚方案）、
-  发布后验证。触发词：发布、上线、发版、release、changelog、版本号、发布检查、
-  ship、deploy、version bump、publish、准备发布、发布前检查。
+  （git log + PR + REVIEW.md）、发布前检查清单（测试/文档/breaking change/回滚方案）。
+  触发词：发布、上线、发版、release、changelog、版本号、发布检查、
+  ship、deploy、version bump、publish、准备发布。
   产出：CHANGELOG.md + RELEASE-CHECKLIST.md + 版本号建议。
 ---
 
 # Releaser
 
 > 代码就绪 → 发布检查 → 版本 bump → Changelog → 发布就绪
+> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
 1. **不执行发布命令** — 只检查、推荐、生成，不 `npm publish` / `git push --tags`
-2. **基于事实** — 版本号从 commit 推导，changelog 从 git log + PR 合成
+2. **基于事实** — 版本号从 commit 推导，changelog 从 git log 合成
 3. **Breaking Change 显式** — 必须标注、必须写迁移步骤
 4. **可回滚** — 每次发布有回滚方案
-
-## 职责边界
-
-→ [references/boundary.md](references/boundary.md)
-
-> 🔴 releaser 只检查不执行发布命令。
-
-## 反例黑名单
-
-| # | ❌ 反模式 | 为什么不要做 | ✅ 正确做法 |
-|---|---------|-------------|-----------|
-| 1 | **执行 `npm publish` / `git push --tags`** | releaser 是检查门禁不是部署工具，自动推送不可逆 | 只生成 CHANGELOG + CHECKLIST，发布命令由人工执行 |
-| 2 | **不看 git log 直接建议版本号** | 忽略 commit 历史导致版本跳跃（PATCH→MAJOR） | 先解析 conventional commits，按 breaking/feat/fix 规则推算 |
-| 3 | **Breaking change 无迁移步骤** | 下游使用者升级时不知道该改什么，导致线上事故 | 每个 BREAKING CHANGE 附带具体迁移步骤（旧API→新API） |
-| 4 | **无回滚方案就标记发布就绪** | 发布失败时无法快速恢复，延长故障时间 | RELEASE-CHECKLIST.md 必须包含回滚方案（git revert 命令+验证步骤） |
-| 5 | **REVIEW.md 未通过仍标记可发布** | 已知 BLOCKER 问题进入生产环境 | REVIEW.md 存在 BLOCKER → 🔴 拒绝生成发布产物，提示先修复 |
 
 ## 前置条件
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
-| 0 | **git log** | 🔴 BLOCKED |
-| 1 | `CHANGELOG.md`（若存在） | 🟡 DEGRADED — 从 git log 生成 |
-| 2 | `REVIEW.md` | 🟡 DEGRADED — 标注"⚠️ 未审查" |
+| 0 | git log | 🔴 BLOCKED |
+| 1 | CHANGELOG.md（若存在） | 🟡 DEGRADED |
+| 2 | REVIEW.md | 🟡 DEGRADED — 标注"⚠️ 未审查" |
 
 ## 工作流
 
-### Discover
+| Stage | Prompt | 模板 |
+|-------|--------|------|
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
-1. 读 `git log` → 解析 conventional commits（feat/fix/refactor/docs/...）
-2. 读 `CHANGELOG.md`（若存在）→ 追加/新建
-3. 读 REVIEW.md（若存在）→ 确认审查状态
-4. 🔴 CHECKPOINT → [checkpoint 模式](../../shared/conventions/checkpoint-pattern.md)
+## 职责边界
 
-### Execute
+→ [references/boundary.md](references/boundary.md)
+> 🔴 releaser 只检查不执行发布命令。
 
-0. **全链路 Confidence Gate** → [../../runtime/engine/confidence-gate.md](../../runtime/engine/confidence-gate.md)
-   - 扫描 `state.json` history → 逐一检查上游 skill confidence
-   - 任一 confidence < 40 → 🔴 BLOCK，拒绝发布
-   - 任一 confidence < 70 → 🟠 GATE，AskUserQuestion 确认
-   - 全部 ≥ 90 → 🟢 PASS，正常发布
-1. **版本号推荐** — 输入: git log 解析结果 → 输出: 推荐版本号
-   - breaking change 存在 → MAJOR
-   - feat 存在且无 breaking → MINOR
-   - 仅 fix/refactor/docs → PATCH
-2. **Changelog 合成** → [prompts/changelog-gen.md](prompts/changelog-gen.md)
-   - 输入: git log + PR 描述 + REVIEW.md（若存在）
-   - 输出: 按版本分组的 CHANGELOG.md（Added/Changed/Fixed/Deprecated/Removed）
-3. **发布检查清单** → [prompts/release-checklist.md](prompts/release-checklist.md)
-   - 逐项验证：测试通过 / 文档更新 / breaking change 迁移说明 / 回滚方案
-4. 🔴 CHECKPOINT — 展示版本号建议+Changelog摘要+检查清单结果，用户确认后生成发布产物
+## 反例黑名单
 
-### Output
-
-| 文件 | 内容 | 消费者 |
-|------|------|--------|
-| `CHANGELOG.md` | 按版本分组的变更记录 | 团队 / 下游用户 |
-| `RELEASE-CHECKLIST.md` | 发布前逐项检查结果 | 发布负责人 |
-| 版本号推荐 | semver 版本号 + 推荐理由 | 发布决策 |
+> 禁止: ① 执行npm publish/git push --tags ② 不看git log直接建议版本号 ③ 无回滚方案标记发布就绪 | → [完整清单](references/boundary.md)
 
 ## 失败处理
 
-| 触发条件 | 一线修复 | 仍失败兜底 |
-|---------|---------|-----------|
-| `git log` 无 conventional commits | 按 commit 首词推断类型（feat→MINOR, fix→PATCH） | 读 `package.json` 当前版本，默认 PATCH bump，标注"⚠️ 非标准 commit" |
-| 无法确定版本号（无历史 tag） | 从 `package.json` 读当前版本，推荐 `1.0.0` 为首个正式版 | AskUserQuestion 让用户指定版本号 |
-| CHANGELOG.md 不存在 | 从 git log 生成全新 CHANGELOG.md | 标注"⚠️ 首次生成，请人工审核" |
-| REVIEW.md 不存在 | 标注"⚠️ 未审查"，继续生成 | 不阻塞 — Changelog 独立于审查状态 |
-| 检测到 breaking change 但无迁移说明 | 在 CHANGELOG 显式标注 BREAKING CHANGE + 生成迁移步骤 | AskUserQuestion 确认是否有遗漏的迁移需求 |
+> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
 
 ## 引用索引
 
 | 资源 | 路径 |
 |------|------|
-| 入口 Prompt | [prompts/main.md](prompts/main.md) |
-| 版本 Bump | [prompts/version-bump.md](prompts/version-bump.md) |
-| Changelog | [prompts/changelog-gen.md](prompts/changelog-gen.md) |
-| 发布检查 | [prompts/release-checklist.md](prompts/release-checklist.md) |
-| 职责边界 | [references/boundary.md](references/boundary.md) |
+| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
+| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
+| Stage Execution | [prompts/execution.md](prompts/execution.md) |
+| Stage Validation | [prompts/validation.md](prompts/validation.md) |
+| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
+| 版本 Bump Prompt | [prompts/version-bump.md](prompts/version-bump.md) |
+| Changelog Prompt | [prompts/changelog-gen.md](prompts/changelog-gen.md) |
+| 发布检查 Prompt | [prompts/release-checklist.md](prompts/release-checklist.md) |
 | Semver 指南 | [references/semver-guide.md](references/semver-guide.md) |
-| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 
-## 完成后下一步
-
-```
-releaser 完成 → 人工审核后发布 / 修复后重新: /project-releaser
-```
+## 完成后下一步 → 人工审核后发布 / 修复后重新 /project-releaser

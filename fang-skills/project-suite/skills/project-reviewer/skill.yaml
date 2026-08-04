@@ -9,6 +9,8 @@ consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
 depends_on: [project-tester]
 parallel_with: []
 boundary: 只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [代码审查, review, 检查代码, 审查 PR, 代码质量, 审查, 帮我看看这段代码, 这个 PR 怎么样]
 triggers_en: [code review, security review, audit code]
@@ -20,10 +22,10 @@ context_contract:
 
 interface:
   inputs:
-    - { name: 变更代码, type: implementation, required: true, source: project-generator, description: 待审查的diff/文件列表 }
-    - { name: PLAN.md, type: planning, required: false, source: project-planner, description: Acceptance Criteria对照 }
-    - { name: context-package.json, type: context, required: false, source: knowledge-resolver, description: 验证Generator是否正确使用知识 }
-    - { name: graph.json, type: graph, required: false, source: project-analyzer, description: 循环依赖检测+影响范围 }
+    - { name: 变更代码, type: implementation, required: true, source: project-generator, fixture: false, description: 待审查的diff/文件列表 }
+    - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria对照 }
+    - { name: context-package.json, type: context, required: false, source: knowledge-resolver, fixture: true, description: 验证Generator是否正确使用知识 }
+    - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 循环依赖检测+影响范围 }
   outputs:
     - { name: REVIEW-<topic>.md, type: review, confidence_range: "70-90", description: 五轴审查报告, BLOCKER→PRAISE }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
@@ -32,3 +34,6 @@ interface:
     - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
   quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: none, safe_to_retry: true, retry_max: 2 }
+  stages: [discovery, execution, validation, output]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 2 }
+  reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }

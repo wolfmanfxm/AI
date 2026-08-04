@@ -1,0 +1,51 @@
+# Skill IR: project-tester
+# Generated: 2026-08-04T03:28:16Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-tester
+version: 1.3.0
+mode: Production
+priority: 50
+
+description: ""
+
+boundary: "只写测试不修被测代码，测试失败记录报告不修改源码"
+
+capabilities:
+  produces: [Test]
+  consumes: [Code, Plan, KnowledgeBase, Context]
+
+dependencies:
+  depends_on: [project-generator]
+
+interface:
+  stages: [discovery, execution, validation]
+  stage_prompts: 3
+  inputs: 4
+  fixtures: 1
+
+quality:
+  confidence_pass: 85
+70
+40
+  review_below: 85
+70
+40
+  block_below: 85
+70
+40
+  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
+manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+
+reliability:
+  stability: mediumexpected_confidence_delta:15output_file_count_tolerance:"20%"}
+  confidence_delta: 15
+20
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 8

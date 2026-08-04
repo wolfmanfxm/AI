@@ -1,0 +1,51 @@
+# Skill IR: project-architect
+# Generated: 2026-08-04T03:28:13Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-architect
+version: 1.3.0
+mode: Production
+priority: 30
+
+description: ""
+
+boundary: "只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改"
+
+capabilities:
+  produces: [Architecture]
+  consumes: [KnowledgeBase, Plan, Context, Graph]
+
+dependencies:
+  depends_on: [project-planner]
+
+interface:
+  stages: [discovery, code-audit, graph-analysis, execution, validation, output]
+  stage_prompts: 5
+  inputs: 4
+  fixtures: 3
+
+quality:
+  confidence_pass: 85
+70
+40
+  review_below: 85
+70
+40
+  block_below: 85
+70
+40
+  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
+manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+
+reliability:
+  stability: mediumexpected_confidence_delta:10output_file_count_tolerance:"15%"}
+  confidence_delta: 10
+15
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 11

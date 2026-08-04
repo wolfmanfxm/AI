@@ -9,6 +9,8 @@ consumes: [Code, Review, KnowledgeBase, Context]
 depends_on: [project-reviewer]
 parallel_with: [project-refactorer]
 boundary: 只生成文档不改代码，API/组件文档同步 Vault 其他留在本地
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [生成文档, 写文档, 补文档, API 文档, README, 更新文档, 补全文档, 组件文档]
 triggers_en: [generate docs, write documentation, update README, api docs]
@@ -17,3 +19,19 @@ context_contract:
   must_read: [context.json, api/overview.md]
   should_read: [architecture/]
   neednt_read: [observations/]
+
+interface:
+  inputs:
+    - { name: 源码文件, type: code, required: true, source: user, fixture: false, description: 待文档化的源文件 }
+    - { name: 已有文档, type: documentation, required: false, source: user, fixture: true, description: 风格参考 }
+  outputs:
+    - { name: "api/<module>.md / components/<name>.md", type: documentation, confidence_range: "75-90", description: 可溯源技术文档,含Evidence Header }
+  side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 源文件不可读或不存在, severity: BLOCKER, recovery: 拒绝执行 }
+    - { condition: JSDoc注释缺失或不完整, severity: DEGRADED, recovery: 从类型推断,标注[推断] }
+  quality_gate: { min_confidence_for_pass: 80, requires_review_below: 60, blocks_downstream_below: 40 }
+  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, validation, output]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }

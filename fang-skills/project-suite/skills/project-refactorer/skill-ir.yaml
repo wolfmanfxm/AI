@@ -1,0 +1,51 @@
+# Skill IR: project-refactorer
+# Generated: 2026-08-04T03:28:15Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-refactorer
+version: 1.3.0
+mode: Production
+priority: 60
+
+description: ""
+
+boundary: "只改善结构不改行为，没测试保护不重构"
+
+capabilities:
+  produces: [RefactoredCode]
+  consumes: [Code, KnowledgeBase, Test, Review]
+
+dependencies:
+  depends_on: [project-reviewer]
+
+interface:
+  stages: [discovery, execution, validation, output]
+  stage_prompts: 3
+  inputs: 4
+  fixtures: 1
+
+quality:
+  confidence_pass: 85
+70
+40
+  review_below: 85
+70
+40
+  block_below: 85
+70
+40
+  rollback: git_revertsafe_to_retry:trueretry_max:1}
+git_revertcheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+  recovery: git_revertcheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+
+reliability:
+  stability: lowexpected_confidence_delta:15output_file_count_tolerance:"30%"}
+  confidence_delta: 15
+30
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 8

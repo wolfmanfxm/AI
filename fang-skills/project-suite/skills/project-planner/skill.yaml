@@ -13,6 +13,8 @@ depends_on_skill:
 
 parallel_with: []
 boundary: 只做计划不写代码，发现问题记录在风险矩阵不直接修改
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量, 分解任务, sprint 规划, 任务规划]
 triggers_en: [break down tasks, plan sprint, estimate effort, create dev plan]
@@ -24,9 +26,9 @@ context_contract:
 
 interface:
   inputs:
-    - { name: context.json, type: context, required: true, source: project-analyzer, description: 技术栈/路径别名/约定 }
-    - { name: knowledge-index.json, type: state, required: true, source: project-analyzer, description: capability→文件映射 }
-    - { name: graph.json, type: graph, required: false, source: project-analyzer, description: 模块依赖关系 }
+    - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }
+    - { name: knowledge-index.json, type: state, required: true, source: project-analyzer, fixture: true, description: capability→文件映射 }
+    - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 模块依赖关系 }
   outputs:
     - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
     - { name: context-package.json, type: context, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
@@ -36,3 +38,6 @@ interface:
     - { condition: 上游analyzer confidence<70, severity: DEGRADED, recovery: 标注"⚠️上游低置信度",继续但降级 }
   quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, code-audit, execution, validation, output]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }

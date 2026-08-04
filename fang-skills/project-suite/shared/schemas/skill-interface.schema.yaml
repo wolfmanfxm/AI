@@ -1,12 +1,11 @@
-# Skill Interface Standard v1.0.0
+# Skill Interface Standard v1.1.0
 #
 # 所有 skill 的标准化接口定义。
-# Workflow Engine 不需要读 Prompt，直接解析 skill.yaml 即可调度。
+# 每个 skill.yaml 必须包含 interface: 块，Engine 直接解析即可调度。
 
-version: "1.0.0"
+version: "1.1.0"
 
 # ═══ Interface Fields ═══
-# 每个 skill.yaml 在 context_contract 之后追加 interface: 块
 
 fields:
 
@@ -18,6 +17,7 @@ fields:
       type: string          # artifact-type: knowledge/context/planning/design/code/test/review/documentation/release/state
       required: boolean     # true = 缺失时 BLOCK
       source: string        # producer skill 或文件路径
+      fixture: boolean      # v1.2: true = file-backed fixture (可 checksum 验证); false = ephemeral/会话临时
       description: string   # 在本 Skill 中的用途
 
   outputs:
@@ -58,6 +58,34 @@ fields:
     description: 回滚策略。Engine 据此决定失败后如何处理。
     type: object
     properties:
-      method: string        # git_revert | manual | none
+      method: string        # git_revert | manifest_resume | manual | none
       safe_to_retry: boolean  # 是否可以安全重试
       retry_max: integer      # 最大重试次数，默认 1
+
+  # ═══ v1.1.0 新增 ═══
+
+  stages:
+    description: 本 Skill 的阶段列表。Engine 据此加载对应的 Stage Contract 模板。
+    type: array
+    item_schema:
+      name: string          # discovery | planning | execution | validation | delivery
+                            # Engine 从 workflow-engine/references/stage-contract.md 加载模板
+
+  recovery:
+    description: 中断恢复策略。Engine 据此决定中断后如何 resume。
+    type: object
+    properties:
+      method: string        # manifest_resume | git_revert | ask_user | none
+      checkpoint_file: string  # 断点文件，默认 manifest.json
+      safe_to_retry: boolean   # 是否可以安全重试
+      retry_max: integer       # 最大重试次数
+
+  # ═══ v1.2 新增 ═══
+
+  reliability:
+    description: 跨运行可靠性预期。Engine 据此评估多次运行稳定性。
+    type: object
+    properties:
+      structural_stability: string   # high (纯分析) | medium (半生成) | low (生成型)
+      expected_confidence_delta: integer  # 两次运行 confidence 最大允许差
+      output_file_count_tolerance: string # 文件数允许波动范围，如 "20%"

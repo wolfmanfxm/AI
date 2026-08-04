@@ -9,6 +9,8 @@ consumes: [Documentation, Review, Test]
 depends_on: [project-documenter]
 parallel_with: []
 boundary: 只检查推荐不执行发布命令，不 npm publish / git push --tags
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [发布, 上线, 发版, release, changelog, 版本号, 发布检查, 准备发布, 发布前检查]
 triggers_en: [release, ship, deploy, version bump, publish]
@@ -17,3 +19,22 @@ context_contract:
   must_read: [state.json]
   should_read: []
   neednt_read: []
+
+interface:
+  inputs:
+    - { name: git log, type: state, required: true, source: git, fixture: false, description: conventional commits历史 }
+    - { name: state.json, type: state, required: true, source: runtime, fixture: true, description: 全链路confidence检查 }
+    - { name: REVIEW.md, type: review, required: false, source: project-reviewer, fixture: true, description: 审查状态 }
+  outputs:
+    - { name: CHANGELOG.md, type: documentation, confidence_range: "80-90", description: 按版本分组变更记录 }
+    - { name: RELEASE-CHECKLIST.md, type: review, confidence_range: "80-90", description: 发布前逐项检查结果 }
+    - { name: 版本号推荐, type: planning, confidence_range: "85-95", description: semver版本号+推荐理由 }
+  side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 全链路confidence<40, severity: BLOCKER, recovery: 拒绝生成发布产物 }
+    - { condition: breaking change无迁移说明, severity: BLOCKER, recovery: 生成迁移步骤,AskUserQuestion确认 }
+  quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, validation, output]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: high, expected_confidence_delta: 5, output_file_count_tolerance: "5%" }

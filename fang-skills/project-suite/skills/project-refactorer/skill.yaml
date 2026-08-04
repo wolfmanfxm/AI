@@ -9,6 +9,8 @@ consumes: [Code, KnowledgeBase, Test, Review]
 depends_on: [project-reviewer]
 parallel_with: [project-documenter]
 boundary: 只改善结构不改行为，没测试保护不重构
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码]
 triggers_en: [refactor, clean up, extract method, simplify, reduce complexity]
@@ -17,3 +19,20 @@ context_contract:
   must_read: [context.json]
   should_read: [patterns/vue.md, patterns/typescript.md, components/catalog.md]
   neednt_read: [observations/, reports/]
+
+interface:
+  inputs:
+    - { name: 待重构代码, type: code, required: true, source: user, fixture: false, description: 待重构的源文件 }
+    - { name: 现有测试, type: test, required: false, source: project-tester, fixture: true, description: 回归测试保护 }
+  outputs:
+    - { name: 重构后代码, type: code, confidence_range: "75-90", description: 行为不变+指标改善 }
+    - { name: REFACTOR.md, type: review, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
+  side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
+  failure_modes:
+    - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
+    - { condition: 重构后测试变红, severity: BLOCKER, recovery: git revert,记录REFACTOR.md失败原因 }
+  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, validation, output]
+  recovery: { method: git_revert, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }

@@ -9,6 +9,8 @@ consumes: [Code, Plan, KnowledgeBase, Context]
 depends_on: [project-generator]
 parallel_with: []
 boundary: 只写测试不修被测代码，测试失败记录报告不修改源码
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [写测试, 测试用例, 单元测试, 集成测试, 组件测试, 测试覆盖, 跑测试, 加测试]
 triggers_en: [write tests, test cases, unit test, test coverage, add test, generate test]
@@ -17,3 +19,21 @@ context_contract:
   must_read: [context.json, PLAN.md]
   should_read: [patterns/vue.md, patterns/typescript.md]
   neednt_read: [observations/, reports/]
+
+interface:
+  inputs:
+    - { name: 被测代码, type: code, required: true, source: user, fixture: false, description: 待测试的源文件或变更列表 }
+    - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria }
+  outputs:
+    - { name: "*.test.ts/*.spec.ts", type: test, confidence_range: "70-90", description: Given-When-Then结构测试用例 }
+    - { name: TEST-REPORT.md, type: review, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
+  side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 检测不到测试框架, severity: DEGRADED, recovery: 默认jest风格,标注⚠️ }
+    - { condition: 被测代码不可读或不存在, severity: BLOCKER, recovery: 拒绝执行 }
+    - { condition: 断言失败(发现潜在bug), severity: WARNING, recovery: 不修改源码,记录[潜在Bug]到报告 }
+  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, validation]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: medium, expected_confidence_delta: 15, output_file_count_tolerance: "20%" }

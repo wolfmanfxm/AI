@@ -1,0 +1,51 @@
+# Skill IR: project-reviewer
+# Generated: 2026-08-04T03:28:15Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-reviewer
+version: 1.3.0
+mode: Production
+priority: 55
+
+description: ""
+
+boundary: "只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复"
+
+capabilities:
+  produces: [Review]
+  consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+
+dependencies:
+  depends_on: [project-tester]
+
+interface:
+  stages: [discovery, execution, validation, output]
+  stage_prompts: 3
+  inputs: 5
+  fixtures: 3
+
+quality:
+  confidence_pass: 85
+70
+40
+  review_below: 85
+70
+40
+  block_below: 85
+70
+40
+  rollback: nonesafe_to_retry:trueretry_max:2}
+manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:2}
+  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:2}
+
+reliability:
+  stability: highexpected_confidence_delta:10output_file_count_tolerance:"10%"}
+  confidence_delta: 10
+10
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 8

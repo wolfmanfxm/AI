@@ -15,6 +15,8 @@ depends_on_skill:
 
 parallel_with: []
 boundary: 只写代码不做设计，缺少上游产物时提示先执行 planner/architect
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
 
 triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加]
 triggers_en: [implement, create component, build feature, generate code, write a]
@@ -26,10 +28,10 @@ context_contract:
 
 interface:
   inputs:
-    - { name: context-package.json, type: context, required: true, source: knowledge-resolver, description: 预消化知识包: pattern+constraints+components }
-    - { name: PLAN.md, type: planning, required: true, source: project-planner, description: Goal+Scope+Task Breakdown }
-    - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, description: ADR决策记录 }
-    - { name: graph.json, type: graph, required: false, source: project-analyzer, description: 已有组件/API不重复生成 }
+    - { name: context-package.json, type: context, required: true, source: knowledge-resolver, fixture: true, description: 预消化知识包: pattern+constraints+components }
+    - { name: PLAN.md, type: planning, required: true, source: project-planner, fixture: true, description: Goal+Scope+Task Breakdown }
+    - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: ADR决策记录 }
+    - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 已有组件/API不重复生成 }
   outputs:
     - { name: "*.vue/*.ts/*.js", type: implementation, confidence_range: "70-95", description: 符合项目规范的生产级代码 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
@@ -38,3 +40,6 @@ interface:
     - { condition: graph.json显示组件已存在, severity: WARNING, recovery: 标记[REUSE],跳过生成 }
   quality_gate: { min_confidence_for_pass: 95, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, execution, validation]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }

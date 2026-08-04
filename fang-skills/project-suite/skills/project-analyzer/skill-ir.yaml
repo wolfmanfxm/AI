@@ -1,0 +1,52 @@
+# Skill IR: project-analyzer
+# Generated: 2026-08-04T03:28:13Z
+# Generator: shared/scripts/generate-skill-ir.sh
+
+id: project-analyzer
+version: 1.3.1
+mode: Production
+priority: 10
+
+description: ""
+
+boundary: "只分析项目生成知识文件，不修改源码"
+
+capabilities:
+  produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+  consumes: []
+
+dependencies:
+  depends_on: []
+
+interface:
+  stages: [discovery, execution, delivery, validation]
+  stage_prompts: 4
+  inputs: 6
+  fixtures: 0
+0
+
+quality:
+  confidence_pass: 90
+70
+40
+  review_below: 90
+70
+40
+  block_below: 90
+70
+40
+  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
+manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
+
+reliability:
+  stability: highexpected_confidence_delta:10output_file_count_tolerance:"10%"}
+  confidence_delta: 10
+10
+
+governance:
+  last_reviewed: "2026-08-04"
+  review_cadence_days: 90
+
+triggers:
+  cn_count: 9

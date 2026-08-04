@@ -12,99 +12,63 @@ description: >
 # Architect
 
 > 需求 → 技术选型 → 模块设计 → API 契约 → ARCHITECTURE.md
+> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
-1. **决策可追溯** — 问题 → 候选方案 → 选择 → 理由
+1. **决策可追溯** — 问题 → 候选方案 → 选择 → 理由（ADR 格式）
 2. **上下文驱动** — 选型基于项目约束，不追求银弹
-3. **够用就好** — 当前需求 + 可预见扩展
-4. **基于事实** — 有 `.project-knowledge/` 时基于现有架构
-
-## 职责边界
-
-→ [references/boundary.md](references/boundary.md)
-
-> 🔴 architect 只做设计不写代码。
-
-## 反例黑名单
-
-→ [references/boundary.md](references/boundary.md)
+3. **现状核实先行** — `[已实现]` 的模块不再出设计方案
+4. **够用就好** — 当前需求 + 可预见扩展
 
 ## 前置条件
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
-| 0 | **`context.json`** | 从 `.project-knowledge/architecture/` 提取 |
+| 0 | `context.json` | 从 `.project-knowledge/architecture/` 提取 |
 | 1 | `.project-knowledge/architecture/` | 标注"未分析" |
-| 2 | `PLAN.md`，**若存在必读** | 标注"⚠️ 无规划" |
-| 3 | 上游源码，**现状核实必读** | 标注"⚠️ 未核实" |
+| 2 | `PLAN.md`，若存在必读 | 标注"⚠️ 无规划" |
+| 3 | 上游源码 | 标注"⚠️ 未核实" |
 
 ## 工作流
 
-### Discover
+| Stage | Prompt | 模板 |
+|-------|--------|------|
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
+| Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @engine: code-audit |
+| Graph Analysis | [prompts/graph-analysis.md](prompts/graph-analysis.md) | @engine: graph-analysis |
+| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
-1. 确认设计范围 + 收集约束
-2. 🔴 CHECKPOINT — 展示设计范围 + 约束清单，用户确认后进入现状核实
+## 职责边界
 
-### 现状核实（Discover 后必做）
+→ [references/boundary.md](references/boundary.md)
+> 🔴 architect 只做设计不写代码。
 
-→ [references/code-audit.md](references/code-audit.md)
+## 反例黑名单
 
-> 标注 `[已实现][部分实现][未实现]`。已实现的不再出设计方案。
-
-### Graph 模块分析
-
-→ [Graph Query Protocol](../../runtime/contracts/graph-query.md)
-
-1. `findDependencies(<目标模块>)` → 了解当前模块耦合度
-2. 全图 edges 按 `group` 聚合 → 识别跨层依赖（view→infrastructure 标注异常）
-3. `findConsumers(<目标 API>)` → 修改 API 契约时了解影响范围
-4. 循环依赖（A→B 且 B→A）→ 标注为架构风险，建议重构
-
-🔴 CHECKPOINT — 展示现状核实 + Graph 分析结果，用户确认范围后进入 Execute。
-
-### Execute
-
-```
-"选什么技术" → 1.技术选型 → [prompts/tech-selection.md](prompts/tech-selection.md)
-"模块划分"   → 2.模块设计 → [prompts/module-design.md](prompts/module-design.md)
-"API设计"    → 3.API契约  → [prompts/api-design.md](prompts/api-design.md)
-综合设计     → 1→2→3 顺序，每步 CHECKPOINT
-```
-
-🔴 CHECKPOINT — 展示 ARCHITECTURE.md 摘要（决策数+模块图+API契约），用户确认后写入文件。
-
-### Output
-
-`.project-knowledge/decisions/ARCHITECTURE-<topic>.md`
+> 禁止: ① 写代码（只做设计） ② 跳过现状核实 ③ 基于猜测做架构决策 | → [完整清单](references/boundary.md)
 
 ## 失败处理
 
-| 触发条件 | 一线修复 | 仍失败兜底 |
-|---------|---------|-----------|
-| `.project-knowledge/architecture/` 不存在 | 从代码结构推断模块边界 | 标注"⚠️ 未分析现有架构"，通用模式设计 |
-| PLAN.md `# Decision` 为空（无待 resolve 决策） | 自行识别架构决策点 | 标注"⚠️ 自行识别决策点" |
-| 候选方案无明确最优（对比矩阵分差 < 10%） | 展示对比 + 权衡分析，标注推荐 | AskUserQuestion 让用户选择 |
-| 现状核实源码不可读 | 标注"⚠️ 未核实"，按未实现出方案 | 不基于猜测做架构决策 |
-| 设计范围完全未指定 | 🔴 BLOCKED — 拒绝执行 | 提示用户先执行 `/project-planner` |
-
-→ 详细: [references/failure-handling.md](references/failure-handling.md)
+> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
 
 ## 引用索引
 
 | 资源 | 路径 |
 |------|------|
-| 入口 Prompt | [prompts/main.md](prompts/main.md) |
-| 技术选型 | [prompts/tech-selection.md](prompts/tech-selection.md) |
-| 模块设计 | [prompts/module-design.md](prompts/module-design.md) |
-| API 契约 | [prompts/api-design.md](prompts/api-design.md) |
+| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
+| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
+| Stage Code Audit | [prompts/code-audit.md](prompts/code-audit.md) |
+| Stage Graph Analysis | [prompts/graph-analysis.md](prompts/graph-analysis.md) |
+| Stage Execution | [prompts/execution.md](prompts/execution.md) |
+| Stage Validation | [prompts/validation.md](prompts/validation.md) |
+| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
+| 技术选型 Prompt | [prompts/tech-selection.md](prompts/tech-selection.md) |
+| 模块设计 Prompt | [prompts/module-design.md](prompts/module-design.md) |
+| API 契约 Prompt | [prompts/api-design.md](prompts/api-design.md) |
 | 职责边界 | [references/boundary.md](references/boundary.md) |
 | 决策框架 | [references/decision-framework.md](references/decision-framework.md) |
-| 现状核实 | [references/code-audit.md](references/code-audit.md) |
-| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
 
 ## 完成后下一步 → /project-generator 或 /project-reviewer
-
-## 输出末尾：Workflow Hint 块
-
-→ [references/workflow-hint.md](references/workflow-hint.md)
