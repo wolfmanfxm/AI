@@ -41,3 +41,8 @@ interface:
   stages: [discovery, execution, delivery, validation]
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
+  stage_config:
+    discovery: { checkpoint: true, retry: 0 }
+    execution: { checkpoint: false, retry: 1, parallel: true }
+    validation: { checkpoint: false, retry: 0, blocking: true }
+    delivery: { checkpoint: false, retry: 1 }

@@ -1,0 +1,81 @@
+# Workflow Library v1.0
+#
+# 通用 Workflow 模式。Skill 可引用预定义 workflow，Engine 自动展开 stages。
+# Pipeline Orchestrator 使用跨 Skill workflow。
+
+version: "1.0.0"
+
+workflows:
+
+  # ═══ 单 Skill Workflow 模式 ═══
+
+  standard:
+    description: 标准 4 阶段 Workflow — 适用于 analyzer/documenter/reviewer/releaser
+    stages: [discovery, execution, validation, delivery]
+    used_by: [analyzer, reviewer, refactorer, documenter, releaser]
+
+  generative:
+    description: 3 阶段生成型 Workflow — 适用于 generator
+    stages: [discovery, execution, validation]
+    used_by: [generator]
+
+  planning:
+    description: 5 阶段规划型 Workflow — 适用于 planner
+    stages: [discovery, code-audit, execution, validation, delivery]
+    used_by: [planner]
+
+  design:
+    description: 6 阶段设计型 Workflow — 适用于 architect
+    stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
+    used_by: [architect]
+
+  test:
+    description: 3 阶段测试型 Workflow — 适用于 tester
+    stages: [discovery, execution, validation]
+    used_by: [tester]
+
+  orchestration:
+    description: 4 阶段编排型 Workflow — pipeline-orchestrator 专用
+    stages: [discovery, orchestrate, validation, delivery]
+    used_by: [pipeline-orchestrator]
+
+  # ═══ 跨 Skill Pipeline 模式 ═══
+
+  full-sdlc:
+    description: 全生命周期 — 分析→规划→设计→生成→测试→审查→文档→发布
+    pipeline: [analyzer, planner, architect, generator, tester, reviewer, documenter, releaser]
+    parallel_groups:
+      wave_1: [analyzer]
+      wave_2: [planner]
+      wave_3: [architect]
+      wave_4: [generator]
+      wave_5: [tester]
+      wave_6: [reviewer]
+      wave_7: [refactorer, documenter]
+      wave_8: [releaser]
+
+  quick-change:
+    description: 轻量改动 — 生成→审查
+    pipeline: [generator, reviewer]
+    parallel_groups:
+      wave_1: [generator]
+      wave_2: [reviewer]
+
+  analyze-plan-build:
+    description: 新功能开发 — 分析→规划→设计→生成→审查
+    pipeline: [analyzer, planner, architect, generator, reviewer]
+
+  refactor-cycle:
+    description: 重构循环 — 审查→重构→测试→审查
+    pipeline: [reviewer, refactorer, tester, reviewer]
+
+  knowledge-refresh:
+    description: 知识刷新 — 分析→文档
+    pipeline: [analyzer, documenter]
+
+# Workflow 引用方式
+# Skill 可在 skill.yaml 中声明:
+#   workflow: standard   # 引用预定义 workflow
+#
+# 等价于:
+#   stages: [discovery, execution, validation, delivery]

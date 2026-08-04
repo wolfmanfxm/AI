@@ -18,6 +18,19 @@ description: >
 
 加载优先级：`@engine:` 块 > 模板默认值 > skill.yaml interface。Skill 可覆盖模板任意字段。
 
+### Workflow DSL（可选，机器可读）
+
+Skill 可选择 `workflow.dsl.yaml`，Engine 直接解析执行，跳过 prose 指令：
+
+```yaml
+stages:
+  - { name: discovery, template: discovery, exit: [scope_confirmed], checkpoint: true, on_failure: ask }
+  - { name: execution,  template: execution,  exit: [all_completed],   parallel: true,  retry: 1 }
+  - { name: validation, template: validation, exit: [no_critical],     blocking: true }
+```
+
+→ [Schema](../../shared/schemas/workflow.schema.json) · [Example](../../runtime/registry/workflow.dsl.example.yaml)
+
 ### 模板目录
 
 | 模板 | 适用 Skill |
@@ -28,6 +41,19 @@ description: >
 | [delivery](references/stage-templates/delivery.md) | analyzer, planner, architect, reviewer, refactorer, documenter, releaser |
 | [code-audit](references/stage-templates/code-audit.md) | planner, architect |
 | [graph-analysis](references/stage-templates/graph-analysis.md) | architect |
+
+## Execution Driver
+
+> **Engine 驱动阶段推进** — 不依赖 Claude 自行判断何时进入下一阶段
+
+遵循 [execution-driver.md](references/execution-driver.md) 的执行循环：
+
+```
+for each stage in interface.stages:
+  ENTRY → LOAD(template+prompt) → EXECUTE(Actions) → EXIT(check) → ADVANCE
+```
+
+Skill 通过 `interface.stage_config` 控制每个 stage 的行为（checkpoint/retry/parallel/blocking/auto_advance）。默认值即可覆盖 90% 场景。
 
 ## 三大能力
 
@@ -53,12 +79,29 @@ workflow-engine **不重复** runtime/engine/ 已有能力：
 
 模板文件不存在或无法加载 → Skill 自带完整 Contract 表格作为 Backward Compatibility。
 
+## Registry-Driven Orchestration
+
+Engine 读取 `runtime/registry/` 自动发现 Skill 依赖关系：
+
+```
+skill.yaml interface.stages → stage-library.yaml (验证合法性)
+skill.yaml produces/consumes → capabilities.yaml (计算 DAG)
+skill.yaml workflow_ref      → workflow-library.yaml (预定义 pipeline)
+```
+
+新增 Skill 只需声明 `produces/consumes`，Engine 自动计算调度顺序。
+
 ## 引用索引
 
 | 资源 | 路径 |
 |------|------|
+| Execution Driver | [references/execution-driver.md](references/execution-driver.md) |
 | Stage Contract 规范 | [references/stage-contract.md](references/stage-contract.md) |
 | Stage Templates | [references/stage-templates/](references/stage-templates/) |
+| Stage Library | [../runtime/registry/stage-library.yaml](../runtime/registry/stage-library.yaml) |
+| Workflow Library | [../runtime/registry/workflow-library.yaml](../runtime/registry/workflow-library.yaml) |
+| Capability Registry | [../runtime/registry/capabilities.yaml](../runtime/registry/capabilities.yaml) |
 | Validation 框架 | [references/validation.md](references/validation.md) |
+| Event Bus | [../runtime/engine/event-bus.md](../runtime/engine/event-bus.md) + [show-events.sh](../shared/scripts/show-events.sh) |
 | QA Sub-Agent 模式 | [references/qa-pattern.md](references/qa-pattern.md) |
 | State Machine / Checkpoint / Error Recovery / Confidence Gate | [../runtime/engine/](../runtime/engine/) |

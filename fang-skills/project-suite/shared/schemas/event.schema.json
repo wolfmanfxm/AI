@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "event.schema.json",
+  "title": "Event Bus Event Schema",
+  "description": "Stage lifecycle events written to .project-runtime/events.jsonl",
+  "definitions": {
+    "BaseEvent": {
+      "type": "object",
+      "required": ["event", "skill", "stage", "timestamp"],
+      "properties": {
+        "event": { "type": "string", "enum": ["StageStarted","StageCompleted","StageFailed","ArtifactGenerated","PipelineAdvanced","GateTriggered","CheckpointReached","RecoveryStarted"] },
+        "skill": { "type": "string" },
+        "stage": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "StageStarted": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "properties": { "manifest": { "type": "object" } } }
+      ]
+    },
+    "StageCompleted": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "required": ["confidence", "duration_ms"], "properties": { "confidence": { "type": "integer" }, "duration_ms": { "type": "integer" } } }
+      ]
+    },
+    "StageFailed": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "required": ["failed_exits"], "properties": { "failed_exits": { "type": "array", "items": { "type": "string" } }, "error": { "type": "string" } } }
+      ]
+    },
+    "ArtifactGenerated": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "required": ["file_path", "file_size"], "properties": { "file_path": { "type": "string" }, "file_size": { "type": "integer" } } }
+      ]
+    },
+    "PipelineAdvanced": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "required": ["from_stage", "to_stage"], "properties": { "from_stage": { "type": "string" }, "to_stage": { "type": "string" } } }
+      ]
+    },
+    "GateTriggered": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "required": ["gate_level", "confidence"], "properties": { "gate_level": { "type": "string", "enum": ["PASS","REVIEW","GATE","BLOCK"] }, "confidence": { "type": "integer" } } }
+      ]
+    },
+    "CheckpointReached": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "properties": { "question_summary": { "type": "string" } } }
+      ]
+    },
+    "RecoveryStarted": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        { "properties": { "resume_from": { "type": "string" } } }
+      ]
+    }
+  }
+}

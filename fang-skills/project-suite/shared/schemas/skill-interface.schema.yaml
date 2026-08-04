@@ -89,3 +89,16 @@ fields:
       structural_stability: string   # high (纯分析) | medium (半生成) | low (生成型)
       expected_confidence_delta: integer  # 两次运行 confidence 最大允许差
       output_file_count_tolerance: string # 文件数允许波动范围，如 "20%"
+
+  # ═══ v1.3 新增: Stage Config ═══
+
+  stage_config:
+    description: 每个 stage 的执行配置。Engine 据此控制阶段推进行为。
+    type: object
+    properties:
+      <stage_name>:
+        checkpoint: boolean       # 是否需要 CHECKPOINT (默认: discovery/execution=true, 其他=false)
+        retry: integer            # exit 不满足时的重试次数 (默认: 0)
+        parallel: boolean         # 子任务可并行 (默认: false)
+        blocking: boolean         # exit 不满足是否阻断 pipeline (默认: false)
+        auto_advance: boolean     # exit 满足是否自动进入下一 stage (默认: false)

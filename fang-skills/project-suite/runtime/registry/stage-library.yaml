@@ -1,0 +1,89 @@
+# Stage Library v1.0
+#
+# 所有可用 Stage 类型的注册中心。Engine 据此验证 Skill 声明的 stages 是否合法。
+# 每个 stage 定义标准 I/O 契约 + 适用条件。
+
+version: "1.0.0"
+
+stages:
+
+  discovery:
+    description: 信息收集与范围确认
+    standard_input: [user_prompt, project_context]
+    standard_output: [manifest.json(status=discover), confirmed_scope]
+    entry_condition: user_triggered
+    exit_condition: scope_confirmed + user_approved
+    checkpoint: true
+    template: stage-templates/discovery.md
+    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
+
+  execution:
+    description: 核心业务逻辑执行
+    standard_input: [discovery_output, project_source]
+    standard_output: [skill_outputs]  # 取决于具体 Skill
+    entry_condition: discovery_completed
+    exit_condition: all_subtasks_completed
+    checkpoint: optional  # 复杂执行建议 CHECKPOINT
+    template: stage-templates/execution.md
+    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
+
+  validation:
+    description: 产出质量独立验证
+    standard_input: [execution_outputs]
+    standard_output: [validation-report.md]
+    entry_condition: execution_completed
+    exit_condition: no_critical_findings
+    checkpoint: false
+    template: stage-templates/validation.md
+    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
+
+  delivery:
+    description: 最终产出写入与同步
+    standard_input: [validated_outputs]
+    standard_output: [final_artifacts, state.json_updated, timeline.json_appended]
+    entry_condition: validation_passed
+    exit_condition: all_files_written + manifest_completed
+    checkpoint: false
+    template: stage-templates/delivery.md
+    used_by: [analyzer, planner, architect, reviewer, refactorer, documenter, releaser]
+
+  code-audit:
+    description: 现状探查 — 标注已有实现状态
+    standard_input: [project_source, confirmed_scope]
+    standard_output: [audit_annotations]
+    entry_condition: discovery_completed
+    exit_condition: user_confirmed_annotations
+    checkpoint: true
+    template: stage-templates/code-audit.md
+    used_by: [planner, architect]
+
+  graph-analysis:
+    description: Graph 依赖分析 — 模块耦合/影响范围/循环依赖
+    standard_input: [graph.json]
+    standard_output: [graph_analysis_results]
+    entry_condition: code_audit_completed
+    exit_condition: user_confirmed_analysis
+    checkpoint: true
+    template: stage-templates/graph-analysis.md
+    used_by: [architect]
+
+# Stage I/O Contracts (Engine 自动验证)
+contracts:
+  discovery:
+    consumes: [user_prompt]
+    produces: [manifest.json, analysis-config.json]
+  execution:
+    consumes: [discovery_output, project_source]
+    produces: [skill_specific_outputs]
+  validation:
+    consumes: [execution_outputs]
+    produces: [validation-report.md]
+  delivery:
+    consumes: [validated_outputs]
+    produces: [final_artifacts, state.json, timeline.json]
+  code-audit:
+    consumes: [project_source, confirmed_scope]
+    produces: [audit_annotations]
+  graph-analysis:
+    consumes: [graph.json]
+    produces: [graph_analysis_results]

@@ -1,0 +1,48 @@
+id: pipeline-orchestrator
+version: "1.0.0"
+mode: Production
+owner: project-suite
+priority: 5
+requires: []
+produces: [PipelineExecution]
+consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
+depends_on: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-refactorer, project-documenter, project-releaser]
+parallel_with: []
+boundary: 编排跨 Skill pipeline 执行，不替代任何单个 Skill 的功能
+last_reviewed: "2026-08-04"
+review_cadence_days: 90
+waivers:
+  - { gate: G3, reason: "反例黑名单使用>禁止:①-④格式,与❌计数方式不同,边界文档含4条反例(SKILL.md 0条❌但反例完整)", expires: "2026-11-04", approved_by: "dispatcher" }
+
+triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
+triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
+
+context_contract:
+  must_read: [capabilities.yaml, workflow-library.yaml]
+  should_read: [state.json]
+  neednt_read: []
+
+interface:
+  inputs:
+    - { name: capabilities.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: Skill 能力注册中心 }
+    - { name: workflow-library.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: 预定义 pipeline 模式 }
+    - { name: state.json, type: state, required: false, source: runtime, fixture: true, description: 项目当前状态 }
+    - { name: 用户目标描述, type: context, required: true, source: user, fixture: false, description: 用户想达成的目标 }
+  outputs:
+    - { name: pipeline-state.json, type: state, confidence_range: "80-95", description: Pipeline 执行状态 }
+    - { name: pipeline-report.md, type: review, confidence_range: "80-95", description: Pipeline 执行报告 }
+  side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+  failure_modes:
+    - { condition: 下游 Skill 不存在或未安装, severity: BLOCKER, recovery: 提示安装缺失的 Skill }
+    - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
+    - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
+  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
+  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
+  stages: [discovery, orchestrate, validation, delivery]
+  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
+  stage_config:
+    discovery: { checkpoint: true, retry: 0 }
+    orchestrate: { checkpoint: true, retry: 1 }
+    validation: { checkpoint: false, retry: 0, blocking: true }
+    delivery: { checkpoint: false, retry: 1 }
+  reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }

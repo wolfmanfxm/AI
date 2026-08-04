@@ -1,0 +1,60 @@
+# Workflow DSL Example — project-analyzer
+#
+# Engine 读取此 DSL → 按序执行 stages → 检查 entry/exit → 推进
+# 此文件可由 skill.yaml interface.stages 自动生成，也可手写。
+#
+# Usage: workflow-engine SKILL.md 包含 DSL 解释指令
+#        Engine reads skill.yaml → generates workflow.dsl.yaml → executes
+
+version: "1.0.0"
+skill: project-analyzer
+
+stages:
+  - name: discovery
+    template: discovery
+    prompt: prompts/discovery.md
+    entry:
+      - user_triggered
+    exit:
+      - framework_identified
+      - scope_confirmed
+      - config_written
+    checkpoint: true
+    retry: 0
+    on_failure: ask
+
+  - name: execution
+    template: execution
+    prompt: prompts/execution.md
+    entry:
+      - discovery_completed
+      - scope_confirmed
+    exit:
+      - all_dimensions_completed_or_gracefully_failed
+      - output_files_verified
+    parallel: true
+    retry: 1
+    checkpoint: false
+    on_failure: retry
+
+  - name: delivery
+    template: delivery
+    prompt: prompts/delivery.md
+    entry:
+      - execution_completed
+    exit:
+      - manifest_status_completed
+      - vault_sync_verified
+    retry: 1
+    on_failure: retry
+
+  - name: validation
+    template: validation
+    prompt: prompts/validation.md
+    entry:
+      - delivery_completed
+    exit:
+      - no_critical_findings
+    blocking: true
+    retry: 0
+    on_failure: block

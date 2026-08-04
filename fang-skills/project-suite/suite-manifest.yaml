@@ -1,0 +1,192 @@
+# Suite Manifest v1.0
+#
+# project-suite 统一治理清单。单文件可消费：所有 Skill + 能力 + 依赖 + 质量。
+# 从此文件可重建 Skill Atlas、生成 DAG、验证兼容性、评估 Governed 就绪度。
+#
+# 来源: SUITE_SPEC + skill-atlas + capabilities.yaml + trust-report + 9 skill.yaml
+# 权威: 此文件 > 各子文件 (子文件由此文件派生的缓存)
+
+suite:
+  name: project-suite
+  version: "0.8.0"
+  spec_version: "1.1.0"
+  trust_score: 90
+  conformance: { errors: 0, warnings: 0, gates: "G1-G17" }
+  drift_status: { passed: 40, drifts: 0 }
+
+governance:
+  owner: project-suite
+  mode: Production+  # targeting Governed (88/100, dim8 实测覆盖率不足)
+  review_cadence_days: 90
+  last_reviewed: "2026-08-04"
+
+engines:
+  workflow:
+    version: "1.0.0"
+    type: Stage Template Injection + Execution Driver + Workflow DSL
+    templates: [discovery, execution, validation, delivery, code-audit, graph-analysis]
+    dsl_schema: shared/schemas/workflow.schema.json
+  runtime:
+    version: "0.7.0"
+    components: [state-machine, checkpoint, error-recovery, confidence-gate, event-bus, scheduler]
+
+capability_types:
+  - { id: KnowledgeBase,    format: [.md, .json], description: 项目结构化知识 }
+  - { id: KnowledgeIndex,   format: [.json],      description: Capability→文件映射 }
+  - { id: Context,          format: [.json],      description: 标准化项目上下文 }
+  - { id: Graph,            format: [.json],      description: 模块依赖图谱 }
+  - { id: Plan,             format: [.md],        description: 9模块执行契约 }
+  - { id: Architecture,     format: [.md],        description: ADR架构决策 }
+  - { id: Code,             format: [.vue,.ts,.js], description: 生产级代码 }
+  - { id: Test,             format: [.ts,.md],    description: 测试文件+报告 }
+  - { id: Review,           format: [.md],        description: 五轴审查报告 }
+  - { id: RefactoredCode,   format: [.vue,.ts,.js,.md], description: 重构代码+报告 }
+  - { id: Documentation,    format: [.md],        description: 技术文档 }
+  - { id: Release,          format: [.md],        description: 发布产物 }
+  - { id: PipelineExecution, format: [.json,.md], description: Pipeline执行记录 }
+
+skills:
+  project-analyzer:
+    priority: 10
+    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    consumes: []
+    workflow: standard
+    stages: [discovery, execution, delivery, validation]
+    confidence: { pass: 90, review: 70, block: 40 }
+    stability: high
+
+  project-planner:
+    priority: 20
+    produces: [Plan]
+    consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    depends_on: [project-analyzer]
+    workflow: planning
+    stages: [discovery, code-audit, execution, validation, delivery]
+    confidence: { pass: 90, review: 70, block: 40 }
+    stability: medium
+
+  project-architect:
+    priority: 30
+    produces: [Architecture]
+    consumes: [KnowledgeBase, Plan, Context, Graph]
+    depends_on: [project-planner]
+    workflow: design
+    stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
+    confidence: { pass: 85, review: 70, block: 40 }
+    stability: medium
+
+  project-generator:
+    priority: 40
+    produces: [Code]
+    consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
+    depends_on: [project-architect]
+    workflow: generative
+    stages: [discovery, execution, validation]
+    confidence: { pass: 95, review: 70, block: 40 }
+    stability: low
+
+  project-tester:
+    priority: 50
+    produces: [Test]
+    consumes: [Code, Plan, KnowledgeBase, Context]
+    depends_on: [project-generator]
+    workflow: test
+    stages: [discovery, execution, validation]
+    confidence: { pass: 85, review: 70, block: 40 }
+    stability: medium
+
+  project-reviewer:
+    priority: 55
+    produces: [Review]
+    consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+    depends_on: [project-tester]
+    workflow: standard
+    stages: [discovery, execution, validation, delivery]
+    confidence: { pass: 85, review: 70, block: 40 }
+    stability: high
+
+  project-refactorer:
+    priority: 60
+    produces: [RefactoredCode]
+    consumes: [Code, KnowledgeBase, Test, Review]
+    depends_on: [project-reviewer]
+    workflow: standard
+    stages: [discovery, execution, validation, delivery]
+    confidence: { pass: 85, review: 70, block: 40 }
+    stability: low
+
+  project-documenter:
+    priority: 65
+    produces: [Documentation]
+    consumes: [Code, Review, KnowledgeBase, Context]
+    depends_on: [project-reviewer]
+    workflow: standard
+    stages: [discovery, execution, validation, delivery]
+    confidence: { pass: 80, review: 60, block: 40 }
+    stability: high
+
+  project-releaser:
+    priority: 90
+    produces: [Release]
+    consumes: [Documentation, Review, Test]
+    depends_on: [project-documenter]
+    workflow: standard
+    stages: [discovery, execution, validation, delivery]
+    confidence: { pass: 90, review: 70, block: 40 }
+    stability: high
+
+  pipeline-orchestrator:
+    priority: 5
+    produces: [PipelineExecution]
+    consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
+    depends_on: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-refactorer, project-documenter, project-releaser]
+    workflow: orchestration
+    stages: [discovery, orchestrate, validation, delivery]
+    confidence: { pass: 85, review: 70, block: 40 }
+    stability: medium
+
+dag:
+  algorithm: Kahn (topological sort from produces/consumes)
+  waves:
+    wave_1: [project-analyzer, pipeline-orchestrator]
+    wave_2: [project-planner]
+    wave_3: [project-architect]
+    wave_4: [project-generator]
+    wave_5: [project-tester]
+    wave_6: [project-reviewer]
+    wave_7: [project-refactorer, project-documenter]
+    wave_8: [project-releaser]
+
+pipelines:
+  full-sdlc:          { skills: [analyzer, planner, architect, generator, tester, reviewer, documenter, releaser], description: 全生命周期 }
+  analyze-plan-build: { skills: [analyzer, planner, architect, generator, reviewer], description: 新功能开发 }
+  quick-change:       { skills: [generator, reviewer], description: 轻量改动 }
+  refactor-cycle:     { skills: [reviewer, refactorer, tester, reviewer], description: 重构循环 }
+  knowledge-refresh:  { skills: [analyzer, documenter], description: 知识刷新 }
+
+quality_gates:
+  G1:  { name: "SKILL.md ≤130行", level: required }
+  G2:  { name: "skill.yaml 字段完整+interface块", level: required }
+  G3:  { name: "反例黑名单 ≥3条 (boundary.md或SKILL.md)", level: required }
+  G4:  { name: "至少1个CHECKPOINT", level: required }
+  G5:  { name: "职责边界表 ✅/❌ ≥3行", level: required }
+  G6:  { name: "description 含触发词+产出", level: required }
+  G7:  { name: "capabilities.yaml 已注册", level: important }
+  G8:  { name: "完成后下一步章节", level: important }
+  G9:  { name: "failure-handling.md 存在", level: important }
+  G10: { name: "无runtime-specific措辞", level: important }
+  G11: { name: "prompts/ ≥1文件", level: optional }
+  G12: { name: "references/ ≥2文件", level: optional }
+  G13: { name: "stages与prompts/<stage>.md对应", level: required }
+  G14: { name: "stage prompt含@engine:声明", level: required }
+  G15: { name: "interface.rollback存在", level: required }
+  G16: { name: "Skill Atlas条目完整", level: important }
+  G17: { name: "last_reviewed在cadence内", level: important }
+
+compatibility:
+  context_schema: ">=1.0.0"
+  state_schema: ">=1.0.0"
+  skill_interface_schema: ">=1.3.0"  # fixture + stage_config + reliability
+  suite_minimum: ">=0.8.0"
+
+missing_evidence: [approvals_automation, benchmarks_standard_suite, drift_auto_detection]

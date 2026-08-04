@@ -3,8 +3,16 @@
 # 统一的能力注册中心。每个 skill 声明 produces（产出什么）和 consumes（依赖什么）。
 # Scheduler 读取此文件构建 DAG，自动识别并行分支。
 
-version: "1.2.0"
-generated: 2026-07-30
+version: "1.3.0"
+generated: 2026-08-04
+
+# --- Registry 扩展 (v1.3) ---
+# 新增:
+#   - auto_discovery: Engine 可自动从 skill.yaml 推导 DAG，无需硬编码 schedule_order
+#   - stage_library: runtime/registry/stage-library.yaml — 标准 stage 类型
+#   - workflow_library: runtime/registry/workflow-library.yaml — 通用 workflow 模式
+#   - skill.stage_ref: 每个 skill 关联其 stages 到 stage-library
+#   - skill.workflow_ref: 每个 skill 关联其 workflow 到 workflow-library
 
 # --- 能力类型定义 ---
 capability_types:
@@ -61,6 +69,8 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 10
+    stage_ref: [discovery, execution, delivery, validation]
+    workflow_ref: standard
 
   project-planner:
     produces: [Plan]
@@ -72,6 +82,8 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 20
+    stage_ref: [discovery, code-audit, execution, validation, delivery]
+    workflow_ref: planning
     artifact_output: artifacts/plans/PLAN-*.md
 
   project-architect:
@@ -84,6 +96,8 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 30
+    stage_ref: [discovery, code-audit, graph-analysis, execution, validation, delivery]
+    workflow_ref: design
     artifact_output: artifacts/decisions/ARCHITECTURE-*.md
 
   project-generator:
@@ -96,6 +110,8 @@ skills:
     confidence_min: 70
     parallel: true
     priority: 40
+    stage_ref: [discovery, execution, validation]
+    workflow_ref: generative
     requires_checkpoint: true
 
   project-tester:
@@ -108,6 +124,8 @@ skills:
     confidence_min: 70
     parallel: true
     priority: 50
+    stage_ref: [discovery, execution, validation]
+    workflow_ref: test
     artifact_output: reports/TEST-REPORT.md
 
   project-reviewer:
@@ -120,6 +138,8 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 55
+    stage_ref: [discovery, execution, validation, delivery]
+    workflow_ref: standard
     artifact_output: artifacts/reviews/REVIEW-*.md
 
   project-refactorer:
@@ -132,6 +152,8 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 60
+    stage_ref: [discovery, execution, validation, delivery]
+    workflow_ref: standard
     requires_tests: true
 
   project-documenter:
@@ -144,6 +166,8 @@ skills:
     confidence_min: 60
     parallel: true
     priority: 65
+    stage_ref: [discovery, execution, validation, delivery]
+    workflow_ref: standard
 
   project-releaser:
     produces: [Release]
@@ -155,7 +179,22 @@ skills:
     confidence_min: 70
     parallel: false
     priority: 90
+    stage_ref: [discovery, execution, validation, delivery]
+    workflow_ref: standard
     requires_review: true
+
+  pipeline-orchestrator:
+    produces: [PipelineExecution]
+    consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
+    description: 跨 Skill Pipeline 编排引擎 — 读取 registry 按 DAG 调度
+    triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 端到端]
+    triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc]
+    cost: low
+    confidence_min: 80
+    parallel: false
+    priority: 5
+    stage_ref: [discovery, orchestrate, validation, delivery]
+    workflow_ref: orchestration
 
 # --- DAG 边（从 consumes/produces 自动推导） ---
 # 规则：若 skill_B.consumes 包含 skill_A.produces 的任一类型，则 A → B

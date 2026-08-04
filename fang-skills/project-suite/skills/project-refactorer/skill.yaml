@@ -36,3 +36,8 @@ interface:
   stages: [discovery, execution, validation, output]
   recovery: { method: git_revert, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
+  stage_config:
+    discovery: { checkpoint: true, retry: 0 }
+    execution: { checkpoint: true, retry: 1 }
+    validation: { checkpoint: false, retry: 0, blocking: true }
+    delivery: { checkpoint: false, retry: 1 }
