@@ -1,0 +1,78 @@
+# Tool Adapter Registry v1.0
+#
+# 统一工具抽象层。Skill 调用 Adapter 而非直接调用 MCP Tool/Bash。
+# 替换底层 provider 时，Skill 无需修改。
+
+version: "1.0.0"
+
+adapters:
+
+  filesystem:
+    description: 文件系统操作
+    providers:
+      primary: bash  # ls, cat, grep, find, mkdir, rm
+      fallback: mcp__filesystem
+    operations:
+      read: { tool: Read, description: 读取文件内容 }
+      write: { tool: Write, description: 写入文件 }
+      edit: { tool: Edit, description: 精确字符串替换 }
+      search: { tool: Bash, command: grep, description: 搜索文件内容 }
+      find: { tool: Bash, command: find, description: 查找文件 }
+      list: { tool: Bash, command: ls, description: 列出目录内容 }
+
+  browser:
+    description: 浏览器操作
+    providers:
+      primary: mcp__playwright
+      fallback: bash  # curl + grep for API testing
+    operations:
+      navigate: { tool: mcp__playwright__browser_navigate }
+      snapshot: { tool: mcp__playwright__browser_snapshot }
+      click: { tool: mcp__playwright__browser_click }
+      fill: { tool: mcp__playwright__browser_fill_form }
+      screenshot: { tool: mcp__playwright__browser_take_screenshot }
+
+  git:
+    description: 版本控制
+    providers:
+      primary: bash  # git CLI
+      fallback: mcp__github
+    operations:
+      status: { tool: Bash, command: git status }
+      diff: { tool: Bash, command: git diff }
+      log: { tool: Bash, command: git log }
+      commit: { tool: Bash, command: git commit }
+      branch: { tool: Bash, command: git branch }
+
+  network:
+    description: 网络请求
+    providers:
+      primary: WebFetch
+      fallback: Bash  # curl
+    operations:
+      fetch: { tool: WebFetch, description: HTTP请求+页面转markdown }
+      search: { tool: WebSearch, description: Web搜索 }
+
+  design:
+    description: 设计稿获取（Figma等）
+    providers:
+      primary: mcp__figma
+    operations:
+      get_data: { tool: mcp__figma__get_figma_data }
+      download_images: { tool: mcp__figma__download_figma_images }
+
+  execution:
+    description: 代码执行
+    providers:
+      primary: bash
+    operations:
+      run: { tool: Bash, description: 执行shell命令 }
+      background: { tool: Bash, run_in_background: true, description: 后台执行 }
+
+# Skill 调用方式
+#
+# 不直接调用: Bash("grep -r 'pattern' src/")
+# 而是调用:   adapter.filesystem.search("pattern", "src/")
+#
+# Engine 负责解析 adapter 调用 → 找到对应 provider → 执行。
+# 替换 provider 时只需改本文件，不改任何 Skill。

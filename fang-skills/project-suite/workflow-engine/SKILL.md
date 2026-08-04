@@ -81,15 +81,18 @@ workflow-engine **不重复** runtime/engine/ 已有能力：
 
 ## Registry-Driven Orchestration
 
-Engine 读取 `runtime/registry/` 自动发现 Skill 依赖关系：
+Engine 读取 `runtime/registry/` 自动发现 + 意图路由：
 
 ```
-skill.yaml interface.stages → stage-library.yaml (验证合法性)
-skill.yaml produces/consumes → capabilities.yaml (计算 DAG)
-skill.yaml workflow_ref      → workflow-library.yaml (预定义 pipeline)
+用户意图 → capability-routing.yaml (intent匹配)
+         → capabilities.yaml (能力→Skill映射)
+         → stage-library.yaml (验证合法性)
+         → workflow-library.yaml (可选 pipeline)
+
+skill.yaml produces/consumes → DAG auto-computed
 ```
 
-新增 Skill 只需声明 `produces/consumes`，Engine 自动计算调度顺序。
+新增 Skill 只需声明 `produces/consumes` + 在 capability-routing 注册 intent 映射。
 
 ## 引用索引
 

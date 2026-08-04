@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "memory.schema.json",
+  "title": "Memory Layer Schema",
+  "description": "四级记忆结构：Session → Project → Suite → Decision",
+
+  "definitions": {
+    "SessionMemory": {
+      "type": "object",
+      "required": ["session_id", "skill"],
+      "properties": {
+        "session_id": { "type": "string" },
+        "skill": { "type": "string" },
+        "context": {
+          "type": "object",
+          "properties": {
+            "goal": { "type": "string" },
+            "user_feedback": { "type": "array", "items": { "type": "string" } },
+            "assumptions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "discoveries": { "type": "array", "items": { "type": "string" } },
+        "open_questions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "ProjectMemory": {
+      "type": "object",
+      "required": ["project"],
+      "properties": {
+        "project": { "type": "string" },
+        "constraints": { "type": "object" },
+        "conventions": { "type": "object" },
+        "known_gotchas": { "type": "array", "items": { "type": "string" } },
+        "architectural_decisions": { "type": "array", "items": { "type": "string" } },
+        "last_updated": { "type": "string", "format": "date" }
+      }
+    },
+
+    "SuiteMemory": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "patterns_learned": { "type": "object" },
+        "cross_project_insights": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "DecisionMemory": {
+      "type": "object",
+      "required": ["id", "decision", "chosen", "timestamp"],
+      "properties": {
+        "id": { "type": "string" },
+        "skill": { "type": "string" },
+        "decision": { "type": "string" },
+        "context": { "type": "string" },
+        "alternatives": { "type": "array", "items": { "type": "object" } },
+        "chosen": { "type": "string" },
+        "consequences": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["accepted", "superseded", "deprecated"] },
+        "revisited_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}
