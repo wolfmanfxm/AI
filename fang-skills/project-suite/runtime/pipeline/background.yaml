@@ -1,0 +1,52 @@
+# Background Pipeline v1.0
+#
+# 后台自动 Pipeline。Analyzer 完成后自动触发，无需用户干预。
+# 由 Event Bus 驱动：StageCompleted(analyzer, delivery) → trigger background pipeline.
+
+version: "1.0.0"
+
+triggers:
+  - event: StageCompleted
+    skill: project-analyzer
+    stage: delivery
+    action: run_background_pipeline
+
+  - event: KnowledgeDecay
+    source: check-decay.sh
+    action: run_background_pipeline
+
+pipeline:
+  - step: knowledge_scan
+    tool: "@adapter:knowledge.scan"
+    description: 检查 broken-links / duplicates / evidence gaps
+    on_failure: warn  # 不阻断后续
+
+  - step: decay_check
+    tool: "@adapter:knowledge.decay"
+    description: 检查 STALE / DECAYING / DEPRECATED
+    on_failure: warn
+
+  - step: graph_refresh
+    tool: "@adapter:filesystem.run generate-skill-ir.sh"
+    description: 刷新 skill-ir.yaml
+    on_failure: skip
+
+  - step: index_refresh
+    tool: "@adapter:knowledge.query type=all scope=project"
+    description: 验证 INDEX.md 链接可达性
+    on_failure: warn
+
+  - step: promotion_review
+    tool: "promotion-reviewer"
+    description: 自动评分 personal_candidates → Promote/Keep/Reject
+    on_failure: warn
+    checkpoint: false  # auto-promote only, manual confirm handled separately
+
+output:
+  file: .project-runtime/background-pipeline-report.md
+  format: markdown
+
+notification:
+  on_complete: summary  # 显示摘要
+  on_warning: brief     # 仅显示警告项
+  on_error: full        # 显示完整错误

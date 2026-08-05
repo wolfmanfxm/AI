@@ -116,6 +116,7 @@ EXECUTE  → StageStarted
 EXIT     → GateTriggered (confidence 检查)
            → StageCompleted (全部满足) 或 StageFailed (不满足+retry=0)
 ADVANCE  → PipelineAdvanced
+           → 若 skill=analyzer + stage=delivery → trigger [background pipeline](../../runtime/pipeline/background.yaml)
 ```
 
 → [Event Bus](../../runtime/engine/event-bus.md) | [Event Schema](../../shared/schemas/event.schema.json)

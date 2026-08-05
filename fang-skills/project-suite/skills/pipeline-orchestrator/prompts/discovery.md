@@ -4,7 +4,7 @@
 
 ## Actions
 
-1. 读 `runtime/registry/workflow-library.yaml` → 列出所有可用 pipeline
+1. `@adapter:filesystem.read runtime/registry/workflow-library.yaml` → 列出所有可用 pipeline
 2. 读 `runtime/registry/capabilities.yaml` → 验证 pipeline 中每个 Skill 的 availability
 3. 读 `.project-runtime/state.json`（若存在）→ 了解项目当前状态
 4. 展示 pipeline 选项给用户：

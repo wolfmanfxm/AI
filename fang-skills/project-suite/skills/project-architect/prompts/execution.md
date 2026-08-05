@@ -4,12 +4,7 @@
 
 ## Actions
 
-### 0. 查询已有决策（避免重复设计）
-
-```bash
-@knowledge:type=decision scope=project
-@knowledge:type=pattern scope=project tags=<target>
-```
+### 0. 查询已有决策：`@adapter:knowledge.query --type decision --scope project`（先查再设计）
 
 ### 按用户意图路由：
 

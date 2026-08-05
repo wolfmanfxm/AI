@@ -4,7 +4,7 @@
 
 ## Actions
 
-### 1. 读被测代码
+### 1. 读被测代码：`@adapter:filesystem.read <target>`
 - 理解函数签名、输入类型、输出类型
 - 识别边界条件（null/undefined/空数组/空字符串/超长输入）
 - 识别依赖（API/Store/其他模块）→ 准备 mock

@@ -8,7 +8,7 @@
 
 ```
 循环直到目标达成:
-  1. 跑现有测试 → 确认全绿（不绿则停止，先修测试）
+  1. 跑现有测试 → 确认全绿（不绿则停止，先修测试）`@adapter:execution.run "npm test"`
   2. 做 1 个重构动作（提取/内联/重命名/简化条件/...）
   3. 跑测试 → 仍绿 → git commit（message: "refactor: {具体动作}"）
   4. 测试变红 → git revert → 分析原因 → 记录 REFACTOR.md → 继续下一个动作

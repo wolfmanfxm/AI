@@ -56,10 +56,20 @@ Event Timeline (project-analyzer):
   ...
 ```
 
+## Background Pipeline 集成
+
+`StageCompleted(analyzer, delivery)` → 自动触发 [background pipeline](../pipeline/background.yaml)：
+
+```
+Knowledge Scan → Decay Check → Graph Refresh → Index Refresh → Promotion Review
+```
+
+所有步骤自动执行，promotion_review 中 auto_promote (≥9分) 自动提升，promote_candidate (7-8分) 留待人工确认。
+
 ## 扩展
 
-Event Bus 为未来扩展提供 hook 点：
 - **监控**: 外部工具 tail events.jsonl，实时展示执行进度
 - **告警**: GateTriggered(level=BLOCK) → 通知用户
+- **Background**: StageCompleted → auto-trigger maintenance pipeline
 - **分析**: 聚合 events.jsonl → 计算平均 stage 耗时、失败率
 - **审计**: 完整事件链 → 合规审查

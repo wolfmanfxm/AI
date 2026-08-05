@@ -8,12 +8,11 @@
 ## 当前版本：1.0.0
 
 ```
-analyzer v3.0   (Multi-Extractor + 7-Phase + Evidence-based Knowledge Graph)
-workflow-engine (Stage Injection + Execution Driver + DSL)
-pipeline-orchestrator (跨 Skill 编排)
-Governed-ready  (Conformance G1-G17, Drift 40/40, Trust 90/100)
-Knowledge Decay (STALE→DECAYING→DEPRECATED 自动衰减)
-Organization Layer (Task→Project→Organization→Personal 四层)
+Knowledge Engine     — Object + Context Resolver + Promotion Reviewer + Decay
+Unified Runtime      — Tool Adapter(9/10) + Event Bus + Background Pipeline
+Reasoning Engine     — Query API + Orchestrator v2.0 (auto-advance + Checkpoint)
+Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
+Organization Layer   — Task→Project→Organization→Personal 四层
 ```
 
 ## 架构三层

@@ -38,7 +38,17 @@ rsync -av --exclude='proposals/' --exclude='reports/REVIEW-*' \
 用户确认 → rsync 到 Vault/Knowledge/
 ```
 
-### 5. Write Manifest + State
+### 5. Trigger Background Pipeline
+
+StageCompleted 事件触发 → [background pipeline](../../../runtime/pipeline/background.yaml)：
+
+```
+Knowledge Scan → Decay Check → Graph Refresh → Index Refresh → Promotion Review
+```
+
+全自动，无需用户干预。`promotion_review` 中 auto_promote 自动执行，promote_candidate 留待人工确认。
+
+### 6. Write Manifest + State
 
 - 写入 manifest.json（status=completed）
 - 写入 state.json（confidence + history）

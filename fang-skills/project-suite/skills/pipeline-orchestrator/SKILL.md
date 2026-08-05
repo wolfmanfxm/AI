@@ -10,7 +10,7 @@ description: >
 
 # Pipeline Orchestrator
 
-> 读取 registry → 呈现 pipeline 选项 → 按序调度 Skill → 传递上下文 → 报告
+> 读取 registry → 呈现 pipeline → auto-advance + per-skill Checkpoint → 传递上下文 → 报告 → 触发 Background Pipeline
 > 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — Execution Driver + Registry-Driven + Stage Template Injection
 
 ## 核心原则

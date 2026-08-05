@@ -4,7 +4,7 @@
 
 ## Actions
 
-### 1. 读源码
+### 1. 读源码：`@adapter:filesystem.read <target>`
 
 Read 目标源文件，提取关键信息：
 
