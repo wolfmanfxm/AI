@@ -51,4 +51,4 @@ cross_validation:
 
 ## Integration
 
-Phase 2.5（Verifier 之后、Knowledge Builder 之前）执行 Cross-Validator。
+Phase 3（Verifier 之后、Knowledge Builder 之前）执行 Cross-Validator。

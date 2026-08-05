@@ -47,25 +47,36 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 判定：全部 5 项 + Occur ≥3 → ✅ Accepted → 进入 CHECKPOINT
       发现反例 >50% 或频率偏差 >50% → ❌ Rejected → `candidates/rejected/`
 
-🔴 **CHECKPOINT** — Phase 2 完成后暂停。展示 Verifier 结果（Accepted/Adjusted/Rejected 计数），用户确认后进入 Phase 2.5。
+🔴 **CHECKPOINT** — Phase 2 完成后暂停。展示 Verifier 结果（Accepted/Adjusted/Rejected 计数），用户确认后进入 Phase 3（Cross-Validator）。
 
-### Phase 2.5: Cross-Extractor Validation
+### Phase 3: Cross-Extractor Validation
 
 → [prompts/cross-validator.md](cross-validator.md)
 
 不同 Extractor 互相验证：Pattern↔Principle、Decision↔Architecture、Glossary↔Pattern/API、Risk↔AntiPattern 等 8 对交叉检查。发现矛盾 → 标注 + confidence 降级。发现互补 → confidence 提升。
 
-### Phase 3: Knowledge Assembly
+### Phase 4: Knowledge Assembly
 
 → [prompts/knowledge-builder.md](knowledge-builder.md)
 
 合并 Accepted Candidates → 生成最终 `.project-knowledge/` 产出 + Evidence Score Section。
 
-### Phase 4: INDEX Generation
+### Phase 5: INDEX Generation
 
 → [prompts/index-generator.md](index-generator.md)
 
 生成 Zettelkasten 风格 `INDEX.md` — 可导航的知识链接图。
+
+### Phase 6: Knowledge Classification
+
+→ [prompts/classifier.md](classifier.md)
+
+对每个 Knowledge Object 分配 promotion level：
+- `none` — Task 产物，归档本地，不同步
+- `project` — 项目知识，Project Sync → Vault/Projects/
+- `personal` — 跨项目通用，Knowledge Promotion → Vault/Knowledge/（需 Reviewer 确认）
+
+输出 `classification-report.yaml`。Delivery 读取此文件执行同步。
 
 ## Phase Gates
 
@@ -73,11 +84,12 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 
 | Gate | 检查 | 不满足时 |
 |------|------|---------|
-| Phase 1→2 | 10 个 `candidates/*.md` 全部存在且 ≥500 bytes | 补跑缺失 Extractor |
-| Phase 2→2.5 | `candidates/verification-report.md` 存在 + 每个 Candidate 有 verdict | 返回 Verifier 补判定 |
-| Phase 2.5→3 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
-| Phase 3→4 | 最终产出文件已写入 `.project-knowledge/`（含 knowledge-graph.yaml 双轨输出）（至少 architecture/overview.md, components/catalog.md, patterns/, glossary.md, INDEX.md 旧路径兼容） | 补跑 Knowledge Builder |
-| Phase 4→Exit | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
+| Phase 1→2 | 10 个 `candidates/accepted/*.yaml` 全部存在且 ≥500 bytes | 补跑缺失 Extractor |
+| Phase 2→3 | `candidates/verification-report.md` 存在 + 每个 Candidate 有 verdict | 返回 Verifier 补判定 |
+| Phase 3→4 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
+| Phase 4→5 | `knowledge-graph.yaml` + `.md` 双轨输出已写入 `.project-knowledge/` | 补跑 Knowledge Builder |
+| Phase 5→6 | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
+| Phase 6→Exit | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
 
 **禁止提前退出**：4 个 Phase 全部完成前不可进入 Delivery。每个 Phase 开始前验证上一 Phase Gate。
 
@@ -85,6 +97,7 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 
 - 10 个 Extractor 全部返回结果（Phase 1 ✅）
 - Verifier 已判定所有 Candidate（Phase 2 ✅）
-- Knowledge Builder 已将全部 Accepted Candidate 组装到 `.project-knowledge/`（Phase 3 ✅）
-- INDEX.md 已重新生成（Phase 4 ✅）
-- 旧 knowledge 文件（architecture/overview.md, components/catalog.md, api/overview.md, patterns/）已从 candidates 同步更新
+- Cross-Validator 已完成所有 pairs 检查（Phase 3 ✅）
+- Knowledge Builder 双轨输出已写入（Phase 4 ✅）
+- INDEX.md 已重新生成（Phase 5 ✅）
+- Classifier 已分配所有 promotion level（Phase 6 ✅）

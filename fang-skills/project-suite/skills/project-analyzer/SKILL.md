@@ -38,10 +38,13 @@ description: >
 ### Execution 四阶段
 
 ```
-Phase 1: Registry-driven Extractors → candidates/accepted/*.yaml (Evidence Format)
-Phase 2: 5-Verify → Accepted/Adjusted/Rejected → candidates/{accepted,adjusted,rejected}/
-Phase 3: Knowledge Builder → .project-knowledge/
-Phase 4: INDEX Generator → INDEX.md (Knowledge Graph)
+Phase 1: Extractors → candidates/accepted/*.yaml
+Phase 2: 5-Verify → Accepted/Adjusted/Rejected
+Phase 3: Cross-Validator → contradictions + complements
+Phase 4: Knowledge Builder → knowledge-graph.yaml + .md
+Phase 5: INDEX Generator → INDEX.md
+Phase 6: Classifier → promotion: none/project/personal
+Delivery: 双同步 — Project Sync + Knowledge Promotion
 ```
 
 ### Extractor 矩阵

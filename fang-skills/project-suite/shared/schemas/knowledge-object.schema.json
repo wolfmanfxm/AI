@@ -52,6 +52,12 @@
         "verdict": { "type": "string", "enum": ["accepted", "adjusted", "rejected"] }
       }
     },
+    "promotion": {
+      "type": "string",
+      "enum": ["none", "project", "personal"],
+      "default": "project",
+      "description": "none=Task产物仅归档 | project=Project Sync到Vault/Projects | personal=Knowledge Promotion到Vault/Knowledge"
+    },
     "tags": { "type": "array", "items": { "type": "string" } },
     "occurrences": { "type": "integer" },
     "predictive_power": { "type": "string" },
