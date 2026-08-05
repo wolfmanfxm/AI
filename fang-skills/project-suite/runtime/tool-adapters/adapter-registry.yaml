@@ -69,6 +69,15 @@ adapters:
       run: { tool: Bash, description: 执行shell命令 }
       background: { tool: Bash, run_in_background: true, description: 后台执行 }
 
+  knowledge:
+    description: 知识查询
+    providers:
+      primary: bash  # knowledge-query.sh
+    operations:
+      query: { tool: Bash, command: knowledge-query.sh, description: 结构化查询 knowledge-graph.yaml }
+      scan: { tool: Bash, command: knowledge-scan.sh, description: 知识质量扫描 }
+      decay: { tool: Bash, command: check-decay.sh, description: 知识衰减检查 }
+
 # Skill 调用方式
 #
 # 不直接调用: Bash("grep -r 'pattern' src/")

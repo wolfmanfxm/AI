@@ -1,66 +1,76 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "knowledge-object.schema.json",
-  "title": "Knowledge Object",
-  "description": "结构化知识节点。Machine-readable，下游 Skill 直接消费。",
+  "title": "Knowledge Object v2.0",
+  "description": "统一知识对象。.md 仅为 View，此为 Runtime 权威数据模型。",
 
   "type": "object",
-  "required": ["id", "type", "confidence"],
+  "required": ["id", "type", "scope", "confidence"],
   "properties": {
-    "id": { "type": "string", "description": "唯一标识，如 pattern.repository" },
+    "id": { "type": "string" },
     "type": {
       "type": "string",
-      "enum": ["pattern", "convention", "principle", "decision", "risk", "antipattern", "component", "api", "module", "glossary", "framework"],
-      "description": "知识类型"
+      "enum": ["pattern", "convention", "principle", "decision", "risk", "antipattern", "component", "api", "module", "glossary", "framework", "instinct", "playbook"]
     },
-    "category": {
+    "scope": {
       "type": "string",
-      "enum": ["structural", "semantic", "behavioral", "quality"],
-      "description": "Extractor 分类"
+      "enum": ["task", "project", "organization", "personal"],
+      "description": "四层 scope: task=一次性, project=项目级, organization=企业级, personal=个人资产"
+    },
+    "promotion": {
+      "type": "string",
+      "enum": ["none", "project", "organization", "personal"],
+      "default": "project"
     },
     "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-    "statement": { "type": "string", "description": "一句话描述这个知识" },
-    "evidence": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "path": { "type": "string" },
-          "type": { "type": "string", "enum": ["file", "pattern", "config", "count", "ratio"] },
-          "lines": { "type": "integer" },
-          "note": { "type": "string" }
-        }
-      }
-    },
+
+    "statement": { "type": "string" },
+    "evidence": { "type": "array", "items": { "type": "object" } },
+    "occurrences": { "type": "integer" },
+
     "related": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "description": "关联知识对象的 id" },
-          "relation": { "type": "string", "enum": ["depends_on", "implements", "contradicts", "composes", "references", "example_of"] }
+          "id": { "type": "string" },
+          "relation": { "type": "string", "enum": ["depends_on", "implements", "contradicts", "composes", "references", "example_of", "promoted_from"] }
         }
       }
     },
-    "source": {
+
+    "decay": {
       "type": "object",
       "properties": {
-        "extractor": { "type": "string" },
-        "extracted_at": { "type": "string", "format": "date-time" },
-        "verifier": { "type": "string" },
-        "verified_at": { "type": "string", "format": "date-time" },
-        "verdict": { "type": "string", "enum": ["accepted", "adjusted", "rejected"] }
+        "last_verified": { "type": "string", "format": "date-time" },
+        "last_used": { "type": "string", "format": "date-time" },
+        "stability": { "type": "number", "minimum": 0, "maximum": 1, "description": "1.0=稳定, <0.3=触发decay" },
+        "deprecated": { "type": "boolean", "default": false },
+        "decay_reason": { "type": "string" }
       }
     },
-    "promotion": {
-      "type": "string",
-      "enum": ["none", "project", "personal"],
-      "default": "project",
-      "description": "none=Task产物仅归档 | project=Project Sync到Vault/Projects | personal=Knowledge Promotion到Vault/Knowledge"
+
+    "score": {
+      "type": "object",
+      "properties": {
+        "quality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reuse": { "type": "integer", "description": "被下游 Skill 消费的次数" },
+        "freshness": { "type": "number", "minimum": 0, "maximum": 1, "description": "1.0=今天验证, 0=从未验证" }
+      }
     },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "occurrences": { "type": "integer" },
-    "predictive_power": { "type": "string" },
-    "obviousness": { "type": "string", "enum": ["non-obvious", "somewhat-obvious", "obvious"] }
+
+    "review": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected", "expired"] },
+        "reviewed_by": { "type": "string" },
+        "reviewed_at": { "type": "string", "format": "date-time" },
+        "queue_position": { "type": "integer" }
+      }
+    },
+
+    "owner": { "type": "string", "description": "创建者或 promoter" },
+    "tags": { "type": "array", "items": { "type": "string" } }
   }
 }

@@ -24,7 +24,7 @@
 
 → [prompts/changelog-gen.md](changelog-gen.md)
 
-输入：git log + PR 描述 + REVIEW.md（若存在）
+输入：`@adapter:git.log` + PR 描述 + REVIEW.md（若存在）
 输出：按版本分组的 CHANGELOG.md（Added/Changed/Fixed/Deprecated/Removed）
 
 ### 3. 发布检查清单

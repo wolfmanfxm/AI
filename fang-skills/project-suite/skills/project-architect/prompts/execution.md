@@ -4,7 +4,14 @@
 
 ## Actions
 
-按用户意图路由：
+### 0. 查询已有决策（避免重复设计）
+
+```bash
+@knowledge:type=decision scope=project
+@knowledge:type=pattern scope=project tags=<target>
+```
+
+### 按用户意图路由：
 
 ### "选什么技术" → 技术选型
 

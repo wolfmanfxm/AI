@@ -4,7 +4,13 @@
 
 ## Actions
 
-1. 加载 `context.json` → 获取模块清单、组件目录、API 列表、路径别名
+0. **Context Resolver** — 从用户任务提取 tags → 查询 knowledge-graph.yaml → 注入 curated knowledge（不读全部 .md）：
+   → [Context Resolver](../../../runtime/contracts/context-resolver.md)
+1. 结构化查询项目知识：
+   - `@knowledge:type=component scope=project` → 可复用组件清单
+   - `@knowledge:type=api scope=project` → 已有 API 列表
+   - `@knowledge:type=pattern scope=project` → 项目模式
+   - 降级：`knowledge-graph.yaml` 缺失 → 读 `context.json`
 2. 读用户输入 + 上游 `PLAN.md` / `ARCHITECTURE.md`（若存在）
 3. 一句话总结 **Goal** + 划定 **Scope** 边界（显式列出 包含/不包含）
 4. CHECKPOINT — 展示 Goal + Scope（格式：一句话 Goal + Scope IN/OUT 清单）

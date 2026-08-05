@@ -101,6 +101,20 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 done
 
 echo "========================================"
+# Drift 6: @adapter references vs registry
+adapter_refs=$(grep -roh '@adapter:[a-z]*\.[a-z]*' skills/ --include="*.md" 2>/dev/null | sort -u || true)
+adapter_mismatch=0
+for ref in $adapter_refs; do
+  domain=$(echo "$ref" | sed 's/@adapter://' | cut -d. -f1)
+  if ! grep -q "$domain:" runtime/tool-adapters/adapter-registry.yaml 2>/dev/null; then
+    echo "  ❌ Unregistered adapter: $ref"
+    ((adapter_mismatch++))
+  fi
+done
+if [ "$adapter_mismatch" -eq 0 ]; then
+  [ -n "$adapter_refs" ] && echo "  ✅ All @adapter: references match registry ($(echo "$adapter_refs" | wc -l | tr -d ' ') unique)" || echo "  ℹ️  No @adapter: refs yet (P0-P2 migration pending)"
+fi
+
 echo " Summary"
 echo "========================================"
 echo " Passed:  $PASS"

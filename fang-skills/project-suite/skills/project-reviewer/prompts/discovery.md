@@ -5,6 +5,9 @@
 ## Actions
 
 1. 加载 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
+2. 查询已知风险 + 反模式（不读 .md）：
+   - `@knowledge:type=antipattern scope=project` → 对照审查
+   - `@knowledge:type=risk scope=project` → 重点关注
 2. **上游 Confidence 检查**：读 `state.json` history → 检查 generator/tester 的 confidence → <70 → 审查强度自动升至 HIGH → [confidence-gate](../../../runtime/engine/confidence-gate.md)
 3. **Graph 影响分析** → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)：
    - `findImpacted([变更文件列表])` → 本次修改影响哪些节点

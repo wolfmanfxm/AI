@@ -78,8 +78,15 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 → [prompts/instinct-extractor.md](instinct-extractor.md)
 
 从 `personal_candidates` 中提炼跨项目 Instinct（Always/Prefer/Avoid/Never）。
-查询 Knowledge Vault 中已有 Instinct → 跨项目出现 ≥2 次 → Promotion Ready。
-输出 `instincts.yaml`。Delivery 据此执行 Knowledge Promotion。
+
+### Phase 8: Promotion Review
+
+→ [prompts/promotion-reviewer.md](promotion-reviewer.md)
+
+自动评分 personal_candidates：CrossProject / Reusability / FrameworkCoupling / EvidenceStrength。
+≥9 分 → Auto-Promote。7-8 分 → 人工确认。5-6 分 → Keep as Project。<5 分 → Reject。
+
+输出 `promotion-review.yaml`。Delivery 据此执行 Knowledge Promotion。
 
 ## Phase Gates
 
@@ -93,7 +100,8 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 | Phase 4→5 | `knowledge-graph.yaml` + `.md` 双轨输出已写入 `.project-knowledge/` | 补跑 Knowledge Builder |
 | Phase 5→6 | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
 | Phase 6→7 | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
-| Phase 7→Exit | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
+| Phase 7→8 | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
+| Phase 8→Exit | `promotion-review.yaml` 存在 + all candidates scored | 补跑 Promotion Reviewer |
 
 **禁止提前退出**：4 个 Phase 全部完成前不可进入 Delivery。每个 Phase 开始前验证上一 Phase Gate。
 

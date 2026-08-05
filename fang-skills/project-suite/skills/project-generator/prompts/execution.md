@@ -7,7 +7,7 @@
 ### Phase 1: Candidate Generation
 
 ```
-读知识库 → Graph 查询 → 找参考实现 → 提取模式 → 套用模式生成 → Candidate 代码
+`@adapter:knowledge.query type=pattern,component --scope project` → `@adapter:filesystem.search "similar implementation" workspace/` → 提取模式 → 套用模式生成 → `@adapter:filesystem.write <file>` → Candidate 代码
 ```
 
 ### Phase 2: Verification
@@ -24,12 +24,22 @@
 
 判定：全部通过 → Accepted → 写入文件。V1/V2 失败 → Rejected → 修正。V3-V6 部分失败 → Accepted + 标注修复建议。
 
-### 1. 读知识库
-- 优先读 `context-package.json`（Planner 产出，唯一知识入口）
-- 遍历 `context.knowledge[]` → 注入 pattern + constraints
-- 遍历 `context.components[]` → reuse=true 直接 import
-- 遍历 `context.api[]` → 按 conventions 生成 API 调用
-- 降级：`context-package.json` 缺失 → `knowledge-list.json`（v1 兼容）
+### 1. 结构化知识查询
+
+不读 .md 文件。通过 [Knowledge Query API](../../../runtime/contracts/knowledge-query.md) 查询 `knowledge-graph.yaml`：
+
+```bash
+# 查询可复用组件
+@knowledge:type=component scope=project
+# 查询目标模块的 pattern
+@knowledge:type=pattern tags=<target_module>
+# 查询命名/import 等 convention
+@knowledge:type=convention scope=project
+# 查询已有 API（避免重复生成）
+@knowledge:type=api scope=project
+```
+
+降级：`knowledge-graph.yaml` 缺失 → 读 `context-package.json` → `context.json`。
 
 ### 2-3. Graph 查询 + 参考实现
 → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)

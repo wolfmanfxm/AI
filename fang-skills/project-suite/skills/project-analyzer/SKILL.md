@@ -45,7 +45,8 @@ Phase 4: Knowledge Builder → knowledge-graph.yaml + .md
 Phase 5: INDEX Generator → INDEX.md
 Phase 6: Classifier → promotion: none/project/personal
 Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
-Delivery: 双同步 — Project Sync + Instinct Promotion
+Phase 8: Promotion Review → auto-score → Promote/Keep/Reject
+Delivery: 双同步 — Project Sync + Promotion (auto_promote + manual confirm)
 ```
 
 ### Extractor 矩阵

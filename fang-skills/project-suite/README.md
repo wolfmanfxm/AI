@@ -5,13 +5,15 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Skill Atlas**: [docs/skill-atlas.md](docs/skill-atlas.md) · **Trust**: 90/100
 
-## 当前版本：0.9.0
+## 当前版本：1.0.0
 
 ```
-analyzer v3.0  (Multi-Extractor + Evidence-based Knowledge Graph)
-workflow-engine (Stage Template Injection + Execution Driver + Workflow DSL)
+analyzer v3.0   (Multi-Extractor + 7-Phase + Evidence-based Knowledge Graph)
+workflow-engine (Stage Injection + Execution Driver + DSL)
 pipeline-orchestrator (跨 Skill 编排)
-Governed-ready (Conformance G1-G17, Drift 40/40, Trust 90/100)
+Governed-ready  (Conformance G1-G17, Drift 40/40, Trust 90/100)
+Knowledge Decay (STALE→DECAYING→DEPRECATED 自动衰减)
+Organization Layer (Task→Project→Organization→Personal 四层)
 ```
 
 ## 架构三层

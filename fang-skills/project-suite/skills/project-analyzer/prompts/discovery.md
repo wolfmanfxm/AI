@@ -4,9 +4,9 @@
 
 ## Actions
 
-1. 探测技术栈：读 `package.json`（dependencies/devDependencies/scripts）、`tsconfig.json`（paths/baseUrl）、`vite.config.*`（alias/resolve）
-2. 探测目录结构：`src/` 一级子目录 + `workspace/`（若有）+ 路由/状态管理方案
-3. 探测 Knowledge Vault 路径：`$HOME/Data/Knowledge Vault` → `./Knowledge Vault` → `$HOME/Documents/Knowledge Vault`，取第一个可达路径
+1. 探测技术栈：`@adapter:filesystem.read package.json`（dependencies/devDependencies/scripts）、`@adapter:filesystem.read tsconfig.json`（paths/baseUrl）、`@adapter:filesystem.read vite.config.*`（alias/resolve）
+2. 探测目录结构：`@adapter:filesystem.list src/` + `@adapter:filesystem.find "*.vue" workspace/`（若有）
+3. 探测 Knowledge Vault 路径：`@adapter:filesystem.list "$HOME/Data/Knowledge Vault"` → `@adapter:filesystem.list "./Knowledge Vault"` → `@adapter:filesystem.list "$HOME/Documents/Knowledge Vault"`，取第一个可达路径
 4. `AskUserQuestion` 确认：
    - 项目名（默认 package.json name）
    - 分析深度：`quick`（仅架构+组件）/ `standard`（7维度）/ `deep`（7维度+交叉验证+QA）

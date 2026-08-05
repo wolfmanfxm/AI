@@ -1,8 +1,8 @@
-# Suite Architecture v0.9.0
+# Suite Architecture v1.0.0
 
 > project-suite 自身的架构设计决策记录。
 
-**当前版本: v0.9.0** — 核心变化：
+**当前版本: v1.0.0** — 核心变化：
 - Workflow Engine（Stage Template Injection + Execution Driver + DSL）
 - Analyzer v3.0（10 Extractor → 7-Phase → Evidence-based Knowledge Graph）
 - Candidate/Verify 架构（9/10 skills 统一验证模式）
