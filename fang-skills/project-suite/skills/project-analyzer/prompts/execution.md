@@ -71,12 +71,15 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 
 → [prompts/classifier.md](classifier.md)
 
-对每个 Knowledge Object 分配 promotion level：
-- `none` — Task 产物，归档本地，不同步
-- `project` — 项目知识，Project Sync → Vault/Projects/
-- `personal` — 跨项目通用，Knowledge Promotion → Vault/Knowledge/（需 Reviewer 确认）
+对每个 Knowledge Object 分配 promotion level → 输出 `classification-report.yaml`。
 
-输出 `classification-report.yaml`。Delivery 读取此文件执行同步。
+### Phase 7: Instinct Extraction
+
+→ [prompts/instinct-extractor.md](instinct-extractor.md)
+
+从 `personal_candidates` 中提炼跨项目 Instinct（Always/Prefer/Avoid/Never）。
+查询 Knowledge Vault 中已有 Instinct → 跨项目出现 ≥2 次 → Promotion Ready。
+输出 `instincts.yaml`。Delivery 据此执行 Knowledge Promotion。
 
 ## Phase Gates
 
@@ -89,7 +92,8 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 | Phase 3→4 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
 | Phase 4→5 | `knowledge-graph.yaml` + `.md` 双轨输出已写入 `.project-knowledge/` | 补跑 Knowledge Builder |
 | Phase 5→6 | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
-| Phase 6→Exit | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
+| Phase 6→7 | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
+| Phase 7→Exit | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
 
 **禁止提前退出**：4 个 Phase 全部完成前不可进入 Delivery。每个 Phase 开始前验证上一 Phase Gate。
 

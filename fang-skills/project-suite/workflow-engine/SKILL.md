@@ -29,7 +29,7 @@ stages:
   - { name: validation, template: validation, exit: [no_critical],     blocking: true }
 ```
 
-→ [Schema](../../shared/schemas/workflow.schema.json) · [Example](../../runtime/registry/workflow.dsl.example.yaml)
+→ [Schema](../shared/schemas/workflow.schema.json) · [Example](../runtime/registry/workflow.dsl.example.yaml)
 
 ### 模板目录
 

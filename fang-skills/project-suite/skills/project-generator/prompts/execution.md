@@ -4,9 +4,25 @@
 
 ## Actions
 
+### Phase 1: Candidate Generation
+
 ```
-读知识库 → Graph 查询 → 找参考实现 → 提取模式 → 套用模式生成 → 自检
+读知识库 → Graph 查询 → 找参考实现 → 提取模式 → 套用模式生成 → Candidate 代码
 ```
+
+### Phase 2: Verification
+
+→ [prompts/verifier.md](verifier.md)
+
+对每个 Candidate 代码文件执行 Verify：
+- V1 Import 可达 → 所有 import 路径指向存在的文件
+- V2 组件复用 → graph.json 中无同功能组件
+- V3 模式一致 → 风格与 `patterns/` 一致
+- V4 类型完整 → 无 any 滥用
+- V5 状态覆盖 → loading/error/empty 三态
+- V6 非重复 → knowledge-graph.yaml 中无同名节点
+
+判定：全部通过 → Accepted → 写入文件。V1/V2 失败 → Rejected → 修正。V3-V6 部分失败 → Accepted + 标注修复建议。
 
 ### 1. 读知识库
 - 优先读 `context-package.json`（Planner 产出，唯一知识入口）

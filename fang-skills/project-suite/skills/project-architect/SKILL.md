@@ -12,7 +12,7 @@ description: >
 # Architect
 
 > 需求 → 技术选型 → 模块设计 → API 契约 → ARCHITECTURE.md
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -38,6 +38,7 @@ description: >
 | Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @engine: code-audit |
 | Graph Analysis | [prompts/graph-analysis.md](prompts/graph-analysis.md) | @engine: graph-analysis |
 | Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 

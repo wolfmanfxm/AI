@@ -1,13 +1,17 @@
-# Suite Architecture v0.7.0
+# Suite Architecture v0.9.0
 
 > project-suite 自身的架构设计决策记录。
 
-**当前版本: v0.7.0** — 核心变化：
-- Knowledge Lifecycle v2.0（Artifact→Candidate→Accepted→Deprecated）
-- 10 字段标准 Interface（9 Skill 对齐）
-- Artifact Registry（12 个统一类型）
-- User-as-Dispatcher（用户始终是 Dispatcher）
-- YAML 配置（scheduler.yaml + gates.yaml + artifact-types.yaml + workflow YAML）
+**当前版本: v0.9.0** — 核心变化：
+- Workflow Engine（Stage Template Injection + Execution Driver + DSL）
+- Analyzer v3.0（10 Extractor → 7-Phase → Evidence-based Knowledge Graph）
+- Candidate/Verify 架构（9/10 skills 统一验证模式）
+- Knowledge Promotion（Task→Project→Personal→Instinct 演化闭环）
+- Pipeline Orchestrator（跨 Skill 编排，5 种 pipeline 模式）
+- Event Bus（8 event types + JSONL + 可视化）
+- Memory Layer（Session/Project/Suite/Decision 四级记忆）
+- Capability Discovery（intent → capability → skill 路由）
+- Governed-ready（G1-G17，Trust 90/100）
 
 ## 设计原则
 

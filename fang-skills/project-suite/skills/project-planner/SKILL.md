@@ -11,7 +11,7 @@ description: >
 # Project Planning Engine
 
 > 模糊需求 → Pipeline 收敛 → 9 模块执行契约 → 全 Suite 可消费
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -35,6 +35,7 @@ description: >
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
 | Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @engine: code-audit |
 | Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 

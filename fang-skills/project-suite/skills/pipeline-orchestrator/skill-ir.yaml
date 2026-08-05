@@ -1,42 +1,11 @@
-# Skill IR: pipeline-orchestrator
-# Generated: 2026-08-04T18:00:00Z
-
+# Skill IR: pipeline-orchestrator — machine-readable, regenerated on skill.yaml change
 id: pipeline-orchestrator
 version: "1.0.0"
 mode: Production
-priority: 5
-
-description: "跨 Skill Pipeline 编排引擎"
-
+description: "跨 Skill Pipeline 编排引擎。读取 registry 自动发现依赖，按 DAG 顺序调度执行， 传递上下文，处理失败。从 9 个独立 Skill 变成 1 个协调执行的 Pipeline Framework。 触发词：全流程、一键执行、自动编排、pipeline、端到端、从分析到发布。 产出：pipeline-state.json + pipeline-report.md。"
 boundary: "编排跨 Skill pipeline 执行，不替代任何单个 Skill 的功能"
-
-capabilities:
-  produces: [PipelineExecution]
-  consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
-
-dependencies:
-  depends_on: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-refactorer, project-documenter, project-releaser]
-
-interface:
-  stages: [discovery, orchestrate, validation, delivery]
-  stage_prompts: 4
-  inputs: 8
-  fixtures: 2
-
-quality:
-  confidence_pass: 85
-  review_below: 70
-  block_below: 40
-  rollback: manifest_resume
-  recovery: manifest_resume
-
-reliability:
-  stability: medium
-  confidence_delta: 10
-
-governance:
-  last_reviewed: "2026-08-04"
-  review_cadence_days: 90
-
-triggers:
-  cn_count: 8
+produces: [PipelineExecution]
+consumes: [KnowledgeBase,Plan,Architecture,Code,Test,Review,Documentation,Release]
+depends_on: [project-analyzer,project-planner,project-architect,project-generator,project-tester,project-reviewer,project-refactorer,project-documenter,project-releaser]
+stages: [discovery, orchestrate, validation, delivery]
+last_reviewed: "2026-08-04"

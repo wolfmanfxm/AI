@@ -164,7 +164,7 @@ RefactoredCode | Documentation | Release
 | DAG 调度 | `runtime/engine/scheduler.md` | ✅（按 capabilities.yaml 优先级） |
 | Context Protocol | `runtime/context/context.md` | ✅（下游 skill 读 context.json） |
 | 能力注册 | `runtime/registry/capabilities.yaml` | ✅（定义 produces/consumes） |
-| Workflow 模板 | `runtime/workflows/*.yaml` | 🟢（参考模板，用户是 Dispatcher） |
+| Workflow 模板 | `runtime/registry/workflow-library.yaml` | 🟢（Pipeline 模式，用户是 Dispatcher） |
 
 ---
 

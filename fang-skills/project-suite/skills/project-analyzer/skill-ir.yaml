@@ -1,52 +1,11 @@
-# Skill IR: project-analyzer
-# Generated: 2026-08-04T03:28:13Z
-# Generator: shared/scripts/generate-skill-ir.sh
-
+# Skill IR: project-analyzer — machine-readable, regenerated on skill.yaml change
 id: project-analyzer
-version: 1.3.1
+version: "1.3.1"
 mode: Production
-priority: 10
-
-description: ""
-
+description: "分析软件项目并生成可复用的项目知识库。v2.0 Multi-Extractor 架构： 10 个专业化提取器 + Candidate→Verify→Accept + Evidence Score + INDEX.md。 触发词：分析项目、代码分析、项目审计、扫描项目、梳理组件、更新项目知识、刷新项目知识、 项目规范、编码规范、analyze codebase、scan project、project refresh。 产出：.project-knowledge/ + Knowledge Vault。仅写知识文件，不修改源码。"
 boundary: "只分析项目生成知识文件，不修改源码"
-
-capabilities:
-  produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
-  consumes: []
-
-dependencies:
-  depends_on: []
-
-interface:
-  stages: [discovery, execution, delivery, validation]
-  stage_prompts: 4
-  inputs: 6
-  fixtures: 0
-0
-
-quality:
-  confidence_pass: 90
-70
-40
-  review_below: 90
-70
-40
-  block_below: 90
-70
-40
-  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
-manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-
-reliability:
-  stability: highexpected_confidence_delta:10output_file_count_tolerance:"10%"}
-  confidence_delta: 10
-10
-
-governance:
-  last_reviewed: "2026-08-04"
-  review_cadence_days: 90
-
-triggers:
-  cn_count: 9
+produces: [KnowledgeBase,KnowledgeIndex,Context,Graph]
+consumes: []
+depends_on: []
+stages: [discovery, execution, delivery, validation]
+last_reviewed: "2026-08-04"

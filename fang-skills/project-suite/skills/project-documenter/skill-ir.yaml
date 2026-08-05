@@ -1,51 +1,11 @@
-# Skill IR: project-documenter
-# Generated: 2026-08-04T03:28:14Z
-# Generator: shared/scripts/generate-skill-ir.sh
-
+# Skill IR: project-documenter — machine-readable, regenerated on skill.yaml change
 id: project-documenter
-version: 1.3.0
+version: "1.3.0"
 mode: Production
-priority: 65
-
-description: ""
-
+description: "生成和维护项目文档：API 文档（从 JSDoc/代码提取）、README、ADR、Changelog、组件文档。 自动匹配项目已有文档风格，所有内容基于代码事实不编造。 触发词：生成文档、写文档、补文档、API 文档、README、更新文档、补全文档、 generate docs、write documentation、update README、api docs、组件文档。 产出：文档文件（.md），含 Evidence Header。API/组件文档同步到 Knowledge Vault。"
 boundary: "只生成文档不改代码，API/组件文档同步 Vault 其他留在本地"
-
-capabilities:
-  produces: [Documentation]
-  consumes: [Code, Review, KnowledgeBase, Context]
-
-dependencies:
-  depends_on: [project-reviewer]
-
-interface:
-  stages: [discovery, execution, validation, output]
-  stage_prompts: 3
-  inputs: 3
-  fixtures: 1
-
-quality:
-  confidence_pass: 80
-60
-40
-  review_below: 80
-60
-40
-  block_below: 80
-60
-40
-  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
-manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-
-reliability:
-  stability: highexpected_confidence_delta:10output_file_count_tolerance:"10%"}
-  confidence_delta: 10
-10
-
-governance:
-  last_reviewed: "2026-08-04"
-  review_cadence_days: 90
-
-triggers:
-  cn_count: 8
+produces: [Documentation]
+consumes: [Code,Review,KnowledgeBase,Context]
+depends_on: [project-reviewer]
+stages: [discovery, execution, validation, output]
+last_reviewed: "2026-08-04"

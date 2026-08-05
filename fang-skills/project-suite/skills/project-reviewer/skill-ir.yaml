@@ -1,51 +1,11 @@
-# Skill IR: project-reviewer
-# Generated: 2026-08-04T03:28:15Z
-# Generator: shared/scripts/generate-skill-ir.sh
-
+# Skill IR: project-reviewer — machine-readable, regenerated on skill.yaml change
 id: project-reviewer
-version: 1.3.0
+version: "1.3.0"
 mode: Production
-priority: 55
-
-description: ""
-
+description: "对代码变更进行五轴审查：正确性、安全性、可读性、架构、性能。问题分级（BLOCKER/HIGH/MEDIUM/LOW） 附带精确的 file:line 引用和可操作的修复建议。 触发词：代码审查、review、检查代码、审查 PR、代码质量、code review、security review、 audit code、审查、帮我看看这段代码、这个 PR 怎么样。 产出：REVIEW.md（分级问题列表 + 正向反馈 + 审查结论）。"
 boundary: "只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复"
-
-capabilities:
-  produces: [Review]
-  consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
-
-dependencies:
-  depends_on: [project-tester]
-
-interface:
-  stages: [discovery, execution, validation, output]
-  stage_prompts: 3
-  inputs: 5
-  fixtures: 3
-
-quality:
-  confidence_pass: 85
-70
-40
-  review_below: 85
-70
-40
-  block_below: 85
-70
-40
-  rollback: nonesafe_to_retry:trueretry_max:2}
-manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:2}
-  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:2}
-
-reliability:
-  stability: highexpected_confidence_delta:10output_file_count_tolerance:"10%"}
-  confidence_delta: 10
-10
-
-governance:
-  last_reviewed: "2026-08-04"
-  review_cadence_days: 90
-
-triggers:
-  cn_count: 8
+produces: [Review]
+consumes: [Code,Plan,KnowledgeBase,KnowledgeIndex,Architecture,Test]
+depends_on: [project-tester]
+stages: [discovery, execution, validation, output]
+last_reviewed: "2026-08-04"

@@ -44,7 +44,8 @@ Phase 3: Cross-Validator → contradictions + complements
 Phase 4: Knowledge Builder → knowledge-graph.yaml + .md
 Phase 5: INDEX Generator → INDEX.md
 Phase 6: Classifier → promotion: none/project/personal
-Delivery: 双同步 — Project Sync + Knowledge Promotion
+Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
+Delivery: 双同步 — Project Sync + Instinct Promotion
 ```
 
 ### Extractor 矩阵

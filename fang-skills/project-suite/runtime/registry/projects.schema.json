@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "projects.schema.json",
+  "title": "Project Knowledge Registry",
+  "description": "每个项目的知识清单。Planner 可查询：哪些项目有 Vue3 + Repository Pattern？",
+
+  "type": "object",
+  "properties": {
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "last_refresh"],
+        "properties": {
+          "name": { "type": "string", "description": "项目名" },
+          "framework": { "type": "string", "description": "Vue3 / React / Node / ..." },
+          "knowledge_count": { "type": "integer" },
+          "patterns": { "type": "array", "items": { "type": "string" } },
+          "rules": { "type": "array", "items": { "type": "string" } },
+          "instincts": { "type": "array", "items": { "type": "string" } },
+          "last_refresh": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}

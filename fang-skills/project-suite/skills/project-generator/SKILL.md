@@ -12,7 +12,7 @@ description: >
 # Generator
 
 > 需求 + 项目知识 → 生产级代码
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -36,6 +36,7 @@ description: >
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 
 ## 职责边界

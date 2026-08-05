@@ -1,51 +1,11 @@
-# Skill IR: project-architect
-# Generated: 2026-08-04T03:28:13Z
-# Generator: shared/scripts/generate-skill-ir.sh
-
+# Skill IR: project-architect — machine-readable, regenerated on skill.yaml change
 id: project-architect
-version: 1.3.0
+version: "1.3.0"
 mode: Production
-priority: 30
-
-description: ""
-
+description: "架构决策、技术选型、模块设计、API 契约设计。使用对比矩阵做技术选型，输出 ADR 格式的架构决策记录。 触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、 怎么设计、选什么技术、模块怎么划分、接口怎么定义、design architecture、tech stack、 system design、API design。 产出：ARCHITECTURE.md（ADR 决策记录 + 模块图 + 选型理由 + API 契约）。"
 boundary: "只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改"
-
-capabilities:
-  produces: [Architecture]
-  consumes: [KnowledgeBase, Plan, Context, Graph]
-
-dependencies:
-  depends_on: [project-planner]
-
-interface:
-  stages: [discovery, code-audit, graph-analysis, execution, validation, output]
-  stage_prompts: 5
-  inputs: 4
-  fixtures: 3
-
-quality:
-  confidence_pass: 85
-70
-40
-  review_below: 85
-70
-40
-  block_below: 85
-70
-40
-  rollback: manifest_resumesafe_to_retry:trueretry_max:1}
-manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-  recovery: manifest_resumecheckpoint_file:manifest.jsonsafe_to_retry:trueretry_max:1}
-
-reliability:
-  stability: mediumexpected_confidence_delta:10output_file_count_tolerance:"15%"}
-  confidence_delta: 10
-15
-
-governance:
-  last_reviewed: "2026-08-04"
-  review_cadence_days: 90
-
-triggers:
-  cn_count: 11
+produces: [Architecture]
+consumes: [KnowledgeBase,Plan,Context,Graph]
+depends_on: [project-planner]
+stages: [discovery, code-audit, graph-analysis, execution, validation, output]
+last_reviewed: "2026-08-04"

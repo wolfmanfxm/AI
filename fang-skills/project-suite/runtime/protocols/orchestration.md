@@ -46,7 +46,7 @@ Skill
 
 ## Workflow 模板
 
-`runtime/workflows/` 中的 YAML 是**参考模板**，不是自动执行引擎：
+`runtime/registry/workflow-library.yaml` 中的 Pipeline 定义是**编排参考**，实际执行由 pipeline-orchestrator 驱动：
 
 | 模板 | 文件 | 适用场景 |
 |------|------|---------|
