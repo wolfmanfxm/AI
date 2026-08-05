@@ -4,6 +4,7 @@
 
 ## Actions
 
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有文档风格/API patterns → 自动匹配
 1. 确认文档类型：API 文档 / 组件文档 / README / Changelog
 2. 读 1-2 份已有文档，提取风格特征：
    - 标题层级（#/##/###）

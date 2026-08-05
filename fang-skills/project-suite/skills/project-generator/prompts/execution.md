@@ -49,7 +49,7 @@
 
 ### 4. 套用模式生成
 - 遵循 `.project-knowledge/patterns/` 中的编码规范
-- 使用 `components/catalog.md` 中的现有组件
+- `@adapter:knowledge.query --type component --scope project` → 使用已有组件
 - 匹配项目约定：缩进/引号/命名/import 顺序
 
 ### 5. 自检

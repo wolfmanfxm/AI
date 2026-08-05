@@ -4,6 +4,7 @@
 
 ## Actions
 
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有 antipatterns/risks → 优先处理已知问题
 1. 识别坏味道：长函数（>50行）/ 重复代码 / 过深嵌套（>3层）/ God Class / 魔数
 2. 确认测试覆盖：
    - 有现有测试 → 跑一遍看是否全绿

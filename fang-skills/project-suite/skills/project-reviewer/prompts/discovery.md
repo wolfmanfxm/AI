@@ -4,6 +4,7 @@
 
 ## Actions
 
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有 antipatterns/risks → 对照审查重点
 1. 加载 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
 2. 查询已知风险 + 反模式（不读 .md）：
    - `@knowledge:type=antipattern scope=project` → 对照审查
