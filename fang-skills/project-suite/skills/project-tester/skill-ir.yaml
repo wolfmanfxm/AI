@@ -8,4 +8,8 @@ produces: [Test]
 consumes: [Code,Plan,KnowledgeBase,Context]
 depends_on: [project-generator]
 stages: [discovery, execution, validation]
+verification: { checks: 4, source: prompts/verifier.md }
+evidence: { format: knowledge-object.schema.json, source: knowledge-graph.yaml }
+exit_criteria: { conditions: 15, source: prompts/execution.md }
+failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

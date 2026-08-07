@@ -47,6 +47,12 @@ description: >
 
 > 禁止: ① 修改被测代码（记录[潜在Bug]不修） ② 只写happy path不写边界/异常 ③ 生成后不执行验证 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "这个函数很简单，happy path 够了" → 仍然覆盖边界+异常
+> "测试跑了就行，失败可能是环境问题" → 每个失败必须分析原因
+> "AC 太多了，挑几个重要的测" → 每条 AC 至少 1 个用例
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

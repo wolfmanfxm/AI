@@ -41,6 +41,17 @@ gen() {
   done < <(head -15 "$m")
   desc=$(echo "$desc" | sed 's/^ *//;s/ *$//')
 
+  # Extract verification checks count from verifier.md
+  local verify_checks=0
+  [ -f "$dir/prompts/verifier.md" ] && verify_checks=$(grep -c "| V" "$dir/prompts/verifier.md" 2>/dev/null || echo 0)
+
+  # Extract exit conditions from execution.md
+  local exit_count=0
+  [ -f "$dir/prompts/execution.md" ] && exit_count=$(grep -c "^- " "$dir/prompts/execution.md" 2>/dev/null | head -1 || echo 0)
+
+  # Extract failure conditions from skill.yaml interface block
+  local failure_modes=$(grep -c "condition:" "$y" 2>/dev/null || echo 0)
+
   # Produce clean IR
   cat > "$dir/skill-ir.yaml" << EOF
 # Skill IR: $id — machine-readable, regenerated on skill.yaml change
@@ -53,6 +64,10 @@ produces: [${produces}]
 consumes: [${consumes}]
 depends_on: [${depends_on}]
 stages: [${stages}]
+verification: { checks: ${verify_checks}, source: prompts/verifier.md }
+evidence: { format: knowledge-object.schema.json, source: knowledge-graph.yaml }
+exit_criteria: { conditions: ${exit_count}, source: prompts/execution.md }
+failure_conditions: { modes: ${failure_modes}, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "${last_reviewed}"
 EOF
   echo "  ✅ $name"

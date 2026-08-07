@@ -33,11 +33,36 @@ description: >
 | Stage | Prompt | 模板 |
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
+| Interview | [prompts/interview.md](prompts/interview.md) | 需求模糊时启用 |
 | Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @engine: code-audit |
 | Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
 | Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
+
+## 执行链
+
+```
+User 需求
+  ↓
+Code Audit（现状探查 → 发现已有 BaseTable/Permission/API → 减少无效问题）
+  ↓
+Knowledge Resolver（查询 knowledge-graph.yaml → 注入已有 knowledge）
+  ↓
+Completeness Check（goal/scope/constraints/knowledge → planning_confidence）
+  ↓
+Adaptive Interview（confidence<0.9 → ≤5 questions, budget 用完 → Assumption）
+  ↓
+9-Step Pipeline（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→AC）
+  ↓
+Decision Record（每个决策: selected + ignored + reason + confidence）
+  ↓
+Verify（5-Verify → Accepted/Adjusted/Rejected）
+  ↓
+Delivery（PLAN.md + context-package.json）
+```
+
+下游衔接: Architect 读 PLAN.md `# Decision` → Generator 读 `# Task Breakdown` + `# Reuse Analysis` → Reviewer 读 `# Acceptance Criteria`。
 
 ## 职责边界
 
@@ -47,6 +72,12 @@ description: >
 ## 反例黑名单
 
 > 禁止: ① 做架构设计（只识别决策点） ② 写代码（只拆任务） ③ confidence<40仍产出完整PLAN | → [完整清单](references/boundary.md)
+
+## Common Rationalizations
+
+> "需求很明确，不需要现状探查" → 仍然 Code Audit
+> "估时差不多就行，不用精确" → 每个 Task 必须有 S/M/L + 天数
+> "依赖关系很明显，不用画 DAG" → 必须画，必须检查循环
 
 ## 失败处理
 

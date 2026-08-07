@@ -1,6 +1,7 @@
 # Execution — Generator
 
 > @engine: execution
+> Session Snapshot: 每个文件生成后写入 `.project-knowledge/.sessions/project-generator/state.json` → 跨 session resume
 
 ## Actions
 
@@ -23,6 +24,8 @@
 - V6 非重复 → knowledge-graph.yaml 中无同名节点
 
 判定：全部通过 → Accepted → 写入文件。V1/V2 失败 → Rejected → 修正。V3-V6 部分失败 → Accepted + 标注修复建议。
+
+⚡ 每个文件写入后 snapshot: `files_generated: [UserCard.vue, ...]` → 中断后跳过已完成文件。
 
 ### 1. 结构化知识查询
 
@@ -61,11 +64,28 @@
 
 🔴 CHECKPOINT — 展示代码摘要（文件清单+关键片段），用户确认后写入
 
+## Decision Record
+
+```yaml
+decisions:
+  - id: D1
+    decision: "表单组件: 使用 FormWrapper"
+    selected: "FormWrapper"
+    ignored:
+      - { option: "Raw el-form", reason: "不符合项目规范, Reviewer 会标记为 antipattern" }
+    reason: "项目 convention, 331 files use it"
+    evidence: ["conventions: FormWrapper is standard"]
+    confidence: 0.96
+    risk: "无"
+    owner: "generator"
+```
+
 ## Exit
 
 - 所有代码文件写入成功
 - 自检清单全部通过
 - confidence 已计算
+- Reasoning Report 已生成
 
 ## Failure
 

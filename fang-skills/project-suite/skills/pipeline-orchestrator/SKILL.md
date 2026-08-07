@@ -59,6 +59,12 @@ description: >
 
 > 禁止: ① 替代单个 Skill 的功能（只调度不执行） ② 硬编码 pipeline（必须从 registry 读取） ③ 中间失败静默跳过不询问用户 ④ 跳过CHECKPOINT直接推进 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "上一个 Skill 成功了，直接继续" → 仍然 CHECKPOINT 确认
+> "这个 Skill 很快，不用展示 Summary" → 每个 Skill 完成后展示 Summary
+> "失败了跳过就行，不影响整体" → 失败必须 AskUserQuestion
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 恢复: pipeline-state.json → [checkpoint](../../runtime/engine/checkpoint.md)

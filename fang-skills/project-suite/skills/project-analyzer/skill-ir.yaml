@@ -8,4 +8,8 @@ produces: [KnowledgeBase,KnowledgeIndex,Context,Graph]
 consumes: []
 depends_on: []
 stages: [discovery, execution, delivery, validation]
+verification: { checks: 9, source: prompts/verifier.md }
+evidence: { format: knowledge-object.schema.json, source: knowledge-graph.yaml }
+exit_criteria: { conditions: 11, source: prompts/execution.md }
+failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

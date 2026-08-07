@@ -115,8 +115,9 @@ EXECUTE  → StageStarted
            → CheckpointReached (CHECKPOINT 等待时)
 EXIT     → GateTriggered (confidence 检查)
            → StageCompleted (全部满足) 或 StageFailed (不满足+retry=0)
-ADVANCE  → PipelineAdvanced
+ADVANCE  → PipelineAdvanced + 写入 [session snapshot](../../runtime/engine/session-snapshot.md)
            → 若 skill=analyzer + stage=delivery → trigger [background pipeline](../../runtime/pipeline/background.yaml)
+           → 跨 Session Resume: 下次启动 → 读 snapshot → 从中断 Phase 继续
 ```
 
 → [Event Bus](../../runtime/engine/event-bus.md) | [Event Schema](../../shared/schemas/event.schema.json)

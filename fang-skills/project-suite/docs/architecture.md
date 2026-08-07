@@ -3,6 +3,36 @@
 > project-suite 自身的架构设计决策记录。
 
 **当前版本: v1.0.0** — 核心变化：
+
+## 设计原则：三层分离
+
+```
+Skill = 行为（Workflow，不是 Reference）
+  │
+  ▼
+Knowledge = 数据（Rule, Pattern, Decision, Instinct）
+  │
+  ▼
+Runtime = 调度（Stage Injection, Execution Driver, Event Bus）
+```
+
+| 层 | 职责 | 不负责 |
+|----|------|--------|
+| **Skill** | 执行工作流（Extract→Verify→Build），定义 Verification Gate 和 Exit Criteria | 不存储知识，不决定"什么时候调用哪个 Skill" |
+| **Knowledge** | 存储结构化知识（knowledge-graph.yaml），提供 Query API | 不执行工作流，不调度 |
+| **Runtime** | 调度 Skill（Stage Injection + Execution Driver），触发 Event，管理 State | 不包含业务逻辑 |
+
+### 为什么分离
+
+- Skill 改工作流时不影响 Knowledge 存储格式
+- Knowledge 扩展 Schema 时不影响 Skill 执行逻辑
+- Runtime 换调度策略时 Skill 和 Knowledge 都不需要改
+
+### Anti-Rationalization（防止 LLM 偷懒）
+
+每个 Skill 显式列出 LLM 可能说的借口 + 为什么必须拒绝。参见各 Skill 的 `## Common Rationalizations` 节。
+
+**当前版本: v1.0.0** — 核心变化：
 - Workflow Engine（Stage Template Injection + Execution Driver + DSL）
 - Analyzer v3.0（10 Extractor → 7-Phase → Evidence-based Knowledge Graph）
 - Candidate/Verify 架构（9/10 skills 统一验证模式）

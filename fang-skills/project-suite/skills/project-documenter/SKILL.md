@@ -47,6 +47,12 @@ description: >
 
 > 禁止: ① 不读源码直接从类型定义编造 ② 覆盖已有文档人工章节 ③ 不标注file:line溯源 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "类型定义已经很清楚了，不需要读源码" → 仍然 Read 源码
+> "风格差不多就行，不用完全匹配" → 必须匹配已有文档风格
+> "这个参数含义很明显，不用标注 file:line" → 每个关键信息必须溯源
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

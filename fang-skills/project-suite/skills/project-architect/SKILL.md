@@ -51,6 +51,12 @@ description: >
 
 > 禁止: ① 写代码（只做设计） ② 跳过现状核实 ③ 基于猜测做架构决策 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "只有一个方案明显最优，不用对比矩阵" → 仍然 ≥2 方案 + ≥3 维度
+> "Graph 分析太慢，直接出方案" → 仍然 Graph Analysis
+> "API 契约等 Generator 生成时再定义" → Architect 必须定义，Generator 只能引用
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

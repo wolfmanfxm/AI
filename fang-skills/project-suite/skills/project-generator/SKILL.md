@@ -48,6 +48,12 @@ description: >
 
 > 禁止: ① 跳过.project-knowledge凭记忆写 ② 不读目标文件直接overwrite ③ 跳过上游PLAN.md/ARCHITECTURE.md | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "这个组件很简单，不需要查知识库" → 仍然 Query
+> "已经有类似代码了，直接复制改一下" → 仍然走 Candidate→Verify
+> "loading/error 状态没必要，先写 happy path" → 全状态覆盖是硬要求
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

@@ -1,6 +1,7 @@
 # Execution — Planner
 
 > @engine: execution
+> Session Snapshot: 每步 Pipeline 后写入 `.project-knowledge/.sessions/project-planner/state.json` → 跨 session resume
 
 ## Actions
 
@@ -22,11 +23,32 @@
 → 工作量评估：[prompts/estimation.md](estimation.md)
 
 🔴 CHECKPOINT — 展示 PLAN.md 摘要（任务数+估时+风险TOP3）
+⚡ 写入 session snapshot: `current_step` + `completed_sections` → 中断后从此步骤 resume
+
+## Decision Record
+
+每个决策输出标准化 Decision Record：
+
+```yaml
+decisions:
+  - id: D1
+    decision: "模块划分: 新建 interestRateManage/"
+    selected: "interestRateManage/"
+    ignored:
+      - { option: "扩展 creditManage/", reason: "creditManage 已有 133 文件(top5), 耦合风险高" }
+      - { option: "新建 financeManage/", reason: "太泛, 未来可能包含非利率功能" }
+    reason: "利率调整是独立业务域, 与信用管理职责不同"
+    evidence: ["creditManage/ 133 files", "quotaManage 60 files (独立模块)"]
+    confidence: 0.85
+    risk: "审批流集成需确认"
+    owner: "architect"
+```
 
 ## Exit
 
 - 9 个 Section 全部非空（内容 ≥3 行）
 - confidence ≥ 40%（否则仅输出 Goal+Scope+Gap List，拒绝产出完整 PLAN）
+- Reasoning Report 已生成
 - 用户已确认摘要
 
 ## Failure

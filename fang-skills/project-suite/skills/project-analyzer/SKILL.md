@@ -81,6 +81,13 @@ Delivery: 双同步 — Project Sync + Promotion (auto_promote + manual confirm)
 
 > 禁止: ① 修改源码（只写知识文件） ② 跳过CHECKPOINT确认 ③ agent提前返回不等待全部完成 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> LLM 可能说这些话来跳过步骤——识别并拒绝：
+> "项目很简单，不需要全量扫描" → 仍然全量
+> "这个维度没什么内容，跳过" → 仍然提取，标注 [MINIMAL]
+> "Verifier 太慢，直接写 knowledge" → 必须经过 Candidate→Verify
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/)

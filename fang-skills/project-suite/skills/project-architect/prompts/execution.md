@@ -40,10 +40,30 @@
 
 🔴 CHECKPOINT — 展示 ARCHITECTURE.md 摘要（决策数 + 模块图 + API 概要）
 
+## Decision Record
+
+每个 ADR 输出标准化 Decision Record：
+
+```yaml
+decisions:
+  - id: D1
+    decision: "状态管理: 使用 Pinia"
+    selected: "Pinia"
+    ignored:
+      - { option: "Vuex", reason: "Vue3 官方不再推荐, TS 支持弱" }
+      - { option: "raw reactive", reason: "缺少 devtools/持久化/模块化" }
+    reason: "Vue3 官方推荐, TypeScript 支持优于 Vuex, 项目已有 11 stores"
+    evidence: ["package.json: pinia 2.1", "src/stores/ 含 11 stores"]
+    confidence: 0.95
+    risk: "无"
+    owner: "architect"
+```
+
 ## Exit
 
 - 所有设计决策已记录（ADR 格式）
 - 无未 resolve 的 trade-off
+- Reasoning Report 已生成
 - 用户已确认
 
 ## Failure

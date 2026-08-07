@@ -3,14 +3,15 @@
 > @engine: execution
 > v2.1: Multi-Extractor + 5-Verify + CHECKPOINT + Pipeline Resume
 
-## Resume
+## Resume（跨 Session）
 
-启动时检查 `manifest.json`：
-- 若 `status = in_progress` → 跳过已完成的 Phase，从中断点继续
-- Phase 1 done → 从 Phase 2 开始
-- Phase 2 done → 从 Phase 3 开始
-- 依此类推
-- 每完成一个 Phase → 立即更新 manifest.phase_status
+启动时检查 `.project-knowledge/.sessions/project-analyzer/state.json` → [session-snapshot](../../../runtime/engine/session-snapshot.md)：
+
+1. 存在 + status = paused → 展示已完成 phases + extracted knowledge → 用户选择"继续/重新开始"
+2. 继续 → 从 `current_phase` 开始，跳过已完成
+3. 不存在 → 正常启动
+
+每 Phase 完成后立即写入 snapshot（current_phase + knowledge_extracted + git_commit）。解决了"5000 文件项目 Context 爆炸 → Claude 重启 → 重来"的问题。
 
 ## Actions
 
@@ -103,7 +104,7 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 | Phase 7→8 | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
 | Phase 8→Exit | `promotion-review.yaml` 存在 + all candidates scored | 补跑 Promotion Reviewer |
 
-**禁止提前退出**：4 个 Phase 全部完成前不可进入 Delivery。每个 Phase 开始前验证上一 Phase Gate。
+**禁止提前退出**：全部 Phase 完成前不可进入 Delivery。每个 Phase 完成后 → 写入 session snapshot → 下一 Phase。Context 爆炸时下次 session 从 snapshot 继续，不重来。
 
 ## Exit
 

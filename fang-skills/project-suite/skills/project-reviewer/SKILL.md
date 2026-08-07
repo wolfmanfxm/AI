@@ -49,6 +49,12 @@ description: >
 
 > 禁止: ① 修改源码（只查不修） ② BLOCKER无明确阻断理由 ③ 跳过AC逐条对照 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "代码风格没问题，不用逐条检查" → 五轴必须全覆盖
+> "这个 file:line 大概在这里，不用精确定位" → 每个 finding 必须精确 file:line
+> "没有 BLOCKER 就是通过了" → 仍然输出 PRAISE + 审查结论
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

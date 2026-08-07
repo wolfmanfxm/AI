@@ -48,6 +48,12 @@ description: >
 
 > 禁止: ① 执行npm publish/git push --tags ② 不看git log直接建议版本号 ③ 无回滚方案标记发布就绪 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "改动很小，PATCH 就行" → 仍然按 conventional commits 推导
+> "回滚很简单，git revert 就行" → 必须写具体命令+验证步骤
+> "REVIEW 里没有 BLOCKER，可以发布" → 仍然检查全链路 Confidence
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)

@@ -48,6 +48,12 @@ description: >
 
 > 禁止: ① 无测试保护直接重构 ② 重构同时改功能 ③ 一次性重构>5个文件 | → [完整清单](references/boundary.md)
 
+## Common Rationalizations
+
+> "这个重构很安全，不用跑测试" → 必须先跑绿
+> "指标改善不明显，但代码确实更好了" → 改善 <10% 必须标注"⚠️ 边际改善"
+> "一起改了吧，都是相关的小改动" → 每个重构动作独立 commit
+
 ## 失败处理
 
 > 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: git revert → [checkpoint](../../runtime/engine/checkpoint.md)
