@@ -85,6 +85,32 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 - 是否需要邮箱验证？（留给 Architect 决策）
 ```
 
+## Domain-Aware Questioning
+
+Interview 查询 Glossary（Analyzer 已提取的领域术语）→ 用项目语言提问：
+
+```
+Resolver: "项目有哪些领域术语？" → Materialization, Cascade, Lesson, Course
+Interview: 不再问 "什么是 Materialization？"
+          而是问 "Materialization cascade 是否包含子 Lesson？"
+```
+
+→ [Glossary Extractor](../project-analyzer/prompts/extractors/glossary.md)
+
+## Decision → Promotion 分流
+
+Interview 产生的每个 Decision，不直接决定"写不写文档"。交给 Promotion Reviewer 判断：
+
+```
+Interview Decision
+  → Promotion Reviewer 评分
+    → Task-only (promotion:none)     → 仅保留在 Task Artifact
+    → Project-level (promotion:project) → 写入 Project Knowledge
+    → Cross-project (promotion:personal) → Knowledge Vault
+```
+
+→ [Promotion Reviewer](../project-analyzer/prompts/promotion-reviewer.md)
+
 ## 与 Context Resolver 的关系
 
 Interview 不替代 Context Resolver——Interview 追问**用户不知道的事**，Resolver 查询**项目已经知道的事**。两者互补：

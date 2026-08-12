@@ -1,145 +1,125 @@
 # Suite Architecture v1.0.0
 
-> project-suite 自身的架构设计决策记录。
+> project-suite 架构设计决策记录。
+> Knowledge-driven Agent Framework：知道什么时候用哪个 Skill，执行这个 Skill 需要什么知识。
 
-**当前版本: v1.0.0** — 核心变化：
-
-## 设计原则：三层分离
-
-```
-Skill = 行为（Workflow，不是 Reference）
-  │
-  ▼
-Knowledge = 数据（Rule, Pattern, Decision, Instinct）
-  │
-  ▼
-Runtime = 调度（Stage Injection, Execution Driver, Event Bus）
-```
-
-| 层 | 职责 | 不负责 |
-|----|------|--------|
-| **Skill** | 执行工作流（Extract→Verify→Build），定义 Verification Gate 和 Exit Criteria | 不存储知识，不决定"什么时候调用哪个 Skill" |
-| **Knowledge** | 存储结构化知识（knowledge-graph.yaml），提供 Query API | 不执行工作流，不调度 |
-| **Runtime** | 调度 Skill（Stage Injection + Execution Driver），触发 Event，管理 State | 不包含业务逻辑 |
-
-### 为什么分离
-
-- Skill 改工作流时不影响 Knowledge 存储格式
-- Knowledge 扩展 Schema 时不影响 Skill 执行逻辑
-- Runtime 换调度策略时 Skill 和 Knowledge 都不需要改
-
-### Anti-Rationalization（防止 LLM 偷懒）
-
-每个 Skill 显式列出 LLM 可能说的借口 + 为什么必须拒绝。参见各 Skill 的 `## Common Rationalizations` 节。
-
-**当前版本: v1.0.0** — 核心变化：
-- Workflow Engine（Stage Template Injection + Execution Driver + DSL）
-- Analyzer v3.0（10 Extractor → 7-Phase → Evidence-based Knowledge Graph）
-- Candidate/Verify 架构（9/10 skills 统一验证模式）
-- Knowledge Promotion（Task→Project→Personal→Instinct 演化闭环）
-- Pipeline Orchestrator（跨 Skill 编排，5 种 pipeline 模式）
-- Event Bus（8 event types + JSONL + 可视化）
-- Memory Layer（Session/Project/Suite/Decision 四级记忆）
-- Capability Discovery（intent → capability → skill 路由）
-- Governed-ready（G1-G17，Trust 90/100）
-
-## 设计原则
-
-### 1. Skill 即插件
-
-每个 skill 是独立的、可单独触发的单元。skill 不感知其他 skill 的存在，只通过 `runtime/` 和 `shared/` 与外界交互。
-
-**含义**：
-- 用户可以只装 analyzer + generator，不需要装全部 9 个
-- 新增 skill 不需要修改已有 skill
-- runtime/ 中的协议向下兼容
-
-### 2. Protocol 属于框架，不属于 skill
-
-skill 内部不包含 protocol 文件。所有 skill 共享 `runtime/` 中的协议定义。
-
-**决策记录**：最初 analyzer 自带 protocol/，但扩展到 9 个 skill 后如果每个 skill 都维护自己的状态机、断点续传、异常处理，必然产生 9 份重复且不一致的实现。
-
-### 3. 数据通过文件传递
-
-skill 之间不通过内存或函数调用通信，而是通过 manifest.json + 产出文件。
-
-**理由**：
-- Claude Code skill 之间没有内存共享机制
-- 文件是唯一可靠的跨 session 通信方式
-- 方便 debug（直接读中间文件）
-
-### 4. 最小可触发单元
-
-每个 skill 可以在缺少上游产出的情况下独立运行——以默认模式执行并标注"缺少上游上下文"。
-
-## 目录设计
+## 全链路架构
 
 ```
-project-suite/
-├── README.md              ← 入口
-├── skills/               ← 9 个独立 skill（可插拔）
-├── runtime/              ← 共享运行时协议（不包含 skill 专属内容）
-│   ├── engine/           ← 单 skill 执行层
-│   └── protocols/        ← 多 skill 协作层
-├── shared/               ← 静态制品（JSON Schema、模板、约定、示例）
-└── docs/                 ← suite 自身文档
+                          User Intent
+                               │
+                               ▼
+                     ┌─────────────────────┐
+                     │   Skill Resolver    │
+                     │   "谁来做？"          │
+                     │   skill-catalog.yaml │
+                     └──────────┬──────────┘
+                                │
+                                ▼
+                     ┌─────────────────────┐
+                     │  Knowledge Resolver │
+                     │  "需要知道什么？"     │
+                     │  context-resolver   │
+                     │  + knowledge-graph   │
+                     └──────────┬──────────┘
+                                │
+                                ▼
+                     ┌─────────────────────┐
+                     │  Decision Engine    │
+                     │  "应该怎么做？"       │
+                     │  completeness-check │
+                     │  + project-principles │
+                     └──────────┬──────────┘
+                                │
+                     ┌──────────┴──────────┐
+                     │                     │
+               confidence≥0.9        confidence<0.9
+                     │                     │
+                     ▼                     ▼
+                Direct Plan      Adaptive Interview
+                     │              (≤5 questions)
+                     │              budget用完→Assumption
+                     │                     │
+                     └──────────┬──────────┘
+                                │
+                                ▼
+                     ┌─────────────────────┐
+                     │    Execution        │
+                     │    + Checkpoint     │
+                     │    10 Skills        │
+                     │    + Verify(9/10)   │
+                     │    + session-snapshot│
+                     └──────────┬──────────┘
+                                │
+                                ▼
+                     ┌─────────────────────┐
+                     │  Review / Converge  │
+                     │  cross-artifact     │
+                     │  + Decision Record  │
+                     └──────────┬──────────┘
+                                │
+                                ▼
+                     ┌─────────────────────┐
+                     │   Reflection        │
+                     │   + Promotion       │
+                     │   candidate→verify  │
+                     │   →accepted→vault   │
+                     │   + Decay Engine    │
+                     └─────────────────────┘
 ```
 
-### 为什么 runtime/ 分 engine/ 和 protocols/
+## 七层职责
 
-- **engine/** 解决"一个 skill 怎么执行"——状态、断点、调度、异常
-- **protocols/** 解决"多个 skill 怎么协作"——路由、编排
+| 层 | 组件 | 回答 | 实现 |
+|----|------|------|------|
+| **Skill Resolver** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
+| **Knowledge Resolver** | context-resolver.md + knowledge-graph.yaml | 需要知道什么？ | Task→tags→Query→Top-K injection |
+| **Decision Engine** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
+| **Execution** | 10 Skills + workflow-engine + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
+| **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |
+| **Reflection** | promotion-reviewer + instinct-extractor + decay-engine | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |
+| **Governance** | conformance(G1-G17) + drift(40/40) + trust(90/100) | 持续可信吗？ | 10/10 governed boundary |
 
-这是两个正交的维度。放在一起会混淆单 skill 行为和跨 skill 行为。
+## Skill Ecosystem 三件套
 
-### 为什么 shared/ 不放 protocol 逻辑
+借鉴 awesome-claude-skills：Skill 必须可发现、可描述、可分类、可验证、可评估、可复用。
 
-shared/ 只放静态制品——schemas、templates、conventions、examples。不放任何涉及运行时决策的文件。`routing` 和 `orchestration` 是运行时决策，放 `runtime/protocols/`。
+| 能力 | 实现 |
+|------|------|
+| **可发现** | Skill Catalog（skill-catalog.yaml: 10 skills, 6 categories, complexity, use_cases） |
+| **可描述** | Skill IR（skill-ir.yaml: id/version/produces/consumes/stages/verification/evidence/exit/failure） |
+| **可分类** | Categories（analysis/planning/creation/verification/evolution/orchestration） |
+| **可验证** | Skill Validator（G1-G17 conformance + drift + trigger-eval + artifact-consistency） |
+| **可评估** | darwin-skill 9-dim rubric（avg 84.2）+ dim8 full_test（3/10） |
+| **可复用** | Pipeline Orchestrator（5 pipeline modes + auto-advance + per-skill checkpoint） |
 
-### 为什么 skills/ 下不设 protocol/
-
-最初设计（方案一）每个 skill 有 `protocol/` 目录。但 protocol 是框架能力，skill 只是使用者。类比：React 组件不自己实现 React 运行时。
-
-## 已拒绝的备选方案
-
-| 方案 | 拒绝理由 |
-|------|---------|
-| 每个 skill 自带 protocol/ | 9 份重复，一致性无法保证 |
-| shared/protocols/ 放路由规则 | 路由规则是运行时行为，非静态制品 |
-| runtime/ 扁平结构（不分子目录） | engine 和 protocols 职责不同，平铺混淆 |
-| runtime/ 合并 engine + protocols | 两件不同的事不应放在同一层 |
-
-## Skill 创建规范
-
-### 最小 skill（骨架）
-
-```
-skills/<name>/
-├── SKILL.md          ← 必须：name + description frontmatter + 使用说明
-├── prompts/          ← 必须：至少一个 prompt 模板
-│   └── main.md
-└── references/       ← 必须：至少能力边界说明
-    └── capability-matrix.md
-```
-
-### 正式版 skill（当前 v0.7.0 标准）
+## 关键数据
 
 ```
-skills/<name>/
-├── SKILL.md              ← 完整工作流 + 核心原则 + 边界处理 + runtime 引用表 + references 索引
-├── prompts/
-│   ├── main.md           入口 + 路由到专用 prompt
-│   ├── <specialized-1>.md  专用领域 prompt
-│   └── <specialized-2>.md
-└── references/
-    ├── capability-matrix.md   保证能力 + 不做 + 前置条件
-    ├── trigger-words.md       触发词 + 歧义处理
-    ├── anti-patterns.md       禁止操作 + 常见反模式 + 反例对比
-    └── examples.md            真实输入→输出示例
+Skills: 10 | Gates: 0/0 | Drift: 40/40 | Trust: 90/100
+Verify: 9/10 | @adapter: 19 refs | Skill IR: 10/10
+Context Resolver: 10/10 | Rationalizations: 10/10
+Decision Record: 3/3 | Completeness Check: ✅
+Session Snapshot: 3/3 (analyzer/planner/generator)
+Background Pipeline: ✅ | Decay Engine: ✅
 ```
 
-### 可选扩展（按需添加）
-- `references/<domain-guide>.md` — 领域专项指南（如 tester 的 mock-strategy.md、refactorer 的 safety-protocol.md）
-- `prompts/<specialized-3>.md` — 第三个专用 prompt
-- `resources/` — skill 专属静态资源
+## v2.0 方向
+
+v1.0 的 Runtime 本质是 Workflow Runtime（流程执行器）。v2.0 目标：Knowledge Runtime（知识驱动决策）。
+
+| 能力 | v1.0 状态 | v2.0 目标 |
+|------|----------|----------|
+| **Perception** | 分散在各 Skill Discovery | 探索方向：统一 Perception 层（Intent → Domain → Tech → Need） |
+| **Context Resolver** | ✅ 10/10 | — |
+| **Tool Resolver** | ✅ adapter-registry 已定义，Skill 声明 `@adapter:` | — 不继续做。adapter 声明式映射足够，不需要 AI 推理 |
+| **Workflow Resolver** | orchestrator 选 pipeline（5 模式）+ profiles.yaml | 动态规划（Bug→Reviewer, Feature→Planner+Architect） |
+| **Promotion Resolver** | ✅ Phase 8 | — |
+| **Execution** | ✅ 10 Skills + workflow-engine | — |
+| **Learning** | ✅ Extract→Verify→Promote→Decay | — |
+
+### 决策链（v2.0 目标形态）
+
+```
+感知 → 理解任务 → 查询知识 → 选择工具 → 规划流程 → 执行 Skill → 抽取知识 → 评估价值 → 沉淀知识
+```

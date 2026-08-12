@@ -3,7 +3,7 @@
 > Agent Pipeline Framework — 10 个 Skill，覆盖分析→规划→设计→生成→测试→审查→重构→文档→发布→编排。
 > Registry-driven + Evidence-based Knowledge Graph + Continuous Learning Loop。
 >
-> **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Skill Atlas**: [docs/skill-atlas.md](docs/skill-atlas.md) · **Trust**: 90/100
+> **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Architecture**: [docs/architecture.md](docs/architecture.md) · **Roadmap**: [docs/roadmap.md](docs/roadmap.md) · **Trust**: 90/100
 
 ## 当前版本：1.0.0
 

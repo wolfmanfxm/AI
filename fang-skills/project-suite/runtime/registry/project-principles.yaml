@@ -1,0 +1,75 @@
+# Project Principles v1.0（Constitution）
+#
+# 项目级不可随意改变的原则。从 Knowledge Vault 提取，
+# Planner/Architect/Reviewer 强制消费。
+# 与 Spec Kit Constitution 对应：guiding principles that all phases check against.
+
+version: "1.0.0"
+
+# 原则类型
+types:
+  form_standard:     # 表单规范
+    description: "所有信息填写功能必须使用的组件/模式"
+    enforcement: hard  # hard=违反则 BLOCK, soft=违反则 WARN
+  api_standard:      # API 规范
+    description: "所有 API 调用必须遵循的模式"
+    enforcement: hard
+  permission_model:  # 权限模型
+    description: "权限控制的实现方式"
+    enforcement: hard
+  type_safety:       # 类型安全
+    description: "TypeScript 使用规范"
+    enforcement: soft
+  naming_convention: # 命名规范
+    description: "文件/组件/函数命名规则"
+    enforcement: soft
+
+# 从 Knowledge Vault 自动提取的原则示例
+principles:
+  - id: principle.base-form
+    type: form_standard
+    statement: "所有信息填写功能必须使用 BaseForm 封装"
+    scope: project
+    source: knowledge-graph.yaml#pattern.form-wrapper
+    confidence: 0.96
+    enforcement: hard
+    evidence: ["331 files use FormWrapper"]
+
+  - id: principle.api-export-function
+    type: api_standard
+    statement: "所有 API 函数必须使用 export function 风格"
+    scope: project
+    source: knowledge-graph.yaml#convention.api-style
+    confidence: 0.92
+    enforcement: hard
+
+  - id: principle.typescript-strict
+    type: type_safety
+    statement: "TypeScript strict=true, 禁止 any 滥用"
+    scope: project
+    source: tsconfig.json
+    confidence: 0.98
+    enforcement: soft
+
+  - id: principle.permission-service
+    type: permission_model
+    statement: "所有权限必须经过 PermissionService"
+    scope: project
+    source: knowledge-graph.yaml#decision.permission
+    confidence: 0.88
+    enforcement: hard
+
+# 各 Skill 消费方式
+consumers:
+  planner:
+    use: "Plan 阶段: 每个 Task 检查是否违反 Project Principle → 违反则标注"
+    output: "PLAN.md #Decision: 标注受哪些 Principle 约束"
+  architect:
+    use: "Architecture 阶段: 每个 ADR 对照 Principle → 违反需提供理由"
+    output: "ARCHITECTURE.md: 每个 decision 标注 principle_compliance"
+  reviewer:
+    use: "Review 阶段: 代码是否遵循 Principle → 违反则标注 BLOCKER(硬)/WARNING(软)"
+    output: "REVIEW.md: principle_violations 独立章节"
+  generator:
+    use: "Generate 阶段: 生成代码前查询 Principle → 自动遵循"
+    output: "代码: 注释标注遵循的 Principle"

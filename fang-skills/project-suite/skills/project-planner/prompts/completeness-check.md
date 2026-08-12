@@ -3,18 +3,42 @@
 > 收到任务后第一步：多维度评分 → confidence → 决定 Interview 深度。
 > 简单任务不走重流程，复杂任务不遗漏关键信息。
 
+## Decision State：三态替代二元判断
+
+每个关键决策标注状态：
+
+| State | 含义 | 触发 |
+|-------|------|------|
+| **KNOWN** | 项目知识/Code Audit 已回答 | 自动填充，不询问 |
+| **ASSUMED** | 无明确证据但合理推断 | 标注 confidence，Interview 时优先确认 |
+| **NEEDS_CLARIFICATION** | 缺失 + 影响 high | Interview 时必问 |
+
+```yaml
+decisions:
+  - field: form_component
+    state: KNOWN
+    value: BaseForm
+    source: knowledge-graph.yaml#pattern.form-wrapper
+  - field: avatar_storage
+    state: ASSUMED
+    value: existing-upload-service
+    confidence: 0.72
+  - field: permission_model
+    state: NEEDS_CLARIFICATION
+    impact: high
+```
+
 ## 评分矩阵
 
-| 维度 | 已知 | 部分已知 | 未知 |
-|------|------|---------|------|
-| **goal** (目标明确?) | 1.0 | 0.5 | 0.2 |
-| **scope** (范围清晰?) | 1.0 | 0.5 | 0.2 |
-| **constraints** (约束已知?) | 1.0 | 0.5 | 0.2 |
-| **knowledge** (项目知识覆盖?) | 1.0 | 0.6 | 0.3 |
+| 维度 | KNOWN(1.0) | ASSUMED(0.6) | NEEDS_CLARIFICATION(0.2) |
+|------|-----------|-------------|-------------------------|
+| **goal** | 1.0 | 0.5 | 0.2 |
+| **scope** | 1.0 | 0.5 | 0.2 |
+| **constraints** | 1.0 | 0.5 | 0.2 |
+| **knowledge** | 1.0 | 0.6 | 0.3 |
 
 ```
-requirement_completeness = avg(goal, scope, constraints)
-knowledge_coverage = Context Resolver 返回的 knowledge 数量 / 预期数量
+requirement_completeness = Σ(state_score × weight) / Σ(weight)
 planning_confidence = (requirement_completeness × 0.6) + (knowledge_coverage × 0.4)
 ```
 

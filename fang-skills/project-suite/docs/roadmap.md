@@ -43,14 +43,10 @@
 - [ ] ~~Cross-skill Pipeline 自动执行~~ — 保持关键节点人工确认，后台任务自动化即可
 - [ ] ~~Tool Selection 自动匹配~~ — Skill 声明 capability，Registry 映射，不需要 AI 推理
 
-### 架构方向
+### v1.0.0 能力评估
 
-```
-当前:  Workflow Runtime（流程执行器）
-目标:  Knowledge Runtime（知识驱动决策）
-
-Skill 启动 → Context Resolver → "这个项目有哪些相关知识和历史经验？"
-  → Query API → 注入 curated knowledge
-  → 基于知识做决策（不只是执行流程）
-  → 产生新知识 → Evaluate → Promote → 下次可用
-```
+| 状态 | 能力 | 说明 |
+|------|------|------|
+| 🟢 | Skill Contract, Workflow Engine, Knowledge Object, Knowledge Resolver, Knowledge Promotion, Evidence/Verification, Confidence Gate, Checkpoint, Adapter Registry, Artifact Contract | 稳定，不继续堆 |
+| 🟡 | Adaptive Interview, Domain Model, Cross Artifact Analysis, Context Budget, Skill Routing, Pipeline Adaptivity, Suite Benchmark, Convergence | 适度打磨 |
+| 🔴 | AI Tool Intent Resolver, 自动 Tool Selection, Multi-Agent Runtime, Skill Marketplace, 复杂 Plugin Ecosystem, 更多 Skill, 更复杂 Pipeline DSL | 不做，ROI 低 |

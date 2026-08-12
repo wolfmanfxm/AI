@@ -118,6 +118,18 @@ EXIT     → GateTriggered (confidence 检查)
 ADVANCE  → PipelineAdvanced + 写入 [session snapshot](../../runtime/engine/session-snapshot.md)
            → 若 skill=analyzer + stage=delivery → trigger [background pipeline](../../runtime/pipeline/background.yaml)
            → 跨 Session Resume: 下次启动 → 读 snapshot → 从中断 Phase 继续
+
+## Context Budget
+
+每个 Profile 定义 `context_budget`（token 上限）。Engine 追踪 utilization：
+
+```
+utilization < 70%  → 正常执行
+utilization 70-90% → 压缩 context（精简 prompt，跳过非关键 reference）
+utilization > 90%  → split + checkpoint（写 snapshot，建议用户在新 session 继续）
+```
+
+→ [profiles.yaml](../../runtime/config/profiles.yaml)
 ```
 
 → [Event Bus](../../runtime/engine/event-bus.md) | [Event Schema](../../shared/schemas/event.schema.json)

@@ -1,0 +1,50 @@
+# Skill Surface Budget v1.0
+#
+# 控制不同任务复杂度下的 Skill 激活范围。
+# 简单任务不走重流程 — minimal profile 只激活 2 个 Skill。
+
+version: "1.0.0"
+
+profiles:
+  minimal:
+    description: "简单任务：改文案、调样式、修小bug"
+    skills: [project-generator, project-reviewer]
+    pipeline: [generator, reviewer]
+    context_budget: 6000
+    auto_advance: false
+    interview: never
+
+  standard:
+    description: "常规任务：新增页面、加功能"
+    skills: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer]
+    pipeline: [planner, architect, generator, tester, reviewer]
+    context_budget: 12000
+    auto_advance: false
+    interview: adaptive
+
+  full:
+    description: "复杂任务：新模块、架构变更、全链路"
+    skills: [all]
+    pipeline: [analyzer, planner, architect, generator, tester, reviewer, documenter, releaser]
+    context_budget: 20000
+    auto_advance: false
+    interview: deep
+
+  background:
+    description: "后台自动任务"
+    skills: [project-analyzer]
+    pipeline: [knowledge-scan, decay-check, graph-refresh, index-refresh, promotion-review]
+    context_budget: 8000
+    auto_advance: true
+    interview: never
+
+# Profile 选择逻辑
+selection:
+  by_complexity:
+    simple: minimal     # <50字 或 单文件改动
+    medium: standard    # 多文件 或 新页面
+    complex: full       # 新模块 或 架构变更
+  by_user_choice:
+    - "/project-planner --profile=minimal"
+    - "/pipeline --profile=standard"
+  default: standard
