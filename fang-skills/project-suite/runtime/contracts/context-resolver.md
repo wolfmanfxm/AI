@@ -40,6 +40,29 @@ Inject into Planner context → Planner 不需要 read 全部 .md
 | 列表/查询 | table, search, list |
 | 表单 | form, validation, input |
 
+## 三层 Context 模型
+
+Context Resolver 一次回答三个问题，返回三个维度的 context：
+
+| 层 | 来源 | 回答 | 类型 |
+|----|------|------|------|
+| **Long-term** | Knowledge Vault | 长期记住什么？ | 跨项目 Instinct/Playbook |
+| **Project semantic** | .project-knowledge + knowledge-graph.yaml | 应该怎么做？ | Patterns/Rules/Decisions |
+| **Structural** | graph.json + Graph Query | 代码怎么连接？ | callers/callees/impact |
+
+```
+Context Resolver
+  ├── Long-term  → Knowledge Vault（跨项目）
+  ├── Semantic   → knowledge-graph.yaml（项目语义）
+  └── Structural → graph.json（代码结构）
+```
+
+Structural 层通过 [Graph Query Protocol](graph-query.md) 获取：
+
+- `findConsumers(<目标>)` → 谁调用了它？影响范围
+- `findDependencies(<目标>)` → 它依赖什么？耦合度
+- `findImpacted([变更文件])` → 改动影响哪些节点？
+
 ## 注入格式
 
 Resolver 输出精简的 knowledge summary，而非完整 knowledge object：
@@ -49,7 +72,11 @@ Resolver 输出精简的 knowledge summary，而非完整 knowledge object：
 task: "新增登记个人信息"
 resolved_at: "2026-08-05T12:00:00Z"
 
-injected_knowledge:
+# 三层 context
+long_term_knowledge:
+  - { id: instinct.form-wrapper, statement: "Always use FormWrapper", scope: personal }
+
+semantic_knowledge:
   - id: pattern.form-wrapper
     type: pattern
     statement: "所有复杂表单使用 FormWrapper 封装"
@@ -77,8 +104,13 @@ injected_knowledge:
     confidence: 0.85
     score: 7.8
     why_relevant: "tag match: form, validation"
+
+structural_facts:
+  - { query: findConsumers(CustomerAPI), result: "被 12 个模块调用, 改动影响范围广" }
+  - { query: findDependencies(UserForm), result: "依赖 FormWrapper + docsStore + userAPI" }
+  - { query: findImpacted([customerId字段]), result: "3 个组件 + 2 个 API 受影响" }
 ```
 
 ## 集成
 
-Planner Discovery 阶段第一步：调用 Context Resolver → 注入 curated knowledge → 然后做现状探查。
+Planner Discovery 阶段第一步：调用 Context Resolver → 注入三层 context（long-term + semantic + structural）→ 然后做现状探查。
