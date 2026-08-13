@@ -160,3 +160,49 @@ Generator:
 以后:  同协议 → Neo4j / MCP graph tool / SQLite
        Skill 代码不变
 ```
+
+## Capability 分层 + Provider 抽象
+
+Graph 协议从"模块依赖图"升级为"图能力协议"。Skill 按 capability 查询，不关心底层 provider。
+
+### 能力分层
+
+```
+Graph Query Protocol（稳定协议）
+    │
+    ├── module.*          ← project-analyzer 提供（已实现）
+    │     module.list / module.dependencies / module.impact
+    │
+    └── symbol.*          ← 外部 Code Intelligence provider 提供（预留）
+          symbol.search / symbol.definition / symbol.references
+          call.*          ← callers / callees
+          reference.*     ← 引用
+          impact.*        ← 修改影响半径
+```
+
+### Provider 抽象
+
+`graph.json` 只声明 capabilities 元数据，不存储 symbol 数据：
+
+```json
+{
+  "schemaVersion": "1.1",
+  "capabilities": ["module", "file", "symbol", "call", "impact"],
+  "nodes": [...],
+  "edges": [...]
+}
+```
+
+- `module`/`file` → project-analyzer 生成（graph.json 里的 nodes/edges）
+- `symbol`/`call`/`impact` → 外部 Code Intelligence provider（如 CodeGraph）提供
+
+### 边界（ADR-002 正式记录）
+
+project-suite **不实现** symbol 级静态分析（AST/type resolution/call graph）。这些委托给外部 provider。
+
+| 层 | 谁提供 | 内容 |
+|----|--------|------|
+| Module Graph | project-analyzer | 模块依赖、循环依赖、跨层依赖 |
+| Symbol Graph | CodeGraph（外部） | symbols/calls/references/impact |
+
+`graph.json` 是 Module Graph 的 portable artifact，**不是** CodeGraph 数据库。两者概念分离。

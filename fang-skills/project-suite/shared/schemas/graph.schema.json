@@ -9,6 +9,14 @@
       "type": "string",
       "description": "graph.schema.json 的版本"
     },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["module", "file", "symbol", "call", "reference", "impact"]
+      },
+      "description": "本 graph 具备的查询能力。project-analyzer 只声明 module/file；symbol/call/reference/impact 由外部 Code Intelligence provider（如 CodeGraph）声明。仅元数据，不存储 symbol 数据。"
+    },
     "nodes": {
       "type": "array",
       "items": {
