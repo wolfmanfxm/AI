@@ -38,10 +38,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   produces=$(grep "^produces:" "$yaml" | sed 's/.*\[\(.*\)\].*/\1/' || echo "")
   if [ -z "$produces" ]; then
     yellow "  ⚠️  No produces declared"
-    ((WARN++))
+    WARN=$((WARN+1))
   else
     green "  ✅ produces: [$produces]"
-    ((PASS++))
+    PASS=$((PASS+1))
   fi
 
   # Drift 2: description mentions capabilities not in produces
@@ -49,11 +49,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # Check if description claims "生成代码" but produces doesn't include Code
   if echo "$desc" | grep -q "生成\|代码\|Code" && ! echo "$produces" | grep -q "Code\|RefactoredCode"; then
     yellow "  ⚠️  Description mentions code generation but produces ≠ [Code]"
-    ((DRIFT_COUNT++))
+    DRIFT_COUNT=$((DRIFT_COUNT+1))
   fi
   if echo "$desc" | grep -q "文档\|document" && ! echo "$produces" | grep -q "Documentation"; then
     yellow "  ⚠️  Description mentions documentation but produces ≠ [Documentation]"
-    ((DRIFT_COUNT++))
+    DRIFT_COUNT=$((DRIFT_COUNT+1))
   fi
 
   # Drift 3: prompt and reference links — do they resolve?
@@ -63,16 +63,16 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     # Resolve relative to skill dir
     abs_path="$skill_dir/$path"
     if [ ! -f "$abs_path" ]; then
-      ((dead_links++))
+      dead_links=$((dead_links+1))
     fi
   done
   if [ "$dead_links" -gt 0 ]; then
     yellow "  ⚠️  ${dead_links} dead link(s) in SKILL.md"
-    ((DRIFT_COUNT++))
-    ((WARN++))
+    DRIFT_COUNT=$((DRIFT_COUNT+1))
+    WARN=$((WARN+1))
   else
     green "  ✅ All SKILL.md links resolve"
-    ((PASS++))
+    PASS=$((PASS+1))
   fi
 
   # Drift 4: stages count — does it match the template expectations?
@@ -80,10 +80,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   min_stages=3; max_stages=7
   if [ "$stages" -ge "$min_stages" ] && [ "$stages" -le "$max_stages" ]; then
     green "  ✅ Stage count: ${stages} (${min_stages}-${max_stages})"
-    ((PASS++))
+    PASS=$((PASS+1))
   else
     yellow "  ⚠️  Stage count: ${stages} (expected ${min_stages}-${max_stages})"
-    ((WARN++))
+    WARN=$((WARN+1))
   fi
 
   # Drift 5: interface.outputs covered by produces?
@@ -91,10 +91,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # Just check that outputs > 0 if produces is non-empty
   if [ -n "$produces" ] && [ "$outputs" -gt 0 ]; then
     green "  ✅ interface.outputs: ${outputs} output(s) match produces"
-    ((PASS++))
+    PASS=$((PASS+1))
   elif [ -z "$produces" ]; then
     yellow "  ⚠️  Cannot verify outputs without produces"
-    ((WARN++))
+    WARN=$((WARN+1))
   fi
 
   echo ""
@@ -108,7 +108,7 @@ for ref in $adapter_refs; do
   domain=$(echo "$ref" | sed 's/@adapter://' | cut -d. -f1)
   if ! grep -q "$domain:" runtime/tool-adapters/adapter-registry.yaml 2>/dev/null; then
     echo "  ❌ Unregistered adapter: $ref"
-    ((adapter_mismatch++))
+    adapter_mismatch=$((adapter_mismatch+1))
   fi
 done
 if [ "$adapter_mismatch" -eq 0 ]; then

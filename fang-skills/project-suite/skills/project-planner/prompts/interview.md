@@ -85,17 +85,50 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 - 是否需要邮箱验证？（留给 Architect 决策）
 ```
 
-## Domain-Aware Questioning
+## Domain-Aware Questioning（活 Domain Model）
 
-Interview 查询 Glossary（Analyzer 已提取的领域术语）→ 用项目语言提问：
+Interview 不只是一次性提问，而是**读写项目 Domain Model**。
+
+### domain/vocabulary.yaml 结构
+
+`.project-knowledge/domain/vocabulary.yaml`（Analyzer 提取 + Interview 维护）：
+
+```yaml
+terms:
+  - id: customer
+    name: "客户"
+    definition: "已完成实名认证的用户"
+    kind: entity           # entity | value_object | workflow | role
+    relationships:
+      - { to: user, relation: "is_a_kind_of" }
+    status: confirmed      # candidate | confirmed | conflicting
+    source: interview      # analyzer | interview
+    confidence: 0.9
+```
+
+### Interview 三步读写
 
 ```
-Resolver: "项目有哪些领域术语？" → Materialization, Cascade, Lesson, Course
-Interview: 不再问 "什么是 Materialization？"
-          而是问 "Materialization cascade 是否包含子 Lesson？"
+1. 读：提问前查 domain/vocabulary.yaml → 已有定义不重问，用项目语言提问
+2. 查：发现假设与已有定义冲突 → 标 ⚠️ Domain conflict，追问澄清
+3. 写：确认新术语/关系 → 写入 vocabulary.yaml（status: confirmed）
+```
+
+### 冲突示例
+
+```
+Planner 假设 "Customer = 任意登记人"
+  ↓ 读 domain model
+发现: "Customer = 已完成实名认证的用户" (status: confirmed)
+  ↓
+⚠️ Domain conflict:
+  Existing:  Customer = 已完成实名认证的用户
+  Current:   Customer = 任意登记人
+  Need:      "这里的 Customer 指哪个？"
 ```
 
 → [Glossary Extractor](../project-analyzer/prompts/extractors/glossary.md)
+→ [Domain Model](../../../runtime/contracts/domain-model.md)
 
 ## Decision → Promotion 分流
 

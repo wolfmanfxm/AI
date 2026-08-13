@@ -16,7 +16,7 @@
 {{/if}}
 
 {{#if project_knowledge}}
-现有架构（从 .project-knowledge/architecture/ 提取）：
+现有架构（Context Resolver 已注入）：
 {{project_knowledge}}
 {{/if}}
 ```

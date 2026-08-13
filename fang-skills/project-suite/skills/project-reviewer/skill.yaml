@@ -3,6 +3,11 @@ version: "1.3.0"
 mode: Production
 owner: project-suite
 priority: 55
+category: verification
+complexity: { min: low, max: high }
+decision_order: 6
+cost: medium
+parallel: false
 requires: []
 produces: [Review]
 consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
@@ -34,7 +39,7 @@ interface:
     - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
   quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: none, safe_to_retry: true, retry_max: 2 }
-  stages: [discovery, execution, validation, output]
+  stages: [discovery, execution, validation, delivery]
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 2 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
   stage_config:

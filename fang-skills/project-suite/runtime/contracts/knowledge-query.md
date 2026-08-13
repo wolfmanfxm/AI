@@ -2,6 +2,26 @@
 
 > 统一知识查询接口。Skill 通过结构化查询获取 Knowledge Object，而非读取 .md 文件。
 
+## Knowledge Access 边界（两类访问）
+
+Skill 获取数据分两类，边界清晰，避免 "Skill A → query, Skill B → md, Skill C → graph" 的失控：
+
+| 类别 | 访问方式 | 例子 |
+|------|---------|------|
+| **Knowledge**（项目知识/长期积累） | **必须走 Query API** | pattern / convention / decision / instinct / component / glossary |
+| **Task Artifact**（任务产物/一次性） | **直接读文件** | PLAN.md / ARCHITECTURE.md / 目标源码 / REVIEW.md |
+
+```
+Knowledge（需要什么知识？）
+  → knowledge.query
+  → Context Package（预消化，注入而非读文件）
+
+Task Artifact（本次任务的具体输入）
+  → @adapter:filesystem.read
+```
+
+**规则**：Knowledge 不直接读 .md；Artifact 不通过 Query。这条边界由 Context Resolver 统一守护——所有知识消费必经它。
+
 ## 查询语法
 
 ```

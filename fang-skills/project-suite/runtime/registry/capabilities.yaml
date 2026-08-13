@@ -1,7 +1,8 @@
 # Capability Registry
 #
-# 统一的能力注册中心。每个 skill 声明 produces（产出什么）和 consumes（依赖什么）。
-# Scheduler 读取此文件构建 DAG，自动识别并行分支。
+# ⚠️ 增量注册：只存 skill.yaml 没有的调度字段（cost/parallel/requires_*）。
+#    produces/consumes/priority 以 skills/*/skill.yaml 为准（此文件是快照，会漂移）。
+#    Scheduler 读取此文件构建 DAG，自动识别并行分支。
 
 version: "1.3.0"
 generated: 2026-08-04

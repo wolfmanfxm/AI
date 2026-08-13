@@ -8,7 +8,7 @@
 
 在写代码之前，完成以下步骤：
 
-1. **读 components/catalog.md** — 确认没有现成组件可用
+1. **`@adapter:knowledge.query --type component --scope project`** — 确认没有现成组件可用
 2. **读 patterns/vue.md** — 确认组件写法（`<script setup>` vs Options API）
 3. **读 patterns/table.md 或 form.md 等** — 确认业务模式
 4. **搜索类似组件** — `grep` 项目中功能相似的组件，作为风格参考
@@ -23,7 +23,7 @@
 组件类型：{{component_type}}（弹窗/表格/表单/卡片/布局）
 {{/if}}
 
-项目规范（从 .project-knowledge/ 提取）：
+项目规范（Context Resolver 已注入）：
 {{project_patterns}}
 
 {{#if reference_component}}

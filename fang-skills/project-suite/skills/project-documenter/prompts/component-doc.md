@@ -7,7 +7,7 @@
 ## 前置
 
 1. 读组件源码（`.vue` 文件）
-2. 读 `components/catalog.md`（若存在）确认现有文档风格
+2. `@adapter:knowledge.query --type component --scope project` 确认现有组件和文档风格
 3. 读 1 份已有组件文档（若存在）
 
 ## 输入

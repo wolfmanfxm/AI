@@ -28,10 +28,10 @@
 | `decisions/architecture-decisions.md` `decisions/index.md` | `project` | 项目级决策标准 |
 | `reports/latest.md` | `project` | 项目变更历史 |
 | `rules/` | `project` | 视情况晋升 personal |
-| `experience/` | `personal` | 推荐晋升：经验天然跨项目 |
-| `playbooks/` | `personal` | 推荐晋升：Playbook 天然跨项目 |
-| Best Practices（通用最佳实践） | `personal` | 推荐晋升 |
-| Framework-agnostic Principles | `personal` | 推荐晋升 |
+| `experience/` | `personal`（review.status=pending） | 候选：由 Promotion Reviewer 语义判断（跨项目? framework-independent? evidence≥N? 复用?）→ Promote 才真进 personal |
+| `playbooks/` | `personal`（review.status=pending） | 候选：同上 |
+| Best Practices（通用最佳实践） | `personal`（review.status=pending） | 候选：同上 |
+| Framework-agnostic Principles | `personal`（review.status=pending） | 候选：同上 |
 
 ### 与同步矩阵对照
 

@@ -16,6 +16,7 @@
 | 7 | [refactorer](../skills/project-refactorer/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | RefactoredCode | Code, KnowledgeBase, Test, Review | reviewer |
 | 8 | [documenter](../skills/project-documenter/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Documentation | Code, Review, KnowledgeBase | reviewer |
 | 9 | [releaser](../skills/project-releaser/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Release | Documentation, Review, Test | documenter |
+| 10 | [orchestrator](../skills/pipeline-orchestrator/SKILL.md) | discovery, orchestrate, validation, delivery | discovery, execution, validation, delivery | PipelineExecution | KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release | releaser |
 
 ## Stage × Skill Matrix
 
@@ -32,9 +33,9 @@
 
 | Template | Used By | Load Count |
 |----------|---------|------------|
-| **discovery** | All 9 skills | 9 |
-| **execution** | All 9 skills | 9 |
-| **validation** | All 9 skills | 9 |
+| **discovery** | All 10 skills | 10 |
+| **execution** | 9 skills（orchestrator 用 orchestrate） | 9 |
+| **validation** | All 10 skills | 10 |
 | **delivery** | analyzer, planner, architect, reviewer, refactorer, documenter, releaser | 7 |
 | **code-audit** | planner, architect | 2 |
 | **graph-analysis** | architect | 1 |
@@ -71,7 +72,7 @@ User Input ──→ architect ──→ Architecture (ADR)
 
 ## Quality Gates
 
-| Gate | 9/9? | Note |
+| Gate | 10/10? | Note |
 |------|------|------|
 | G1: SKILL.md ≤120 lines | ✅ | 58-66 |
 | G2: skill.yaml 完整 | ✅ | 含 interface + stages + recovery + rollback |
@@ -79,24 +80,24 @@ User Input ──→ architect ──→ Architecture (ADR)
 | G4: CHECKPOINT ≥1 | ✅ | 每 stage prompts 含 CHECKPOINT |
 | G5: 职责边界表 | ✅ | ✅/❌ 表在 boundary.md |
 | G6: description 含触发词 | ✅ | 全部含触发词+产出 |
-| G7: capabilities.yaml 注册 | ✅ | 9/9 已注册 |
-| G8: 完成后下一步 | ✅ | 9/9 |
-| G9: failure-handling.md | ✅ | 9/9 |
+| G7: capabilities.yaml 注册 | ✅ | 10/10 已注册 |
+| G8: 完成后下一步 | ✅ | 10/10 |
+| G9: failure-handling.md | ✅ | 10/10 |
 | G10: Stage prompts | ✅ | 37 个文件 |
 | G11: @engine 声明 | ✅ | 每 stage prompt 含 @engine |
-| G12: interface.rollback | ✅ | 9/9 (Wave A 补齐) |
+| G12: interface.rollback | ✅ | 10/10 (Wave A 补齐) |
 
 ## Governed Readiness
 
 | Requirement | Status |
 |-------------|--------|
 | owner | ✅ `project-suite` |
-| review cadence | ✅ 90-day, last_reviewed 已写入 9/9 skill.yaml |
-| input_files (file-backed fixture) | ✅ 9/9 skills `interface.inputs[].fixture` |
+| review cadence | ✅ 90-day, last_reviewed 已写入 10/10 skill.yaml |
+| input_files (file-backed fixture) | ✅ 10/10 skills `interface.inputs[].fixture` |
 | output contract | ✅ skill.yaml interface.outputs |
-| rollback boundary | ✅ skill.yaml interface.rollback (9/9) |
-| trust report | ✅ `reports/trust-report.md` (88/100) |
+| rollback boundary | ✅ skill.yaml interface.rollback (10/10) |
+| trust report | ✅ `reports/trust-report.md` (90/100) |
 | output_quality_scorecard | ✅ `reports/output-quality-scorecard.md` |
 | telemetry | ✅ `shared/scripts/collect-metrics.sh` (local aggregation) |
-| cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 9/9 `interface.reliability` |
+| cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 10/10 `interface.reliability` |
 | drift detection | ⚠️ `missing evidence` |

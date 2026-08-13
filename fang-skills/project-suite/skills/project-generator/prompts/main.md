@@ -14,8 +14,8 @@
 ## 前置要求
 
 启动前必须：
-1. 读 `.project-knowledge/index.md`（若存在）定位相关模式文档
-2. 按 SKILL.md 中的读取策略加载对应文档
+1. `@adapter:knowledge.query --type pattern,component,convention --scope project` 定位相关模式
+2. 按 SKILL.md 中的读取策略加载对应知识（不读 .md，走 Query API）
 3. 搜索项目中类似功能代码作为风格参考
 
 ## 要求

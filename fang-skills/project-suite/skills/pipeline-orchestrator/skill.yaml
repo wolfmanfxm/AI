@@ -3,6 +3,11 @@ version: "1.0.0"
 mode: Production
 owner: project-suite
 priority: 5
+category: orchestration
+complexity: { min: high, max: high }
+decision_order: 0
+cost: low
+parallel: false
 requires: []
 produces: [PipelineExecution]
 consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]

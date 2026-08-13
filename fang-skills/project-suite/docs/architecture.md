@@ -91,13 +91,13 @@
 | **可分类** | Categories（analysis/planning/creation/verification/evolution/orchestration） |
 | **可验证** | Skill Validator（G1-G17 conformance + drift + trigger-eval + artifact-consistency） |
 | **可评估** | darwin-skill 9-dim rubric（avg 84.2）+ dim8 full_test（3/10） |
-| **可复用** | Pipeline Orchestrator（5 pipeline modes + auto-advance + per-skill checkpoint） |
+| **可复用** | Pipeline Orchestrator（5 pipeline modes + per-skill checkpoint；auto-advance 仅 background profile） |
 
 ## 关键数据
 
 ```
 Skills: 10 | Gates: 0/0 | Drift: 40/40 | Trust: 90/100
-Verify: 9/10 | @adapter: 19 refs | Skill IR: 10/10
+Verify: 9/10 | @adapter: 27 refs | Skill IR: 10/10
 Context Resolver: 10/10 | Rationalizations: 10/10
 Decision Record: 3/3 | Completeness Check: ✅
 Session Snapshot: 3/3 (analyzer/planner/generator)

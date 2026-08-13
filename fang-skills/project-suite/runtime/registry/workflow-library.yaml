@@ -10,29 +10,29 @@ workflows:
   # ═══ 单 Skill Workflow 模式 ═══
 
   standard:
-    description: 标准 4 阶段 Workflow — 适用于 analyzer/documenter/reviewer/releaser
+    description: 标准 4 阶段 Workflow — 适用于 project-analyzer/project-documenter/project-reviewer/project-releaser
     stages: [discovery, execution, validation, delivery]
-    used_by: [analyzer, reviewer, refactorer, documenter, releaser]
+    used_by: [project-analyzer, project-reviewer, project-refactorer, project-documenter, project-releaser]
 
   generative:
-    description: 3 阶段生成型 Workflow — 适用于 generator
+    description: 3 阶段生成型 Workflow — 适用于 project-generator
     stages: [discovery, execution, validation]
-    used_by: [generator]
+    used_by: [project-generator]
 
   planning:
-    description: 5 阶段规划型 Workflow — 适用于 planner
+    description: 5 阶段规划型 Workflow — 适用于 project-planner
     stages: [discovery, code-audit, execution, validation, delivery]
-    used_by: [planner]
+    used_by: [project-planner]
 
   design:
-    description: 6 阶段设计型 Workflow — 适用于 architect
+    description: 6 阶段设计型 Workflow — 适用于 project-architect
     stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
-    used_by: [architect]
+    used_by: [project-architect]
 
   test:
-    description: 3 阶段测试型 Workflow — 适用于 tester
+    description: 3 阶段测试型 Workflow — 适用于 project-tester
     stages: [discovery, execution, validation]
-    used_by: [tester]
+    used_by: [project-tester]
 
   orchestration:
     description: 4 阶段编排型 Workflow — pipeline-orchestrator 专用
@@ -43,35 +43,35 @@ workflows:
 
   full-sdlc:
     description: 全生命周期 — 分析→规划→设计→生成→测试→审查→文档→发布
-    pipeline: [analyzer, planner, architect, generator, tester, reviewer, documenter, releaser]
+    pipeline: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-documenter, project-releaser]
     parallel_groups:
-      wave_1: [analyzer]
-      wave_2: [planner]
-      wave_3: [architect]
-      wave_4: [generator]
-      wave_5: [tester]
-      wave_6: [reviewer]
-      wave_7: [refactorer, documenter]
-      wave_8: [releaser]
+      wave_1: [project-analyzer]
+      wave_2: [project-planner]
+      wave_3: [project-architect]
+      wave_4: [project-generator]
+      wave_5: [project-tester]
+      wave_6: [project-reviewer]
+      wave_7: [project-refactorer, project-documenter]
+      wave_8: [project-releaser]
 
   quick-change:
     description: 轻量改动 — 生成→审查
-    pipeline: [generator, reviewer]
+    pipeline: [project-generator, project-reviewer]
     parallel_groups:
-      wave_1: [generator]
-      wave_2: [reviewer]
+      wave_1: [project-generator]
+      wave_2: [project-reviewer]
 
   analyze-plan-build:
     description: 新功能开发 — 分析→规划→设计→生成→审查
-    pipeline: [analyzer, planner, architect, generator, reviewer]
+    pipeline: [project-analyzer, project-planner, project-architect, project-generator, project-reviewer]
 
   refactor-cycle:
     description: 重构循环 — 审查→重构→测试→审查
-    pipeline: [reviewer, refactorer, tester, reviewer]
+    pipeline: [project-reviewer, project-refactorer, project-tester, project-reviewer]
 
   knowledge-refresh:
     description: 知识刷新 — 分析→文档
-    pipeline: [analyzer, documenter]
+    pipeline: [project-analyzer, project-documenter]
 
 # Workflow 引用方式
 # Skill 可在 skill.yaml 中声明:

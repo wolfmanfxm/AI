@@ -9,7 +9,7 @@
 1. **读 architecture/overview.md** — 确认路由和目录结构
 2. **读 patterns/table.md** — 确认表格页面模式
 3. **读 patterns/form.md** — 确认表单页面模式
-4. **读 components/catalog.md** — 确认可复用的项目组件
+4. **`@adapter:knowledge.query --type component --scope project`** — 确认可复用的项目组件
 5. **搜索类似页面** — `grep` 项目中功能相似的页面作为参考
 
 ## 输入
@@ -25,7 +25,7 @@
 {{PLAN}}
 {{/if}}
 
-项目页面模式（从 .project-knowledge/patterns/ 提取）：
+项目页面模式（Context Resolver 已注入）：
 {{page_patterns}}
 ```
 

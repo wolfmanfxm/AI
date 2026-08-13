@@ -5,7 +5,7 @@
 ## Actions
 
 0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：从用户需求提取 tags → 查询 `knowledge-graph.yaml` → 注入相关 patterns/components/conventions
-1. 读项目知识库：`context.json` → `context-package.json`（Planner 产出）→ `components/catalog.md`
+1. 结构化查询知识（不读 .md）：`@adapter:knowledge.query --type component,pattern,api --scope project`
 2. **Graph 查询**（不搜索代码库）：
    - `findNode("component", <目标>)` → 已存在 → `[REUSE]`，不生成
    - `findNode("api", <目标>)` → 已存在 → 直接 import，不复创建

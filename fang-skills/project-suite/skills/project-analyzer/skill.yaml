@@ -3,6 +3,11 @@ version: "1.3.1"
 mode: Production
 owner: project-suite
 priority: 10
+category: analysis
+complexity: { min: medium, max: high }
+decision_order: 1
+cost: high
+parallel: false
 requires: [general-purpose agent]
 produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
 consumes: []

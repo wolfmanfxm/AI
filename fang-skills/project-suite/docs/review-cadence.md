@@ -6,7 +6,7 @@
 
 | 触发条件 | 审查范围 | 审查者 |
 |----------|---------|--------|
-| **SUITE_SPEC 版本 bump** | 全部 9 个 Skill | Dispatcher（人）+ Reviewer Agent |
+| **SUITE_SPEC 版本 bump** | 全部 10 个 Skill | Dispatcher（人）+ Reviewer Agent |
 | **每 90 天** | 单个 Skill（按 `last_reviewed` 排序） | Reviewer Agent |
 | **Skill 自身版本 bump** | 该 Skill | Reviewer Agent |
 | **新增 Skill** | 新 Skill | Dispatcher + 全部 Gate 检查 |

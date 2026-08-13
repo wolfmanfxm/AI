@@ -3,6 +3,11 @@ version: "1.3.0"
 mode: Production
 owner: project-suite
 priority: 65
+category: creation
+complexity: { min: low, max: medium }
+decision_order: 8
+cost: medium
+parallel: true
 requires: []
 produces: [Documentation]
 consumes: [Code, Review, KnowledgeBase, Context]
@@ -32,7 +37,7 @@ interface:
     - { condition: JSDoc注释缺失或不完整, severity: DEGRADED, recovery: 从类型推断,标注[推断] }
   quality_gate: { min_confidence_for_pass: 80, requires_review_below: 60, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
-  stages: [discovery, execution, validation, output]
+  stages: [discovery, execution, validation, delivery]
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
   stage_config:

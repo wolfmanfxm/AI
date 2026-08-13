@@ -3,6 +3,11 @@ version: "1.3.0"
 mode: Production
 owner: project-suite
 priority: 40
+category: creation
+complexity: { min: low, max: high }
+decision_order: 4
+cost: high
+parallel: true
 requires: []
 produces: [Code]
 consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]

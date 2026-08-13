@@ -58,7 +58,7 @@ Before: XX → After: XX (Δ: ±X)
 
 | Trigger | Action |
 |---------|--------|
-| SUITE_SPEC bump | 全量审查（9 skills） |
+| SUITE_SPEC bump | 全量审查（10 skills） |
 | Skill version bump | 单 Skill 审查 |
 | G17 过期警告 | 单 Skill 审查 |
 | 用户请求 `/review <skill>` | 单 Skill 审查 |

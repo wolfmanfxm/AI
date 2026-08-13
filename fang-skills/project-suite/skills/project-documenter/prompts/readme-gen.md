@@ -9,7 +9,7 @@
 1. 读 `package.json` — 项目名、描述、脚本、依赖
 2. 读项目目录结构 — `src/`、`workspace/`、`public/` 等
 3. 读已有 README（若存在）— 避免覆盖手写内容
-4. 读 `.project-knowledge/architecture/overview.md`（若存在）
+4. `@adapter:knowledge.query --type module,component --scope project` 获取架构概览
 
 ## 输入
 

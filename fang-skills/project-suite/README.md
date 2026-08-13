@@ -10,7 +10,7 @@
 ```
 Knowledge Engine     — Object + Context Resolver + Promotion Reviewer + Decay
 Unified Runtime      — Tool Adapter(9/10) + Event Bus + Background Pipeline
-Reasoning Engine     — Query API + Orchestrator v2.0 (auto-advance + Checkpoint)
+Reasoning Engine     — Query API + Orchestrator v2.0 (per-skill Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
 Organization Layer   — Task→Project→Organization→Personal 四层
 ```
@@ -45,7 +45,7 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 
 | # | Skill | 职责 | 关键能力 |
 |---|-------|------|---------|
-| 1 | **analyzer** | 10 Extractor → 7-Phase → Evidence-based Knowledge Graph | Candidate→Verify→Instinct |
+| 1 | **analyzer** | 10 Extractor → 8-Phase → Evidence-based Knowledge Graph | Candidate→Verify→Instinct |
 | 2 | **planner** | 模糊需求 → 9 模块执行契约 | 现状探查 + Context Package |
 | 3 | **architect** | 技术选型 + 模块设计 + API 契约 | ADR + 对比矩阵 + Graph 分析 |
 | 4 | **generator** | 项目知识 → 生产级代码 | Pattern 复用 + Graph 查询 |

@@ -9,6 +9,23 @@
 
 ---
 
+## 0. 权威层级（单一 Source of Truth）
+
+避免多头权威。每个字段只有一个手工维护的源：
+
+| 层级 | 文件 | 定位 | 维护方式 |
+|------|------|------|---------|
+| **单一权威** | `skills/*/skill.yaml` | produces/consumes/stages/confidence/stability/workflow | 手工，唯一源 |
+| **增量注册** | `runtime/registry/capabilities.yaml` | cost/parallel/requires_*（skill.yaml 没有的调度字段） | 手工，只存增量 |
+| **增量注册** | `runtime/registry/skill-catalog.yaml` | category/complexity/decision_order（编排元数据） | 手工，只存增量 |
+| **派生（勿手改）** | `skills/*/skill-ir.yaml` | 从 skill.yaml 生成 | `generate-skill-ir.sh` |
+| **派生（勿手改）** | `suite-manifest.yaml` 的 skills 段 | 聚合快照，会漂移 | 以 skill.yaml 为准 |
+| **协议定义** | `SUITE_SPEC.md` + `stage-library.yaml` + `workflow-library.yaml` | 规范与模式（非 Skill 数据） | 手工 |
+
+**规则**：`produces/consumes/stages/priority/confidence` 以 `skill.yaml` 为准。任何派生文件的这些字段与 skill.yaml 不一致时，以 skill.yaml 为准。
+
+---
+
 ## 1. 目录结构契约
 
 每个 skill 必须包含以下目录和文件：
@@ -213,7 +230,7 @@ check_suite_compliance()
   → 输出 PASS/WARN/FAIL + 修复建议
 ```
 
-触发词评测（`shared/scripts/trigger-eval.py`）：
+触发词评测（`shared/scripts/trigger-eval.mjs`）：
 
 ```
 trigger_eval()

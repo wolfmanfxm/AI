@@ -1,7 +1,8 @@
 # Skill Catalog v1.0
 #
-# 结构化 Skill 目录。Runtime 据此回答"这个任务应该使用哪个 Skill？"
-# 比 capability-routing.yaml 多：category、complexity、use_cases、decision_order。
+# ⚠️ 增量注册：只存 skill.yaml 没有的编排元数据（category/complexity/decision_order）。
+#    intent/capabilities 是快照，以 skills/*/skill.yaml 的 triggers/interface 为准。
+#    Runtime 据此回答"这个任务应该使用哪个 Skill？"
 
 version: "1.0.0"
 

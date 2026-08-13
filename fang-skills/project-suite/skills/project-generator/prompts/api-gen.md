@@ -21,7 +21,7 @@
 {{api_spec}}
 {{/if}}
 
-项目 API 规范（从 .project-knowledge/api/ 提取）：
+项目 API 规范（Context Resolver 已注入）：
 {{api_patterns}}
 ```
 

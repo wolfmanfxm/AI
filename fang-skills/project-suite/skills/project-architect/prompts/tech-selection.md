@@ -16,7 +16,7 @@
 {{/if}}
 
 {{#if project_knowledge}}
-现有技术栈（从 .project-knowledge/ 提取）：
+现有技术栈（Context Resolver 已注入）：
 {{project_knowledge}}
 {{/if}}
 ```

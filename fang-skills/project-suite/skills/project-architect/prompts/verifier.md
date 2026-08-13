@@ -13,14 +13,16 @@
 | V5 | 方案自洽 | 技术选型、模块设计、API 间无矛盾 | 🟡 标注矛盾 |
 | V6 | 分差有理 | 对比矩阵分差 <10% 时有充分说明 | 🟡 标注风险 |
 | V7 | Graph 一致 | 设计引用的模块/API 在 graph.json 中存在 | 修正引用 |
+| V8 | Domain 一致 | 设计引入的术语与 `.project-knowledge/domain/vocabulary.yaml` 的 confirmed 术语一致 | ⚠️ Domain conflict：现有定义 ≠ 新假设 → 阻断，追问澄清 |
 
 ## 判定
 
 | 条件 | 判定 |
 |------|------|
-| V1-V7 全部通过 | ✅ Accepted |
+| V1-V8 全部通过 | ✅ Accepted |
 | V1 失败(ADR 不完整) | ❌ Rejected |
 | V5 失败(方案自相矛盾) | ❌ Rejected |
+| V8 失败(domain 冲突) | ❌ Rejected — 与 confirmed domain 术语冲突，需澄清 |
 | V3-V7 部分失败 | 🟡 Accepted + adjusted confidence |
 
 ## Evidence Format

@@ -3,6 +3,11 @@ version: "1.3.0"
 mode: Production
 owner: project-suite
 priority: 60
+category: evolution
+complexity: { min: medium, max: high }
+decision_order: 7
+cost: medium
+parallel: false
 requires: [existing tests]
 produces: [RefactoredCode]
 consumes: [Code, KnowledgeBase, Test, Review]
@@ -33,7 +38,7 @@ interface:
     - { condition: 重构后测试变红, severity: BLOCKER, recovery: git revert,记录REFACTOR.md失败原因 }
   quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
-  stages: [discovery, execution, validation, output]
+  stages: [discovery, execution, validation, delivery]
   recovery: { method: git_revert, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
   stage_config:

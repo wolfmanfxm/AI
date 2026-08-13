@@ -62,6 +62,42 @@ if [ -f "$KNOWLEDGE_DIR/../runtime/registry/project-principles.yaml" ] 2>/dev/nu
 fi
 
 echo "" >> "$REPORT"
+echo "## 5. ID Traceability（Decision-traceable）" >> "$REPORT"
+echo "" >> "$REPORT"
+
+# 5a. 提取 PLAN 中的 Task ID 和它们 satisfies 的 Requirement ID
+if [ -f "$KNOWLEDGE_DIR/proposals/PLAN-"*.md ] 2>/dev/null; then
+  orphan_tasks=0
+  # 提取所有 satisfies: R-xxx 的引用，和所有定义的 R-xxx
+  defined_reqs=$(grep -oE "R-[0-9]{3}" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | sort -u || true)
+  referenced_reqs=$(grep -oE "satisfies: R-[0-9]{3}" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | grep -oE "R-[0-9]{3}" | sort -u || true)
+
+  for req in $referenced_reqs; do
+    if ! echo "$defined_reqs" | grep -q "$req"; then
+      echo "- ⚠️ Task references $req but it's not defined as a Requirement" >> "$REPORT"
+      ((orphan_tasks++))
+      ((ISSUES++))
+    fi
+  done
+
+  # 提取所有 Task ID 和 AC 引用的 Task ID
+  defined_tasks=$(grep -oE "T-[0-9]{3}" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | sort -u || true)
+  referenced_tasks=$(grep -oE "verifies: T-[0-9]{3}" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | grep -oE "T-[0-9]{3}" | sort -u || true)
+
+  for task in $referenced_tasks; do
+    if ! echo "$defined_tasks" | grep -q "$task"; then
+      echo "- ⚠️ AC references $task but it's not defined as a Task" >> "$REPORT"
+      ((orphan_tasks++))
+      ((ISSUES++))
+    fi
+  done
+
+  [ "$orphan_tasks" -eq 0 ] && echo "✅ All ID references resolve（无孤立 ID）" >> "$REPORT"
+else
+  echo "ℹ️  No PLAN found — ID traceability skipped" >> "$REPORT"
+fi
+
+echo "" >> "$REPORT"
 echo "## Summary" >> "$REPORT"
 echo "| Check | Status |" >> "$REPORT"
 echo "|-------|--------|" >> "$REPORT"

@@ -3,8 +3,13 @@
 # project-suite 统一治理清单。单文件可消费：所有 Skill + 能力 + 依赖 + 质量。
 # 从此文件可重建 Skill Atlas、生成 DAG、验证兼容性、评估 Governed 就绪度。
 #
-# 来源: SUITE_SPEC + skill-atlas + capabilities.yaml + trust-report + 9 skill.yaml
-# 权威: 此文件 > 各子文件 (子文件由此文件派生的缓存)
+# ⚠️ 权威层级（避免多头权威）：
+#   唯一 source of truth = skills/*/skill.yaml（手工维护 produces/consumes/stages/confidence）
+#   本文件的 skills 段是聚合快照（派生），会漂移，勿手改，以 skill.yaml 为准
+#   增量注册（skill.yaml 没有的调度/编排字段）= capabilities.yaml + skill-catalog.yaml
+#   派生（自动生成）= skills/*/skill-ir.yaml（generate-skill-ir.sh）
+#
+# 来源: SUITE_SPEC + skill-atlas + capabilities.yaml + trust-report + skills/*/skill.yaml
 
 suite:
   name: project-suite

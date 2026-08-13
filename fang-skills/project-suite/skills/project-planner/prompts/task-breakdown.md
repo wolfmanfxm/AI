@@ -10,7 +10,7 @@
 {{user_input}}
 
 {{#if project_knowledge}}
-项目上下文（从 .project-knowledge/ 提取）：
+项目上下文（Context Resolver 已注入）：
 {{project_knowledge}}
 {{/if}}
 
@@ -77,7 +77,7 @@ confidence = 100
 
 **核心问题：** 项目现状是什么？有哪些技术/业务约束？
 
-- 引用 `.project-knowledge/architecture/` 了解现有架构
+- `@adapter:knowledge.query --type module,decision --scope project` 了解现有架构
 - 引用 `.project-knowledge/rules/` 了解编码约束
 - 标注信息缺口（不确定的事 + 错了的代价）
 
@@ -211,7 +211,7 @@ B 完全独立？                 → 无依赖
 # Context
 
 ## 项目现状
-- **架构:** {从 .project-knowledge/architecture/ 引用}
+- **架构:** {Context Resolver 注入的架构}
 - **技术栈:** {从 context.json 或 .project-knowledge/ 提取}
 - **相关模块:** {已有相关代码/路由/API}
 
@@ -239,7 +239,7 @@ B 完全独立？                 → 无依赖
 ## 已有模式
 | 模式 | 来源 | 应用于 |
 |------|------|--------|
-| {name} | .project-knowledge/patterns/{file} | T{N} |
+| {name} | knowledge-graph.yaml 中的 pattern 节点 | T{N} |
 
 ## 已有 API
 | 模块 | 路径 | 已有端点 |

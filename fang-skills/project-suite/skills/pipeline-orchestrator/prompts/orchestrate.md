@@ -1,11 +1,11 @@
 # Orchestrate — Pipeline Orchestrator v2.0
 
 > @engine: execution
-> v2.0: Auto-advance + per-skill Checkpoint gate。Runtime 自动调度，每步等用户确认。
+> v2.0: per-skill Checkpoint gate。auto_advance 是引擎能力（capability），默认 profile 不启用——每步等用户确认。
 
 ## Actions
 
-按 pipeline 定义的 DAG 顺序，自动推进 + 每步 Checkpoint：
+按 pipeline 定义的 DAG 顺序，逐 Skill 执行 + 每步 Checkpoint：
 
 ```
 for each skill in pipeline:
@@ -15,7 +15,6 @@ for each skill in pipeline:
 
   2. EXECUTE: 触发 Skill
      - 提示: "下一步: /project-<skill> — <description>"
-     - ⚡ Auto-advance: 若该 Skill 标记 auto_advance=true，跳过等待，直接进入执行
 
   3. CHECKPOINT: 每 Skill 完成后暂停
      - 展示 Summary: <skill> 完成 | confidence: XX% | 产出: <files>
@@ -29,19 +28,19 @@ for each skill in pipeline:
      - 读 pipeline-state.json → 从第一个 status=pending 的 Skill 继续
 ```
 
-### Per-Skill Gate
+### Per-Skill Gate（foreground 默认每步 Checkpoint）
 
-| Skill | Auto-advance? | Checkpoint 展示 |
-|-------|--------------|----------------|
-| analyzer | No | knowledge-graph.yaml + context.json 就绪 |
-| planner | No | PLAN.md 摘要（9模块+估时+风险） |
-| architect | No | ARCHITECTURE.md 摘要（决策数+模块图） |
-| generator | No | 生成文件清单 + Verify 结果 |
-| tester | No | TEST-REPORT.md 摘要（覆盖率+失败分析） |
-| reviewer | No | REVIEW.md 摘要（BLOCKER/HIGH/MEDIUM/LOW） |
-| refactorer | No | REFACTOR.md 摘要（Before→After 指标） |
-| documenter | No | 文档文件清单 |
-| releaser | No | 版本号 + Changelog 摘要 |
+| Skill | Checkpoint 展示 |
+|-------|----------------|
+| analyzer | knowledge-graph.yaml + context.json 就绪 |
+| planner | PLAN.md 摘要（9模块+估时+风险） |
+| architect | ARCHITECTURE.md 摘要（决策数+模块图） |
+| generator | 生成文件清单 + Verify 结果 |
+| tester | TEST-REPORT.md 摘要（覆盖率+失败分析） |
+| reviewer | REVIEW.md 摘要（BLOCKER/HIGH/MEDIUM/LOW） |
+| refactorer | REFACTOR.md 摘要（Before→After 指标） |
+| documenter | 文档文件清单 |
+| releaser | 版本号 + Changelog 摘要 |
 
 ### Background Tasks（自动，无 Checkpoint）
 

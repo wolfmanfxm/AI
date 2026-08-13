@@ -31,7 +31,10 @@
 
 ### 做
 
-- [ ] Knowledge Query 成为所有 Skill 的唯一数据入口（消除残留 .md 直接读取）
+- [x] Knowledge Query 成为所有 Skill 的唯一数据入口（消除残留 .md 直接读取）
+- [ ] Domain Model → 全 Suite：Analyzer(candidate) → Planner(confirm) → Architect(validate) → Generator(follow) → Reviewer(detect drift)，形成 Domain-aware SDLC
+- [ ] Benchmark 套件：simple/medium/complex/long-task 四类，20 个真实任务对比 native Claude Code vs project-suite，测 Planning Accuracy/Requirement Coverage/Context Tokens/Interview Questions/Human Interventions/Task Success/Review Defects/Knowledge Reuse
+- [ ] 完整生成脚本：catalog/capabilities/routing 从 skill.yaml 派生（消除多头权威的剩余漂移风险）
 - [ ] Context Resolver 支持跨项目知识注入（不只是当前项目）
 - [ ] Knowledge Decay 自动化（check-decay.sh → 定期执行 → 自动标记 STALE/DEPRECATED）
 - [ ] Knowledge Score 复合指标（quality × coverage × reuse × freshness → 排序权重）
@@ -39,7 +42,7 @@
 
 ### 不做
 
-- [ ] ~~Tool Adapter 深度集成~~ — 当前抽象层足够（7 域, 18 refs, 9/10 Skill），不过度设计
+- [ ] ~~Tool Adapter 深度集成~~ — 当前抽象层足够（7 域, 27 refs, 9/10 Skill），不过度设计
 - [ ] ~~Cross-skill Pipeline 自动执行~~ — 保持关键节点人工确认，后台任务自动化即可
 - [ ] ~~Tool Selection 自动匹配~~ — Skill 声明 capability，Registry 映射，不需要 AI 推理
 
