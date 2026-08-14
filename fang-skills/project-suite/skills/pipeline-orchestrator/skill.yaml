@@ -2,17 +2,15 @@ id: pipeline-orchestrator
 version: "1.0.0"
 mode: Production
 owner: project-suite
-priority: 5
 category: orchestration
 complexity: { min: high, max: high }
-decision_order: 0
 cost: low
-parallel: false
+description: "跨Skill Pipeline编排，auto-advance+Decision-Boundary Checkpoint"
+capabilities: [pipeline-execution, auto-advance, checkpoint]
+confidence_min: 80
 requires: []
 produces: [PipelineExecution]
 consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
-depends_on: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-refactorer, project-documenter, project-releaser]
-parallel_with: []
 boundary: 编排跨 Skill pipeline 执行，不替代任何单个 Skill 的功能
 last_reviewed: "2026-08-04"
 review_cadence_days: 90
@@ -23,7 +21,7 @@ triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端
 triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
 
 context_contract:
-  must_read: [capabilities.yaml, workflow-library.yaml]
+  must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml]
   should_read: [state.json]
   neednt_read: []
 

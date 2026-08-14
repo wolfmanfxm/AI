@@ -20,7 +20,7 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
     ├── architecture/  components/  api/  patterns/  conventions/
     ├── observations/  experience/  rules/
     ├── glossary.md  principles.md  INDEX.md
-    ├── knowledge-graph.yaml  context.json  graph.json  statistics.json
+    ├── graph.json  context.json  statistics.json
     ├── decisions/architecture-decisions.md  index.md
     └── reports/latest.md
 
@@ -28,7 +28,7 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
     ├── README.md  (项目概述, KB 入口)
     ├── Architecture/  Components/  Patterns/  Rules/
     ├── Decisions/  Experience/  Glossary/
-    └── Risks/  knowledge-graph.yaml
+    └── Risks/  graph.json
 ```
 
 rsync 命令：

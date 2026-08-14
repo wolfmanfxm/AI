@@ -29,7 +29,7 @@ reviewer: promotion-reviewer-agent
 
 scores:
   - candidate: pattern.form-wrapper
-    cross_project: 0.87    # 出现在 afc-newcore-web + bcapnext
+    cross_project: 0.87    # 出现在 acme-web + cms
     reusability: 0.93      # 可独立提取为 "Vue3 Form Pattern"
     framework_coupling: 0.18  # 框架弱相关（仅依赖 Vue3 + Element Plus）
     evidence_strength: 0.95  # 331 occurrences, consistency 0.96
@@ -38,7 +38,7 @@ scores:
     reason: "≥2 projects, high reusability, low framework coupling"
 
   - candidate: convention.import-order
-    cross_project: 0.45    # 仅 afc-newcore-web
+    cross_project: 0.45    # 仅 acme-web
     reusability: 0.60      # 项目特定 import 约定
     framework_coupling: 0.30
     evidence_strength: 0.70

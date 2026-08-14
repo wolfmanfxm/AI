@@ -1,6 +1,6 @@
 # Intent Routing v0.8.0
 
-> 用户意图 → skill 路由。路由表从 `skills/*/skill.yaml` + `runtime/registry/capabilities.yaml` 自动生成。
+> 用户意图 → skill 路由。路由表从 `skills/*/skill.yaml` 派生（单一源），生成 `runtime/registry/capability-routing.yaml`。
 > **用户始终是 Dispatcher。路由只是建议，不自动级联。**
 > Artifact 类型详见 `runtime/artifacts/artifact-types.yaml`，Interface 详见各 Skill 的 `interface.md`。
 
@@ -9,10 +9,10 @@
 | 字段 | 来源 | 说明 |
 |------|------|------|
 | triggers_cn / triggers_en | `skill.yaml` | 触发词 |
-| produces / consumes | `capabilities.yaml` | 能力注册 |
+| produces / consumes | `skills.generated.yaml`（从 `skill.yaml` 派生） | 能力注册 |
 | depends_on / parallel_with | `skill.yaml` | 依赖和并行关系 |
 
-> 手动维护此文件时，需与 `skill.yaml` + `capabilities.yaml` 保持一致。不一致时以 `skill.yaml` 为准。
+> 单一源：所有 per-skill 字段以 `skills/*/skill.yaml` 为准，经 `generate-registry.mjs` 生成 `skills.generated.yaml`。手动改 registry 会漂移。
 
 ## 路由规则（优先级从高到低）
 

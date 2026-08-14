@@ -16,12 +16,12 @@
 
 ```yaml
 terms:
-  - id: customer
-    name: "客户"
-    definition: "已完成实名认证的用户"
+  - id: user
+    name: "用户"
+    definition: "系统注册用户"
     kind: entity              # entity | value_object | workflow | role
     relationships:
-      - { to: user, relation: "is_a_kind_of" }
+      - { to: account, relation: "is_a_kind_of" }
     status: confirmed         # candidate | confirmed | conflicting
     source: interview         # analyzer | interview
     confidence: 0.9
@@ -49,16 +49,16 @@ Domain Model 是**整个 Suite 的共同语言约束**，不是 Planner 辅助�
 | Planner Interview | 读 + 确认新术语（candidate→confirmed）+ 标记冲突 | — |
 | Architect | 设计引用的术语必须与 confirmed 一致 | V8: Domain 一致（冲突则阻断） |
 | Generator | 代码命名必须与 confirmed 一致 | V7: Domain 命名一致 |
-| Reviewer | 检测术语混用（Customer/CustomerInfo/Client） | V6: Domain Terminology Drift |
+| Reviewer | 检测术语混用（User/UserInfo/Client） | V6: Domain Terminology Drift |
 
 ## 核心价值：Domain Conflict
 
 当 Skill 的假设与已确认定义冲突时，**停止并追问**，而不是静默用新定义：
 
 ```
-假设 "Customer = 任意登记人"
+假设 "User = 任意登录者"
   vs
-已确认 "Customer = 已完成实名认证的用户"
+已确认 "User = 系统注册用户"
   → ⚠️ Domain conflict → 追问澄清
 ```
 

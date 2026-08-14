@@ -1,0 +1,78 @@
+task: L3
+category: long-task
+prompt: "从零搭建一个业务模块（含 CRUD + 审批 + 报表）"
+
+native:
+  files:
+    - workspace/types/serviceFeeManage.ts
+    - workspace/api/serviceFeeManage/serviceFeeManage.ts
+    - workspace/api/index.ts
+    - workspace/views/serviceFeeManage/serviceFeeList/index.vue
+    - workspace/views/serviceFeeManage/serviceFeeList/components/ServiceFeeDialog.vue
+    - workspace/views/serviceFeeManage/serviceFeeApproval/index.vue
+    - workspace/views/serviceFeeManage/serviceFeeApproval/detail.vue
+    - workspace/views/serviceFeeManage/serviceFeeReport/index.vue
+    - workspace/router/serviceFeeManage.ts
+    - workspace/router/index.ts
+  what: "从零搭建「服务费管理 serviceFeeManage」：CRUD 列表（PageTable+SchemaSearch+OperateGroup+DialogWrapper+FormWrapper+MoneyInput），审批待办+详情（SubPageWrapper+NavigationBar+SectionCard，通过/退回填意见调 approveServiceFee），报表（4 汇总卡片 + ECharts 月度趋势双轴/费用类型饼图/状态柱状，含 resize 自适应）。补齐类型/API/路由"
+  requirement_coverage: 0
+  context_tokens: 106020
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "严格复用 workspace 主范式组件链（PageTable→SchemaSearch/SchemaTable/OperateGroup），未新造组件，与 rebateManage/marginManage 一致"
+    - "PageTable request 契约返回 {rows,rowcount}，用 parseListResponse 收敛；SchemaTable status 列用 enum（带 label+type）渲染 el-tag"
+    - "MoneyInput modelValue 类型 string|number|null，字段按 number|null 初始化避免与 v-model 类型摩擦"
+    - "无 node_modules 无法跑 vue-tsc，导入路径逐一对齐既有模块"
+
+suite:
+  files:
+    - workspace/types/incentiveManage.ts
+    - workspace/api/incentiveManage/incentiveManage.ts
+    - workspace/api/incentiveManage/index.ts
+    - workspace/router/incentiveManage.ts
+    - workspace/router/index.ts
+    - workspace/views/incentiveManage/incentiveConfig/index.vue
+    - workspace/views/incentiveManage/incentiveConfig/components/IncentiveConfigDialog.vue
+    - workspace/views/incentiveManage/incentiveApply/index.vue
+    - workspace/views/incentiveManage/incentiveApply/components/IncentiveApplyDialog.vue
+    - workspace/views/incentiveManage/incentiveApply/detail.vue
+    - workspace/views/incentiveManage/incentiveReview/review.vue
+    - workspace/views/incentiveManage/incentiveReport/index.vue
+  what: "从零实现「渠道激励管理 incentiveManage」：CRUD（incentiveConfig 标准列表+DialogWrapper+FormWrapper+FormInput/Select/DatePicker/DocsSelect/Money），审批（incentiveApply 草稿/待审批/已通过/已驳回状态机→detail 提交→review 通过/驳回强制填意见），报表（4 汇总卡片 + ECharts 月度趋势 + SchemaTable 经销商排行）。约 1658 行新代码"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/crud.md
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/patterns/dialog.md
+    - .project-knowledge/patterns/form.md
+    - .project-knowledge/patterns/approval-pages.md
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/api/overview.md
+    - .project-knowledge/rules/form-component-standard.md
+    - .project-knowledge/experience/workspace-page-patterns.md
+  decision_record:
+    - "D1 模块名/领域选「渠道激励管理 incentiveManage」（对标 rebateManage 范式）"
+    - "D2 CRUD 用 workspace 主模式 PageTable+SchemaSearch+SchemaTable（非 MpTable/JSON 驱动）"
+    - "D3 表单用 FormWrapper + FormFields/DocsSelect/Money（遵循 form-component-standard 强制规则，弃裸 el-form）"
+    - "D4 审批用 SubPageWrapper+NavigationBar+SectionCard+el-descriptions 独立页（非弹窗）"
+    - "D5 弹窗统一 setDialogVisible(isNew, data?) + emit('reloadTab')"
+    - "D6 API 走 export function + baseService 前缀 + IResponseResultRows/Row 泛型 + parseListResponse"
+    - "D7 报表 ECharts 直接渲染 + 汇总卡片，生命周期规范化"
+  requirement_coverage: 1
+  context_tokens: 145903
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "项目存在三套 CRUD 范式，新模块必须走 workspace 主模式（PageTable+SchemaTable 99.7% co-usage）"
+    - "表单字段组件不接收 label/prop，须内嵌 el-form-item；FormWrapper.validate() 返回 boolean 而非 throw，提交前需 if(!valid) return（BrandRecipientDialog 实际漏判，已修正）"
+    - "字典枚举列须让 statusEnum 走 computed 并在 columns computed 内引用 .value 才能随 docsStore 异步加载响应式更新"
+    - "9 个公共组件全复用无新造，仅 parseListResponse 工具与 rebateManage 同构"
+
+key_comparison:
+  - "两者都从零搭建了完整业务模块（CRUD+审批+报表），复用 workspace 标准组件链，reuse 均 0.9-1"
+  - "落点不同：native 选 serviceFeeManage（服务费），suite 选 incentiveManage（渠道激励）——任务主题自由度高"
+  - "suite 产出更完整（12 文件 1658 行 vs 10 文件）、显式状态机（草稿/待审批/已通过/已驳回）、7 条决策；native 更精简"
+  - "suite 的知识库让它避开了真实坑：FormWrapper.validate 返回 boolean、FormInput 不接 label/prop、字典枚举要 computed——这些 native 未显式提及"
+  - "suite 的 99.7% co-usage 等量化证据 vs native 定性描述——suite 的 Evidence 更硬"

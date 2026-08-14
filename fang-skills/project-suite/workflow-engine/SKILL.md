@@ -11,13 +11,13 @@ description: >
 
 ## Knowledge Consumption（默认行为）
 
-所有 Skill 启动时第一步：**Context Resolver** → 查询 `knowledge-graph.yaml` → 注入 curated knowledge。
+所有 Skill 启动时第一步：**Context Resolver** → 查询 `graph.json` → 注入 curated knowledge。
 
 ```
-Skill Discovery → Context Resolver → Query knowledge-graph.yaml → 注入 Top-K → 执行业务逻辑
+Skill Discovery → Context Resolver → Query graph.json → 注入 Top-K → 执行业务逻辑
 ```
 
-- `.md` 为 Human View，`knowledge-graph.yaml` 为 Machine Source of Truth
+- `.md` 为 Human View，`graph.json` 为 Machine Source of Truth
 - 所有 Skill 默认通过 Query API 消费知识，不直接读 .md 文件
 
 ## 核心机制：Stage Template Injection

@@ -73,7 +73,7 @@
 | 层 | 组件 | 回答 | 实现 |
 |----|------|------|------|
 | **Skill Resolver** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
-| **Knowledge Resolver** | context-resolver.md + knowledge-graph.yaml | 需要知道什么？ | Task→tags→Query→Top-K injection |
+| **Knowledge Resolver** | context-resolver.md + graph.json | 需要知道什么？ | Task→tags→Query→Top-K injection |
 | **Decision Engine** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
 | **Execution** | 10 Skills + workflow-engine + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
 | **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |

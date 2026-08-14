@@ -21,7 +21,7 @@
 - V3 模式一致 → 风格与 `patterns/` 一致
 - V4 类型完整 → 无 any 滥用
 - V5 状态覆盖 → loading/error/empty 三态
-- V6 非重复 → knowledge-graph.yaml 中无同名节点
+- V6 非重复 → graph.json 中无同名节点
 
 判定：全部通过 → Accepted → 写入文件。V1/V2 失败 → Rejected → 修正。V3-V6 部分失败 → Accepted + 标注修复建议。
 
@@ -29,7 +29,7 @@
 
 ### 1. 结构化知识查询
 
-不读 .md 文件。通过 [Knowledge Query API](../../../runtime/contracts/knowledge-query.md) 查询 `knowledge-graph.yaml`：
+不读 .md 文件。通过 [Knowledge Query API](../../../runtime/contracts/knowledge-query.md) 查询 `graph.json`：
 
 ```bash
 # 查询可复用组件
@@ -42,7 +42,7 @@
 @knowledge:type=api scope=project
 ```
 
-降级：`knowledge-graph.yaml` 缺失 → 读 `context-package.json` → `context.json`。
+降级：`graph.json` 缺失 → 读 `context-package.json` → `context.json`。
 
 ### 2-3. Graph 查询 + 参考实现
 → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)

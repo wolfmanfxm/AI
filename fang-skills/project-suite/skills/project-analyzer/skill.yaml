@@ -2,17 +2,15 @@ id: project-analyzer
 version: "1.3.1"
 mode: Production
 owner: project-suite
-priority: 10
 category: analysis
 complexity: { min: medium, max: high }
-decision_order: 1
 cost: high
-parallel: false
+description: "分析项目结构、组件、API、模式，生成结构化知识库"
+capabilities: [code-analysis, knowledge-extraction, candidate-verification]
+confidence_min: 70
 requires: [general-purpose agent]
 produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
 consumes: []
-depends_on: []
-parallel_with: []
 boundary: 只分析项目生成知识文件，不修改源码
 last_reviewed: "2026-08-04"
 review_cadence_days: 90

@@ -21,7 +21,7 @@
 | File | Lines | Issue |
 |------|-------|-------|
 | workspace/utils/format.ts | 3200 | Utils 膨胀：混入格式/校验/转换 |
-| workspace/views/trustManage/loanReview/detail.vue | 1200 | 页面过大 |
+| src/views/accountManage/orderReview/detail.vue | 1200 | 页面过大 |
 
 ## any 滥用
 | File | any Count | % |

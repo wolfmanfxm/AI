@@ -2,23 +2,21 @@ id: project-refactorer
 version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 60
 category: evolution
 complexity: { min: medium, max: high }
-decision_order: 7
 cost: medium
-parallel: false
+description: "安全重构，行为不变，指标量化"
+capabilities: [safe-refactor, test-protection, metric-improvement]
+confidence_min: 70
 requires: [existing tests]
 produces: [RefactoredCode]
 consumes: [Code, KnowledgeBase, Test, Review]
-depends_on: [project-reviewer]
-parallel_with: [project-documenter]
 boundary: 只改善结构不改行为，没测试保护不重构
 last_reviewed: "2026-08-04"
 review_cadence_days: 90
 
-triggers_cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码]
-triggers_en: [refactor, clean up, extract method, simplify, reduce complexity]
+triggers_cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码, 迁移]
+triggers_en: [refactor, clean up, extract method, simplify, reduce complexity, migrate]
 
 context_contract:
   must_read: [context.json]

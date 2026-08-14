@@ -1,0 +1,75 @@
+task: M4
+category: medium
+prompt: "实现一个文件上传组件（带进度条）"
+
+native:
+  files:
+    - workspace/components/common/FileUpload/index.vue
+    - workspace/components/common/FileUpload/index.ts
+    - workspace/components/common/FileUpload/types.ts
+  reference_components:
+    - workspace/components/common/Uploader/index.vue
+    - workspace/components/common/UploadCard/index.vue
+    - workspace/components/common/DragUpload/index.vue
+    - src/components/BigFileUpload/index.vue
+    - workspace/components/common/FilePreviewUpload/components/UploadProgressList.vue
+  implementation:
+    - "新建通用 FileUpload 组件（未复用现有 Uploader/UploadCard，因为它们无真实进度条）"
+    - "用 el-upload :http-request 自定义上传 + request 拦截器（自动签名/token）"
+    - "onUploadProgress 计算百分比 + 自定义 CSS 进度条（复用项目 #196EFF 配色）"
+    - "before-upload 校验 0KB/maxSize/accept 白名单"
+  requirement_coverage: 0.9
+  context_tokens: 90000
+  knowledge_reuse: 0.5
+  task_success: true
+
+suite:
+  files:
+    - workspace/components/common/ProgressUpload/index.vue
+  reference_components:
+    - workspace/components/common/Uploader/index.vue
+    - workspace/components/common/UploadCard/index.vue
+    - workspace/components/common/DragUpload/index.vue
+    - workspace/components/common/FilePreviewUpload/components/UploadProgressList.vue
+    - workspace/components/common/AttachManage/view/composables/useChunkUpload.ts
+    - src/utils/FileUtils.ts
+    - src/utils/service/request.ts
+  implementation:
+    - "新建 ProgressUpload（el-upload + el-progress 真实进度条）"
+    - "onUploadProgress 驱动 percentage，Math.floor(event.percent)"
+    - "before-upload 复用 FileUtils.checkFile 做大小/类型/非法字符校验"
+    - "四态 idle/uploading/success/error 全状态覆盖"
+    - "鉴权头复用 SessionStorage token（Authorization/X-Requested-With/x-show-original）"
+    - "响应契约对齐 result==='1' + msg，兼容 Boolean 返回"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/graph.json
+    - .project-knowledge/patterns/upload.md
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/architecture/glossary.md
+    - .project-knowledge/rules/frontend-convention.md
+    - .project-knowledge/rules/form-component-standard.md
+  decision_record:
+    - "D1 复用 vs 新建：新建 ProgressUpload。现有 Uploader/DragUpload/UploadCard 均无渲染的真实进度条（Uploader 只存 progress 不渲染、UploadCard handleProgress 空实现、DragUpload auto-upload=false）；唯一有真实进度条的 FilePreviewUpload/AttachManage 深度耦合分片上传+AI 分类，不可直接复用"
+    - "D2 复用 FileUtils.checkFile：before-upload 复用现有工具，不重写校验逻辑"
+    - "D3 复用 token/header 模式：对齐 Uploader/UploadCard 的鉴权头约定"
+    - "D4 复用 el-progress + #196EFF：配色对齐 UploadProgressList 品牌蓝"
+    - "D5 响应契约复用：result==='1' + msg + Boolean 兼容"
+    - "D6 结构与命名：PascalCase ProgressUpload、script setup lang=ts、workspace/components/common/ 目录"
+  requirement_coverage: 0.95
+  context_tokens: 120000
+  knowledge_reuse: 0.7
+  task_success: true
+
+key_comparison:
+  - "native 新建 FileUpload（3 文件，自定义 CSS 进度条），suite 新建 ProgressUpload（1 文件，复用 el-progress）——suite 更精简，复用 Element Plus 现成组件"
+  - "native 手动 grep 探索 5 个上传组件，suite 走 graph.json findNode + catalog 结构化查重，两者都正确识别'现有组件无真实进度条'"
+  - "suite 复用 FileUtils.checkFile 统一校验，native 自写 0KB/maxSize/accept 白名单"
+  - "suite 有 D1-D6 Decision Record（含'复用 vs 新建'的显式裁决 + 不改动现有 Uploader 的最小侵入决策），native 无"
+  - "suite 全状态覆盖（idle/uploading/success/error），native 未提全状态"
+
+observations:
+  - "项目已有 7+ 上传相关组件，形成 UploadCard/DragUpload/Uploader 近重复集群（catalog 已标注），通用层确实缺'真实进度条'渲染"
+  - "唯一真实进度条实现与分片上传/MD5 秒传/AI 分类强耦合，不可直接复用为通用组件"
+  - "native 与 suite 结论一致（都选择新建），但 suite 的决策可追溯且更精简"

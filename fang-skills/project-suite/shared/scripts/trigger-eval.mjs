@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Trigger Word Evaluator v2.0
- * Validates trigger word coverage, overlap, and uniqueness across all skills.
+ * Trigger Word Evaluator v2.1
+ * Validates trigger word coverage, overlap, uniqueness, and frontmatter sync (skill.yaml ↔ SKILL.md).
  * Node.js — zero dependencies, built-in modules only.
  *
  * Usage: node shared/scripts/trigger-eval.mjs
- * Output: reports/trigger-eval-report.md
+ * Output: project-suite-eval/reports/trigger-eval-report.md
  */
 
 import { readdirSync, readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SUITE_ROOT = join(__dirname, '..', '..');
 const SKILLS_DIR = join(SUITE_ROOT, 'skills');
-const REPORT_DIR = join(SUITE_ROOT, 'reports');
+const REPORT_DIR = join(SUITE_ROOT, '..', 'project-suite-eval', 'reports');
 const REPORT_PATH = join(REPORT_DIR, 'trigger-eval-report.md');
 
 function parseYamlList(filepath, key) {
@@ -28,6 +28,12 @@ function parseYamlList(filepath, key) {
     .split(',')
     .map(s => s.trim().replace(/^["']|["']$/g, ''))
     .filter(Boolean);
+}
+
+function readFrontmatter(filepath) {
+  if (!existsSync(filepath)) return '';
+  const parts = readFileSync(filepath, 'utf-8').split('---');
+  return parts.length >= 2 ? parts[1] : '';
 }
 
 function main() {
@@ -51,6 +57,15 @@ function main() {
   const overlapsEN = [...triggersEN].filter(([, v]) => v.length > 1);
   const missing = Object.entries(skills).filter(([, d]) => !d.cn.length && !d.en.length).map(([k]) => k);
 
+  // 触发词 frontmatter 同步检查：skill.yaml 有但 SKILL.md frontmatter 缺（Claude Code 按 frontmatter 路由，会漏）
+  const drift = [];
+  for (const [name, d] of Object.entries(skills)) {
+    const fm = readFrontmatter(join(SKILLS_DIR, name, 'SKILL.md'));
+    const missingCN = d.cn.filter(t => !fm.includes(t));
+    const missingEN = d.en.filter(t => !fm.includes(t));
+    if (missingCN.length || missingEN.length) drift.push({ name, missingCN, missingEN });
+  }
+
   mkdirSync(REPORT_DIR, { recursive: true });
   const lines = [];
   lines.push('# Trigger Word Evaluation Report');
@@ -69,6 +84,7 @@ function main() {
   lines.push(`| CN overlaps (>1 skill) | ${overlapsCN.length} |`);
   lines.push(`| EN overlaps (>1 skill) | ${overlapsEN.length} |`);
   lines.push(`| Skills with no triggers | ${missing.length} |`);
+  lines.push(`| Skills with frontmatter drift | ${drift.length} |`);
   lines.push(`| Avg CN triggers/skill | ${(totalCN / Math.max(Object.keys(skills).length, 1)).toFixed(1)} |`);
   lines.push('');
 
@@ -94,6 +110,16 @@ function main() {
     for (const name of missing) lines.push(`- ${name}`);
     lines.push('');
   }
+  if (drift.length) {
+    lines.push('## ❌ Frontmatter Trigger Drift');
+    lines.push('');
+    lines.push('skill.yaml 有、但 SKILL.md frontmatter 描述里缺的触发词（Claude Code 按 frontmatter 路由，会漏）：');
+    lines.push('');
+    lines.push('| Skill | 缺失 CN | 缺失 EN |');
+    lines.push('|-------|---------|---------|');
+    for (const { name, missingCN, missingEN } of drift) lines.push(`| ${name} | ${missingCN.join(', ')} | ${missingEN.join(', ')} |`);
+    lines.push('');
+  }
   lines.push('## Per-Skill Trigger Count');
   lines.push('');
   lines.push('| Skill | CN | EN |');
@@ -106,7 +132,8 @@ function main() {
   if (overlapsCN.length) console.log(`⚠️  ${overlapsCN.length} CN trigger overlaps found`);
   if (overlapsEN.length) console.log(`⚠️  ${overlapsEN.length} EN trigger overlaps found`);
   if (missing.length) console.log(`❌ ${missing.length} skills missing triggers`);
-  if (!overlapsCN.length && !overlapsEN.length && !missing.length) console.log('✅ All triggers clean — no overlaps, no missing');
+  if (drift.length) console.log(`❌ ${drift.length} skills have frontmatter trigger drift`);
+  if (!overlapsCN.length && !overlapsEN.length && !missing.length && !drift.length) console.log('✅ All triggers clean — no overlaps, no missing, no drift');
 }
 
 main();

@@ -41,6 +41,7 @@ description: >
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 修复方案。

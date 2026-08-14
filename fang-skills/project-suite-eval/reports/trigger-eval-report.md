@@ -7,12 +7,13 @@
 | Metric | Value |
 |--------|-------|
 | Skills evaluated | 10 |
-| Total CN triggers | 87 |
-| Total EN triggers | 45 |
+| Total CN triggers | 94 |
+| Total EN triggers | 52 |
 | CN overlaps (>1 skill) | 0 |
 | EN overlaps (>1 skill) | 0 |
 | Skills with no triggers | 0 |
-| Avg CN triggers/skill | 8.7 |
+| Skills with frontmatter drift | 0 |
+| Avg CN triggers/skill | 9.4 |
 
 ## Per-Skill Trigger Count
 
@@ -22,9 +23,9 @@
 | project-analyzer | 9 | 3 |
 | project-architect | 11 | 4 |
 | project-documenter | 8 | 4 |
-| project-generator | 10 | 5 |
+| project-generator | 16 | 11 |
 | project-planner | 8 | 4 |
-| project-refactorer | 8 | 5 |
+| project-refactorer | 9 | 6 |
 | project-releaser | 9 | 5 |
 | project-reviewer | 8 | 3 |
 | project-tester | 8 | 6 |

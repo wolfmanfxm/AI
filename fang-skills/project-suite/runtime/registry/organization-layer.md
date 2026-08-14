@@ -22,28 +22,28 @@
 ## Organization 示例
 
 ```yaml
-# Vault/Organization/afc-org/knowledge-graph.yaml
-organization: "东风汽金"
-projects: [afc-newcore-web, afc-mobile, afc-admin]
+# Vault/Organization/acme-org/graph.json
+organization: "acme"
+projects: [acme-web, acme-mobile, acme-admin]
 
 shared_knowledge:
   - id: org.ui-design-system
     type: convention
     scope: organization
     statement: "所有项目统一使用 Element Plus 2.x + el-mp 命名空间"
-    projects: [afc-newcore-web, afc-mobile, afc-admin]
+    projects: [acme-web, acme-mobile, acme-admin]
 
   - id: org.security-policy
     type: rule
     scope: organization
     statement: "所有 API 请求必须使用国密 SM2/SM4 加密"
-    projects: [afc-newcore-web, afc-mobile, afc-admin]
+    projects: [acme-web, acme-mobile, acme-admin]
 
   - id: org.code-style
     type: convention
     scope: organization
     statement: "统一使用 script setup + TypeScript strict + ESLint"
-    projects: [afc-newcore-web, afc-mobile, afc-admin]
+    projects: [acme-web, acme-mobile, acme-admin]
 ```
 
 ## Promotion 路径

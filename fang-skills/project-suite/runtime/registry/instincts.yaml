@@ -12,7 +12,7 @@ instincts:
     scope: organization
     statement: "Vue3 项目：Always use FormWrapper pattern for complex forms"
     evidence:
-      projects: [afc-newcore-web]
+      projects: [acme-web]
       total_occurrences: 47
       consistency: 0.96
     tags: [vue3, form, pattern]
@@ -25,7 +25,7 @@ instincts:
     scope: personal
     statement: "TypeScript 项目：Prefer Repository Pattern for data access"
     evidence:
-      projects: [afc-newcore-web]
+      projects: [acme-web]
       total_occurrences: 31
       consistency: 0.89
     tags: [typescript, repository, data-access]
@@ -38,7 +38,7 @@ instincts:
     scope: personal
     statement: "TypeScript 项目：Avoid `any` type in production code"
     evidence:
-      projects: [afc-newcore-web]
+      projects: [acme-web]
     tags: [typescript, any, type-safety]
     decay: { last_verified: "2026-08-05", stability: 1.0 }
 
@@ -47,6 +47,6 @@ instincts:
     scope: personal
     statement: "Vue3 项目：Never mutate props directly"
     evidence:
-      projects: [afc-newcore-web]
+      projects: [acme-web]
     tags: [vue3, props, mutation]
     decay: { last_verified: "2026-08-05", stability: 1.0 }

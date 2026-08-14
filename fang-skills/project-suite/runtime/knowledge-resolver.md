@@ -22,8 +22,8 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 
 1. 提取实体
    从 Task 描述中提取:
-   - 组件名（如 FormSelect, CustomerTable）
-   - API 模块名（如 quotaManage, customerApi）
+   - 组件名（如 FormSelect, UserTable）
+   - API 模块名（如 orderApi, userApi）
    - 模式关键词（如 CRUD, 审批流, 文件上传）
 
 2. 图查询
@@ -54,7 +54,7 @@ Context Package 是预消化的知识包。Generator 不再读文件、不再自
 **核心转变：**
 
 ```
-Before:  knowledge-list.json = ["patterns/table.md", "api/quotaManage.md", ...]
+Before:  knowledge-list.json = ["patterns/table.md", "api/order.md", ...]
          Generator → 读每个文件 → 自己 parse → 自己判断用哪个段落 → 不可靠
 
 After:   context-package.json = { knowledge: [{ pattern: "PageTable + SchemaTable", constraints: [...] }], ... }
@@ -63,27 +63,27 @@ After:   context-package.json = { knowledge: [{ pattern: "PageTable + SchemaTabl
 
 ### 示例
 
-Plan: "新增品牌收件人 CRUD 页面" → Resolver 输出：
+Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
 
 ```json
 {
-  "plan": "PLAN-quota-mail-config.md",
+  "plan": "PLAN-order-shipping-address.md",
   "generatedBy": "knowledge-resolver",
   "confidence": 91,
   "context": {
     "knowledge": [
       {
         "capability": "TablePattern",
-        "pattern": "PageTable + SchemaTable + SchemaSearch",
-        "constraints": ["pageIndex/pageSize 数字", "el-mp 命名空间"],
+        "pattern": "DataTable + SchemaTable + SearchForm",
+        "constraints": ["pageIndex/pageSize 数字", "Element Plus 命名空间"],
         "anti_pattern": "不要手写 el-table + el-pagination",
         "source": "patterns/table.md",
         "confidence": 92
       },
       {
         "capability": "DialogPattern",
-        "pattern": "DialogWrapper + FormWrapper + setDialogVisible(isNew, data?)",
-        "constraints": ["emit('reloadTab')", "ElMessage.success()"],
+        "pattern": "Dialog + FormContainer + setDialogVisible(isNew, data?)",
+        "constraints": ["emit('refresh')", "ElMessage.success()"],
         "anti_pattern": "不要用 el-dialog 裸写",
         "source": "patterns/dialog.md",
         "confidence": 88
@@ -91,7 +91,7 @@ Plan: "新增品牌收件人 CRUD 页面" → Resolver 输出：
       {
         "capability": "ApiPattern",
         "pattern": "export function getXxxPageList(params): Promise<AxiosResponse<T>>",
-        "constraints": ["pageIndex/pageSize", "data.result === '1'", "GET=params POST=data"],
+        "constraints": ["pageIndex/pageSize", "data.code === 0", "GET=params POST=data"],
         "anti_pattern": "不要用 export const 箭头函数 + method 小写",
         "source": "api/overview.md",
         "confidence": 90
@@ -99,30 +99,30 @@ Plan: "新增品牌收件人 CRUD 页面" → Resolver 输出：
     ],
     "components": [
       {
-        "name": "DialogWrapper",
-        "path": "@workspace/components/common/DialogWrapper/index.vue",
+        "name": "Dialog",
+        "path": "@app/components/common/Dialog/index.vue",
         "usage": "v-model:visible + #footer 插槽",
         "reuse": true
       },
       {
-        "name": "FormWrapper",
-        "path": "@workspace/components/common/FormWrapper/index.vue",
+        "name": "FormContainer",
+        "path": "@app/components/common/FormContainer/index.vue",
         "usage": "ref + .validate() 返回 Promise",
         "reuse": true
       }
     ],
     "api": [
       {
-        "module": "quotaManage",
-        "functions": ["getBrandRecipientPage", "saveBrandRecipient", "deleteBrandRecipient"],
+        "module": "order",
+        "functions": ["getShippingAddressPage", "saveShippingAddress", "deleteShippingAddress"],
         "conventions": ["export function 风格", "baseService URL 前缀"],
-        "source": "api/quotaManage.md"
+        "source": "api/order.md"
       }
     ],
     "rules": [
       {
         "rule": "workspace-priority",
-        "constraint": "组件从 @workspace/components/ 引入，不碰 src/components/",
+        "constraint": "组件从 @app/components/ 引入，不碰 src/components/",
         "blocking": true
       },
       {

@@ -1,0 +1,48 @@
+task: M5
+category: medium
+prompt: "给审批列表加状态筛选"
+
+native:
+  files:
+    - workspace/views/dueDiligenceManage/dueDiligenceApprove/index.vue
+  what: "给尽调审批列表加'审批状态'多选筛选，选项来自 SURVEY_APPLY_STATUS 字典，默认 211 待复核；移除 getListTableData 写死的 params.surveyApplyStatus='211' 改为 query 默认值 + search defaultValue"
+  requirement_coverage: 0
+  context_tokens: 111379
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "目标页是唯一把 surveyApplyStatus 写死 '211' 且搜索区无状态筛选的审批列表；复用同模块 dueDiligence 的 getCachedSelectOptions('SURVEY_APPLY_STATUS') 模式"
+    - "surveyApplyStatus ← SURVEY_APPLY_STATUS（211=待复核）"
+    - "SchemaSearch clearAll 重置为 defaultValue 而非清空，单字段 handleClear 才置空查全部——框架既有行为"
+
+suite:
+  files:
+    - workspace/views/creditManage/creditReview/index.vue
+  what: "给授信审批列表的'审批状态'筛选改字典驱动：新增 creditReviewStatusOptions，复用页面已拉取但未使用的 queryCreditStatus() → CREDIT_AUDIT_STATUS 字典；queryNodeCode 筛选项由硬编码 options 改动态 getter，保留 defaultValue '5'"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/search.md
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/patterns/approval-pages.md
+    - .project-knowledge/architecture/glossary.md
+  decision_record:
+    - "D1 目标页选 creditReview（授信审批最贴近审批列表；资信审批/授信延期审批等均已带状态筛选）"
+    - "D2 复用页面内已存在但未用于筛选的 queryCreditStatus() 字典，而非新增硬编码"
+    - "D3 保留 key: queryNodeCode 与 defaultValue '5'，仅 options 改动态 getter，避免改后端查询语义"
+    - "D4 该文件 script setup 无 lang=ts，ref 用 JS 写法 ref([])（首版 TS 泛型语法错误已回退）"
+  requirement_coverage: 1
+  context_tokens: 150230
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "全项目所有审批/审核/复核列表（trustManage 与 creditManage 两条线）均已内置状态筛选，唯一可改进点是 creditReview 用硬编码而非字典"
+    - "queryCreditStatus() 原本只写 valueList.CREDIT_AUDIT_STATUS 后无人消费属死代码，本次复用为筛选字典"
+    - "该页存在明显遗留问题（审批状态/审批结果两列重复定义、多处 console.log、watch 注册于 handleSearchChange 内），不在本次范围未改"
+
+key_comparison:
+  - "两者选了不同的审批页：native 选 dueDiligenceApprove（写死状态、无筛选→新增），suite 选 creditReview（硬编码 options→字典化）——'审批列表'歧义导致落点发散"
+  - "suite 用 approval-pages.md 知识全量盘点审批页后定位'唯一硬编码页'（更全面），native 找到'唯一无筛选页'"
+  - "两者都复用了字典模式（getCachedSelectOptions vs queryCreditStatus 死代码复活），reuse 均 1"
+  - "suite 顺带发现该页三处遗留问题但守边界不改"

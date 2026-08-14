@@ -1,121 +1,35 @@
-# Skill Catalog v1.0
-#
-# ⚠️ 增量注册：只存 skill.yaml 没有的编排元数据（category/complexity/decision_order）。
-#    intent/capabilities 是快照，以 skills/*/skill.yaml 的 triggers/interface 为准。
-#    Runtime 据此回答"这个任务应该使用哪个 Skill？"
+# Skill Catalog v3.0 — 自动生成，勿手改
+# 单一源：category 分组从 skills.generated.yaml 派生，decision_model 为框架常量。
+# 回答"这个任务应该用哪个 Skill？"
 
-version: "1.0.0"
+version: "3.0.0"
+generated: true
 
 categories:
   analysis:
     label: 分析与理解
+    description: 代码库结构、组件、API、模式分析
     skills: [project-analyzer]
   planning:
     label: 规划与设计
+    description: 需求收敛、任务规划、架构设计
     skills: [project-planner, project-architect]
   creation:
     label: 生成与实现
+    description: 代码生成、文档生成
     skills: [project-generator, project-documenter]
   verification:
     label: 验证与审查
+    description: 测试、代码审查
     skills: [project-tester, project-reviewer]
   evolution:
     label: 演进与发布
+    description: 重构、发布
     skills: [project-refactorer, project-releaser]
   orchestration:
     label: 编排
+    description: 跨 Skill 流水线编排
     skills: [pipeline-orchestrator]
-
-skills:
-  project-analyzer:
-    category: analysis
-    intent: [分析项目, 扫描代码, 了解架构, 刷新知识]
-    capabilities: [code-analysis, knowledge-extraction, candidate-verification]
-    complexity: { min: medium, max: high }
-    outputs: [KnowledgeBase, Context, Graph]
-    decision_order: 1
-    description: "分析项目结构、组件、API、模式，生成结构化知识库"
-
-  project-planner:
-    category: planning
-    intent: [需求分析, 任务规划, 估时排期]
-    capabilities: [adaptive-interview, completeness-check, plan-generation]
-    complexity: { min: medium, max: high }
-    outputs: [Plan, RequirementSpec]
-    decision_order: 2
-    description: "需求收敛→完整性检查→自适应访谈→9模块执行契约"
-
-  project-architect:
-    category: planning
-    intent: [技术选型, 模块设计, API契约]
-    capabilities: [tech-selection, module-design, api-contract]
-    complexity: { min: medium, max: high }
-    outputs: [Architecture]
-    decision_order: 3
-    description: "技术选型+模块设计+API契约，ADR格式决策记录"
-
-  project-generator:
-    category: creation
-    intent: [写代码, 生成组件, 实现功能]
-    capabilities: [code-generation, pattern-matching, query-api]
-    complexity: { min: low, max: high }
-    outputs: [Code]
-    decision_order: 4
-    description: "按项目规范生成生产级代码，Candidate→Verify"
-
-  project-tester:
-    category: verification
-    intent: [写测试, 测试用例, 单元测试]
-    capabilities: [test-generation, ac-coverage, framework-detect]
-    complexity: { min: low, max: medium }
-    outputs: [Test]
-    decision_order: 5
-    description: "AC驱动测试生成+执行，自动检测测试框架"
-
-  project-reviewer:
-    category: verification
-    intent: [代码审查, review, 安全检查]
-    capabilities: [code-review, security-audit, ac-verification]
-    complexity: { min: low, max: high }
-    outputs: [Review]
-    decision_order: 6
-    description: "五轴审查，BLOCKER→PRAISE分级"
-
-  project-refactorer:
-    category: evolution
-    intent: [重构, 优化结构, 简化代码]
-    capabilities: [safe-refactor, test-protection, metric-improvement]
-    complexity: { min: medium, max: high }
-    outputs: [RefactoredCode]
-    decision_order: 7
-    description: "安全重构，行为不变，指标量化"
-
-  project-documenter:
-    category: creation
-    intent: [生成文档, API文档, 组件文档]
-    capabilities: [doc-generation, style-matching, source-tracing]
-    complexity: { min: low, max: medium }
-    outputs: [Documentation]
-    decision_order: 8
-    description: "代码→可溯源技术文档，自动匹配风格"
-
-  project-releaser:
-    category: evolution
-    intent: [发布, 版本号, changelog]
-    capabilities: [semver, changelog, release-checklist]
-    complexity: { min: low, max: medium }
-    outputs: [Release]
-    decision_order: 9
-    description: "版本bump+Changelog+发布检查"
-
-  pipeline-orchestrator:
-    category: orchestration
-    intent: [全流程, pipeline, 端到端]
-    capabilities: [pipeline-execution, auto-advance, checkpoint]
-    complexity: { min: high, max: high }
-    outputs: [PipelineExecution]
-    decision_order: 0
-    description: "跨Skill Pipeline编排，auto-advance+per-skill Checkpoint"
 
 # 四步决策模型
 decision_model:
@@ -125,21 +39,18 @@ decision_model:
     input: user_task
     output: matched_skill
     source: skill-catalog.yaml + capability-routing.yaml
-
   step_2:
     name: Knowledge Resolver
     question: "需要哪些知识？"
     input: matched_skill + project_context
     output: curated_knowledge
-    source: context-resolver.md + knowledge-graph.yaml
-
+    source: context-resolver.md + graph.json
   step_3:
     name: Decision Engine
     question: "基于这些知识应该怎么做？"
     input: curated_knowledge + requirement
     output: decision_context
     source: completeness-check.md + adaptive-interview
-
   step_4:
     name: Execution
     question: "怎么执行？"

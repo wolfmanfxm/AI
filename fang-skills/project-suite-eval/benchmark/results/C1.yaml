@@ -1,0 +1,70 @@
+task: C1
+category: complex
+prompt: "实现一个完整的权限管理模块（角色+菜单+接口权限）"
+
+native:
+  files:
+    - workspace/views/roleManage/index.vue
+    - workspace/views/roleManage/types.ts
+    - workspace/views/roleManage/permission.ts
+    - workspace/views/roleManage/components/RoleFormDialog.vue
+    - workspace/views/roleManage/components/MenuAuthDialog.vue
+    - workspace/views/roleManage/components/ApiAuthDialog.vue
+    - workspace/router/roleManage.ts
+    - workspace/api/roleManage/roleManage.ts
+    - workspace/router/index.ts
+  what: "workspace 业务层新建角色权限模块（单页：角色列表 + 编辑/菜单权限/接口权限三个弹窗）。角色列表用 PageTable+SchemaSearch+OperateGroup，复用 roleadd/rolemodify/getRoleInfoUsingGet 核心端点；菜单/接口权限弹窗用 el-tree 勾选，将核心 menuAuthTree/apiAuthTree 勾选归集逻辑移植到 permission.ts"
+  requirement_coverage: 0.9
+  context_tokens: 137636
+  knowledge_reuse: 0.85
+  task_success: true
+  findings:
+    - "核心平台 src/views/OrgManage/RoleManagement/ 已存在完整角色管理，后端 /mp/org/role/* 端点已验证可用→判定'已存在'，workspace 层复用其 API 而非重写后端契约"
+    - "workspace 层原仅有 api/roleManage 两个 stub，无 roleManage 视图→'需新增'是主要缺口"
+    - "接口权限对应核心 apiAuthTree，菜单权限对应 menuAuthTree，两类树勾选逻辑已移植"
+    - "未实现：成员管理 member、组织树选择器、数据权限范围 UI；菜单导航后端 DB 驱动仍需后端菜单表新增才进侧边栏"
+
+suite:
+  files:
+    - workspace/api/roleManage/roleManage.ts
+    - workspace/api/roleManage/menuManage.ts
+    - workspace/api/roleManage/apiManage.ts
+    - workspace/views/roleManage/role/index.vue
+    - workspace/views/roleManage/role/components/RoleDialog.vue
+    - workspace/views/roleManage/role/components/MenuAuthDialog.vue
+    - workspace/views/roleManage/role/components/ApiAuthDialog.vue
+    - workspace/views/roleManage/menu/index.vue
+    - workspace/views/roleManage/menu/components/MenuDialog.vue
+    - workspace/views/roleManage/api/index.vue
+    - workspace/views/roleManage/api/components/ApiDialog.vue
+    - workspace/router/roleManage.ts
+    - workspace/router/index.ts
+  what: "workspace 层三子模块：角色管理（分页+新增/编辑+分配菜单/接口权限两个 el-tree 弹窗）、菜单管理（el-table tree-props 树表 CRUD）、接口权限管理（分页 CRUD）。API 按 /web/employee/ REST 约定补齐 roleManage（10 函数）并新增 menuManage/apiManage；路由 roleManage.ts 注册进 extandRoutes"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/crud.md
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/patterns/dialog.md
+    - .project-knowledge/api/overview.md
+    - .project-knowledge/components/catalog.md
+  decision_record:
+    - "D1 复用核心 vs 新建 workspace：核心 src/ 有完整权限体系但走旧网关 .do API + MpTable/手动 el-dialog；workspace 有 /web/employee/sysRole/ REST 种子。裁决：新建 workspace 层复用 workspace CRUD 范式 + 新 REST 约定，不迁移不改核心旧实现"
+    - "D2 模块归属：归入既有 roleManage 模块目录（menuManage/apiManage 同放），避免碎片化"
+    - "D3 接口权限以'角色→接口树勾选'落地（ApiAuthDialog），接口本身有独立 CRUD 列表"
+    - "D4 菜单用树表不分页，角色/接口用 PageTable 分页；端点按 /web/employee/sysRole|sysMenu|sysApi 命名"
+  requirement_coverage: 0.6
+  context_tokens: 129934
+  knowledge_reuse: 0.85
+  task_success: true
+  findings:
+    - "核心平台已存在完整权限体系（旧网关 API），新 workspace 模块是对新 REST 后端的前端契约实现，二者并存、路由名去重"
+    - "菜单/接口授权树用 getCheckedKeys + getHalfCheckedKeys 合并提交，半选父节点一并回传保证级联完整"
+    - "响应约定 data.result==='1' + rows/rowcount（分页）与 rows/row（树），失败分支 { rows:[], rowcount:0 } 兜底"
+
+key_comparison:
+  - "架构裁决相反：native 复用核心平台旧 .do API（已验证可用，pragmatic），suite 新建 workspace 层新 REST 契约（/web/employee/sysRole|sysMenu|sysApi，未接真实后端）"
+  - "结构差异：native 单页 3 弹窗（精简），suite 三子模块 role/menu/api（完整 13 文件）"
+  - "suite 的 D1 显式记录了'复用 vs 新建'的架构权衡（旧网关 vs 新 REST），native 无显式裁决"
+  - "风险差异：native 复用已验证端点更稳，suite 对新 REST 端点属未验证前端契约（潜在空接口风险）"
+  - "coverage 自报：native 0.9 vs suite 0.6（suite 更保守，因未接入真实后端）"

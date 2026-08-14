@@ -8,7 +8,7 @@
 |-------|---------|--------|--------|
 | **Session** | 当前会话 | 本次执行的上下文、中间产出、用户反馈 | `.project-runtime/memory/session.json` |
 | **Project** | 项目生命周期 | 架构决策、已知约束、团队约定 | `.project-runtime/memory/project.json` |
-| **Suite** | 跨项目 | 通用模式、最佳实践、学习到的规则 | `shared/memory/suite.json` |
+| **Suite** | 跨项目 | 通用模式、最佳实践、学习到的规则 | `runtime/memory/suite.json` |
 | **Decision** | 永久 | 为什么做某个决策（ADR的"为什么"部分） | `.project-runtime/memory/decisions/<id>.json` |
 
 ## Session Memory
@@ -18,11 +18,11 @@
   "session_id": "20260804-153000",
   "skill": "project-planner",
   "context": {
-    "goal": "利率调整审批",
+    "goal": "价格调整审批",
     "user_feedback": ["范围确认通过", "增加撤销审批功能"],
-    "assumptions": ["假设审批流程为两级", "假设利率T+1生效"]
+    "assumptions": ["假设审批流程为两级", "假设价格T+1生效"]
   },
-  "discoveries": ["发现已有 creditWorkflow.ts 可复用"],
+  "discoveries": ["发现已有 approvalWorkflow.ts 可复用"],
   "open_questions": ["审批撤回是否需要通知申请人？"]
 }
 ```
@@ -33,7 +33,7 @@
 
 ```json
 {
-  "project": "afc-newcore-web-frontend",
+  "project": "my-web-app",
   "constraints": {
     "framework": "Vue 3.4",
     "ui_library": "Element Plus 2.13 (el-mp prefix)",
@@ -73,8 +73,8 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
     }
   },
   "cross_project_insights": [
-    "东风汽金项目的 creditWorkflow.ts 可复用到其他审批场景",
-    "bcapnext 模式的 json-driven 表单比手写更灵活"
+    "某企业项目的 approvalWorkflow.ts 可复用到其他审批场景",
+    "cms 模式的 json-driven 表单比手写更灵活"
   ]
 }
 ```
@@ -87,14 +87,14 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
 {
   "id": "D-20260804-001",
   "skill": "project-architect",
-  "decision": "新利率调整模块放在 interestRateManage/ 而非扩展 creditManage/",
-  "context": "creditManage 已有 133 文件，排名 top 5；利率调整是独立业务域",
+  "decision": "新价格调整模块放在 pricingManage/ 而非扩展 approvalManage/",
+  "context": "approvalManage 已有 133 文件，排名 top 5；价格调整是独立业务域",
   "alternatives": [
-    { "option": "扩展 creditManage", "rejected_because": "模块过大，耦合增加" },
-    { "option": "新建 financeManage", "rejected_because": "太泛，未来可能包含非利率功能" }
+    { "option": "扩展 approvalManage", "rejected_because": "模块过大，耦合增加" },
+    { "option": "新建 billingManage", "rejected_because": "太泛，未来可能包含非价格功能" }
   ],
-  "chosen": "新建 interestRateManage/",
-  "consequences": { "new_module": true, "reuse": ["creditWorkflow.ts"], "risk": "审批流集成需确认" },
+  "chosen": "新建 pricingManage/",
+  "consequences": { "new_module": true, "reuse": ["approvalWorkflow.ts"], "risk": "审批流集成需确认" },
   "timestamp": "2026-08-04T15:30:00Z",
   "status": "accepted",
   "revisited_at": null

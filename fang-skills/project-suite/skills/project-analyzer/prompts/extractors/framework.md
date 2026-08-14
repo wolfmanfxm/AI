@@ -20,7 +20,7 @@ state: Pinia
 router: Vue Router 4
 test: Vitest
 package_manager: pnpm
-aliases: { "@": "src", "@workspace": "workspace", "@bcapnext": "bcapnext" }
+aliases: { "@": "src", "@workspace": "workspace", "@cms": "cms" }
 strict_mode: true
 ```
 

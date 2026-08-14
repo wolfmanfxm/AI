@@ -1,0 +1,45 @@
+task: S2
+category: simple
+prompt: "修复 UserForm 的提交按钮 loading 状态没生效"
+
+native:
+  files:
+    - src/views/PlatformManagement/UserManager/index.vue
+  what: "UserManager 新增/编辑弹窗确定按钮从未绑定 loading，saveFormData 异步保存时无反馈无防重复。修法：submitLoading ref + :loading 绑定 + finally 复位"
+  requirement_coverage: 0
+  context_tokens: 55000
+  knowledge_reuse: 0
+  task_success: true
+  tool_uses: 48
+  findings:
+    - "项目无字面量 UserForm 组件，全仓库 grep/find 无命中，语义最贴近的是 UserManager 用户管理"
+    - "该组件提交按钮此前无任何 :loading，属真实缺陷"
+
+suite:
+  files:
+    - src/views/PlatformManagement/UserManager/index.vue
+  what: "同一根因：UserManager 新增/编辑弹窗确定按钮无 loading。修法：saveLoading ref + :loading + 提交前置 true + finally 复位"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/form.md
+    - .project-knowledge/patterns/dialog.md
+    - .project-knowledge/patterns/crud.md
+  decision_record:
+    - "D1 定位 UserManager/index.vue（editor.vue 是纯表单体 defineExpose，提交按钮在父 index.vue 的 dialog footer）"
+    - "D2 用 ref(false) + :loading + 前置 true + finally 复位，对齐 form.md/dialog.md 的 submitting 模式，三路径均复位"
+    - "D3 saveLoading=true 放 validate 通过后 try 前，避免校验失败也触发 loading；disabled 交给 el-button loading 态内置"
+  requirement_coverage: 0
+  context_tokens: 8000
+  knowledge_reuse: 0
+  task_success: true
+  tool_uses: 15
+  findings:
+    - "editor.vue 只是表单体（defineExpose getFormData/getEditorForm），修复点必须在父组件"
+    - "index.vue 的 queryList 首行 tableConfig.loading=false（应为 true）属既有疑点，不在本次范围未改"
+
+key_comparison:
+  - "两者定位到同一文件、同一修法（loading ref + :loading + finally），说明简单 bug 的收敛一致"
+  - "关键差异在探索成本：native 全仓库 grep/find 找 UserForm 用 48 tool_uses / 55k tokens，suite 靠 crud.md 定位 UserManager 仅 15 tool_uses / 8k tokens——知识库显著降低模糊目标的定位成本"
+  - "suite 有 D1-D3 决策记录 + 顺带发现 queryList 既有 loading 疑点（主动识别但守边界不改），native 无"
+  - "coverage 均自报 0（字面 UserForm 不存在），暴露度量口径问题"

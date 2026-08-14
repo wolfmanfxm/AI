@@ -39,8 +39,6 @@ skills:
       block_below: 50
     knowledge:
       require_accepted: true    # 只读 accepted 状态的知识
-    checkpoint:
-      require_approval: true    # CHECKPOINT 必须用户确认
 
   project-tester:
     confidence:

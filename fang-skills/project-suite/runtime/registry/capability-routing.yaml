@@ -1,128 +1,109 @@
-# Capability Routing v1.0
-#
+# Capability Routing v3.0 — 自动生成，勿手改
 # 用户意图 → 能力匹配 → Skill 路由。
-# Runtime 读取此文件，做语义匹配而非字符串匹配 Trigger Words。
-# Trigger Words 是入口，Capability 是真正能力。
+# 单一源：provider/intents/produces/confidence_min 从 skills.generated.yaml 派生，capability 名称为框架常量。
 
-version: "1.0.0"
+version: "3.0.0"
+generated: true
 
 routing:
   ProjectAnalysis:
-    description: 分析代码库结构、组件、API、模式，生成结构化知识库
+    description: 分析项目结构、组件、API、模式，生成结构化知识库
     intents:
-      cn: [分析项目, 扫描代码, 了解架构, 代码审计, 梳理组件, 项目规范, 编码规范, 刷新知识]
-      en: [analyze codebase, scan project, project audit, project refresh]
+      cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
+      en: [analyze codebase, scan project, project refresh]
     provider: project-analyzer
-    produces: [KnowledgeBase, Context, Graph, KnowledgeIndex]
-    requires: { inputs: [ProjectRoot], fixtures: [] }
+    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
     confidence_min: 70
-
   Planning:
-    description: 将模糊需求收敛为9模块可执行计划
+    description: 需求收敛→完整性检查→自适应访谈→9模块执行契约
     intents:
-      cn: [规划, 拆任务, 估时, 排期, 需求分析, 任务拆分, sprint规划]
-      en: [plan, estimate, break down, sprint planning, task breakdown]
+      cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量, 分解任务, sprint 规划, 任务规划]
+      en: [break down tasks, plan sprint, estimate effort, create dev plan]
     provider: project-planner
     produces: [Plan]
-    requires: { inputs: [KnowledgeBase], fixtures: [context.json, knowledge-index.json] }
     confidence_min: 70
-
   ArchitectureDesign:
-    description: 技术选型、模块设计、API契约设计
+    description: 技术选型+模块设计+API契约，ADR格式决策记录
     intents:
-      cn: [架构设计, 技术选型, 模块设计, 系统设计, API设计, 架构评审]
-      en: [architecture design, tech stack, system design, API design]
+      cn: [架构设计, 技术选型, 模块设计, 系统设计, 数据库设计, API 设计, 架构评审, 怎么设计, 选什么技术, 模块怎么划分, 接口怎么定义]
+      en: [design architecture, tech stack, system design, API design]
     provider: project-architect
     produces: [Architecture]
-    requires: { inputs: [Plan], fixtures: [context.json, PLAN.md] }
     confidence_min: 70
-
   CodeGeneration:
-    description: 按项目规范生成生产级代码
+    description: 按项目规范生成生产级代码，Candidate→Verify
     intents:
-      cn: [写代码, 生成, 实现, 创建组件, 新增页面, 开发功能]
-      en: [generate code, implement, create component, build feature]
+      cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
+      en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]
     provider: project-generator
     produces: [Code]
-    requires: { inputs: [KnowledgeBase, Plan], fixtures: [context-package.json, PLAN.md] }
     confidence_min: 70
-
   Testing:
-    description: 生成测试用例、执行测试、生成覆盖率报告
+    description: AC驱动测试生成+执行，自动检测测试框架
     intents:
-      cn: [写测试, 测试用例, 单元测试, 集成测试, 测试覆盖, 跑测试]
-      en: [write tests, test cases, unit test, test coverage]
+      cn: [写测试, 测试用例, 单元测试, 集成测试, 组件测试, 测试覆盖, 跑测试, 加测试]
+      en: [write tests, test cases, unit test, test coverage, add test, generate test]
     provider: project-tester
     produces: [Test]
-    requires: { inputs: [Code, Plan], fixtures: [被测代码] }
     confidence_min: 70
-
   CodeReview:
-    description: 五轴代码审查，问题分级
+    description: 五轴审查，BLOCKER→PRAISE分级
     intents:
-      cn: [代码审查, review, 检查代码, 审查PR, 代码质量]
+      cn: [代码审查, review, 检查代码, 审查 PR, 代码质量, 审查, 帮我看看这段代码, 这个 PR 怎么样]
       en: [code review, security review, audit code]
     provider: project-reviewer
     produces: [Review]
-    requires: { inputs: [Code, Plan], fixtures: [变更代码] }
     confidence_min: 70
-
-  Refactoring:
-    description: 安全重构，行为不变
-    intents:
-      cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复]
-      en: [refactor, clean up, extract method, simplify]
-    provider: project-refactorer
-    produces: [RefactoredCode]
-    requires: { inputs: [Code, Test], fixtures: [现有测试] }
-    confidence_min: 70
-
   Documentation:
-    description: 生成API/组件/README文档
+    description: 代码→可溯源技术文档，自动匹配风格
     intents:
-      cn: [生成文档, 写文档, API文档, 组件文档, 更新文档]
-      en: [generate docs, api docs, write documentation]
+      cn: [生成文档, 写文档, 补文档, API 文档, README, 更新文档, 补全文档, 组件文档]
+      en: [generate docs, write documentation, update README, api docs]
     provider: project-documenter
     produces: [Documentation]
-    requires: { inputs: [Code], fixtures: [源码文件] }
     confidence_min: 60
-
-  Release:
-    description: 版本号推荐、Changelog合成、发布检查
+  Refactoring:
+    description: 安全重构，行为不变，指标量化
     intents:
-      cn: [发布, 上线, 发版, changelog, 版本号, 发布检查]
-      en: [release, ship, deploy, version bump]
+      cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码, 迁移]
+      en: [refactor, clean up, extract method, simplify, reduce complexity, migrate]
+    provider: project-refactorer
+    produces: [RefactoredCode]
+    confidence_min: 70
+  Release:
+    description: 版本bump+Changelog+发布检查
+    intents:
+      cn: [发布, 上线, 发版, release, changelog, 版本号, 发布检查, 准备发布, 发布前检查]
+      en: [release, ship, deploy, version bump, publish]
     provider: project-releaser
     produces: [Release]
-    requires: { inputs: [Documentation, Review], fixtures: [state.json] }
     confidence_min: 70
-
   PipelineOrchestration:
-    description: 跨Skill全流程编排
+    description: 跨Skill Pipeline编排，auto-advance+Decision-Boundary Checkpoint
     intents:
-      cn: [全流程, 一键执行, 自动编排, pipeline, 端到端]
-      en: [full pipeline, orchestrate, end-to-end, auto sdlc]
+      cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
+      en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
     provider: pipeline-orchestrator
     produces: [PipelineExecution]
-    requires: { inputs: [], fixtures: [capabilities.yaml, workflow-library.yaml] }
     confidence_min: 80
 
 # 匹配规则
 matching:
   # 1. 精确 Intent 匹配 → 直接路由
   # 2. 模糊 Intent 匹配 → 展示 Top-3 能力让用户选择
-  # 3. 多能力匹配 → 按 consumes 是否有上游产出排序，已有产出的优先
+  # 3. 多能力匹配 → 按 consumes 是否有上游产出排序
   # 4. 无匹配 → 展示全部能力列表
   strategy: [exact_intent, fuzzy_top3, availability_sort, full_list]
 
-# 能力依赖图（同 produces/consumes DAG，以能力视角表达）
+# 能力依赖图（从 produces/consumes 推导，Capability DAG，非强制执行顺序）
 dependency_graph:
-  ProjectAnalysis: { provides: [KnowledgeBase, Context, Graph], needs: [] }
-  Planning:        { provides: [Plan], needs: [KnowledgeBase] }
-  ArchitectureDesign: { provides: [Architecture], needs: [KnowledgeBase, Plan] }
-  CodeGeneration:  { provides: [Code], needs: [KnowledgeBase, Plan, Architecture] }
-  Testing:         { provides: [Test], needs: [Code, Plan] }
-  CodeReview:      { provides: [Review], needs: [Code, Plan, Test] }
-  Refactoring:     { provides: [RefactoredCode], needs: [Code, Test, Review] }
-  Documentation:   { provides: [Documentation], needs: [Code, Review] }
-  Release:         { provides: [Release], needs: [Documentation, Review, Test] }
+  ProjectAnalysis: { provides: [KnowledgeBase, KnowledgeIndex, Context, Graph], needs: [] }
+  Planning: { provides: [Plan], needs: [KnowledgeBase, KnowledgeIndex, Context, Graph] }
+  ArchitectureDesign: { provides: [Architecture], needs: [KnowledgeBase, Plan, Context, Graph] }
+  CodeGeneration: { provides: [Code], needs: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph] }
+  Testing: { provides: [Test], needs: [Code, Plan, KnowledgeBase, Context] }
+  CodeReview: { provides: [Review], needs: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test] }
+  Documentation: { provides: [Documentation], needs: [Code, Review, KnowledgeBase, Context] }
+  Refactoring: { provides: [RefactoredCode], needs: [Code, KnowledgeBase, Test, Review] }
+  Release: { provides: [Release], needs: [Documentation, Review, Test] }
+  PipelineOrchestration: { provides: [PipelineExecution], needs: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release] }

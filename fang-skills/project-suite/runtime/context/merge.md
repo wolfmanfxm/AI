@@ -24,7 +24,7 @@
 ```
 Generator 生成一个组件:
 
-User Prompt:     "用卡片布局显示客户列表"
+User Prompt:     "用卡片布局显示用户列表"
 patterns/table.md: "列表页使用 PageTable + SchemaTable"
 CLAUDE.md:       "Element Plus 使用 el-mp 前缀"
 

@@ -22,7 +22,7 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 ```json
 {
   "schemaVersion": "1.0.0",
-  "project": "afc-newcore-web-frontend",
+  "project": "my-web-app",
   "runs": [
     {
       "runId": "run-20260730-001",
@@ -76,8 +76,8 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
       },
 
       "input": {
-        "planFile": "artifacts/plans/PLAN-credit-activate.md",
-        "architectureFile": "artifacts/decisions/ARCHITECTURE-credit.md",
+        "planFile": "artifacts/plans/PLAN-user-activate.md",
+        "architectureFile": "artifacts/decisions/ARCHITECTURE-user.md",
         "capabilitiesUsed": ["VueConvention","TablePattern","FormPattern","ApiPattern"],
         "knowledgeFilesRead": 4,
         "contextSizeEstimate": "~45k tokens"
@@ -85,7 +85,7 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 
       "output": {
         "filesGenerated": 3,
-        "artifacts": ["workspace/views/credit/activate/index.vue","workspace/api/credit.ts","workspace/types/credit.d.ts"],
+        "artifacts": ["workspace/views/user/activate/index.vue","workspace/api/user.ts","workspace/types/user.d.ts"],
         "linesOfCode": 320,
         "approxTokens": 28000
       },

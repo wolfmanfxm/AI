@@ -9,7 +9,7 @@ consumes: [KnowledgeBase,Plan,Architecture,Code,Test,Review,Documentation,Releas
 depends_on: [project-analyzer,project-planner,project-architect,project-generator,project-tester,project-reviewer,project-refactorer,project-documenter,project-releaser]
 stages: [discovery, orchestrate, validation, delivery]
 verification: { checks: 0, source: prompts/verifier.md }
-evidence: { format: knowledge-object.schema.json, source: knowledge-graph.yaml }
+evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 0, source: prompts/execution.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

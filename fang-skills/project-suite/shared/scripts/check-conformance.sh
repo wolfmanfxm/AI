@@ -39,7 +39,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 
   # G2: skill.yaml exists and has required fields
   if [ -f "$skill_dir/skill.yaml" ]; then
-    required_fields=("id:" "version:" "mode:" "owner:" "priority:" "produces:" "consumes:" "boundary:")
+    required_fields=("id:" "version:" "mode:" "owner:" "produces:" "consumes:" "boundary:")
     missing_fields=()
     for field in "${required_fields[@]}"; do
       if ! grep -q "$field" "$skill_dir/skill.yaml"; then
@@ -120,7 +120,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # G6: frontmatter has description + trigger words（多行 YAML，取 frontmatter 完整内容）
-  desc=$(awk '/^---/{f++} f==1' "$skill_dir/SKILL.md" 2>/dev/null | grep -A5 "description:" | tr '\n' ' ')
+  desc=$(awk '/^---/{f++} f==1' "$skill_dir/SKILL.md" 2>/dev/null | sed -n '/description:/,$p' | tr '\n' ' ')
   if echo "$desc" | grep -q "触发词\|trigger" && echo "$desc" | grep -q "产出"; then
     green "  G6 PASS: description has trigger+output"
   else
@@ -128,11 +128,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G7: registered in capabilities.yaml
-  if grep -q "$skill" "$SUITE_ROOT/runtime/registry/capabilities.yaml" 2>/dev/null; then
-    green "  G7 PASS: registered in capabilities.yaml"
+  # G7: registered in skills.generated.yaml（per-skill 唯一派生源）
+  if grep -qE "^  ${skill}:" "$SUITE_ROOT/runtime/registry/skills.generated.yaml" 2>/dev/null; then
+    green "  G7 PASS: registered in skills.generated.yaml"
   else
-    yellow "  G7 WARN: not found in capabilities.yaml"
+    yellow "  G7 WARN: not found in skills.generated.yaml"
     WARNINGS=$((WARNINGS+1))
   fi
 
@@ -259,6 +259,47 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     fi
   fi
 done
+
+# ═══ G18: Scheduler Contract (cross-skill check) ═══
+echo "--- scheduler-contract ---"
+scheduler_file="$SUITE_ROOT/runtime/config/scheduler.yaml"
+if [ -f "$scheduler_file" ]; then
+  # G18a: 每个 skill 有 scheduler entry
+  missing_sched=()
+  for skill_dir in "$SKILLS_DIR"/*/; do
+    skill=$(basename "$skill_dir")
+    if ! grep -qE "^  ${skill}:" "$scheduler_file"; then
+      missing_sched+=("$skill")
+    fi
+  done
+  if [ ${#missing_sched[@]} -eq 0 ]; then
+    green "  G18a PASS: all skills have scheduler entry"
+  else
+    yellow "  G18a WARN: missing scheduler entry: ${missing_sched[*]}"
+    WARNINGS=$((WARNINGS+1))
+  fi
+
+  # G18b: priority 唯一
+  priority_dupes=$(grep -oE "priority: [0-9]+" "$scheduler_file" | grep -oE "[0-9]+" | sort | uniq -d)
+  if [ -z "$priority_dupes" ]; then
+    green "  G18b PASS: priority values unique"
+  else
+    yellow "  G18b WARN: duplicate priority: $priority_dupes"
+    WARNINGS=$((WARNINGS+1))
+  fi
+
+  # G18c: decision_order 唯一
+  order_dupes=$(grep -oE "decision_order: [0-9]+" "$scheduler_file" | grep -oE "[0-9]+" | sort | uniq -d)
+  if [ -z "$order_dupes" ]; then
+    green "  G18c PASS: decision_order values unique"
+  else
+    yellow "  G18c WARN: duplicate decision_order: $order_dupes"
+    WARNINGS=$((WARNINGS+1))
+  fi
+else
+  red "  G18 FAIL: scheduler.yaml missing"
+  ERRORS=$((ERRORS+1))
+fi
 
 echo ""
 

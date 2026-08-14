@@ -2,22 +2,16 @@ id: project-architect
 version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 30
 category: planning
 complexity: { min: medium, max: high }
-decision_order: 3
 cost: medium
-parallel: false
+description: "技术选型+模块设计+API契约，ADR格式决策记录"
+capabilities: [tech-selection, module-design, api-contract]
+confidence_min: 70
 requires: []
 produces: [Architecture]
 consumes: [KnowledgeBase, Plan, Context, Graph]
-depends_on: [project-planner]
 
-depends_on_skill:
-  project-analyzer: ">=1.3"
-  project-planner: ">=1.2"
-
-parallel_with: []
 boundary: 只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改
 last_reviewed: "2026-08-04"
 review_cadence_days: 90

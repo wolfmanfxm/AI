@@ -1,0 +1,62 @@
+task: L2
+category: long-task
+prompt: "全链路重构：数据层 → 业务层 → 视图层"
+
+native:
+  files:
+    - workspace/api/result.ts
+    - workspace/views/channelManage/dealerPersonInfo/hooks/useDealerPersonList.ts
+    - workspace/views/channelManage/dealerPersonInfo/hooks/useDealerPersonDetail.ts
+    - workspace/types/channelManage/dealerPersonInfo.ts
+    - workspace/views/channelManage/dealerPersonInfo/index.vue
+    - workspace/views/channelManage/dealerPersonInfo/components/DealerPersonDetailDrawer.vue
+  what: "选定 dealerPersonInfo（经销商人员信息）。数据层：isSuccessResult/SUCCESS_RESULT_CODES 统一 result 判断 + 4 响应类型继承 IResponseResultRows/Row。业务层：useDealerPersonList（查询归一化/列表/在职离职变更/大区懒加载/字典）+ useDealerPersonDetail（详情/经销商选项/组织解析/保存）。视图层：index.vue 与 Drawer 只留展示配置与编排。行为不变（唯一差异 console.error 日志 tag）"
+  requirement_coverage: 0.8
+  context_tokens: 118393
+  knowledge_reuse: 0.9
+  task_success: true
+  process_note: "⚠️ 本轮过程被污染：agent 为跑 vue-tsc 临时软链了兄弟项目 /workspace 的 node_modules（跨界访问），且 git 工作目录发生混乱（分支切换/pull）。重构代码本身正确完整，但'长任务下 agent 会跨界访问 node_modules + 触碰 git'是真实的过程风险"
+  findings:
+    - "架构文档'View→API 直接、无中间层'属实：该模块业务逻辑全内联 .vue 中，本次补齐缺失的 composable 中间层"
+    - "data?.result === '1' || '200' 在本模块出现 6 次，收敛为 isSuccessResult"
+    - "4 个响应接口重复声明 result/msg/rows/rowcount，统一继承 IResponseResultRows/Row"
+    - "存量问题（非本次引入）：dealerInfo.ts 重复字段 applicationId；messageCenter/PlatformConfigDrawer 语法错误；全量 vue-tsc 4GB 堆 OOM"
+
+suite:
+  files:
+    - workspace/utils/response.ts
+    - workspace/views/trustManage/entryDeclaration/api/entryDeclaration.ts
+    - workspace/views/trustManage/entryDeclaration/hooks/useEntryDeclarationList.ts
+    - workspace/views/trustManage/entryDeclaration/config/listConfig.ts
+    - workspace/views/trustManage/entryDeclaration/index.vue
+  what: "选定 entryDeclaration（进件申报列表页）。数据层：isSuccess() 收敛全项目 2000+ 处散落的 result==='1'，4 列表接口补 IResponseResultRows/Row 返回类型（对齐 quotaManage 黄金模式），params 改 DTO。业务层：useEntryDeclarationList composable 整体迁入状态/事件/生命周期。视图层：index.vue 422→110 行退化为模板+配置+编排，静态配色 map 抽 config/listConfig.ts"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/vue.md
+    - .project-knowledge/patterns/folder.md
+    - .project-knowledge/api/overview.md
+    - .project-knowledge/components/catalog.md
+    - workspace/api/type.d.ts
+    - workspace/api/quotaManage.ts
+  decision_record:
+    - "D1 result 判断收敛到 isSuccess(data)（success===true || result==='1'），复用 IResponseResult* 类型而非新增私有类型"
+    - "D2 业务逻辑抽 composable，pageTableRef 由视图持有、参数注入，DOM ref 不归业务层"
+    - "D3 tableColumns（响应式配置）留 hook，纯静态配色 map 移 config/listConfig.ts 避免与 enums.ts 旧状态码冲突"
+    - "D4 不改 sibling 页 incomingAllocation/creditAllocation，本次只动主列表页"
+  requirement_coverage: 0.85
+  context_tokens: 109649
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "响应拦截器 resultAnalyseForAjax 已写 data.success，但视图仍手写 result==='1'（2038 处），isSuccess 补缺口"
+    - "quotaManage.ts 是项目已存在的数据层黄金模式（Promise<AxiosResponse<IResponseResultRows<T>>>），对齐它而非自创"
+    - "workspace/api/trustManage/entryDeclaration.ts（341 行）是硬编码 mock，已被本地 api/entryDeclaration.ts 取代（两套并存语义重叠）"
+    - "唯一行为差异：删掉 handleEdit 一处调试 console.log（非用户可见，符合 dead-code 清理）"
+
+key_comparison:
+  - "两者都正确执行了全链路三层重构（数据层 result 收敛/类型统一 → 业务层 composable → 视图层瘦身），模式高度一致"
+  - "落点不同：native 选 dealerPersonInfo（经销商人员），suite 选 entryDeclaration（进件申报）——都是 400+ 行的 God 页"
+  - "suite 收敛了 2038 处 result==='1' 的全局缺口（更有全局视野），native 收敛 6 处模块内重复"
+  - "两者都识别并对齐项目既有黄金模式（IResponseResultRows / quotaManage.ts），reuse 均 0.9"
+  - "⚠️ 过程差异：native 跨界软链 node_modules + 触碰 git（过程污染），suite 严守沙箱零 git 操作——这是长任务下 native vs suite 的护栏差异"

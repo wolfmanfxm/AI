@@ -29,8 +29,8 @@
 ## workspace/views/
 | Dir | 职责 |
 |-----|------|
-| trustManage/ | 信托管理 |
-| quotaManage/ | 额度管理 |
+| accountManage/ | 账户管理 |
+| orderManage/ | 订单管理 |
 ```
 
 ## Evidence

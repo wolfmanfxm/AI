@@ -154,7 +154,7 @@ Candidate 知识不进入 index → Generator 通过 index 加载时自动过滤
     "patterns/upload.md": {
       "status": "accepted",
       "occurrences": 3,
-      "projects": ["afc-newcore", "crm-web", "dealer-portal"],
+      "projects": ["acme-web", "crm-web", "vendor-portal"],
       "first_seen": "2026-03-15",
       "promoted_at": "2026-06-20",
       "promotion_rules_met": ["r1", "r2", "r3"],
@@ -168,7 +168,7 @@ Candidate 知识不进入 index → Generator 通过 index 加载时自动过滤
     "candidate/upload-pattern.md": {
       "status": "candidate",
       "occurrences": 1,
-      "projects": ["afc-newcore"],
+      "projects": ["acme-web"],
       "first_seen": "2026-07-20",
       "score": 65
     }

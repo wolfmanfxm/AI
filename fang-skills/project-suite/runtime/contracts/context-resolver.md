@@ -1,6 +1,6 @@
 # Context Resolver v1.0
 
-> Task → Tags → Query knowledge-graph.yaml → Curated Knowledge Injection。
+> Task → Tags → Query graph.json → Curated Knowledge Injection。
 > 解决"1000 篇知识，Planner 读哪些？"的问题。
 
 ## 工作流
@@ -12,7 +12,7 @@
 Context Resolver: 提取 tags → [form, user, upload, validation, register]
         │
         ▼
-Query knowledge-graph.yaml:
+Query graph.json:
   @knowledge:type=pattern,convention,principle,decision tags=form,user,upload,validation,register
         │
         ▼
@@ -47,13 +47,13 @@ Context Resolver 一次回答三个问题，返回三个维度的 context：
 | 层 | 来源 | 回答 | 类型 |
 |----|------|------|------|
 | **Long-term** | Knowledge Vault | 长期记住什么？ | 跨项目 Instinct/Playbook |
-| **Project semantic** | .project-knowledge + knowledge-graph.yaml | 应该怎么做？ | Patterns/Rules/Decisions |
+| **Project semantic** | .project-knowledge + graph.json | 应该怎么做？ | Patterns/Rules/Decisions |
 | **Structural** | graph.json + Graph Query | 代码怎么连接？ | callers/callees/impact |
 
 ```
 Context Resolver
   ├── Long-term  → Knowledge Vault（跨项目）
-  ├── Semantic   → knowledge-graph.yaml（项目语义）
+  ├── Semantic   → graph.json（项目语义）
   └── Structural → graph.json（代码结构）
 ```
 
@@ -106,9 +106,9 @@ semantic_knowledge:
     why_relevant: "tag match: form, validation"
 
 structural_facts:
-  - { query: findConsumers(CustomerAPI), result: "被 12 个模块调用, 改动影响范围广" }
+  - { query: findConsumers(UserApi), result: "被 12 个模块调用, 改动影响范围广" }
   - { query: findDependencies(UserForm), result: "依赖 FormWrapper + docsStore + userAPI" }
-  - { query: findImpacted([customerId字段]), result: "3 个组件 + 2 个 API 受影响" }
+  - { query: findImpacted([userId字段]), result: "3 个组件 + 2 个 API 受影响" }
 ```
 
 ## 集成

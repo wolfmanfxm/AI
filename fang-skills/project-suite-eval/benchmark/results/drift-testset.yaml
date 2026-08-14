@@ -1,0 +1,45 @@
+# Domain Drift 检测准确率 — 测试集
+# 30 个命名样例，每个标注 ground_truth（drift / no_drift）
+# no_drift = 规范术语 或 不同概念（不应被检测器报 drift）
+# drift    = 漂移术语（应被检测器报 drift，correct_to 为规范术语）
+
+version: "1.0.0"
+
+samples:
+  # ── no_drift：规范术语（10）──
+  - { id: N1,  term: customerIndividual, domain: customer, ground_truth: no_drift }
+  - { id: N2,  term: customerCompany,    domain: customer, ground_truth: no_drift }
+  - { id: N3,  term: groupCustomer,      domain: customer, ground_truth: no_drift }
+  - { id: N4,  term: customerTag,        domain: customer, ground_truth: no_drift }
+  - { id: N5,  term: customerCheck,      domain: customer, ground_truth: no_drift }
+  - { id: N6,  term: retailQuota,        domain: quota,    ground_truth: no_drift }
+  - { id: N7,  term: wholesaleQuota,     domain: quota,    ground_truth: no_drift }
+  - { id: N8,  term: margin,             domain: quota,    ground_truth: no_drift }
+  - { id: N9,  term: rebate,             domain: quota,    ground_truth: no_drift }
+  - { id: N10, term: scoreCard,          domain: credit,   ground_truth: no_drift }
+
+  # ── no_drift：不同概念（5，检测器最易误报的地方）──
+  - { id: N11, term: user,     domain: other, ground_truth: no_drift, note: "系统登录用户，非客户" }
+  - { id: N12, term: dealer,   domain: other, ground_truth: no_drift, note: "经销商，非客户" }
+  - { id: N13, term: employee, domain: other, ground_truth: no_drift, note: "员工，非客户" }
+  - { id: N14, term: creditApprove, domain: credit, ground_truth: no_drift }
+  - { id: N15, term: creditReview,  domain: credit, ground_truth: no_drift }
+
+  # ── drift：明确漂移（11，应报 drift）──
+  - { id: D1,  term: personInfo,   domain: customer, ground_truth: drift, correct_to: customerIndividual }
+  - { id: D2,  term: personalInfo, domain: customer, ground_truth: drift, correct_to: customerIndividual }
+  - { id: D3,  term: company,      domain: customer, ground_truth: drift, correct_to: customerCompany }
+  - { id: D4,  term: client,       domain: customer, ground_truth: drift, correct_to: customer }
+  - { id: D5,  term: group,        domain: customer, ground_truth: drift, correct_to: groupCustomer }
+  - { id: D6,  term: person,       domain: customer, ground_truth: drift, correct_to: customerIndividual }
+  - { id: D7,  term: deposit,      domain: quota,    ground_truth: drift, correct_to: margin }
+  - { id: D8,  term: audit,        domain: credit,   ground_truth: drift, correct_to: creditReview }
+  - { id: D9,  term: approval,     domain: credit,   ground_truth: drift, correct_to: creditApprove }
+  - { id: D10, term: creditLimit,  domain: quota,    ground_truth: drift, correct_to: quota, note: "额度口径，应统一 quota" }
+  - { id: D11, term: customerInfo, domain: customer, ground_truth: drift, correct_to: customerIndividual, note: "应明确个人还是机构" }
+
+  # ── drift：边界（4，泛化词，检测器容易漏报或误判）──
+  - { id: B1, term: individual, domain: customer, ground_truth: drift, correct_to: customerIndividual, note: "泛化词" }
+  - { id: B2, term: amount,     domain: quota,    ground_truth: drift, correct_to: quota, note: "泛化词" }
+  - { id: B3, term: limit,      domain: quota,    ground_truth: drift, correct_to: quota, note: "泛化词" }
+  - { id: B4, term: money,      domain: quota,    ground_truth: drift, correct_to: margin, note: "泛化词，可指额度/保证金" }

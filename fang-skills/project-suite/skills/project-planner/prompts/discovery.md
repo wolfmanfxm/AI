@@ -7,7 +7,7 @@
 0. **Code Audit** → [prompts/code-audit.md](code-audit.md)：
    标注 `[已实现]` / `[部分实现]` / `[未实现]` → Interview 前先知道项目有什么。
 
-1. **Context Resolver** — 查询 knowledge-graph.yaml → 注入 curated knowledge：
+1. **Context Resolver** — 查询 graph.json → 注入 curated knowledge：
    → [Context Resolver](../../../runtime/contracts/context-resolver.md)
 
 2. **Completeness Check** → [prompts/completeness-check.md](completeness-check.md)：

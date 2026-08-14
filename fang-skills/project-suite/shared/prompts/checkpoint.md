@@ -35,7 +35,7 @@
 
 | ❌ 弱 CHECKPOINT | ✅ 强 CHECKPOINT |
 |-----------------|----------------|
-| "确认后继续" | "🔴 CHECKPOINT — 展示: 新增brandRecipient/index.vue(+220行)+BrandRecipientDialog.vue(+180行)，⚠️ 无ARCHITECTURE.md约束，确认后写入文件" |
+| "确认后继续" | "🔴 CHECKPOINT — 展示: 新增shippingAddress/index.vue(+220行)+ShippingAddressDialog.vue(+180行)，⚠️ 无ARCHITECTURE.md约束，确认后写入文件" |
 | "建议确认一下"（无 🔴 标记） | 🔴 CHECKPOINT 视觉标记是 LLM 扫描时的锚点 |
 | AskUserQuestion 无选项 | 给出 2-3 个具体选项 + 推荐项 |
 

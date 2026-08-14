@@ -28,9 +28,9 @@ types:
 principles:
   - id: principle.base-form
     type: form_standard
-    statement: "所有信息填写功能必须使用 BaseForm 封装"
+    statement: "所有信息填写功能必须使用 FormBase 封装"
     scope: project
-    source: knowledge-graph.yaml#pattern.form-wrapper
+    source: graph.json#pattern.form-wrapper
     confidence: 0.96
     enforcement: hard
     evidence: ["331 files use FormWrapper"]
@@ -39,7 +39,7 @@ principles:
     type: api_standard
     statement: "所有 API 函数必须使用 export function 风格"
     scope: project
-    source: knowledge-graph.yaml#convention.api-style
+    source: graph.json#convention.api-style
     confidence: 0.92
     enforcement: hard
 
@@ -55,7 +55,7 @@ principles:
     type: permission_model
     statement: "所有权限必须经过 PermissionService"
     scope: project
-    source: knowledge-graph.yaml#decision.permission
+    source: graph.json#decision.permission
     confidence: 0.88
     enforcement: hard
 

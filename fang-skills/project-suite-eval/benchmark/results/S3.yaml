@@ -1,0 +1,45 @@
+task: S3
+category: simple
+prompt: "给列表页加一个空状态提示"
+
+native:
+  files:
+    - workspace/views/baseData/bizLineConfig/index.vue
+  what: "给业务条线配置列表页（裸 el-table）加空状态：引入 Empty 组件 + #empty 插槽，无数据时显示'暂无记录'"
+  requirement_coverage: 0
+  context_tokens: 43773
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "项目已有通用 Empty 组件（el-empty + 品牌空图），直接复用而非新建"
+    - "SchemaTable 已内置空态，本页是裸 el-table 未覆盖，属真实缺口"
+
+suite:
+  files:
+    - workspace/views/baseData/bizLineConfig/index.vue
+  what: "同文件、同思路：补 <template #empty><Empty description=\"暂无记录\" /></template> 并引入 Empty 组件"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/components/catalog.md
+    - workspace/components/common/SchemaTable/index.vue
+    - workspace/components/common/Empty/index.vue
+    - workspace/views/creditManage/creditApprove/components/TotalCreditDetailDialog.vue
+  decision_record:
+    - "D1 选裸 el-table 缺 empty 的列表页（bizLineConfig），而非已内置空态的 SchemaTable/PageTable 页"
+    - "D2 复用 Empty 组件 + 文案'暂无记录'，对齐 TotalCreditDetailDialog 范式"
+    - "D3 不加 v-if=!loading，与现有裸 el-table 空态写法一致"
+  requirement_coverage: 1
+  context_tokens: 67926
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "项目中裸 el-table 共 51 处，多数缺 #empty；Empty 是官方封装应复用"
+    - "SchemaTable 已内置空态，缺口集中在裸 el-table 页面"
+
+key_comparison:
+  - "两者命中同一文件、同一修法（复用 Empty 组件 + #empty 插槽），收敛一致"
+  - "native 靠 grep 找到 Empty 组件并复用（reuse=1），suite 靠 catalog.md + table.md 结构化定位并附 TotalCreditDetailDialog 范式证据"
+  - "suite 有 D1-D3 决策记录 + 精确缺口统计（51 处裸 el-table），native 只做单点修复"
+  - "native 自报 tokens=1（明显失真），suite 自报 35k 也偏低——实际 subagent_tokens 才是可靠口径（native 43773 / suite 67926）"

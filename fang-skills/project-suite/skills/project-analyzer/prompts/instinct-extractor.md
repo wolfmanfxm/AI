@@ -9,8 +9,8 @@ Instinct 不是单个项目的 Pattern，而是**跨项目反复出现的规律*
 
 | 层级 | 范围 | 示例 |
 |------|------|------|
-| **Fact** | 单项目 | "afc-newcore 用 FormWrapper 封装表单" |
-| **Rule** | 单项目 | "afc-newcore 所有表单必须用 FormWrapper" |
+| **Fact** | 单项目 | "acme 用 FormWrapper 封装表单" |
+| **Rule** | 单项目 | "acme 所有表单必须用 FormWrapper" |
 | **Instinct** | 跨项目 | "Vue3 项目：Always use FormWrapper pattern for complex forms" |
 
 ## 提炼逻辑
@@ -36,12 +36,12 @@ instincts:
     type: Always
     statement: "Vue3 项目：Always use FormWrapper pattern for complex forms"
     evidence:
-      projects: [afc-newcore-web, bcapnext, crm-system]
+      projects: [acme-web, cms, crm-system]
       total_occurrences: 47
       consistency: 0.96  # 47/49 forms use it
     source_patterns:
-      - pattern.form-wrapper (afc-newcore-web)
-      - pattern.form-layout (bcapnext)
+      - pattern.form-wrapper (acme-web)
+      - pattern.form-layout (cms)
     promotion_ready: true
     suggested_playbook: "Form Development.md"
 
@@ -49,7 +49,7 @@ instincts:
     type: Prefer
     statement: "TypeScript 项目：Prefer Repository Pattern for data access"
     evidence:
-      projects: [afc-newcore-web, crm-system]
+      projects: [acme-web, crm-system]
       total_occurrences: 31
       consistency: 0.89
     promotion_ready: true
@@ -59,7 +59,7 @@ instincts:
     type: Avoid
     statement: "TypeScript 项目：Avoid `any` type in production code"
     evidence:
-      projects: [afc-newcore-web, bcapnext, crm-system]
+      projects: [acme-web, cms, crm-system]
       any_usage_rate: "3%-8%"
     promotion_ready: true
 
@@ -67,7 +67,7 @@ instincts:
     type: Prefer
     statement: "Monorepo 项目：Prefer pnpm over npm"
     evidence:
-      projects: [afc-newcore-web]  # 仅 1 个项目
+      projects: [acme-web]  # 仅 1 个项目
     promotion_ready: false  # 等下一个项目验证
 ```
 

@@ -4,8 +4,9 @@ metadata: skill.yaml
 description: >
   根据需求和项目规范生成生产级代码：Vue 3 组件、页面、API 模块、工具函数、类型定义。
   必须遵循项目现有模式，从 .project-knowledge/ 提取规范而非凭记忆。
-  触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、implement、
-  create component、build feature、generate code、write a、开发、编写、添加。
+  触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、修改、调整、修复、
+  删除、改、搭建、implement、create component、build feature、generate code、write a、modify、
+  fix、delete、change、update、build、开发、编写、添加。
   产出：代码文件（.vue / .ts / .js 等）+ completion-report.md。
 ---
 
@@ -40,6 +41,7 @@ description: >
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 generator 只写代码。缺少上游产物 → 提示先执行 planner/architect。

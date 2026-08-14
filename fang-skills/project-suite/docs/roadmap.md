@@ -14,7 +14,7 @@
 
 ## v1.0.0 已完成
 
-- [x] Knowledge Object — 统一 Schema v2.0，knowledge-graph.yaml 为 Machine Source of Truth
+- [x] Knowledge Object — 统一 Schema v2.0，graph.json 为 Machine Source of Truth
 - [x] Knowledge Query — API spec + CLI tool，结构化查询替代读 .md
 - [x] Context Resolver — 10/10 Skill Discovery step 0，Task → Tags → Query → 注入
 - [x] Knowledge Evaluation — Promotion Reviewer Phase 8，CrossProject/Reusability/FrameworkCoupling 评分
@@ -32,9 +32,9 @@
 ### 做
 
 - [x] Knowledge Query 成为所有 Skill 的唯一数据入口（消除残留 .md 直接读取）
-- [ ] Domain Model → 全 Suite：Analyzer(candidate) → Planner(confirm) → Architect(validate) → Generator(follow) → Reviewer(detect drift)，形成 Domain-aware SDLC
-- [ ] Benchmark 套件：simple/medium/complex/long-task 四类，20 个真实任务对比 native Claude Code vs project-suite，测 Planning Accuracy/Requirement Coverage/Context Tokens/Interview Questions/Human Interventions/Task Success/Review Defects/Knowledge Reuse
-- [ ] 完整生成脚本：catalog/capabilities/routing 从 skill.yaml 派生（消除多头权威的剩余漂移风险）
+- [x] Domain Model → 全 Suite：Analyzer(candidate) → Planner(confirm) → Architect(validate) → Generator(follow) → Reviewer(detect drift)。已验 4.5/5 环（Analyzer 提取✅ / Architect V8✅ / Generator V7✅ / Reviewer V6✅ / Planner confirm🟡），见 ../../project-suite-eval/benchmark/results/domain-aware-sdlc-verification.md
+- [x] Benchmark 套件：20 个真实任务 native vs project-suite 对比完成。结论：suite 收益=过程质量（Decision Record/边界纪律/护栏），非 token/复用。见 ../../project-suite-eval/benchmark/analysis.md
+- [x] 完整生成脚本：catalog/capabilities/routing 从 skill.yaml 派生（消除多头权威的剩余漂移风险）
 - [ ] Context Resolver 支持跨项目知识注入（不只是当前项目）
 - [ ] Knowledge Decay 自动化（check-decay.sh → 定期执行 → 自动标记 STALE/DEPRECATED）
 - [ ] Knowledge Score 复合指标（quality × coverage × reuse × freshness → 排序权重）

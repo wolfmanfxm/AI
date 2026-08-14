@@ -1,0 +1,46 @@
+task: L4
+category: long-task
+prompt: "迁移整个项目从 Vue2 到 Vue3"
+
+native:
+  files:
+    - workspace/views/collection/vehicleManage/inventoryTaskList/detail.vue
+  what: "判定项目已是 Vue3（vue ^3.4.29 / element-plus 2.13.7 / vue-router 4 / pinia 2 / vite 6，main.ts createApp，1373 个 .vue 用 script setup），迁移无需执行。仅修复 1 处 Vue2 深度选择器 ::v-deep() → :deep()"
+  requirement_coverage: 1
+  context_tokens: 43222
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "package.json/依赖/构建工具/代码写法三方面证据一致，项目已是完整 Vue3 工程"
+    - "唯一实质残留 detail.vue:772 的 ::v-deep(.m-carinfodetail-img)，已改 :deep()"
+    - "4 个 Options API export default 文件均为 workflow/form demo 页，用 Element Plus 语法，Vue3 合法非残留"
+    - "indexvue2.vue 文件名含 vue2 但内容是合法 Vue3，仅命名误导"
+
+suite:
+  files:
+    - workspace/views/collection/vehicleManage/inventoryTaskList/detail.vue
+  what: "判定已是 Vue3（vue ^3.4.29 / vite 7.3.1 / main.ts createApp / 1649 个 .vue 中 1373 个即 83% 用 script setup），无需迁移。修复 1 处 ::v-deep() → :deep()"
+  knowledge_queried:
+    - .project-knowledge/context.json
+    - .project-knowledge/index.md
+    - .project-knowledge/architecture/tech-stack.md
+  decision_record:
+    - "D1 项目已 Vue 3.4.29，不做迁移（createApp + script setup 83% + 无 Vue2 核心 API）"
+    - "D2 修复唯一 ::v-deep() 为 :deep()（行为等价，消 deprecation）"
+    - "D3 table-function.js 的 $children 是真实残留（Vue3 已移除），在 bcapnext 导出兜底路径潜在 undefined，未盲改需专项重构"
+    - "D4 bcapnext 渲染器 $listeners/$slots 是内部命名约定（从 Vue3 $attrs 注入），非运行期 Vue2 依赖，不改"
+  requirement_coverage: 0.9
+  context_tokens: 53451
+  knowledge_reuse: 0.3
+  task_success: true
+  findings:
+    - "全项目无 Vue2 核心 API：grep 无 new Vue/Vue.use/Vue.prototype/$set/filters/beforeDestroy/.sync 实际用法"
+    - "::v-deep 仅 1 处（detail.vue:772）已改，项目其余 706 处已用 :deep("
+    - "table-function.js:168-169,191 用 Vue2 独有的 item.$children/lyTableRef.$children，Vue3 中 undefined，属真实 Vue2 残留（导出兜底分支潜在 bug）"
+    - "bcapnext 多个文件以 $listeners 作参数/对象键，实际数据来自 Vue3 $attrs，仅 Vue2 时代命名遗留，功能正常"
+
+key_comparison:
+  - "两者都正确判定'已是 Vue3 无需迁移'（长任务'需求已满足'识别的正面案例），并都修复了同一处 ::v-deep"
+  - "suite 更彻底：额外发现 $children（真实 Vue2 残留、潜在运行期 bug，native 漏掉），并正确分类 $listeners/$slots 为命名遗留而非依赖"
+  - "suite 靠 context.json techStack.framework=Vue 3.4.29 直接佐证 + 量化（83% script setup / 706 :deep），native 靠 package.json 定性"
+  - "suite 的 D3 显示'发现真实残留但守边界不盲改'（$children 需专项重构），native 未发现 $children"

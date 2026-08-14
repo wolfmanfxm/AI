@@ -69,7 +69,7 @@ results:
 
 ## CLI 工具
 
-`shared/scripts/knowledge-query.sh` — 从 `knowledge-graph.yaml` 中查询：
+`shared/scripts/knowledge-query.sh` — 从 `graph.json` 中查询：
 
 ```bash
 # 查询所有 Form 相关的 pattern

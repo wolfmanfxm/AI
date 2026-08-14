@@ -17,8 +17,8 @@
 decisions:
   - field: form_component
     state: KNOWN
-    value: BaseForm
-    source: knowledge-graph.yaml#pattern.form-wrapper
+    value: FormBase
+    source: graph.json#pattern.form-wrapper
   - field: avatar_storage
     state: ASSUMED
     value: existing-upload-service
@@ -67,7 +67,7 @@ planning_confidence = (requirement_completeness × 0.6) + (knowledge_coverage ×
 
 ```markdown
 ## Assumptions
-- Assume 使用现有 BaseForm 模式 (confidence: 0.81)
+- Assume 使用现有 FormBase 模式 (confidence: 0.81)
 - Assume 当前权限模型适用 (confidence: 0.75)
 - Assume 单用户单记录 (confidence: 0.90)
 ```
@@ -81,8 +81,8 @@ planning_confidence = (requirement_completeness × 0.6) + (knowledge_coverage ×
 - 发现 `[未实现] Export` → 标记为 gap → Interview 时可以问
 
 **Context Resolver 已回答的 → 不重复问**：
-- "用什么表单组件？" → Resolver: BaseForm → 跳过
-- "是否需要审批流？" → Resolver: creditWorkflow 存在 → 问"是否复用？"而非"是否需要？"
+- "用什么表单组件？" → Resolver: FormBase → 跳过
+- "是否需要审批流？" → Resolver: approvalWorkflow 存在 → 问"是否复用？"而非"是否需要？"
 
 ## Planning Loop
 

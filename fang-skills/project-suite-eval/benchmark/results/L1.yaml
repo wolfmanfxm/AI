@@ -1,0 +1,69 @@
+task: L1
+category: long-task
+prompt: "分析整个项目并生成知识库"
+
+native:
+  files:
+    - .project-knowledge/architecture/framework-layer.md
+    - .project-knowledge/components/framework-components.md
+    - .project-knowledge/architecture/overview.md
+    - .project-knowledge/index.md
+    - .project-knowledge/statistics.json
+    - .project-knowledge/context.json
+    - .project-knowledge/manifest.json
+    - .project-knowledge/analysis-config.json
+  what: "全项目代表性结构分析，重点补齐此前 scope 仅 workspace 而缺失的 src 框架层（656 文件）。产出 2 份新文档（framework-layer.md 详解 src 布局/路由/鉴权/HTTP/国密/平台后台/低代码/国际化，framework-components.md 编目 8 个全局组件）+ 刷新 6 份元数据到 whole-project 口径 2740 文件"
+  requirement_coverage: 0.85
+  context_tokens: 96729
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "双层耦合架构：src（框架外壳+平台后台 656 文件）与 workspace（业务层 2084 文件）双向依赖，主方向 workspace→src ~250 文件，反向 src→workspace ~36 文件"
+    - "国密加密子模块 src/utils/service/crypto/ 是工程标杆：config/policy/pipeline/session/types 五层分离 + 8 单测，是全项目唯一成体系测试的模块"
+    - "src 双重职责：既是基础设施（512 行路由守卫/HTTP/国密），又承载 23+ 平台管理页"
+    - "三套扩展并存：qiankun 微前端 + bcapnext 低代码 + Vant 移动端；MPCONTEXT 全局上下文 + config 5 级优先级链"
+
+suite:
+  files:
+    - .project-knowledge/architecture/framework-layer.md
+    - .project-knowledge/api/overview.md
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/manifest.json
+    - .project-knowledge/statistics.json
+    - .project-knowledge/graph.json
+    - .project-knowledge/candidates/accepted/src-framework-layer.yaml
+  what: "读取已有 v1.6.0 知识库（覆盖 workspace），识别缺口是 src 框架层仅高层概述。代表性分析覆盖 src 的 7 个 views 模块、34 组 api、3 套 Layout、47 utils、35 i18n namespace，每条结论 grep/read 佐证（198 UsingGet/UsingPost、/mp/ 11 命名空间、MpTable 55/59）。产出核心平台完整编目 + accepted YAML，复用 v1.6.0 增量补框架层"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/manifest.json
+    - .project-knowledge/statistics.json
+    - .project-knowledge/graph.json
+    - .project-knowledge/architecture/overview.md
+    - .project-knowledge/architecture/tech-stack.md
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/api/request.md
+    - .project-knowledge/api/overview.md
+  decision_record:
+    - "D1 复用已有 v1.6.0 workspace 基线，scope 从 ['workspace'] 扩展 ['src','workspace']，仅增量补 src 框架层不重新生成"
+    - "D2 新增单一 framework-layer.md 承载框架层全量（571 文件可一页讲清），不拆散多文件"
+    - "D3 保留 src/api 与 workspace/api 双风格差异为'关键约定'而非反模式（历史痕迹）"
+    - "D4 secure/format 识别为死配置（request.ts 不消费），记录但不定性 BLOCKER"
+  requirement_coverage: 0.85
+  context_tokens: 119569
+  knowledge_reuse: 0.85
+  task_success: true
+  findings:
+    - "src/api 是 Swagger 自动生成风格（242 export const 箭头函数，198 UsingGet/UsingPost），与 workspace/api 的 export function 风格（96.2%）形成双 API 风格"
+    - "MpTable 是核心平台专属（55/59 引用在 src/views），SchemaTable/PageTable 业务层专属（src/views 仅 3 处），两子系统组件栈基本隔离"
+    - "src 核心平台是完整运营管理系统：PlatformManagement 23 子模块 + OrgManage 8 + AuthorityManagement 5"
+    - "两套 JSON 驱动渲染引擎并存：dynamicDashboard BridgingWidget 与 bcapnext BridgingComponent 同名异构"
+    - "secure:true（33 文件）+ format:'json'（30 文件）为 Swagger 遗留死配置，可安全清理"
+
+key_comparison:
+  - "两者都识别出同一缺口（知识库仅覆盖 workspace，src 框架层缺失）并扩展 whole-project，coverage 均 0.85"
+  - "suite 走 Analyzer 的 Candidate→Verify→Accept（产出 accepted/src-framework-layer.yaml 带证据），native 直接写文档——suite 的结论有明确 evidence 佐证（198 UsingGet/198、MpTable 55/59、secure 死配置）"
+  - "suite 发现双 API 风格、双 JSON 渲染引擎同名异构、死配置等精细洞察，native 偏架构层（国密标杆、双重职责、三扩展）"
+  - "native 多产出一份 framework-components.md（8 全局组件编目），suite 多产出 accepted YAML + graph 节点"
+  - "suite 复用 v1.6.0 增量补（reuse 0.85），native 也复用已有知识库（reuse 0.9）——L1 是'知识库已存在'场景，两者都选择增量而非重造"

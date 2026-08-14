@@ -5,7 +5,7 @@ description: >
   生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架，
   遵循现有测试风格，生成 Given-When-Then 结构的测试用例。
   触发词：写测试、测试用例、单元测试、集成测试、组件测试、测试覆盖、
-  跑测试、加测试、write tests、test cases、unit test、test coverage。
+  跑测试、加测试、write tests、test cases、unit test、test coverage、add test、generate test。
   产出：测试文件（.test.ts / .spec.ts）+ TEST-REPORT.md。
 ---
 
@@ -39,6 +39,7 @@ description: >
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 tester 只写测试不修被测代码。测试失败 → 记录报告，不修改源码。

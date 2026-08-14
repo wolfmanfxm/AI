@@ -1,0 +1,63 @@
+task: C4
+category: complex
+prompt: "实现数据大屏（图表+实时刷新）"
+
+native:
+  files:
+    - workspace/api/bigScreen/index.ts
+    - workspace/views/bigScreen/data/mock.ts
+    - workspace/views/bigScreen/components/BaseChart.vue
+    - workspace/views/bigScreen/components/StatCard.vue
+    - workspace/views/bigScreen/index.vue
+    - workspace/router/bigScreen.ts
+    - workspace/router/index.ts
+  what: "数据大屏页面：5 个 KPI 卡（在贷余额/本月放款/放款笔数/逾期率/新增客户）+ 4 图表（折线放款还款趋势/饼图资产结构/条形图区域排名/折线逾期率）。实时刷新 setInterval 轮询默认 5s，可切 5/10/30s、暂停/继续、立即刷新 + 实时时钟。mock 随机游走数据，USE_MOCK 开关 + getBigScreenData 切换点。注册一级全屏路由 /big-screen 无 layout"
+  requirement_coverage: 0.4
+  context_tokens: 74014
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "echarts 5.5.1 已直接依赖，现有代码均用 import * as echarts 全量引入（未 tree-shaking），沿用约定"
+    - "后端无大屏聚合接口，用 mock 随机游走保证可独立运行，USE_MOCK 开关标注真实接口切换点"
+    - "大屏走一级全屏路由 extandLevel1Routes（无 layout），与 /common/fullscreen-host 同级"
+    - "抽了 BaseChart.vue（封装 echarts 生命周期）+ StatCard.vue（KPI 卡）避免重复样板"
+
+suite:
+  files:
+    - workspace/api/dataScreen.ts
+    - workspace/router/dataScreen.ts
+    - workspace/router/index.ts
+    - workspace/views/dataScreen/index.vue
+    - workspace/views/dataScreen/components/BaseChart.vue
+    - workspace/views/dataScreen/components/KpiCard.vue
+    - workspace/views/dataScreen/hooks/useDataScreen.ts
+    - workspace/views/dataScreen/data/mockData.ts
+  what: "全屏数据大屏 /data-screen，深色渐变背景，顶部实时时钟 + 刷新控制（5/10/30/60s、暂停/恢复、立即刷新）。复用 echarts 约定（import * as echarts、品牌色 #196AFF/#35D7A9），5 张 KPI + 3 图（进件/放款折线、业务类型饼图、区域放款柱状）。刷新用 useDataScreen composable 的 setInterval + watch(option,deep) + setOption(option,true) 全量重绘，卸载清理定时器与 chart。mock 生成器 + getDataScreenOverview 契约就绪"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/patterns/vue.md
+    - .project-knowledge/patterns/folder.md
+    - .project-knowledge/patterns/layout.md
+    - .project-knowledge/api/request.md
+    - .project-knowledge/components/catalog.md
+  decision_record:
+    - "D1 大屏做成 extandLevel1Routes 全屏一级路由 /data-screen，与 /common/fullscreen-host 同级——因 /workbench 已指向 dynamicDashboard/page.vue，大屏需独立全屏"
+    - "D2 抽通用 BaseChart.vue（echarts 生命周期封装），泛化 workbench EchartsTime/EchartsNum 裸写法"
+    - "D3 实时刷新 setInterval + setOption(notMerge=true) 全量替换，避免 series/data 长度变化残留"
+    - "D4 数据源两层：api 契约 + mock 独立运行，useDataScreen 单点 TODO 标注后端替换；遵循项目 echarts 品牌色非 dataviz 通用色板"
+  requirement_coverage: 0
+  context_tokens: 91116
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "echarts@5.5.1 已是依赖；现有图表集中在 workbench（硬编码）与 PlatformManagement 报表（API 驱动），全项目无通用 chart 封装，本任务补 BaseChart"
+    - "/workbench 已改指 @/views/dynamicDashboard/page.vue（JSON 驱动工作台），原静态 workbench 已非入口，故大屏独立建 dataScreen"
+    - "后端无数据大屏接口契约，用 mockData 保证独立运行，真实接口切换仅改 useDataScreen 一行"
+    - "node_modules 未装无法跑 vue-tsc/eslint，验证限静态审查"
+
+key_comparison:
+  - "两者都复用 echarts 约定 + 全屏一级路由 + mock 数据 + setInterval 刷新 + BaseChart 封装，思路高度收敛"
+  - "落点命名不同：native 建 bigScreen 模块，suite 建 dataScreen 模块（且 suite 发现 /workbench 已被 JSON 驱动工作台占用，故独立建模块）"
+  - "suite 结构更清晰：抽 useDataScreen composable（刷新/数据/清理分离）+ 品牌色 #196AFF/#35D7A9（知识库）"
+  - "suite 的 D3 处理了 setOption notMerge 残留陷阱，native 未提"
+  - "两者都把后端接口标注为'需替换 mock'（诚实），reuse 均 0.9"

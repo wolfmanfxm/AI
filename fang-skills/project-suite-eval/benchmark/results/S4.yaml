@@ -1,0 +1,43 @@
+task: S4
+category: simple
+prompt: "把 API 返回的错误信息改成中文提示"
+
+native:
+  files:
+    - src/utils/service/request.ts
+  what: "改 axios 响应拦截器 getHttpStatusMessage：HTTP 状态码(400/403/404/408/409/500/502/503/504) + 网络异常统一映射中文，后端 msg 优先；并修复 error.response 为 undefined 时直接 .data.msg 抛 TypeError 的崩溃"
+  requirement_coverage: 1
+  context_tokens: 66926
+  knowledge_reuse: 0
+  task_success: true
+  findings:
+    - "原 else 分支 error.response.data.msg 硬取值，断网时 error.response undefined 会抛错不提示，已改可选链+中文兜底"
+    - "原兜底复用 common.requestTimeout 对非超时 4xx/5xx 语义不符，现按状态码给对应中文"
+
+suite:
+  files:
+    - src/views/AuthorityManagement/ApiAuth/userlist.vue
+    - src/views/AuthorityManagement/ApiAuth/orglist.vue
+    - src/views/AuthorityManagement/ApiAuth/rolelist.vue
+  what: "将三个 ApiAuth 列表页 queryList 的 catch 里英文兜底 (error as any).msg || 'error' 改为中文 '查询失败'，保留后端 msg 优先"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/api/request.md
+  decision_record:
+    - "D1 先查唯一错误处理中心 request.ts 已全中文兜底+msg 优先，无需改；真正英文残留在三处 ApiAuth 列表页的 || 'error'"
+    - "D2 中文文案取 '查询失败'，对齐 request.md 文档示例惯例"
+    - "D3 保留 (error as any).msg 前缀维持后端 msg 优先，仅替换兜底字面量"
+  requirement_coverage: 1
+  context_tokens: 69112
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "if ((error as any).msg) return 提前返回会导致有 msg 时不提示也不复位 loading（拦截器已 toast，此处防重复提示，既有逻辑未改）"
+    - "请求层 request.ts 与 utils/index.ts 兜底文案已全部中文，无需修改"
+
+key_comparison:
+  - "两者选了不同的错误层：native 改 request.ts（中央拦截器，加状态码映射+修崩溃 bug），suite 判定 request.ts 已中文后改 3 处页面级英文残留 || 'error'"
+  - "suite 靠 request.md 知识先判定'中央已覆盖'再找真实残留（completeness 视角），native 直接强化中央层并附带修复崩溃 bug"
+  - "两者都覆盖了'错误信息中文化'需求，但落点不同——暴露'改哪一层'缺乏明确契约"
+  - "suite 有 D1-D3 + 顺带发现 msg 提前返回导致 loading 不复位的既有疑点"

@@ -5,12 +5,17 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Architecture**: [docs/architecture.md](docs/architecture.md) · **Roadmap**: [docs/roadmap.md](docs/roadmap.md) · **Trust**: 90/100
 
+## 阅读约定：示例 vs 规范
+
+> 文档与 prompt 中出现的具体组件名（`FormWrapper` / `PageTable` / `MpTable` / `DialogWrapper` / `DocsSelect`）和路径别名（`@workspace` / `el-mp`）均来自**参考项目**，仅作**示例说明**，**不是**本框架的通用规范。
+> 换到你的项目时，这些名字应替换成你项目自己的组件与别名。框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），而不是这些具体名字。
+
 ## 当前版本：1.0.0
 
 ```
 Knowledge Engine     — Object + Context Resolver + Promotion Reviewer + Decay
 Unified Runtime      — Tool Adapter(9/10) + Event Bus + Background Pipeline
-Reasoning Engine     — Query API + Orchestrator v2.0 (per-skill Checkpoint, auto-advance 仅 background)
+Reasoning Engine     — Query API + Orchestrator v2.0 (Decision-Boundary Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
 Organization Layer   — Task→Project→Organization→Personal 四层
 ```
@@ -62,7 +67,7 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 Phase 1: 10 Extractors (Registry-driven) → candidates/accepted/*.yaml
 Phase 2: 5-Verify → Accepted/Adjusted/Rejected
 Phase 3: Cross-Validator → contradictions + complements
-Phase 4: Knowledge Builder → knowledge-graph.yaml + .md (双轨输出)
+Phase 4: Knowledge Builder → graph.json + .md (双轨输出)
 Phase 5: INDEX Generator → Zettelkasten Knowledge Graph
 Phase 6: Classifier → promotion: none/project/personal
 Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
@@ -116,6 +121,24 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 | cross-run reliability | ✅ 10/10 |
 | Skill Atlas | ✅ |
 | Skill IR | ✅ 10/10 auto-generated |
+
+## 验证状态（2026-08-14 快照）
+
+> 三目标实际完成度，基于真实 benchmark + 验证实验。
+
+| 目标 | 完成度 | 证据 |
+|------|--------|------|
+| Spec = Registry = Runtime | ~50% | Registry 派生 ✅（generate-registry.mjs）；Runtime 独立是 ADR-003 设计使然，本不该「=」 |
+| Domain Model = SDLC 共同语言 | ~90% | 5 环里 4.5 环验证：Analyzer 提取 ✅ / Architect V8 ✅ / Generator V7 ✅ / Reviewer V6 ✅ / Planner confirm 🟡 |
+| Benchmark 证明收益 | ~100% | 20 任务 native vs suite，收益=**过程质量**，非 token/复用 |
+
+### 关键结论
+
+- **suite 的收益是过程质量**：Decision Record 可追溯、边界纪律（反 gold-plate）、证据密度、长任务护栏（L2 事故）——**不是** token 省（平均 +12.8%）或复用率（两者都靠 grep）。
+- **domain drift 检测可靠**：F1 0.966，零误报。三步闭环：存在 → 可纠正 → 可靠。
+- **消除多头权威**：skill.yaml = Skill Contract（intrinsic），workflow/gates/profiles = Orchestration，无字段重叠（ADR-003）。
+
+详见 [project-suite-eval/benchmark/analysis.md](../project-suite-eval/benchmark/analysis.md)（评估证据已独立存放）。
 
 ## 目录
 

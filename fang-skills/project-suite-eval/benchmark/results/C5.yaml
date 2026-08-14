@@ -1,0 +1,55 @@
+task: C5
+category: complex
+prompt: "新增国际化支持（中英文切换）"
+
+native:
+  files:
+    - src/config.ts
+    - workspace/i18n/lang/creditLetter/zh-CN.js
+    - workspace/i18n/lang/creditLetter/en-US.js
+  what: "中英文切换基础设施已完整存在（createI18n+initI18n glob 加载、Header 语言下拉+handleSetLangClick 持久化+reload），本次补齐缺口：config.multipleLanguage false→true 启用切换入口；补齐唯一缺 EN 的 creditLetter 模块（新增 en-US.js）；修正 zh-CN.js 错误的多套一层 namespace 包裹"
+  requirement_coverage: 0.6
+  context_tokens: 72489
+  knowledge_reuse: 0.95
+  task_success: true
+  findings:
+    - "切换机制依赖整页 location.reload()（清缓存写 LocalStorage 'lang' 再刷新），main.ts 启动按 langkey 只注册对应语言包"
+    - "config.multipleLanguage 是唯一开关（默认 false 导致入口隐藏），可被后端 configFromBackEnd 覆盖"
+    - "creditLetter/zh-CN.js 原本多包一层 creditLetter（与 myMargin 扁平结构不一致），zipObjectDeep 变双命名空间，已修平"
+    - "groupCustomer.js 是孤儿文件（fileName=GROUPCUSTOMER 永不等于 langkey，永不注册且无 $t 引用）"
+    - "trustManage 业务视图仍硬编码中文未接 i18n"
+
+suite:
+  files:
+    - workspace/i18n/lang/entryDeclaration/zh-CN.js
+    - workspace/i18n/lang/entryDeclaration/en-US.js
+    - workspace/views/trustManage/entryDeclaration/index.vue
+    - workspace/views/trustManage/entryDeclaration/config/searchConfig.ts
+  what: "判定框架层中英文切换已完整存在（createI18n + LANG_SURPORT + Header 下拉 + reload），不新建切换机制。缺口在业务层（36 模块仅 5 有语言包、仅 myMargin 真正用 useI18n）。本次为活跃页面 entryDeclaration 做示范性中英国际化：新建 zh-CN/en-US 语言包，列表页全部用户可见文案改 t('entryDeclaration.xxx')，searchConfig 静态数组改 createSearchItems(t) 工厂"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - workspace/i18n/lang/myMargin/{zh-CN,en-US}.js
+    - src/i18n/index.ts
+    - src/main.ts
+  decision_record:
+    - "D1 判定切换基础设施'已存在'，不新建切换机制，只补齐业务层语言包与接入"
+    - "D2 缺口定位业务层，选当前 git 活跃的 trustManage/entryDeclaration 做示范性国际化"
+    - "D3 严格复用 myMargin 模式：workspace/i18n/lang/<module>/<locale>.js + 命名空间 join('.') + useI18n()/t('module.xxx')"
+    - "D4 searchConfig 静态 searchItems 改 createSearchItems(t) 工厂（t 只能 setup 调用）"
+    - "D5 enums.ts（20+ 业务字典跨详情页共享）暂不国际化，列后续项"
+  requirement_coverage: 0.4
+  context_tokens: 86610
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "中英文切换框架层已 100% 可用，任务本质不是'加切换'而是'让业务页真正响应切换'"
+    - "initI18n 用 import.meta.glob(eager) 扫描 workspace/i18n/**/*.js，新增语言包零注册成本"
+    - "切换走 Header handleSetLangClick → LocalStorage 'lang' → reload，语言包标签无需响应式"
+    - "最大剩余工作是 enums.ts 与 detail 表单页 20+ 业务字典硬编码中文，多页共享属独立大项"
+
+key_comparison:
+  - "两者都正确判定 i18n 基础设施已存在，落点不同：native 翻转开关+修 creditLetter 缺包（基础设施层），suite 给活跃页做示范国际化（业务内容层）"
+  - "suite 的 D1 明确'不新建切换机制只补业务层'，与 native 的'启用开关'视角不同但都合理"
+  - "native 发现 creditLetter 双命名空间 bug + groupCustomer 孤儿文件（架构级洞察），suite 发现 36 模块仅 5 有语言包 + enums.ts 是最大剩余工作（覆盖度洞察）"
+  - "suite 复用 myMargin 既有模式 + createSearchItems 工厂技巧（t() 作用域约束），native 直接改 config 开关"

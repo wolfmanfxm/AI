@@ -1,0 +1,54 @@
+task: C2
+category: complex
+prompt: "重构客户管理模块（拆解 God Component）"
+
+native:
+  files:
+    - workspace/views/customerManage/groupCustomer/detail.vue
+    - workspace/views/customerManage/groupCustomer/components/BasicInfoSection.vue
+    - workspace/views/customerManage/groupCustomer/components/AttachmentSection.vue
+  what: "定位 God Component groupCustomer/detail.vue（1684 行），拆出 BasicInfoSection（基本信息 114 行）+ AttachmentSection（附件）。BasicInfoSection 通过 model 同一 reactive 引用 + 布尔/回调 prop 接入，v-model 原地绑定，el-form-item prop 与 FormWrapper 校验链不变（provide/inject 跨组件注册）。detail.vue 降至约 1520 行(-157/+15)"
+  requirement_coverage: 0
+  context_tokens: 69279
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "拆分组件的正确性依赖 el-form provide/inject：el-form-item 子组件内仍注册到 FormWrapper 校验，model 传同一引用 validateField/v-model 不变"
+    - "未一次性重写巨型文件，只做两处安全 section 抽取；被多处共用 computed 仍留父组件"
+    - "FormItem import 重构前后均未使用（历史遗留），未动以免扩大改动面"
+
+suite:
+  files:
+    - workspace/views/customerManage/groupCustomer/detail.vue
+    - workspace/views/customerManage/groupCustomer/components/ChangeHistoryDrawer.vue
+    - workspace/views/customerManage/groupCustomer/utils/apiTransform.ts
+  what: "拆 God Component groupCustomer/detail.vue（1684 行）：把'变更记录'子表抽屉抽为 ChangeHistoryDrawer.vue（153 行，open(row,type)+reset()），共享 parseChangeRecordResponse 下沉 utils/apiTransform.ts。detail.vue 降至 1569 行(-115)，三处变更详情改走 ref.open()，keep-alive 复用经 resetCreatePageState 调子组件 reset() 保持行为"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/vue.md
+    - .project-knowledge/patterns/folder.md
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/components/groupCustomer.md
+    - .project-knowledge/observations/antipatterns.md
+  decision_record:
+    - "D1 选 groupCustomer/detail.vue（1684 行，客户管理模块唯一 >500 行大组件）"
+    - "D2 首个拆解块选'变更记录抽屉'而非'基本信息表单'——前者零表单耦合，避开 el-form provide/inject 校验链与 v-model 引用风险"
+    - "D3 抽屉 API 沿用项目 Promise/暴露方法模式（open()），列配置 changeRecordColumns 以 prop 传入保持单一数据源"
+    - "D4 共享纯函数 parseChangeRecordResponse 下沉 utils/apiTransform.ts（正确归属，避免抽屉与父页重复）"
+  requirement_coverage: 0.15
+  context_tokens: 117469
+  knowledge_reuse: 0.9
+  task_success: true
+  findings:
+    - "groupCustomer/detail.vue 是唯一 God Component（1684 行），远超 customerCompany/detail.vue（368 行）、groupCustomer/index.vue（356 行）"
+    - "FormWrapper 的 el-form 校验链靠 inject 跨组件边界，子组件可直接用 el-form-item（customerCompany Tab 拆分先例），但本次刻意避开表单 section 最小化风险"
+    - "parseChangeRecordResponse 在 loadDetailPage 与 handleChangeDetail 两处共用，拆解需同时下沉否则留悬空引用"
+    - "keep-alive 复用实例时 resetCreatePageState 显式清空抽屉状态，子组件化后必须暴露 reset() 否则新建页残留上一条记录"
+
+key_comparison:
+  - "两者同选 groupCustomer/detail.vue（1684 行 God Component），目标一致"
+  - "拆解策略相反：native 拆表单 section（BasicInfoSection+AttachmentSection，via model 引用），suite 拆零表单耦合的抽屉（ChangeHistoryDrawer）——suite 的 D2 显式规避 el-form 校验链风险，更保守"
+  - "native 拆 2 个 section（-157 行，进表单风险区），suite 拆 1 个抽屉+下沉工具函数（-115 行，更安全）"
+  - "suite 用 observations/antipatterns.md 知识定位 God Component 并给出行数对比证据，native 靠 grep 目测"
+  - "suite 发现 5 处关键正确性细节（inject 校验链/悬空引用/keep-alive reset），native 3 处——suite 的风险意识更系统"

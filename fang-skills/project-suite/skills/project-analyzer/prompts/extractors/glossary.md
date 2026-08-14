@@ -4,11 +4,12 @@
 
 ## Actions
 
-1. 扫描类型定义（types/ *.d.ts）→ 提取 interface/type 名称
-2. 扫描 API 函数名 → 提取业务动词（submit/approve/reject/settle）
-3. 扫描路由名称 → 提取业务模块名
-4. 扫描枚举值 → 提取状态/类型常量
-5. 对每个术语：标注定义、出现位置、使用频率
+1. 扫描 views 目录名 → 提取业务模块名（**最可靠的术语源**，每个目录对应一个可交付页面）
+2. 扫描类型定义 → types/ **根目录** + 所有子目录的 `*.d.ts` / `*.ts`（类型定义常散落各处，根目录和子目录都要扫）
+3. 扫描 API 函数名 → 提取业务动词（submit/approve/reject/settle）
+4. 扫描路由名称 → 提取业务模块名（与 views 目录名交叉验证）
+5. 扫描枚举值 → 提取状态/类型常量
+6. 对每个术语：标注定义（**优先用 types 里的中文 JSDoc 注释**）、出现位置、使用频率
 
 ## Output
 
@@ -19,27 +20,27 @@
 
 | 术语 | 英文 | 定义 | 出现位置 | 频率 |
 |------|------|------|---------|------|
-| 借据 | LoanNote | 贷款凭证 | types/loan.ts, api/loan.ts | 高 |
-| 额度 | Quota | 授信额度 | types/quota.ts, views/quotaManage/ | 高 |
-| 批复 | Approval | 审批决策 | api/approval.ts, views/*/review/ | 高 |
-| 放款 | Disbursement | 贷款发放 | types/disburse.ts | 中 |
-| 还款方式 | RepaymentMethod | 等额本息/等额本金等 | types/loan.ts:42 | 中 |
+| 用户 | User | 系统登录用户 | types/user.ts, views/userManage/ | 高 |
+| 订单 | Order | 交易订单 | types/order.ts, api/order.ts | 高 |
+| 账户 | Account | 资金账户 | types/account.ts | 中 |
+| 角色 | Role | 权限角色 | types/role.ts, views/roleManage/ | 中 |
+| 商品 | Product | 商品信息 | types/product.ts | 中 |
 
 ## 状态术语
 
 | 术语 | 值 | 含义 |
 |------|-----|------|
-| PENDING | 0 | 待审批 |
-| APPROVED | 1 | 已通过 |
-| REJECTED | 2 | 已驳回 |
-| SETTLED | 3 | 已结清 |
+| PENDING | 0 | 待处理 |
+| ACTIVE | 1 | 已激活 |
+| DISABLED | 2 | 已禁用 |
+| DELETED | 3 | 已删除 |
 
 ## 术语歧义
 
 | 术语 | 代码含义 | 注意 |
 |------|---------|------|
-| Policy | 保险单 (不是系统策略) | types/insurance.ts |
-| Settlement | 结算 (不是支付) | api/settlement.ts |
+| Session | 会话（不是「会议」） | types/session.ts |
+| Batch | 批次（不是「批处理脚本」） | types/batch.ts |
 ```
 
 ## Evidence

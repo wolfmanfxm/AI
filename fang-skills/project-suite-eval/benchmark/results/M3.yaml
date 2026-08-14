@@ -1,0 +1,59 @@
+task: M3
+category: medium
+prompt: "新增用户信息编辑功能（可修改手机号和邮箱）"
+
+native:
+  files:
+    - src/Layout/components/Header/UserInfo/index.vue
+    - src/Layout/components/Header/index.vue
+    - src/i18n/lang/sysset/zh-CN.js
+    - src/i18n/lang/sysset/en-US.js
+    - src/i18n/lang/sysset/ja-JP.js
+    - src/i18n/lang/sysset/ru-RU.js
+  what: "Header 用户下拉菜单加'用户信息'编辑弹窗，改手机号/邮箱。getUserInfoUsingGet 回显，phoneReg/emailReg 校验（Element Plus validator），modifyUserUsingPost 保存，整字段回传仅覆盖 mobile/email，日期 moment 格式化"
+  requirement_coverage: 0
+  context_tokens: 121008
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "改手机/邮箱唯一可用后端是框架接口 modifyUser.do（modifyUserUsingPost）；BFF 只有 getUserInfo 且仅返回 phone"
+    - "modifyUser.do 整字段更新，弹窗先加载完整记录再全量回传防清空"
+    - "defineModel 用法不一致：UpdatePassword 用 defineModel('visible') 却被 v-model 无参绑定，本组件沿用 ChangeOrg 正确写法"
+
+suite:
+  files:
+    - src/Layout/components/Header/EditUserInfo/index.vue
+    - src/Layout/components/Header/index.vue
+    - src/i18n/lang/sysset/zh-CN.js
+    - src/i18n/lang/sysset/en-US.js
+    - src/i18n/lang/sysset/ja-JP.js
+    - src/i18n/lang/sysset/ru-RU.js
+  what: "同功能：Header 用户下拉加'编辑个人信息'弹窗，改手机号/邮箱。FormWrapper + FormInput + RULES.phone/email 校验，复用 @/api/UserManager 的 getUserInfoUsingGet + modifyUserUsingPost，整字段回传仅覆盖 mobile/email"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/form.md
+    - .project-knowledge/patterns/dialog.md
+    - .project-knowledge/rules/form-component-standard.md
+    - .project-knowledge/api/overview.md
+  decision_record:
+    - "D1 入口放 Header 用户下拉（与修改密码并列），非 taskManage/myTodo/UserInfo.vue（后者是审批查看他人信息）"
+    - "D2 复用 @/api/UserManager 既有 getUserInfoUsingGet + modifyUserUsingPost，不新增重复 API（DRY）"
+    - "D3 表单遵循 form-component-standard 强制标准：FormWrapper + FormInput + RULES，而非兄弟 UpdatePassword 的裸 el-form"
+    - "D4 整字段更新：先拉完整记录，提交回传全部字段仅覆盖 mobile/email"
+    - "D5 i18n 挂 sysset 补四语言，标签复用 orgMgr.user 既有键"
+  requirement_coverage: 1
+  context_tokens: 153431
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "无独立'当前用户改手机/邮箱'接口，唯一修改接口是框架 org 管理 modifyUser.do（FormData 整字段 POST）"
+    - "id 映射假设：登录态 currentUser.userid == org user_id（router/common.ts 佐证），未连后端实测属未验证假设"
+    - "修改成功后未回写 SessionStorage userInfo.phone（Header 只展示 empname/username，无可见影响）"
+
+key_comparison:
+  - "两者同功能同落点（Header 弹窗 + modifyUser.do），收敛一致"
+  - "关键差异：suite 用 FormWrapper + FormInput + RULES.phone/email（form-component-standard 强制标准），native 用裸 el-form + 自写 phoneReg/emailReg"
+  - "suite 复用 @/api/UserManager 不新增 API（DRY）+ 复用 orgMgr.user 标签键；native 自写校验器"
+  - "suite 显式标注 id 映射假设为'未验证'（诚实边界），native 未提"
+  - "tokens：suite 153431 > native 121008（+27%，知识注入有成本）"

@@ -1,0 +1,64 @@
+task: M1
+category: medium
+prompt: "新增个人信息登记页面，字段：姓名/手机/邮箱"
+
+# ⚠️ 重跑记录：第一次 native/suite 并行导致 suite 被 native 污染，已废弃
+# 下面是纯净重跑（native 从干净状态，suite 随后也需从干净状态）
+
+native:
+  # 第一次（污染前，废弃）
+  first_run:
+    files: [workspace/views/customerManage/personInfoRegister/index.vue]
+    location: customerManage/ 模块下
+    term: personInfo
+    note: "保存是 TODO 空壳，未定义 API/类型"
+
+  # 第二次（纯净重跑）
+  rerun:
+    files:
+      - workspace/views/personalInfoRegister/index.vue
+      - workspace/api/personalInfoRegister/personalInfoRegister.ts
+      - workspace/types/personalInfoRegister/index.ts
+      - workspace/router/personalInfoRegister.ts
+    location: workspace/views/ 顶层（不在 customerManage 模块下！）
+    term: personalInfoRegister
+    reference: DealerPersonForm.vue（个人信息表单）
+    components: [SubPageWrapper, NavigationBar, SectionCard, FormWrapper, FormInput]
+    validators: [RULES.name, RULES.phone, RULES.email]
+    requirement_coverage: 0.9   # 这次补了 API + 类型，但 location 可能不对
+    context_tokens: 82000
+
+  key_finding: "native 两次结果不一致：第一次放 customerManage/personInfoRegister，第二次放 workspace/views/personalInfoRegister。命名（personInfo vs personalInfoRegister）和位置（模块下 vs 顶层）都漂移了——这正是无 domain model 约束的后果。"
+
+suite:
+  # 纯净重跑（从干净状态，带 generator 工作流）
+  files:
+    - workspace/views/customerManage/personalInfoRegister/index.vue
+    - workspace/api/customerManage/customerManage.ts（追加 personalInfoRegister 函数）
+    - workspace/router/customerManage.ts（追加路由）
+  location: customerManage 模块下的 personalInfoRegister/ 子目录
+  term: personalInfoRegister
+  reference: CustomerInfoForm.vue + customerIndividual/detail.vue
+  components: [FormWrapper, FormInput, SubPageWrapper, NavigationBar, SectionCard]
+  validators: [RULES.name, RULES.phone, RULES.email]
+  knowledge_queried: [context.json, glossary.md, form-component-standard.md, patterns/form.md, components/catalog.md, validators/rules.ts]
+  decision_record:
+    - D1: FormWrapper + FormInput（非裸 el-form）
+    - D2: RULES.name/phone/email（非自写正则）
+    - D3: customerManage 下新子目录（非顶层/非 customerIndividual 内嵌）
+    - D4: SubPageWrapper + NavigationBar + SectionCard + FormWrapper
+  requirement_coverage: 0.95
+  context_tokens: 93000
+  knowledge_reuse: 0.9
+
+key_comparison:
+  - "native 放顶层 workspace/views/，suite 放 customerManage 模块下——suite 靠 Context Resolver 做了更合理的领域归属判断"
+  - "两者都用了 personalInfoRegister 命名，suite 也未纠正为 customerIndividual——说明 glossary 里缺'个人信息=个人客户'的术语映射，domain 约束未完全生效"
+  - "suite 有 Decision Record（D1-D4），native 没有——suite 的决策可追溯"
+  - "suite 显式查询了 6 类知识文件，native 靠 grep 探索"
+
+observations:
+  - "native 缺乏领域模型约束，同一任务两次生成的位置和命名都不同"
+  - "native 虽然能 grep 到 FormWrapper/RULES 等项目模式，但无法决定'这个页面该放哪个模块'"
+  - "suite 的 Context Resolver 让模块归属判断更合理（customerManage 而非顶层）"
+  - "但 domain drift（personalInfo vs customerIndividual）仍存：glossary 无明确术语映射，V7 领域命名检查空转"

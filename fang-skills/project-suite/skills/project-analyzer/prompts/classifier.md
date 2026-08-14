@@ -23,7 +23,7 @@
 | `candidates/` | `none` | 中间产物 |
 | `architecture/` `components/` `api/` | `project` | 项目结构知识 |
 | `patterns/` `conventions/` `observations/` | `project` | 项目模式与规范 |
-| `glossary.md` `INDEX.md` `knowledge-graph.yaml` | `project` | 项目知识索引 |
+| `glossary.md` `INDEX.md` `graph.json` | `project` | 项目知识索引 |
 | `context.json` `graph.json` `statistics.json` | `project` | 结构化项目数据 |
 | `decisions/architecture-decisions.md` `decisions/index.md` | `project` | 项目级决策标准 |
 | `reports/latest.md` | `project` | 项目变更历史 |
@@ -71,9 +71,9 @@ classifier: knowledge-classifier
 
 classified:
   none:
-    - proposals/PLAN-quota-v1.1.md
-    - reports/REVIEW-quota-v1.1.md
-    - decisions/ARCHITECTURE-quota-wholesale-gap.md
+    - proposals/PLAN-order-v1.1.md
+    - reports/REVIEW-order-v1.1.md
+    - decisions/ARCHITECTURE-order-gap.md
   project:
     - architecture/overview.md
     - components/catalog.md

@@ -1,0 +1,45 @@
+task: M2
+category: medium
+prompt: "给客户列表加搜索和分页"
+
+native:
+  files:
+    - workspace/views/customerManage/customerCompany/index.vue
+  what: "定位 customerCompany 机构客户列表，发现搜索+分页已由 PageTable+SchemaSearch 实现，只补了缺失的证件号码(idNumber)搜索项 { key: 'idNumber', label: '证件号码', type: 'input' }"
+  requirement_coverage: 0
+  context_tokens: 119855
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "搜索+分页非净新增：所有客户列表页已用 PageTable + SchemaSearch/SearchGroup，唯一缺口是机构列表缺证件号码搜索 key"
+    - "PageTable 用 el-pagination 读 res.rows + res.rowcount，#search 槽 SchemaSearch 触发 reload"
+    - "dataOwnerName vs 需求文档 dataOwner 字段不一致需后端确认，未改"
+
+suite:
+  files: []   # 无改动 — 功能已存在，未重写
+  what: "判定客户列表搜索+分页已完整实现（PageTable + SchemaSearch + SchemaTable，@change→reload，/listPage 返回 rows/rowcount），按'若已有则补缺口不重写'原则零改动"
+  knowledge_queried:
+    - .project-knowledge/context.json
+    - .project-knowledge/index.md
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/patterns/search.md
+    - .project-knowledge/patterns/crud.md
+    - workspace/components/common/PageTable.vue
+  decision_record:
+    - "D1 客户列表定位 customerCompany/customerIndividual（机构/个人客户），非 management 日志或 customerCheck 征信"
+    - "D2 搜索+分页已存在且为标准 PageTable+SchemaSearch，判定无需重写（reuse=1）"
+    - "D3 不修 getListTableData 错误分支缺 return、customerIndividual name='network-list' 笔误——超出'加搜索分页'范围，避免 gold-plate"
+  requirement_coverage: 1
+  context_tokens: 74451
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "搜索分页功能早已由 PageTable + SchemaSearch/SearchGroup 标准组件完整实现，无缺口"
+    - "相邻微小缺口：两页 getListTableData 失败分支只 ElMessage.error 不 return，API 失败时 PageTable.fetchData 会因 res.rows undefined 抛错；customerIndividual name 误写 'network-list'"
+    - "router/vehicleMonitor.ts 的 institutionalClientQuery 指向空目录（死路由）"
+
+key_comparison:
+  - "native 做了改动（补 idNumber 搜索项，可能属 scope creep），suite 判定'已完整'零改动——suite 的知识库让它识别'需求已满足'并克制不加料"
+  - "suite 的 D3 显式拒绝修相邻缺口（错误分支/笔误/死路由），体现守边界；native 无此纪律直接加了字段"
+  - "coverage 口径相反：native 自报 0（因需求已存在）、suite 自报 1（识别已满足=覆盖）——再次暴露 coverage 度量歧义"
+  - "suite 用知识库快速确认标准组件，tokens 74451 < native 119855（省 38%），且不产生无谓改动"

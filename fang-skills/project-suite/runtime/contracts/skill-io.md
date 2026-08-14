@@ -33,7 +33,7 @@
   "phase": "generating",
   "current": { "skill": "project-generator", "task": null },
   "history": [
-    {"skill": "project-planner", "confidence": 85, "output": "artifacts/plans/PLAN-credit-activate.md"},
+    {"skill": "project-planner", "confidence": 85, "output": "artifacts/plans/PLAN-user-activate.md"},
     {"skill": "project-architect", "confidence": 90, "output": "artifacts/decisions/ARCHITECTURE-auth.md"}
   ],
   "blockers": []
@@ -52,13 +52,13 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
 
 ```json
 {
-  "plan": "PLAN-credit-activate.md",
+  "plan": "PLAN-user-activate.md",
   "generated_by": "project-planner",
   "schemaVersion": "2.0.0",
   "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],
   "graph_queries": [
     {"type": "component", "name": "FormSelect"},
-    {"type": "api", "name": "quotaManage"}
+    {"type": "api", "name": "order"}
   ]
 }
 ```

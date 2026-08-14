@@ -11,7 +11,7 @@
 | V3 | 模式一致 | 代码风格与 `.project-knowledge/patterns/` 一致 | 修正为符合模式 |
 | V4 | 类型完整 | 无 `any` 滥用，接口定义完整 | 从 types/ 导入或定义 |
 | V5 | 状态覆盖 | loading/empty/error 三态均有处理 | 补全缺失状态 |
-| V6 | 非重复 | knowledge-graph.yaml 中无同名节点 | 标记 `[DUPLICATE]` |
+| V6 | 非重复 | graph.json 中无同名节点 | 标记 `[DUPLICATE]` |
 | V7 | Domain 命名一致 | 代码中的类名/变量名与 `.project-knowledge/domain/vocabulary.yaml` 的 confirmed 术语一致 | ⚠️ 命名与 domain 术语不一致 → 修正命名 |
 
 ## 判定

@@ -148,4 +148,4 @@ expected:
 
 ## 基准执行器
 
-`shared/scripts/run-benchmark.sh` — 对指定 Skill 运行基准检查，输出 PASS/FAIL/结构差异。
+> 基准工具已移至 `project-suite-eval/benchmark/`（评估证据与治理契约分离）。

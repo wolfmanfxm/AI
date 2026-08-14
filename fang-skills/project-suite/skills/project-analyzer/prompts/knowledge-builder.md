@@ -35,7 +35,7 @@
 
 ```
 .project-knowledge/
-├── knowledge-graph.yaml     ← ⭐ 权威知识图谱（machine-readable）
+├── graph.json     ← ⭐ 权威知识图谱（machine-readable）
 ├── architecture/
 │   ├── overview.md          ← 人读版本
 │   ├── modules.md
@@ -49,16 +49,15 @@
 ├── principles.md
 ├── INDEX.md
 ├── statistics.json
-├── context.json
-└── graph.json
+└── context.json
 ```
 
-## knowledge-graph.yaml — Knowledge Objects
+## graph.json — Knowledge Objects
 
 从 accepted candidates 组装 → [schema](../../../shared/schemas/knowledge-object.schema.json)
 
 ```yaml
-# .project-knowledge/knowledge-graph.yaml
+# .project-knowledge/graph.json
 nodes:
   - id: pattern.repository
     type: pattern
@@ -70,7 +69,7 @@ nodes:
       - { path: src/repositories/OrderRepository.ts, type: file, lines: 62 }
     related:
       - { id: principle.repository, relation: implements }
-      - { id: api.customer, relation: references }
+      - { id: api.user, relation: references }
     source: { extractor: pattern, verdict: accepted }
     occurrences: 17
     predictive_power: "Can answer: where to add data access for new entity?"
@@ -93,11 +92,11 @@ nodes:
 
 edges:
   - { from: pattern.repository, to: principle.repository, relation: implements }
-  - { from: pattern.repository, to: api.customer, relation: references }
+  - { from: pattern.repository, to: api.user, relation: references }
   - { from: convention.pascalcase, to: antipattern.kebabcase, relation: contradicts }
 
 # 下游 Skill 消费方式:
-# Planner:   读取 knowledge-graph.yaml → 了解可复用资产
+# Planner:   读取 graph.json → 了解可复用资产
 # Architect: 读取 nodes[type=decision] → 了解已有架构决策
 # Generator: 读取 nodes[type=pattern,component,api] → 套用模式生成代码
 # Reviewer:  读取 nodes[type=antipattern,risk] → 对照审查

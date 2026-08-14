@@ -42,7 +42,7 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 | UI Pattern | FormWrapper 是所有表单的标准 | 需要哪些字段？有没有特殊校验？是否上传？ |
 | Data | 用户模块已有 UserStore, UserAPI | 是否需要新的数据源？是否需要关联已有 API？ |
 | Permission | 项目使用路由守卫 | 是否需要权限控制？哪些角色？ |
-| Workflow | 审批流程使用 creditWorkflow | 是否需要审批？几级审批？ |
+| Workflow | 审批流程使用 approvalWorkflow | 是否需要审批？几级审批？ |
 | Export | 项目使用 exportGraphImage | 是否需要导出功能？ |
 
 ## Question Template
@@ -58,9 +58,9 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 
 例：
 🔍 还需要确认：
-1. 项目已有 BaseForm 模式——个人信息表单需要哪些字段？（姓名/手机/邮箱/头像？）
-2. 是否需要审批流？（项目已有 creditWorkflow 可复用）
-3. 是否关联已有客户数据？（需查询 CustomerAPI 还是新建？）
+1. 项目已有 FormBase 模式——个人资料表单需要哪些字段？（姓名/手机/邮箱/头像？）
+2. 是否需要审批流？（项目已有 approvalWorkflow 可复用）
+3. 是否关联已有用户数据？（需查询 UserApi 还是新建？）
 ```
 
 ## Exit
@@ -68,16 +68,16 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 信息足够 → confidence ≥ 0.7 → 输出 `requirement-spec.md` → 进入 Code Audit：
 
 ```markdown
-# Requirement Spec: 新增个人信息登记
+# Requirement Spec: 新增个人资料登记
 
 ## Confirmed
-- 使用 BaseForm 模式（项目 conventions）
+- 使用 FormBase 模式（项目 conventions）
 - 字段: 姓名, 手机, 邮箱, 头像（上传）
 - 无需审批流
-- 关联已有 CustomerAPI（通过 customerId）
+- 关联已有 UserApi（通过 userId）
 
 ## Assumptions
-- 假设单用户单条记录（不涉及多条个人信息）
+- 假设单用户单条记录（不涉及多条个人资料）
 - 假设头像使用已有 BigFileUpload 组件
 - 假设移动端适配（项目有 h5/ 目录）
 
@@ -95,8 +95,8 @@ Interview 不只是一次性提问，而是**读写项目 Domain Model**。
 
 ```yaml
 terms:
-  - id: customer
-    name: "客户"
+  - id: user
+    name: "用户"
     definition: "已完成实名认证的用户"
     kind: entity           # entity | value_object | workflow | role
     relationships:
@@ -148,5 +148,5 @@ Interview Decision
 
 Interview 不替代 Context Resolver——Interview 追问**用户不知道的事**，Resolver 查询**项目已经知道的事**。两者互补：
 
-- Resolver: "项目已有什么？" → BaseForm, CustomerAPI, creditWorkflow
+- Resolver: "项目已有什么？" → FormBase, UserApi, approvalWorkflow
 - Interview: "用户想要什么？" → 哪些字段, 是否审批, 是否导出

@@ -1,11 +1,11 @@
 # Orchestrate — Pipeline Orchestrator v2.0
 
 > @engine: execution
-> v2.0: per-skill Checkpoint gate。auto_advance 是引擎能力（capability），默认 profile 不启用——每步等用户确认。
+> v2.0: Decision-Boundary Checkpoint。auto_advance 是引擎能力（capability），profile 决定哪些点是决策边界（非每步都停）。
 
 ## Actions
 
-按 pipeline 定义的 DAG 顺序，逐 Skill 执行 + 每步 Checkpoint：
+按 pipeline 定义的 DAG 顺序，逐 Skill 执行，在 Decision Boundary 暂停确认：
 
 ```
 for each skill in pipeline:
@@ -16,7 +16,7 @@ for each skill in pipeline:
   2. EXECUTE: 触发 Skill
      - 提示: "下一步: /project-<skill> — <description>"
 
-  3. CHECKPOINT: 每 Skill 完成后暂停
+  3. CHECKPOINT: 仅在 Decision Boundary 暂停（非每 skill）
      - 展示 Summary: <skill> 完成 | confidence: XX% | 产出: <files>
      - AskUserQuestion: "✅ 继续 / 🔧 调整 / ❌ 终止"
 
@@ -28,11 +28,13 @@ for each skill in pipeline:
      - 读 pipeline-state.json → 从第一个 status=pending 的 Skill 继续
 ```
 
-### Per-Skill Gate（foreground 默认每步 Checkpoint）
+### Decision-Boundary Gate（profile 决定哪些点是决策边界）
 
-| Skill | Checkpoint 展示 |
-|-------|----------------|
-| analyzer | knowledge-graph.yaml + context.json 就绪 |
+> 不是每个 skill 都 checkpoint。默认决策边界：planner（Goal/Scope）、architect（选型）、reviewer（是否修复）、releaser（发布确认）。其余默认 auto-advance，除非 profile/workflow 显式标记。
+
+| Skill | 若为决策边界，展示什么 |
+|-------|----------------------|
+| analyzer | graph.json + context.json 就绪 |
 | planner | PLAN.md 摘要（9模块+估时+风险） |
 | architect | ARCHITECTURE.md 摘要（决策数+模块图） |
 | generator | 生成文件清单 + Verify 结果 |

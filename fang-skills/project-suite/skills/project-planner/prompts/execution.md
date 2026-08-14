@@ -32,13 +32,13 @@
 ```yaml
 decisions:
   - id: D1
-    decision: "模块划分: 新建 interestRateManage/"
-    selected: "interestRateManage/"
+    decision: "模块划分: 新建 pricingManage/"
+    selected: "pricingManage/"
     ignored:
-      - { option: "扩展 creditManage/", reason: "creditManage 已有 133 文件(top5), 耦合风险高" }
-      - { option: "新建 financeManage/", reason: "太泛, 未来可能包含非利率功能" }
-    reason: "利率调整是独立业务域, 与信用管理职责不同"
-    evidence: ["creditManage/ 133 files", "quotaManage 60 files (独立模块)"]
+      - { option: "扩展 approvalManage/", reason: "approvalManage 已有 133 文件(top5), 耦合风险高" }
+      - { option: "新建 billingManage/", reason: "太泛, 未来可能包含非价格功能" }
+    reason: "价格调整是独立业务域, 与审批管理职责不同"
+    evidence: ["approvalManage/ 133 files", "orderManage 60 files (独立模块)"]
     confidence: 0.85
     risk: "审批流集成需确认"
     owner: "architect"

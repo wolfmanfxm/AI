@@ -7,7 +7,7 @@
 
 ## 核心规则
 
-1. **源码引用格式**：`file:line`，如 `workspace/api/quotaManage.ts:65`
+1. **源码引用格式**：`file:line`，如 `src/api/order.ts:65`
 2. **不编造**：所有代码示例从源文件复制，不凭记忆写
 3. **不确定标标注**：无法确认的内容标 `[待补充]` 或 `[推断]`
 
@@ -41,6 +41,6 @@ sources:
 
 | ❌ 不要 | ✅ 要 |
 |--------|------|
-| "项目使用 XX 模式"（无证据） | "项目使用 PageTable+SchemaTable 模式，见 `workspace/views/quotaManage/mailConfig/index.vue:4-10`" |
+| "项目使用 XX 模式"（无证据） | "项目使用 DataTable+SchemaTable 模式，见 `src/views/order/shippingAddress/index.vue:4-10`" |
 | 凭框架知识写代码 | 读 2+ 个现有文件提取实际模式 |
 | 编造 API 参数名 | 从 `workspace/api/<module>.ts` 源码复制参数名 |

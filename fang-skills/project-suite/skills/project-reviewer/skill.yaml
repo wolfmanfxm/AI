@@ -2,17 +2,15 @@ id: project-reviewer
 version: "1.3.0"
 mode: Production
 owner: project-suite
-priority: 55
 category: verification
 complexity: { min: low, max: high }
-decision_order: 6
 cost: medium
-parallel: false
+description: "五轴审查，BLOCKER→PRAISE分级"
+capabilities: [code-review, security-audit, ac-verification]
+confidence_min: 70
 requires: []
 produces: [Review]
 consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
-depends_on: [project-tester]
-parallel_with: []
 boundary: 只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复
 last_reviewed: "2026-08-04"
 review_cadence_days: 90

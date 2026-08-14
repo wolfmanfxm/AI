@@ -1,0 +1,49 @@
+task: M6
+category: medium
+prompt: "新增数据导出功能（Excel）"
+
+native:
+  files:
+    - workspace/utils/exportExcel.ts
+    - workspace/views/trustManage/contractAudit/index.vue
+  what: "新增通用前端导出 exportColumnsToExcel（基于 xlsx/SheetJS XLSX.writeFile），复用 SchemaTable ColumnSchema + resolveColumnLabel；合同审核列表 toolbar 加'导出'按钮，按当前搜索条件 getContractAuditPage pageSize:-1 拉全量导出，给合同状态列补 enum 使导出中文"
+  requirement_coverage: 1
+  context_tokens: 83878
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "项目已内置 xlsx@^0.18.5 依赖，且有前端导出先例 exportRepeatCustomer.ts，故用前端导出而非后端接口"
+    - "全量导出复用列表接口 pageSize:-1（全项目约定'不分页取全部'写法）"
+    - "导出值解析 formatter > enum > prop 与 SchemaTable/ColumnCell 渲染一致，带 slot 链接列回退原始值"
+
+suite:
+  files:
+    - workspace/utils/exportExcel.ts
+    - workspace/views/trustManage/entryDeclaration/index.vue
+  what: "进件申报列表页新增 Excel 导出，前端 xlsx 库。新增通用导出 exportTableToExcel，基于 ColumnSchema 解析表头/单元格（尊重 formatter/enum/prop，过滤 index/actions），复刻 exportRepeatCustomer.ts；toolbar OperateGroup #descrption 槽加导出按钮，按当前搜索条件拉全量写出'进件申报.xlsx'"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/api/overview.md
+    - .project-knowledge/components/catalog.md
+  decision_record:
+    - "D1 前端 xlsx 导出而非后端 blob——未找到进件申报已验证的后端导出 URL，避免臆造 endpoint"
+    - "D2 新增通用可复用 exportTableToExcel，复用 ColumnSchema 类型与 SchemaTable 列配置，非写死列"
+    - "D3 按当前搜索条件拉全量（pageSize:100000）而非仅当前页"
+    - "D4 toolbar 用 OperateGroup #descrption 槽放导出按钮，移除 v-if=isJXS 使全部可查看者可见"
+    - "D5 taskStatus 列 slot 渲染无 enum，在 handler 内重映射为 taskStatusName 避免导出原始状态码"
+  requirement_coverage: 0
+  context_tokens: 93428
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "本 checkout 未装 node_modules，IDE/tsc 报 cannot find module 均为环境噪声，仅静态校验"
+    - "项目存在两条导出先例：后端 ExportButton(blob) 与前端 xlsx(exportRepeatCustomer.ts)，因无已验证后端端点选前端"
+    - "taskStatus 列用 slot 渲染，已用 taskStatusName 重映射解决；businessType 等依赖各自 enum 自动输出友好标签"
+
+key_comparison:
+  - "两者都建了通用 exportExcel.ts + 前端 xlsx 方案 + 复用 exportRepeatCustomer.ts 先例，思路高度一致"
+  - "落点不同：native 选 contractAudit（合同审核），suite 选 entryDeclaration（进件申报）——'数据导出'歧义导致页面发散"
+  - "suite 额外处理 taskStatus→taskStatusName 友好名重映射（slot 列导出陷阱），native 补 enum 显示中文——都识别了'编码 vs 中文'导出坑"
+  - "两者都发现并复用 xlsx 依赖 + 导出先例，reuse 均 1，质量相当"

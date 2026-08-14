@@ -50,8 +50,8 @@
 
 ## Glossary
 - [[glossary]] — 领域术语表
-  - → [[LoanNote]] — 借据
-  - → [[Quota]] — 额度
+  - → [[Voucher]] — 凭证
+  - → [[Order]] — 订单
   - → [[Approval]] — 审批
 
 ## Decisions

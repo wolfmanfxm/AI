@@ -32,8 +32,8 @@ Candidate 必须满足 **≥3/5** 才能晋升为 Accepted：
 ### R2: 跨模块影响
 
 ```
-✅ upload pattern 被 creditManage 和 customerManage 两个模块使用 → R2 满足
-❌ upload pattern 只被 creditManage 一个模块使用 → 不满足
+✅ upload pattern 被 approvalManage 和 userManage 两个模块使用 → R2 满足
+❌ upload pattern 只被 approvalManage 一个模块使用 → 不满足
 ```
 
 判定来源：`graph.json` 中的 `findConsumers(nodeId)` 查询结果。
@@ -55,7 +55,7 @@ Confidence > 85 → R3 满足
 
 ```
 ❌ 非一次性:
-  - "客户列表按首字母分组" → 纯业务逻辑
+  - "用户列表按首字母分组" → 纯业务逻辑
   - "调用 /api/v1/legacy/upload" → 绑定特定 API
   - "if status === 3 then show red" → 硬编码映射
 
@@ -74,8 +74,8 @@ Confidence > 85 → R3 满足
 
 ✅ "Repository 模式：数据访问抽象层" → 任何项目可用
 ✅ "API 请求拦截器：token 刷新 + 错误统一处理"
-❌ "东风汽金特定审批流" → 绑定特定业务
-❌ "AFC 数据库连接配置" → 绑定特定项目
+❌ "某企业特定审批流" → 绑定特定业务
+❌ "某数据库连接配置" → 绑定特定项目
 ```
 
 判定：Architect 在 candidate review 时标注 `reusable: true/false`。

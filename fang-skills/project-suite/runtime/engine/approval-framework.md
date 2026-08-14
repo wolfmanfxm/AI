@@ -8,7 +8,7 @@
 | Level | Trigger | Action | Logged? |
 |-------|---------|--------|---------|
 | **AUTO_PASS** | confidence ≥ `interface.quality_gate.min_confidence_for_pass` | 无需人工确认，直接进入下一阶段 | ✅ 自动记录 |
-| **CHECKPOINT** | 所有 Stage 边界 | `AskUserQuestion` — 用户选"继续"/"调整"/"取消" | ✅ 用户选择写入 approval_log |
+| **CHECKPOINT** | Decision Boundary（用户决策会改变结果的地方：Goal/Scope 确认、技术选型、冲突裁决） | `AskUserQuestion` — 用户选"继续"/"调整"/"取消" | ✅ 用户选择写入 approval_log |
 | **GATE** | confidence < `interface.quality_gate.requires_review_below` | 强制 Review 后才能继续 | ✅ GATE 触发记录 |
 | **BLOCK** | confidence < `interface.quality_gate.blocks_downstream_below` | 拒绝下游执行 | ✅ BLOCK 原因记录 |
 | **MANUAL_OVERRIDE** | 用户主动覆盖 GATE/BLOCK | AskUserQuestion 确认覆盖 | ✅ 覆盖理由记录 |

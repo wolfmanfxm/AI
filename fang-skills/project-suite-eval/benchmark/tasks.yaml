@@ -1,0 +1,55 @@
+# Benchmark Tasks v1.1
+#
+# 20 个真实任务，四类复杂度。对比 native Claude Code vs project-suite。
+# 每个任务测 8 个指标：Planning Accuracy / Requirement Coverage / Context Tokens /
+# Interview Questions / Human Interventions / Task Success / Review Defects / Knowledge Reuse。
+#
+# v1.1 变更：每个任务新增 target_hint 字段。
+#   目的：消除"任务描述含糊 → native/suite 选不同目标页"的落点发散，让对比 apples-to-apples。
+#   说明：v1.0 的 20 个任务已在无 target_hint 下跑完，落点发散本身是发现（见 analysis.md）。
+#         target_hint 是给未来重跑用的，不回溯修改已有结果。
+
+version: "1.1.0"
+
+categories:
+  simple:
+    description: "简单任务：单文件改动、小 bug、样式调整"
+    tasks: [S1, S2, S3, S4, S5]
+  medium:
+    description: "中等任务：新增页面、加功能"
+    tasks: [M1, M2, M3, M4, M5, M6]
+  complex:
+    description: "复杂任务：新模块、架构变更"
+    tasks: [C1, C2, C3, C4, C5]
+  long-task:
+    description: "长任务：跨多个 session、context 爆炸风险"
+    tasks: [L1, L2, L3, L4]
+
+tasks:
+  # ── Simple ──
+  S1: { prompt: "把按钮颜色改成蓝色", domain: frontend, expected: "改 1 处 CSS", target_hint: "workspace/views/trustManage/（确认类按钮 warning→primary）" }
+  S2: { prompt: "修复 UserForm 的提交按钮 loading 状态没生效", domain: frontend, expected: "修 1 个 loading 绑定", target_hint: "src/views/PlatformManagement/UserManager/index.vue" }
+  S3: { prompt: "给列表页加一个空状态提示", domain: frontend, expected: "加 empty 状态", target_hint: "workspace/views/baseData/bizLineConfig/index.vue（裸 el-table）" }
+  S4: { prompt: "把 API 返回的错误信息改成中文提示", domain: frontend, expected: "改错误映射", target_hint: "src/utils/service/request.ts（拦截器兜底文案）" }
+  S5: { prompt: "删除一个未使用的 import", domain: frontend, expected: "删 1 行 import", target_hint: "workspace/views/trustManage/entryDeclaration/index.vue" }
+
+  # ── Medium ──
+  M1: { prompt: "新增个人信息登记页面，字段：姓名/手机/邮箱", domain: frontend, expected: "新页面 + 表单", target_hint: "workspace/views/customerManage/（个人客户 domain，命名 customerIndividual）" }
+  M2: { prompt: "给客户列表加搜索和分页", domain: frontend, expected: "搜索 + 分页", target_hint: "workspace/views/customerManage/customerCompany/index.vue" }
+  M3: { prompt: "新增用户信息编辑功能（可修改手机号和邮箱）", domain: frontend, expected: "编辑页 + API", target_hint: "src/Layout/components/Header/（用户下拉入口）" }
+  M4: { prompt: "实现一个文件上传组件（带进度条）", domain: frontend, expected: "上传组件", target_hint: "workspace/components/common/（通用组件）" }
+  M5: { prompt: "给审批列表加状态筛选", domain: frontend, expected: "筛选 + 状态映射", target_hint: "workspace/views/creditManage/creditReview/index.vue" }
+  M6: { prompt: "新增数据导出功能（Excel）", domain: frontend, expected: "导出 + API", target_hint: "workspace/utils/exportExcel.ts + workspace/views/trustManage/entryDeclaration/index.vue" }
+
+  # ── Complex ──
+  C1: { prompt: "实现一个完整的权限管理模块（角色+菜单+接口权限）", domain: fullstack, expected: "权限模块", target_hint: "workspace/views/roleManage/（workspace 业务层）" }
+  C2: { prompt: "重构客户管理模块（拆解 God Component）", domain: refactor, expected: "拆分 + 测试", target_hint: "workspace/views/customerManage/groupCustomer/detail.vue（1684 行 God Component）" }
+  C3: { prompt: "新增审批流（多级审批+驳回+撤回）", domain: workflow, expected: "审批流", target_hint: "workspace/views/trustManage/applicationReview/（进件复核）" }
+  C4: { prompt: "实现数据大屏（图表+实时刷新）", domain: frontend, expected: "大屏", target_hint: "workspace/views/（新建全屏大屏模块）" }
+  C5: { prompt: "新增国际化支持（中英文切换）", domain: infra, expected: "i18n", target_hint: "src/i18n/ + workspace/i18n/（补齐业务层语言包）" }
+
+  # ── Long Task（跨 session，context 爆炸风险）──
+  L1: { prompt: "分析整个项目并生成知识库", domain: analysis, expected: "知识库", target_hint: ".project-knowledge/（含 src 框架层，非仅 workspace）" }
+  L2: { prompt: "全链路重构：数据层 → 业务层 → 视图层", domain: refactor, expected: "全链路重构", target_hint: "任选一个 400+ 行 God 页（如 workspace/views/trustManage/entryDeclaration/index.vue）" }
+  L3: { prompt: "从零搭建一个业务模块（含 CRUD + 审批 + 报表）", domain: fullstack, expected: "完整模块", target_hint: "workspace/views/（新建模块，主题自选但需明确）" }
+  L4: { prompt: "迁移整个项目从 Vue2 到 Vue3", domain: migration, expected: "迁移 + 验证", target_hint: "全项目（实际已是 Vue3，应识别无需迁移）" }

@@ -11,18 +11,22 @@
 
 ## 0. 权威层级（单一 Source of Truth）
 
-避免多头权威。每个字段只有一个手工维护的源：
+避免多头权威。每个事实只有一个手工维护的源：
 
 | 层级 | 文件 | 定位 | 维护方式 |
 |------|------|------|---------|
-| **单一权威** | `skills/*/skill.yaml` | produces/consumes/stages/confidence/stability/workflow | 手工，唯一源 |
-| **增量注册** | `runtime/registry/capabilities.yaml` | cost/parallel/requires_*（skill.yaml 没有的调度字段） | 手工，只存增量 |
-| **增量注册** | `runtime/registry/skill-catalog.yaml` | category/complexity/decision_order（编排元数据） | 手工，只存增量 |
-| **派生（勿手改）** | `skills/*/skill-ir.yaml` | 从 skill.yaml 生成 | `generate-skill-ir.sh` |
-| **派生（勿手改）** | `suite-manifest.yaml` 的 skills 段 | 聚合快照，会漂移 | 以 skill.yaml 为准 |
-| **协议定义** | `SUITE_SPEC.md` + `stage-library.yaml` + `workflow-library.yaml` | 规范与模式（非 Skill 数据） | 手工 |
+| **单一权威** | `skills/*/skill.yaml` | Skill Contract（intrinsic：description/capabilities/produces/consumes/confidence_min/boundary/interface…） | 手工，唯一源 |
+| **编排权威** | `runtime/config/scheduler.yaml` | skill_order.decision_order / priority（路由 + 调度顺序） | 手工 |
+| **编排权威** | `runtime/registry/workflow-library.yaml` | workflow 编排（pipeline 定义） | 手工 |
+| **编排权威** | `runtime/config/profiles.yaml` | profile（任务复杂度 → skill 激活范围 + auto_advance） | 手工 |
+| **门禁权威** | `runtime/config/gates.yaml` | gate/checkpoint policy（conf 阈值、审查要求） | 手工 |
+| **派生（勿手改）** | `runtime/registry/*.yaml`（4 份：skills.generated / skill-catalog / capabilities / capability-routing） | 从 skill.yaml 生成 | `generate-registry.mjs` |
 
-**规则**：`produces/consumes/stages/priority/confidence` 以 `skill.yaml` 为准。任何派生文件的这些字段与 skill.yaml 不一致时，以 skill.yaml 为准。
+**规则**：
+- `description/capabilities/produces/consumes/confidence_min/boundary/interface…` 以 `skill.yaml` 为准。
+- `priority/decision_order` 以 `scheduler.yaml` 为准。
+- 并行关系由 produces/consumes 推导的 **Capability DAG** 决定（能力依赖，非强制执行顺序），不再是 skill 固定字段。
+- 派生文件与 skill.yaml 不一致 → `generate-registry.mjs --check` 报漂移（exit 1）。
 
 ---
 
@@ -122,9 +126,11 @@ Skill 独立迭代版本号时，必须声明对上游 schema 的最低版本要
 
 ### 3.3 Capability 类型枚举（🔴 REQUIRED，不可自定义）
 
+> 单一源：`runtime/registry/capabilities.yaml` 的 `capability_types`（generate-registry.mjs 生成）。此处为同步快照，以 capabilities.yaml 为准。
+
 ```
-KnowledgeBase | Context | Plan | Architecture | Code | Test | Review |
-RefactoredCode | Documentation | Release
+KnowledgeBase | KnowledgeIndex | Context | State | Graph | Plan | Architecture | Code | Test | Review |
+RefactoredCode | Documentation | Release | PipelineExecution
 ```
 
 ---

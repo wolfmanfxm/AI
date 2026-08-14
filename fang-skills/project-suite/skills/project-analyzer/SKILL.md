@@ -11,7 +11,7 @@ description: >
 
 # Analyzer v2.0
 
-> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → knowledge-graph.yaml
+> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json
 > 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
 
 ## 核心原则
@@ -41,7 +41,7 @@ description: >
 Phase 1: Extractors → candidates/accepted/*.yaml
 Phase 2: 5-Verify → Accepted/Adjusted/Rejected
 Phase 3: Cross-Validator → contradictions + complements
-Phase 4: Knowledge Builder → knowledge-graph.yaml + .md
+Phase 4: Knowledge Builder → graph.json + .md
 Phase 5: INDEX Generator → INDEX.md
 Phase 6: Classifier → promotion: none/project/personal
 Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
@@ -74,6 +74,7 @@ Delivery: 双同步 — Project Sync + Promotion (auto_promote + manual confirm)
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 

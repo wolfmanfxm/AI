@@ -1,0 +1,46 @@
+task: S1
+category: simple
+prompt: "把按钮颜色改成蓝色"
+
+native:
+  files:
+    - workspace/views/trustManage/entryDeclaration/index.vue
+  what: "给'汽车贷款/融资租赁/消费贷款'三个新增按钮加 type=\"primary\"，白底→蓝主按钮"
+  requirement_coverage: 0
+  context_tokens: 3000
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "用 type=\"primary\" 复用项目内置主色（蓝），非硬编码色值"
+    - "三个按钮为默认类型，仅加属性即变蓝，改动最小"
+
+suite:
+  files:
+    - workspace/views/trustManage/contractConfirm/components/loanInfo/SubjectMatter/CarConsumption.vue
+  what: "将'确定并追加'确认按钮 type=\"warning\"(橙) 改为 type=\"primary\"(蓝 #196eff)，与相邻'确定并覆盖'按钮一致"
+  knowledge_queried:
+    - .project-knowledge/index.md
+    - .project-knowledge/context.json
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/patterns/dialog.md
+    - .project-knowledge/patterns/form.md
+    - .project-knowledge/patterns/crud.md
+    - workspace/styles/theme-variables.css
+    - workspace/styles/base-variables.css
+  decision_record:
+    - "D1 用 Element Plus 语义 type=\"primary\" 而非硬编码色值（dialog.md/form.md 均约定确定按钮 type=primary）"
+    - "D2 确认 primary 即蓝色：base-variables.css 中 --light-primary: #196eff"
+    - "D3 目标选'确定并追加'按钮：确认动作却用 warning 橙，相邻'确定并覆盖'已是 primary 蓝，改后 footer 统一"
+  requirement_coverage: 1
+  context_tokens: 7000
+  knowledge_reuse: 1
+  task_success: true
+  findings:
+    - "项目主题色 primary 实为 #196eff（非 EP 默认 #409eff），由 base-variables.css 覆盖，勿硬编码"
+    - "footer 语义本就不一致（覆盖=primary/追加=warning），本次仅按要求把追加变蓝"
+
+key_comparison:
+  - "native 选中 entryDeclaration 页 3 个'新增'按钮直接加 primary；suite 选中 CarConsumption 页 1 个 warning 按钮改为 primary——两者对'哪个按钮'的选择不同"
+  - "suite 通过知识库确认主题色 #196eff 并定位到'语义不一致'的 warning 按钮（更精准），native 抓首个可见按钮"
+  - "suite 消耗 7k vs native 3k context（2.3x 开销），但选择更 deliberate、coverage 1 vs 0"
+  - "native 自报 coverage 0（因为用 primary 语义而非字面'蓝色'色值），暴露度量口径问题"

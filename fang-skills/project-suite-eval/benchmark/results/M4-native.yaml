@@ -1,0 +1,27 @@
+task: M4
+category: medium
+prompt: "实现一个文件上传组件（带进度条）"
+mode: native（无 skill）
+
+result:
+  files:
+    - workspace/components/common/FileUpload/index.vue
+    - workspace/components/common/FileUpload/index.ts
+    - workspace/components/common/FileUpload/types.ts
+  reference_components:
+    - workspace/components/common/Uploader/index.vue
+    - workspace/components/common/UploadCard/index.vue
+    - workspace/components/common/DragUpload/index.vue
+    - src/components/BigFileUpload/index.vue
+    - workspace/components/common/FilePreviewUpload/components/UploadProgressList.vue
+  implementation:
+    - "新建通用 FileUpload 组件（未复用现有 Uploader/UploadCard，因为它们无真实进度条）"
+    - "用 el-upload :http-request 自定义上传 + request 拦截器（自动签名/token）"
+    - "onUploadProgress 计算百分比 + 自定义 CSS 进度条（复用项目 #196EFF 配色）"
+    - "before-upload 校验 0KB/maxSize/accept 白名单"
+
+observations:
+  - "native 探索了 5 个已有上传组件，但都因为'无真实进度条'而选择新建——这说明 native 也做了组件查重"
+  - "但 native 的查重是靠 grep 手动探索，而非结构化 Query"
+  - "native 复用了项目的 request 拦截器 + 进度条配色（说明项目模式明显时 native 也能发现）"
+  - "注意：此结果因 M1 产物未清理，可能受工作树污染影响（后续需重跑验证）"

@@ -4,8 +4,8 @@ metadata: skill.yaml
 description: >
   改善代码结构不改变外部行为：提取函数/组件、简化条件逻辑、移除死代码、语义化重命名、
   拆分过大模块。每次重构必须安全可逆，有测试跑测试，无测试先加表征测试。
-  触发词：重构、优化结构、提取公共、简化代码、消除重复、拆分模块、重命名、
-  refactor、clean up、extract method、simplify、reduce complexity。
+  触发词：重构、优化结构、提取公共、简化代码、消除重复、拆分模块、重命名、优化这段代码、迁移、
+  refactor、clean up、extract method、simplify、reduce complexity、migrate。
   产出：重构后代码 + REFACTOR.md（变更记录 + 改善指标 + 验证结果）。
 ---
 
@@ -40,6 +40,7 @@ description: >
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 refactorer 只改善结构不改行为。没测试保护不重构。

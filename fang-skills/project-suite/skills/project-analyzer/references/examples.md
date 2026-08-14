@@ -15,7 +15,7 @@
 ```
 Phase 1 Discover:
   Q: 项目名称？
-  A: afc-newcore-web-frontend（package.json name）
+  A: my-web-app（package.json name）
   Q: 分析深度？
   A: 📊 标准
   Q: 扫描范围？

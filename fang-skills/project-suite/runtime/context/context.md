@@ -41,7 +41,7 @@ context.json   → 项目知识（用了什么技术栈、有什么约定、有�
     "aliases": {
       "@": "src",
       "@workspace": "workspace",
-      "@bcapnext": "src/views/bcapnext"
+      "@cms": "src/views/cms"
     },
     "apiPrefix": "baseService = api/v1"
   },
@@ -63,13 +63,13 @@ context.json   → 项目知识（用了什么技术栈、有什么约定、有�
 
   "modules": {
     "views": {
-      "src": ["PlatformManagement", "OrgManage", "AuthorityManagement", "bcapnext", "dynamicDashboard", "Login"],
-      "workspace": ["creditManage", "customerManage", "trustManage", "collection", "vehicleMonitor", "..."],
+      "src": ["PlatformManagement", "OrgManage", "AuthorityManagement", "cms", "dynamicDashboard", "Login"],
+      "workspace": ["approval", "user", "account", "billing", "monitoring", "..."],
       "total": 40
     },
     "stores": {
       "src": ["user", "menu", "uiSetting", "pending", "industry", "region"],
-      "workspace": ["docs", "area", "dealer", "finReport", "counter"],
+      "workspace": ["docs", "region", "vendor", "finance", "counter"],
       "total": 11
     },
     "apis": {
@@ -89,7 +89,7 @@ context.json   → 项目知识（用了什么技术栈、有什么约定、有�
     "dualPatterns": [
       "src/pageindex vs workspace/pageNum pagination",
       "src/Swagger URL vs workspace/RESTful URL",
-      "src/script setup vs bcapnext/JSX+Options API"
+      "src/script setup vs cms/JSX+Options API"
     ]
   }
 }

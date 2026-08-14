@@ -47,7 +47,7 @@ User 需求
   ↓
 Code Audit（现状探查 → 发现已有 BaseTable/Permission/API → 减少无效问题）
   ↓
-Knowledge Resolver（查询 knowledge-graph.yaml → 注入已有 knowledge）
+Knowledge Resolver（查询 graph.json → 注入已有 knowledge）
   ↓
 Completeness Check（goal/scope/constraints/knowledge → planning_confidence）
   ↓
@@ -65,6 +65,7 @@ Delivery（PLAN.md + context-package.json）
 下游衔接: Architect 读 PLAN.md `# Decision` → Generator 读 `# Task Breakdown` + `# Reuse Analysis` → Reviewer 读 `# Acceptance Criteria`。
 
 ## 职责边界
+> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 Planning Engine 只产出执行契约。不架构设计、不写代码。

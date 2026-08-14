@@ -16,10 +16,10 @@
 
 ```bash
 # 查找组件节点
-jq '.nodes[] | select(.type=="component" and .label | test("CustomerTable"; "i"))' graph.json
+jq '.nodes[] | select(.type=="component" and .label | test("UserTable"; "i"))' graph.json
 
 # 查找 API 节点
-jq '.nodes[] | select(.type=="api" and .label | test("customer"; "i"))' graph.json
+jq '.nodes[] | select(.type=="api" and .label | test("user"; "i"))' graph.json
 ```
 
 **返回：** 匹配的节点列表（id, type, label, group, refs/functions）
@@ -40,7 +40,7 @@ jq --arg id "comp-01" '
 查找哪些节点依赖（引用/使用）指定节点。
 
 ```bash
-jq --arg id "api-customer" '
+jq --arg id "api-user" '
   [.edges[] | select(.to==$id) | .from] | unique
 ' graph.json
 ```
@@ -77,7 +77,7 @@ jq --arg id "comp-01" '
 查找修改指定文件会影响哪些节点。输入文件路径列表，返回受影响节点。
 
 ```bash
-jq --argjson files '["workspace/views/customer/index.vue"]' '
+jq --argjson files '["workspace/views/user/index.vue"]' '
   [.edges[] | select(.from as $f | $files | index($f)) | .to] | unique
 ' graph.json
 ```

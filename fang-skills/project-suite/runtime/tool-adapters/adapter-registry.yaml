@@ -74,7 +74,7 @@ adapters:
     providers:
       primary: bash  # knowledge-query.sh
     operations:
-      query: { tool: Bash, command: knowledge-query.sh, description: 结构化查询 knowledge-graph.yaml }
+      query: { tool: Bash, command: knowledge-query.sh, description: 结构化查询 graph.json }
       scan: { tool: Bash, command: knowledge-scan.sh, description: 知识质量扫描 }
       decay: { tool: Bash, command: check-decay.sh, description: 知识衰减检查 }
 
