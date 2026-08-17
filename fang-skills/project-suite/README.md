@@ -5,17 +5,13 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Architecture**: [docs/architecture.md](docs/architecture.md) · **Roadmap**: [docs/roadmap.md](docs/roadmap.md) · **Trust**: 90/100
 
-## 定位：Agent SDLC Framework，不是 Skills 集合
+## 定位：Agent SDLC Framework
 
-> project-suite 与「可组合小 Skill」路线（Superpowers / Matt Pocock Skills）是**不同品类**：
->
-> - **Superpowers** — composable、harness-agnostic，Skill 不绑定工具，由 harness 做 Tool Mapping。
-> - **Matt Pocock Skills** — 小 Skill、可组合、用户掌控流程。
 > - **project-suite** — **Agent SDLC Framework**：10 Skill + Workflow Engine + Runtime + Registry + Gates + Profiles + Adapters + Knowledge，形成有约束、可编排、可验证的流水线。
 
-**设计原则：复杂度藏在 Framework 层，不堆进 Skill。** Skill 保持薄（~50 行），只声明 stages + 业务逻辑；跨 Skill 约束由 Framework 统一提供（生命周期/checkpoint/验证 → workflow-engine；git/命令护栏 → command-guard；复用判定 → [reuse-check primitive](shared/primitives/reuse-check.md)）。
+**设计原则：复杂度藏在 Framework 层，不堆进 Skill。** Skill 保持薄（~50 行），只声明 stages + 业务逻辑；跨 Skill 约束由 Framework 统一提供（生命周期/checkpoint/验证 → workflow-engine；git/命令护栏 → command-guard；复用判定 → [reuse-check primitive](shared/primitives/reuse-check.md)）。新增能力落 `shared/primitives/` / `runtime/engine/` / `runtime/registry/`，不散落进 SKILL.md。
 
-**后果：新增能力落 Framework 层**（`shared/primitives/`、`runtime/engine/`、`runtime/registry/`），不要散落进 10 个 SKILL.md。
+**收益定位：过程质量，不是速度。** 收益是 Decision Record 可追溯、边界纪律（反 gold-plate）、证据密度、长任务护栏——**不是** token 省或复用率。
 
 ## 阅读约定：机制 vs 占位符
 
@@ -134,24 +130,6 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 | cross-run reliability | ✅ 10/10 |
 | Skill Atlas | ✅ |
 | Skill IR | ✅ 10/10 auto-generated |
-
-## 验证状态（2026-08-14 快照）
-
-> 三目标实际完成度，基于真实 benchmark + 验证实验。
-
-| 目标 | 完成度 | 证据 |
-|------|--------|------|
-| Spec = Registry = Runtime | ~50% | Registry 派生 ✅（generate-registry.mjs）；Runtime 独立是 ADR-003 设计使然，本不该「=」 |
-| Domain Model = SDLC 共同语言 | ~90% | 5 环里 4.5 环验证：Analyzer 提取 ✅ / Architect V8 ✅ / Generator V7 ✅ / Reviewer V6 ✅ / Planner confirm 🟡 |
-| Benchmark 证明收益 | ~100% | 20 任务 native vs suite，收益=**过程质量**，非 token/复用 |
-
-### 关键结论
-
-- **suite 的收益是过程质量**：Decision Record 可追溯、边界纪律（反 gold-plate）、证据密度、长任务护栏（L2 事故）——**不是** token 省（平均 +12.8%）或复用率（两者都靠 grep）。
-- **domain drift 检测可靠**：F1 0.966，零误报。三步闭环：存在 → 可纠正 → 可靠。
-- **消除多头权威**：skill.yaml = Skill Contract（intrinsic），workflow/gates/profiles = Orchestration，无字段重叠（ADR-003）。
-
-详见 project-suite-eval（外部评估仓库，独立存放）。
 
 ## 目录
 
