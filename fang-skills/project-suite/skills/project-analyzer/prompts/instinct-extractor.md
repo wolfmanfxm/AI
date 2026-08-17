@@ -9,9 +9,9 @@ Instinct 不是单个项目的 Pattern，而是**跨项目反复出现的规律*
 
 | 层级 | 范围 | 示例 |
 |------|------|------|
-| **Fact** | 单项目 | "acme 用 FormWrapper 封装表单" |
-| **Rule** | 单项目 | "acme 所有表单必须用 FormWrapper" |
-| **Instinct** | 跨项目 | "Vue3 项目：Always use FormWrapper pattern for complex forms" |
+| **Fact** | 单项目 | "acme 用 <统一表单封装> 封装表单" |
+| **Rule** | 单项目 | "acme 所有表单必须用 <统一表单封装>" |
+| **Instinct** | 跨项目 | "Vue3 项目：Always use <统一表单封装> pattern for complex forms" |
 
 ## 提炼逻辑
 
@@ -34,7 +34,7 @@ extracted_at: "2026-08-05T10:00:00Z"
 instincts:
   - id: instinct.form-wrapper
     type: Always
-    statement: "Vue3 项目：Always use FormWrapper pattern for complex forms"
+    statement: "Vue3 项目：Always use <统一表单封装> pattern for complex forms"
     evidence:
       projects: [acme-web, cms, crm-system]
       total_occurrences: 47

@@ -1,0 +1,40 @@
+task: N3-A
+category: medium
+prompt: "新增经销商保证金缴纳记录页面，字段：经销商 / 品牌 / 车辆类型 / 缴纳金额 / 状态"
+target_hint: workspace/views/marginManage/dealerMargin/（新页面）
+monitor_signal: "#3 vocabulary v2 — V7 是否纠正动作级命名"
+
+# 对照：round2 同任务
+round2_baseline:
+  native_naming: "PaymentRecord（泛化）"
+  suite_naming: "DepositRecord（D7 辩护'存保证金'，但非 artifact 命名）"
+
+suite:
+  files:
+    - workspace/views/marginManage/dealerMargin/MarginDepositRecord.vue (新建)
+    - workspace/types/dealerMargin.ts (修改)
+    - workspace/api/marginManage/dealerMargin.ts (修改)
+    - workspace/router/marginManage.ts (修改)
+  what: "新建 MarginDepositRecord.vue 列表页，复用 PageTable+SchemaSearch+SchemaTable，字段对齐 6 需求点。"
+  decision_record:
+    - "D1 复用 PageTable/SchemaSearch/SchemaTable/OperateGroup，不新建组件/弹窗（只读记录列表）"
+    - "D2 命名：按 verifier V7，落 domain/vocabulary.yaml artifacts 的 marginDepositRecord（而非泛化 DepositRecord），统一 MarginDepositRecord 前缀"
+    - "D3 落点对齐模块扁平 PascalCase 页面文件 + 注册独立路由"
+    - "D4 复用 HANDLE_STATUS 枚举，不新造 DEPOSIT_STATUS"
+    - "D5 类型/API 追加到既有 dealerMargin.ts，不新建文件"
+    - "D6 API 端点按同文件既有模式推断"
+    - "D7 不改 index.vue / 交易记录 / 申请记录"
+  knowledge_queried:
+    - .project-knowledge/domain/vocabulary.yaml（v2，命中 artifacts.marginDepositRecord）
+    - .project-knowledge/context.json / index.md / graph.json / patterns/{table,crud,naming}.md
+  requirement_coverage: 1.0
+  context_tokens: 116421
+  task_success: true
+
+monitor_result:
+  vocabulary_v2_generated: true
+  artifact_matched: true       # 页面命名 MarginDepositRecord 命中 artifact.naming
+  drift_corrected: true        # V7 把 round2 的 DepositRecord 纠正为 marginDepositRecord
+  verdict: "✅ #3 生效 — 命名从 round2 的 DepositRecord → marginDepositRecord，D2 显式引用 V7 + artifacts"
+
+key_finding: "这是 round3 首个强信号：v2 vocabulary（artifacts 层）+ 更新后的 V7，让 suite 从 round2 的'DepositRecord（D7 辩护存保证金）'纠正为规范的 marginDepositRecord，且 D2 显式写出'按 V7 落 artifacts'。命名漂移被 artifact 命名规则真正约束住了。"

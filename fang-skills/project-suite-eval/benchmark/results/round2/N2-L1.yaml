@@ -1,0 +1,65 @@
+task: N2-L1
+category: long-task
+prompt: "从零搭建「返利对账报表」子模块：返利对账记录列表（CRUD）+ 月度对账报表 + 对账审批流"
+target_hint: workspace/views/rebateManage/rebateStatement/（新建子模块）
+
+native:
+  files:
+    - workspace/views/rebateManage/rebateStatement/record/index.vue (新建)
+    - .../record/components/StatementRecordDrawer.vue (新建)
+    - .../monthly/index.vue (新建)
+    - .../approval/index.vue (新建)
+    - .../approval/components/ApprovalDrawer.vue (新建)
+    - workspace/types/rebateStatement.ts (新建)
+    - workspace/api/rebateManage/rebateStatement.ts (新建)
+    - workspace/router/rebateManage.ts (编辑，+21 行)
+  what: "新建 rebateStatement 子模块（record/monthly/approval 三子目录），记录列表 CRUD + 月度报表 + 审批流，配套 8 接口 + 类型 + 3 路由。复用 PageTable+SchemaSearch+SchemaTable、BaseDrawer+FormWrapper。"
+  requirement_coverage: 1.0
+  context_tokens: 102253
+  task_success: true
+  process_note: "⚠️ native 连续 3 次被电脑休眠打断（探索阶段 ~20min 被切），第 4 次才完成——长任务受环境休眠影响。"
+  findings:
+    - "1123 行，三需求点全覆盖"
+    - "结构用 record/monthly/approval 三个子目录（原生分层）"
+    - "API 用 getLoginTypePrefix 端别切换（对齐 marginStatement 而非 rebateManage 的 dealer/internal 双端）"
+
+suite:
+  files:
+    - workspace/views/rebateManage/rebateStatement/index.vue (新建)
+    - .../monthlyReport.vue (新建)
+    - .../approval.vue (新建)
+    - .../components/RebateStatementDialog.vue (新建)
+    - .../components/ApprovalOpinionDialog.vue (新建)
+    - .../components/ApprovalHistoryDialog.vue (新建)
+    - workspace/types/rebateStatement.ts (新建)
+    - workspace/api/rebateManage/rebateStatement.ts (新建)
+    - workspace/router/rebateManage.ts (编辑，+28 行)
+  what: "同样新建 rebateStatement 子模块（扁平：index/monthlyReport/approval 三页 + components 三个弹窗），CRUD + 月度报表 + 审批流。"
+  decision_record:
+    - "D1 复用 rebateManage 的 dealer/internal pageType 双端机制（rebateTobService/rebateToeService），而非 marginStatement 的 getLoginTypePrefix——同模块保持一致"
+    - "D2 独立 types 文件（对齐 marginStatement.ts），const 对象 + 联合类型，接口不加 I 前缀"
+    - "D3 独立 API 文件且不建 index.ts（rebateManage 现状无 index.ts）"
+    - "D4 月度报表复用 marginStatement「对账单」blob 流 + openFilePreviewWindow + X-xxx-failed 响应头失败明细 + MAX_DOWNLOAD_COUNT=50"
+    - "D5 审批流复用 CollectRefundReview 模式，但 ApprovalOpinionDialog/ApprovalHistoryDialog 做模块本地副本而非跨模块 import（dealerMargin 同名组件耦合 dealerMargin 类型/API）"
+    - "D6 表单弹窗遵循 rules/form-component-standard.md（FormWrapper + FormInput/FormDatePicker/Money）"
+    - "D7 不改 router/index.ts，仅扩展 rebateManage.ts 内部路由数组"
+    - "D8 详情审批页用静态 label map 避免只读页依赖字典异步加载"
+  knowledge_queried:
+    - .project-knowledge: context.json / index.md / graph.json / domain/vocabulary.yaml / domain/domain.yaml
+    - patterns/crud.md / approval-pages.md / rules/form-component-standard.md
+    - 参照: rebateManage/index.vue、marginStatement/index.vue、dealerMargin/CollectRefundReview.vue、api/rebateManage/rebateManage.ts、types/marginStatement.ts
+  requirement_coverage: 1.0
+  context_tokens: 161278
+  task_success: true
+  findings:
+    - "1166 行，三需求点全覆盖"
+    - "结构扁平（index/monthlyReport/approval 三页 + 三弹窗），与 native 的嵌套子目录不同"
+    - "D1/D4/D5 显式做了'复用哪个黄金模式'的裁决（rebateManage 双端 / marginStatement 对账单 / CollectRefundReview 审批），证据充分"
+
+key_comparison:
+  - "两者都满足 3 需求点（coverage 均 1.0），都建了完整子模块 + 类型 + API + 路由"
+  - "结构差异：native 用 record/monthly/approval 嵌套子目录，suite 用 index/monthlyReport/approval 扁平三页——纯结构偏好，无对错"
+  - "关键差异：native 的 API 用 getLoginTypePrefix（对齐 marginStatement），suite 的 D1 明确指出应复用 rebateManage 的 dealer/internal 双端机制（同模块一致性更好）——suite 的领域归属更准"
+  - "suite 有 D1-D8 决策记录（含 3 个'复用哪个黄金模式'的显式裁决 + D5 跨模块 import 风险规避），native 无"
+  - "token：suite 161k vs native 102k（+58%，长任务 suite 开销显著，但换来更准的领域归属 + 可追溯决策）"
+  - "长任务护栏：两者都未跑 git、未跨界（native 4 次里前 3 次是被环境休眠打断，非护栏问题）"

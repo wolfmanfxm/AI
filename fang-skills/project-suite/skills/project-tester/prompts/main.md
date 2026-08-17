@@ -7,7 +7,7 @@
 | 用户意图 | 路由到 |
 |---------|--------|
 | 为函数/方法写单元测试 | [unit-test.md](unit-test.md) |
-| 为 Vue 组件写测试 | [component-test.md](component-test.md) |
+| 为组件写测试 | [component-test.md](component-test.md) |
 | 为整个模块规划测试 | [test-strategy.md](test-strategy.md) |
 | API/集成测试 | 在 main 中直接处理 |
 

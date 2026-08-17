@@ -45,7 +45,7 @@
 | Entry    | Discover 完成，改动范围已确认 |
 | Input    | context-package.json, PLAN.md, ARCHITECTURE.md（若存在）, graph.json |
 | Actions  | 1. 读知识库 → 提取 patterns/constraints/components 2. Graph 查询 → 确认可复用组件/API 3. 找类似实现 → 提取代码模式 4. 套用模式生成代码 5. 自检（import 正确性/组件复用/TS 类型/linting） |
-| Output   | 代码文件（.vue/.ts/.js）+ completion-report.md |
+| Output   | 代码文件（扩展名按项目技术栈）+ completion-report.md |
 | Exit     | 所有文件写入成功，自检清单全部通过 |
 | Failure  | 目标文件已存在 → diff 后增量修改; 需新增依赖 → 使用已有替代; 无类似实现 → 标注"⚠️ 全新模式" |
 | Recovery | manifest.subtasks 标记每个文件的生成状态，resume 时跳过已生成文件 |

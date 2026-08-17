@@ -7,13 +7,13 @@
 | # | Check | Method | On Failure |
 |---|-------|--------|------------|
 | V1 | ADR 四段完整 | 问题→候选方案→选择→理由 不缺 | 返回补全 |
-| V2 | 对比矩阵充分 | 候选方案 ≥2，维度 ≥3 | 🟡 补全或标注原因 |
+| V2 | 决策成本门 | low-impact（可逆/局部/单模块）→ 1 方案 + reason 即可；high-impact（不可逆/跨模块/影响下游）→ ≥2 方案 + ≥3 维度 | 🟡 补全或标注原因 |
 | V3 | 现状核实准确 | `[已实现]` 模块路径存在 | 修正标注 |
 | V4 | API 契约完整 | 每个 endpoint 有 method/path/request/response | 补全字段 |
 | V5 | 方案自洽 | 技术选型、模块设计、API 间无矛盾 | 🟡 标注矛盾 |
 | V6 | 分差有理 | 对比矩阵分差 <10% 时有充分说明 | 🟡 标注风险 |
-| V7 | Graph 一致 | 设计引用的模块/API 在 graph.json 中存在 | 修正引用 |
-| V8 | Domain 一致 | 设计引入的术语与 `.project-knowledge/domain/vocabulary.yaml` 的 confirmed 术语一致 | ⚠️ Domain conflict：现有定义 ≠ 新假设 → 阻断，追问澄清 |
+| V7 | Graph 一致 | 设计引用的模块/API 在 graph.json 中存在；新增模块前先走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)（可扩展已有模块就不新建） | 修正引用 |
+| V8 | Domain 一致 | 设计引入的术语与 vocabulary.yaml 的 confirmed 术语一致；**新增页面/API 的 artifact 命名须匹配 artifacts 的 naming 前缀**（或由 entity×action 组合合法派生） | ⚠️ Domain conflict：现有定义 ≠ 新假设 → 阻断，追问澄清 |
 
 ## 判定
 

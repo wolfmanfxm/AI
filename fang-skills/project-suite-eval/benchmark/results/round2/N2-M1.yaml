@@ -1,0 +1,56 @@
+task: N2-M1
+category: medium
+prompt: "新增经销商保证金缴纳记录页面，字段：经销商 / 品牌 / 车辆类型 / 缴纳金额 / 状态"
+target_hint: workspace/views/marginManage/dealerMargin/（新页面）
+domain_note: "保证金= margin（confirmed）；deposit= conflicting→margin"
+
+native:
+  files:
+    - workspace/views/marginManage/dealerMargin/PaymentRecord.vue (新建)
+    - workspace/types/dealerMargin.ts (新增 PAYMENT_STATUS 枚举 + 行/参数类型)
+    - workspace/api/marginManage/dealerMargin.ts (新增列表接口)
+    - workspace/router/marginManage.ts (新增路由)
+  what: "新建 PaymentRecord.vue 列表页（PageTable+SchemaSearch+SchemaTable），5 业务字段 + 缴纳时间/经销商编码辅助列；新造 PAYMENT_STATUS 枚举；新增 getDealerMarginPaymentRecordList 接口 + 路由。"
+  requirement_coverage: 1.0
+  context_tokens: 89652
+  task_success: true
+  findings:
+    - "页面命名 PaymentRecord（缴纳记录），未用 margin 前缀（但落点在 marginManage/dealerMargin 目录内，目录已锚定 domain）"
+    - "新造 PAYMENT_STATUS 枚举（状态：成功/失败/处理中），未复用模块既有状态枚举"
+
+suite:
+  files:
+    - workspace/views/marginManage/dealerMargin/DepositRecord.vue (新建)
+    - workspace/types/dealerMargin.ts (新增 DepositRecordRow + DepositRecordParams)
+    - workspace/api/marginManage/dealerMargin.ts (新增 getDepositRecordList)
+    - workspace/router/marginManage.ts (新增 depositRecord 路由)
+  what: "新建 DepositRecord.vue，复用 PageTable+SchemaSearch+SchemaTable，字段对齐需求；状态复用 HANDLE_STATUS_LABELS，金额复用 formatMarginMoney。"
+  decision_record:
+    - "D1 新建独立页面 DepositRecord.vue 而非并入 index.vue 两个 tab —— 需求明确'独立页面'"
+    - "D2 复用 PageTable+SchemaSearch+SchemaTable（context.json 99.7% 共用），拒绝裸 el-table"
+    - "D3 复用 HANDLE_STATUS/HANDLE_STATUS_LABELS/VEHICLE_TYPE 枚举，不新造（反 gold-plate）"
+    - "D4 复用 formatMarginMoney（保证金模块金额口径），不用通用 formatMoney"
+    - "D5 新建 getDepositRecordList（兄弟接口各司其职），端点标注 @TODO 待后端确认"
+    - "D6 注册二级路由，对齐 detail/collectRefund 的 meta.prevMenuPath 模式"
+    - "D7 命名遵循 vocabulary：margin confirmed；deposit 指'存保证金'动作（对齐 OPERATE_TYPE.DEPOSIT），非'押金'漂移义"
+    - "D8 状态字段名 handleStatus（对齐 HANDLE_STATUS），label 用'状态'"
+  knowledge_queried:
+    - skill SKILL.md + prompts/(discovery/execution/verifier/validation/page-gen/api-gen)
+    - .project-knowledge/context.json
+    - .project-knowledge/domain/vocabulary.yaml
+    - .project-knowledge/patterns/table.md
+    - .project-knowledge/graph.json
+    - workspace/components/common/{SchemaSearch,SchemaTable}/type.d.ts
+  requirement_coverage: 1.0
+  context_tokens: 121107
+  task_success: true
+  findings:
+    - "页面命名 DepositRecord —— D7 里为'存保证金'辩护，但 vocabulary 明确 deposit 是 conflicting→margin，suite 用 D7 合理化了一个潜在漂移词（诚实但值得商榷）"
+    - "复用 HANDLE_STATUS 而非新造枚举（与 native 新造 PAYMENT_STATUS 对比，边界纪律更优）"
+
+key_comparison:
+  - "两者都满足 6 需求点（coverage 均 1.0），都走 PageTable+SchemaSearch+SchemaTable 模式，落点一致"
+  - "命名：native PaymentRecord vs suite DepositRecord —— 两者都未严格用 margin 前缀；suite 至少显式走 vocabulary 并写 D7 决策，native 无 domain 意识"
+  - "边界纪律：suite 复用 HANDLE_STATUS/formatMarginMoney（D3/D4），native 新造 PAYMENT_STATUS —— suite 更克制"
+  - "token：suite 121k vs native 90k（+35%，suite 读 skill+知识库+多个兄弟页参考）"
+  - "证据密度：suite 引 99.7% PageTable 共现、17 模块节点等量化依据；native 定性描述"

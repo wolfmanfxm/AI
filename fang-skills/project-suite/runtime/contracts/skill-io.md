@@ -21,7 +21,7 @@
 ```json
 {
   "techStack": { "framework": "Vue 3.4", "ui": "Element Plus 2.13", "lang": "TypeScript" },
-  "aliases": { "@": "src", "@workspace": "workspace" },
+  "aliases": { "@": "src", "<业务层别名>": "workspace" },
   "conventions": { "component": "<script setup lang=\"ts\">", "form": "reactive()" },
   "modules": ["workspace/api/", "workspace/views/", "workspace/components/"]
 }
@@ -57,7 +57,7 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
   "schemaVersion": "2.0.0",
   "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],
   "graph_queries": [
-    {"type": "component", "name": "FormSelect"},
+    {"type": "component", "name": "<表单字段>"},
     {"type": "api", "name": "order"}
   ]
 }

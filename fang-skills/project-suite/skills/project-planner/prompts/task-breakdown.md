@@ -40,6 +40,17 @@ Goal → Scope → Context → Reuse Analysis → Decision → Task Breakdown �
 | 8. Risk Assessment | `# Risk Assessment` | 什么可能出错？影响多大？ |
 | 9. Acceptance Criteria | `# Acceptance Criteria` | 怎么验证完成了？ |
 
+## 规划深度（depth_profiles）
+
+> 由 `depth_profiles`（skill.yaml）决定：simple→minimal、medium→standard、complex→full。不自己猜。
+
+| 深度 | 触发 | 产出 section | 跳过 |
+|------|------|-------------|------|
+| **standard** | medium | Goal / Scope / Reuse / Tasks / AC | Context / Decision / Dependency / Risk + Interview + Verify |
+| **full** | complex/long | 全部 9 模块 | —（加 Interview + Decision + Verify） |
+
+standard 时：只做 Step 1、2、4、6、9，跳过 Step 3/5/7/8，不跑 Interview，不做 Verify（直接 Delivery）。
+
 ---
 
 ### Step 1: Goal — 明确业务目标
@@ -85,13 +96,15 @@ confidence = 100
 
 ### Step 4: Reuse Analysis — 可复用分析
 
-**核心问题：** 哪些已有资产可以直接复用，不需要重新设计？
+**核心问题：** 哪些已有资产可以直接复用，不需要重新设计？→ [Reuse Ladder](../../../shared/primitives/reuse-check.md)
 
 扫描 `.project-knowledge/`：
 - `components/catalog.md` → 已有组件
 - `patterns/*.md` → 已有模式
 - `api/overview.md` → 已有 API
 - `rules/*.md` → 强制规则
+
+对每个「新增」意图给出 REUSE / EXTEND / CREATE 裁决（需求已覆盖 → 标 REUSE 零改动）。
 
 → 产出：`# Reuse Analysis`
 

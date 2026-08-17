@@ -2,7 +2,7 @@
 
 生成后必须过一遍：
 
-- [ ] import 路径使用项目别名（`@/` / `@workspace/`）
+- [ ] import 路径使用项目别名（`@/` / `<业务层别名>/`）
 - [ ] 组件名 PascalCase，文件名 kebab-case
 - [ ] Props 使用 `defineProps<{...}>()` 泛型
 - [ ] 响应式用 `ref()` / `reactive()` 非 `data()`

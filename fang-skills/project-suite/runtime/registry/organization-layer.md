@@ -30,7 +30,7 @@ shared_knowledge:
   - id: org.ui-design-system
     type: convention
     scope: organization
-    statement: "所有项目统一使用 Element Plus 2.x + el-mp 命名空间"
+    statement: "所有项目统一使用 Element Plus 2.x + <组件库前缀> 命名空间"
     projects: [acme-web, acme-mobile, acme-admin]
 
   - id: org.security-policy

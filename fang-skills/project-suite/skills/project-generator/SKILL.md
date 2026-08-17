@@ -2,23 +2,24 @@
 name: project-generator
 metadata: skill.yaml
 description: >
-  根据需求和项目规范生成生产级代码：Vue 3 组件、页面、API 模块、工具函数、类型定义。
+  根据需求和项目规范生成生产级代码：组件、页面、API 模块、工具函数、类型定义。
+  技术栈由 context + project-knowledge 决定，不预设框架。
   必须遵循项目现有模式，从 .project-knowledge/ 提取规范而非凭记忆。
   触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、修改、调整、修复、
   删除、改、搭建、implement、create component、build feature、generate code、write a、modify、
   fix、delete、change、update、build、开发、编写、添加。
-  产出：代码文件（.vue / .ts / .js 等）+ completion-report.md。
+  产出：代码文件（按项目技术栈）+ completion-report.md。
 ---
 
 # Generator
 
 > 需求 + 项目知识 → 生产级代码
-> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
 1. **遵循项目模式** — 从 `.project-knowledge/` 提取写法，不凭记忆
-2. **使用项目组件** — 查 `components/catalog.md`，不重复造轮子
+2. **使用项目组件** — 查 `components/catalog.md`，不重复造轮子。先走 [Reuse Ladder](../../shared/primitives/reuse-check.md)：需求已覆盖 → 零改动
 3. **完整性** — loading、empty、error 全状态覆盖
 4. **增量修改** — 已存在文件先 Read 再 Edit，不 overwrite
 
@@ -40,36 +41,11 @@ description: >
 | Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 
+> 深度（`depth_profiles`，见 skill.yaml）：**minimal**=跳过 Validation（Discovery → Execution → Verify）；**standard/full**=4 段全走。单文件小改的独立复验是浪费。
+
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 generator 只写代码。缺少上游产物 → 提示先执行 planner/architect。
 
-## 反例黑名单
-
-> 禁止: ① 跳过.project-knowledge凭记忆写 ② 不读目标文件直接overwrite ③ 跳过上游PLAN.md/ARCHITECTURE.md | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "这个组件很简单，不需要查知识库" → 仍然 Query
-> "已经有类似代码了，直接复制改一下" → 仍然走 Candidate→Verify
-> "loading/error 状态没必要，先写 happy path" → 全状态覆盖是硬要求
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Execution | [prompts/execution.md](prompts/execution.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| 职责边界+反例 | [references/boundary.md](references/boundary.md) |
-| 代码审计+自检 | [references/code-audit.md](references/code-audit.md) + [self-check.md](references/self-check.md) |
-| 完成报告 | [references/completion-report.md](references/completion-report.md) |
-
-## 完成后下一步 → /project-reviewer 或 /project-tester
+> 完成后：/project-reviewer 或 /project-tester。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

@@ -12,7 +12,7 @@ description: >
 # Reviewer
 
 > 代码变更 + AC + Risk → 五轴审查 → 问题分级 → REVIEW.md
-> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -40,38 +40,11 @@ description: >
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
+> 深度（`depth_profiles`，见 skill.yaml）：**minimal**=只审正确性+安全（小 diff）；**standard/full**=五轴全审。小改动不必跑架构/性能轴。
+
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 修复方案。
 
-## 反例黑名单
-
-> 禁止: ① 修改源码（只查不修） ② BLOCKER无明确阻断理由 ③ 跳过AC逐条对照 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "代码风格没问题，不用逐条检查" → 五轴必须全覆盖
-> "这个 file:line 大概在这里，不用精确定位" → 每个 finding 必须精确 file:line
-> "没有 BLOCKER 就是通过了" → 仍然输出 PRAISE + 审查结论
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Execution | [prompts/execution.md](prompts/execution.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
-| 正确性审查 | [prompts/correctness.md](prompts/correctness.md) |
-| 安全性审查 | [prompts/security.md](prompts/security.md) |
-| 职责边界 | [references/boundary.md](references/boundary.md) |
-| 严重度分级 | [references/severity-guide.md](references/severity-guide.md) |
-
-## 完成后下一步 → /project-generator(修复) 或 /project-documenter 或 /project-releaser
+> 完成后：/project-generator（修复） 或 /project-documenter 或 /project-releaser。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

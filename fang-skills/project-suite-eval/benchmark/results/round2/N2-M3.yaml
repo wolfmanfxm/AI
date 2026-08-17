@@ -1,0 +1,42 @@
+task: N2-M3
+category: medium
+prompt: "实现一个批量导入组件：模板下载 + 文件选择上传 + 校验结果反馈"
+target_hint: workspace/components/common/（新通用组件）
+reuse_note: "项目已有 ImportButton / ImportDialog / FilePreviewUpload（catalog 已登记）"
+
+native:
+  files:
+    - workspace/components/common/BatchImportDialog/index.vue (新建，496 行)
+  what: "新建 BatchImportDialog，复用 DialogWrapper+ExportButton+SchemaTable，实现两阶段（选文件+校验 → 内联表格展示校验明细+统计摘要）。"
+  requirement_coverage: 1.0
+  context_tokens: 83065
+  task_success: true
+  findings:
+    - "识别到 ImportDialog 已存在，但判定'ImportDialog 只给条数+失败原因下载，不做内联行级明细'，因此新建 496 行组件补内联明细"
+    - "结果是 ImportDialog 的近重复组件（gold-plate 风险）—— 需求点 1/2/3 其实已被 ImportDialog 覆盖"
+
+suite:
+  files: []   # 零改动 —— 需求已被现有组件完整覆盖
+  what: "Discovery 查重后判定 ImportDialog（catalog.md:120 + 磁盘 477 行 + 27 处引用）已完整覆盖三需求点，按 V2 复用硬门槛 + workspace-priority 复用优先原则，不做任何新建。"
+  decision_record:
+    - "D1 复用 vs 新建 → 复用 ImportDialog（catalog 已登记'完整导入工作流：模板下载、拖拽上传、校验、失败导出'，磁盘存在且 27 处引用）"
+    - "D2 三选一 → ImportDialog（ImportButton 只覆盖上传、FilePreviewUpload 面向附件非 Excel 批量导入）"
+    - "D3 不改现有 ImportDialog（其 console.log/fail 事件/checkSuccess 未实现等瑕疵不在需求范围，修复属 gold-plate）"
+  knowledge_queried:
+    - .project-knowledge/context.json / index.md / graph.json
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/patterns/upload.md / vue.md
+    - .project-knowledge/domain/vocabulary.yaml
+    - .project-knowledge/rules/workspace-priority.md
+  requirement_coverage: 1.0   # 识别需求已满足 = 覆盖（rubric 边界规则）
+  context_tokens: 78450
+  task_success: true
+  findings:
+    - "catalog.md:120 已登记 ImportDialog（33 引用），磁盘核验 477 行逐条对应三需求点"
+    - "D3 显式拒绝清理 ImportDialog 既有 console.log 等瑕疵（边界纪律）"
+
+key_comparison:
+  - "本轮最大差异：native 新建 496 行 BatchImportDialog（ImportDialog 近重复），suite 零改动判定'需求已满足'"
+  - "根因：native 靠 grep 找到 ImportDialog 但低估其覆盖度（认为缺内联明细），suite 靠 catalog.md 结构化登记 + V2 复用硬门槛直接判定 REUSE"
+  - "这是第一轮 M2 结论（'suite 识别需求已满足，native 加料'）在本轮陌生任务上的复现——过程质量价值的最强证据"
+  - "token：suite 78k < native 83k（suite 反而省，因为不写代码只做查重）"

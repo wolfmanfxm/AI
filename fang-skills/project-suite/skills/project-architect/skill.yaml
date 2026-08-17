@@ -6,6 +6,8 @@ category: planning
 complexity: { min: medium, max: high }
 cost: medium
 description: "技术选型+模块设计+API契约，ADR格式决策记录"
+verification: { mode: candidate-verify-accept }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [tech-selection, module-design, api-contract]
 confidence_min: 70
 requires: []

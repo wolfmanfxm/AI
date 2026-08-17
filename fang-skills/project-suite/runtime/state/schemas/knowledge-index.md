@@ -40,13 +40,13 @@ After（Knowledge as Capability）:
       "confidence": 90
     },
     "TablePattern": {
-      "description": "项目表格组件使用模式：PageTable/SchemaTable/MpTable 选择与配置",
+      "description": "项目表格组件使用模式：<表格组件> 选择与配置",
       "files": ["patterns/table.md", "components/catalog.md"],
       "keywords": ["表格", "table", "分页", "pagination", "列配置"],
       "confidence": 92
     },
     "FormPattern": {
-      "description": "项目表单模式：reactive() + defineExpose + SchemaSearch + 校验",
+      "description": "项目表单模式：reactive() + defineExpose + <schema搜索> + 校验",
       "files": ["patterns/form.md", "patterns/dialog.md"],
       "keywords": ["表单", "form", "校验", "validate", "弹窗"],
       "confidence": 88

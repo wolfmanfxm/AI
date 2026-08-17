@@ -37,6 +37,25 @@ adapters:
     providers:
       primary: bash  # git CLI
       fallback: mcp__github
+    guard:
+      # 命令护栏：见 runtime/engine/command-guard.md。改写工作树/历史的一律 BLOCK。
+      blocklist:
+        - "git checkout"
+        - "git reset"
+        - "git clean"
+        - "git restore"
+        - "git rm"
+        - "git stash"
+        - "git revert"
+        - "git commit"
+        - "git add"
+        - "git push"
+      allowlist:
+        - "git status"
+        - "git diff"
+        - "git log"
+        - "git branch"
+        - "git rev-parse"
     operations:
       status: { tool: Bash, command: git status }
       diff: { tool: Bash, command: git diff }

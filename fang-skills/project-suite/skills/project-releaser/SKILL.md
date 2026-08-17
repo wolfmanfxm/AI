@@ -12,7 +12,7 @@ description: >
 # Releaser
 
 > 代码就绪 → 发布检查 → 版本 bump → Changelog → 发布就绪
-> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -40,37 +40,8 @@ description: >
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 releaser 只检查不执行发布命令。
 
-## 反例黑名单
-
-> 禁止: ① 执行npm publish/git push --tags ② 不看git log直接建议版本号 ③ 无回滚方案标记发布就绪 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "改动很小，PATCH 就行" → 仍然按 conventional commits 推导
-> "回滚很简单，git revert 就行" → 必须写具体命令+验证步骤
-> "REVIEW 里没有 BLOCKER，可以发布" → 仍然检查全链路 Confidence
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Execution | [prompts/execution.md](prompts/execution.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
-| 版本 Bump Prompt | [prompts/version-bump.md](prompts/version-bump.md) |
-| Changelog Prompt | [prompts/changelog-gen.md](prompts/changelog-gen.md) |
-| 发布检查 Prompt | [prompts/release-checklist.md](prompts/release-checklist.md) |
-| Semver 指南 | [references/semver-guide.md](references/semver-guide.md) |
-
-## 完成后下一步 → 人工审核后发布 / 修复后重新 /project-releaser
+> 完成后：人工审核后发布。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

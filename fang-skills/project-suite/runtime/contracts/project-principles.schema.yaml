@@ -1,12 +1,13 @@
-# Project Principles v1.0（Constitution）
+# Project Principles Schema v1.0
 #
-# 项目级不可随意改变的原则。从 Knowledge Vault 提取，
-# Planner/Architect/Reviewer 强制消费。
+# 定义「原则怎么工作」（类型 + enforcement + 消费方式）。
+# 真正的原则数据来自 `.project-knowledge/principles.yaml`（Analyzer 从项目提取）。
+# 本文件是 Schema，不含任何具体项目的原则。
 # 与 Spec Kit Constitution 对应：guiding principles that all phases check against.
 
 version: "1.0.0"
 
-# 原则类型
+# 原则类型（通用 schema，不含具体项目名）
 types:
   form_standard:     # 表单规范
     description: "所有信息填写功能必须使用的组件/模式"
@@ -24,42 +25,18 @@ types:
     description: "文件/组件/函数命名规则"
     enforcement: soft
 
-# 从 Knowledge Vault 自动提取的原则示例
-principles:
-  - id: principle.base-form
-    type: form_standard
-    statement: "所有信息填写功能必须使用 FormBase 封装"
+# 原则数据样例（结构示例，实际数据从 .project-knowledge/principles.yaml 注入）
+principles_example:
+  - id: principle.<kebab-name>
+    type: form_standard              # 对应 types 里的某个类型
+    statement: "<本项目的原则陈述>"     # 具体陈述来自项目，如「所有表单用统一封装」
     scope: project
-    source: graph.json#pattern.form-wrapper
-    confidence: 0.96
+    source: graph.json#pattern.<id>  # 证据源
+    confidence: 0.9
     enforcement: hard
-    evidence: ["331 files use FormWrapper"]
+    evidence: ["<统计证据，如 N 处使用>"]
 
-  - id: principle.api-export-function
-    type: api_standard
-    statement: "所有 API 函数必须使用 export function 风格"
-    scope: project
-    source: graph.json#convention.api-style
-    confidence: 0.92
-    enforcement: hard
-
-  - id: principle.typescript-strict
-    type: type_safety
-    statement: "TypeScript strict=true, 禁止 any 滥用"
-    scope: project
-    source: tsconfig.json
-    confidence: 0.98
-    enforcement: soft
-
-  - id: principle.permission-service
-    type: permission_model
-    statement: "所有权限必须经过 PermissionService"
-    scope: project
-    source: graph.json#decision.permission
-    confidence: 0.88
-    enforcement: hard
-
-# 各 Skill 消费方式
+# 各 Skill 消费方式（机制，通用）
 consumers:
   planner:
     use: "Plan 阶段: 每个 Task 检查是否违反 Project Principle → 违反则标注"

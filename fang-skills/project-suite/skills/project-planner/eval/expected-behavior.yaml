@@ -1,0 +1,31 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+skill: project-planner
+
+tests:
+  - id: P1
+    name: 契约而非待办清单
+    scenario: >
+      把「实现用户管理模块」这个模糊需求拆成可执行计划。
+    naive_failure: >
+      朴素 Agent 输出一份 todo list（- 做登录 - 做列表 - 做编辑），无 Scope/Reuse/Decision/
+      依赖/验收标准，下游 Generator/Reviewer 无法消费。
+    skill_mechanism: 核心原则 1「Contract over Todo」——产出 9 模块契约
+    assertion: PLAN.md 含 Goal/Scope/Context/Reuse/Decision/Tasks/Deps/Risk/Acceptance 模块。
+
+  - id: P2
+    name: 复用分析而非忽略已有资产
+    scenario: >
+      规划一个功能，项目 .project-knowledge/ 里已有可复用组件与模式。
+    naive_failure: >
+      朴素 Agent 忽略已有资产，把已存在的东西又规划一遍，产出重复任务。
+    skill_mechanism: 核心原则 2「Knowledge First」——先扫描 .project-knowledge/ 可复用资产
+    assertion: PLAN.md 含 Reuse Analysis 段，标注哪些可 REUSE / EXTEND。
+
+  - id: P3
+    name: 低置信度拒绝产出而非硬编
+    scenario: >
+      规划一个信息严重不足、无法确定范围的需求。
+    naive_failure: >
+      朴素 Agent 靠猜把计划硬编出来，产出看似完整实则不可执行的 PLAN。
+    skill_mechanism: 核心原则 4「Confidence 透明」——< 40% 拒绝产出，暴露 Gaps
+    assertion: confidence < 40% 时只输出 Goal + Scope + Gap List，不产出完整 PLAN。

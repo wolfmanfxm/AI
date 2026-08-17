@@ -73,12 +73,12 @@
         },
         "pattern": {
           "type": "string",
-          "description": "The actual convention/pattern — Generator injects this directly. Example: 'PageTable + SchemaTable + SchemaSearch'"
+          "description": "The actual convention/pattern — Generator injects this directly. Example: '<统一表格> + <schema表格> + <schema搜索>'"
         },
         "constraints": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Hard constraints within this pattern. Example: ['pageIndex/pageSize 数字类型', 'el-mp 命名空间']"
+          "description": "Hard constraints within this pattern. Example: ['<分页字段> 类型', '<组件库前缀> 命名空间']"
         },
         "anti_pattern": {
           "type": "string",
@@ -126,7 +126,7 @@
         },
         "import_path": {
           "type": "string",
-          "description": "Import path. Example: '@workspace/components/common/DialogWrapper/index.vue'"
+          "description": "Import path. Example: '<业务层别名>/components/common/<统一弹窗>/index.vue'"
         },
         "reuse": {
           "type": "boolean",

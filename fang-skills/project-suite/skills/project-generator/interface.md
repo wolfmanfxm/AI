@@ -3,7 +3,7 @@
 > 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **implementation** — `.vue / .ts / .js`（生产级代码）
+- **implementation** — 生产级代码（扩展名按项目技术栈）
 
 ## Consumes
 | artifact | 优先级 | 缺失行为 |
@@ -24,7 +24,7 @@
 | ARCHITECTURE.md | architect | 🟡 |
 
 ## Output
-- 代码文件（`.vue / .ts / .js`）
+- 代码文件（按项目技术栈）
 - `state.json` — 追加 history
 - `result.md` — 含 plan vs actual 完成报告
 

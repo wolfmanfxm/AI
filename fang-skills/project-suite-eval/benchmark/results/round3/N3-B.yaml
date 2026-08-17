@@ -1,0 +1,36 @@
+task: N3-B
+category: medium
+prompt: "实现一个批量导入组件：模板下载 + 文件选择上传 + 校验结果反馈"
+target_hint: workspace/components/common/（新通用组件）
+monitor_signal: "#2 reuse check — 需求已覆盖是否零改动"
+
+# 对照：round2 同任务 N2-M3
+round2_baseline:
+  native: "新建 496 行 BatchImportDialog（冗余组件）"
+  suite: "零改动，判定 ImportDialog 已覆盖"
+
+suite:
+  files: []   # 零改动
+  what: "Discovery 查重后判定 ImportDialog 完全覆盖三需求点，REUSE 零改动，不执行 Execution。"
+  decision_record:
+    - "D1 [REUSE] 采用现有 ImportDialog（33 引用），覆盖模板下载+上传+校验结果三点，新建会触犯 V2/V6 反 gold-plate"
+    - "D2 排除 ImportButton（仅单文件触发按钮，无模板下载/校验结果）"
+    - "D3 排除 FilePreviewUpload/Uploader/ExportButton/UploadCard/DragUpload（关注点不同）"
+    - "D4 不创建 completion-report.md（父任务规定返回格式为消息，写文件是范围外改动）"
+    - "D5 未动 ProgressUpload 空目录（0 文件，非落点）"
+  knowledge_queried:
+    - .project-knowledge/components/catalog.md
+    - .project-knowledge/patterns/upload.md
+    - .project-knowledge/{index.md,context.json,graph.json,domain/vocabulary.yaml}
+    - workspace/components/common/ImportDialog/index.vue + ImportButton + Uploader
+  requirement_coverage: 1.0   # 识别需求已满足 = 覆盖
+  context_tokens: 75500
+  task_success: true
+
+monitor_result:
+  reuse_verdict: "REUSE"
+  suite_created: 0             # 零改动
+  redundancy_avoided: true
+  verdict: "✅ #2 生效 — reuse-check 下沉后，suite 的 D1 显式引用 Reuse Ladder + N2-M3 案例，零改动判定更可追溯"
+
+key_finding: "N3-B 比 round2 N2-M3 更强的信号：reuse-check.md（含 N2-M3 案例）接线进 generator 后，suite 的 D1 自我引用了'知识库 Reuse Ladder 里 N2-M3 案例'。复用判定从 round2 的'catalog 查重'升级为'Suite 一级 Reuse Ladder 裁决 + 自我引用案例'。零改动 + token 略降（75.5k vs round2 78.5k）。"

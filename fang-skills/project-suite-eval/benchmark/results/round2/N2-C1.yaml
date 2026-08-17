@@ -1,0 +1,55 @@
+task: N2-C1
+category: complex
+prompt: "重构授信变更管理模块：拆解 God Component + 抽业务逻辑到 composable，行为保持不变"
+target_hint: workspace/views/creditChangeManage/batchCreditAdjust/batchCreditImport/index.vue（775 行）
+
+native:
+  files:
+    - workspace/views/creditChangeManage/batchCreditAdjust/batchCreditImport/index.vue (改写 775→222)
+    - .../config.ts (新建，搜索项+列工厂)
+    - .../mockData.ts (新建)
+    - .../hooks/useBatchCreditImportList.ts (新建)
+    - .../hooks/useImportDialog.ts (新建)
+    - .../hooks/useEditDialog.ts (新建)
+  what: "775 行拆成 1 瘦入口 + 5 支撑文件：mock 抽 mockData.ts，搜索/列抽 config.ts（buildColumns 工厂），列表/导入/修改抽 3 个 composable，通过 reload 回调解耦。"
+  requirement_coverage: 1.0
+  context_tokens: 84205
+  task_success: true
+  findings:
+    - "重构干净：模板逐字保留，函数体原样搬运，行为不变"
+    - "config.ts 抽搜索/列配置是合理的结构选择"
+
+suite:
+  files:
+    - workspace/views/creditChangeManage/batchCreditAdjust/batchCreditImport/index.vue (改写 775→222)
+    - .../hooks/mockData.ts (新建)
+    - .../hooks/useBatchCreditImportList.ts (新建)
+    - .../hooks/useBatchCreditImportDialog.ts (新建)
+    - .../hooks/useBatchCreditEditDialog.ts (新建)
+  what: "同样 775→222，拆列表/导入/修改 3 个 composable + mockData 模块，模板零改动。"
+  decision_record:
+    - "D1 composable 依赖用 reload: ()=>void 回调而非 Ref<PageTable>——项目 0 处 .ts import .vue，回调避免类型引入 .vue"
+    - "D2 MOCK_ROWS 抽独立 mockData.ts（三处共享）而非塞进某 composable"
+    - "D3 拆 3 个 composable 而非单个大 hook，对齐 quotaManage/trustManage 的 useXxx 黄金模式"
+    - "D4 columns 的修改 action 用 onEdit 选项注入，打破 list/edit/reload 循环依赖"
+    - "D5 index.vue 保留全部模板组件 import（显式 import 局部组件，去掉破坏模板）"
+    - "D6 不改 template 一个字"
+    - "D7 保留 (row:any) 不强行改类型——行为不变为最高优先"
+  knowledge_queried:
+    - SKILL.md + prompts/{discovery,execution,verifier,validation}.md
+    - .project-knowledge/index.md / patterns/vue.md / patterns/folder.md / rules/frontend-convention.md
+    - .project-knowledge/context.json / components/catalog.md / domain/vocabulary.yaml / graph.json
+    - 黄金模式 hooks：quotaManage/useExposure.ts、useActivationCheck.ts、trustManage/entryDeclaration/useSubjectMatter.ts
+  requirement_coverage: 1.0
+  context_tokens: 114686
+  task_success: true
+  findings:
+    - "与 native 结果几乎一致（775→222，3 composable + mockData）"
+    - "D1 的 reload 回调决策与 native 不谋而合（都避免 .ts import .vue）"
+    - "诚实标注 MOCK_ROWS 从组件级 const → 模块级单例的 keep-alive 边界差异"
+
+key_comparison:
+  - "重构结果高度一致：都拆 3 composable + mockData，都 775→222，都行为不变"
+  - "结构微差：native 多抽一个 config.ts（搜索/列），suite 把列留在 list composable；native mockData 在模块根、suite 在 hooks/ 下"
+  - "suite 有 D1-D7 决策记录（含 reload 回调 vs Ref<PageTable> 的显式裁决 + keep-alive 边界诚实标注），native 无"
+  - "token：suite 115k vs native 84k（+36%）"

@@ -1,0 +1,34 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+skill: project-generator
+
+tests:
+  - id: P1
+    name: 复用现有组件而非从零写
+    scenario: >
+      为项目写一个查询用户列表的页面，包含搜索区、表格区、分页。项目已有封装好的
+      表格/表单组件（记录在 .project-knowledge/patterns/）。
+    naive_failure: >
+      朴素 Agent 凭框架通用知识直接用原生表格/表单组件，忽略项目已有封装组件，导致
+      生成的代码与项目风格不符、重复造轮子。
+    skill_mechanism: 核心原则 2「使用项目组件」+ Reuse Ladder（reuse-check）
+    assertion: >
+      生成的代码 import 项目封装的表格/表单组件（从 patterns/ 提取），而非原生表格/表单。
+
+  - id: P2
+    name: 增量修改而非整体重写
+    scenario: >
+      修改一个已存在文件里的一处逻辑（如某个校验条件），其余 300 行保持不变。
+    naive_failure: >
+      朴素 Agent 直接 overwrite 整个文件，导致无关行被重写、丢失人工改动、diff 巨大。
+    skill_mechanism: 核心原则 4「增量修改」——已存在文件先 Read 再 Edit，不 overwrite
+    assertion: >
+      diff 只含目标改动行，无关行未被触碰；改动标注 [已存在]。
+
+  - id: P3
+    name: 全状态覆盖而非只写 happy path
+    scenario: >
+      写一个数据列表组件，数据来自异步接口。
+    naive_failure: >
+      朴素 Agent 只写成功态，忽略 loading / empty / error，页面在慢网络或空数据下表现异常。
+    skill_mechanism: 核心原则 3「完整性」——loading、empty、error 全状态覆盖
+    assertion: 组件含 loading / empty / error 三态处理，且自检清单 V5 通过。

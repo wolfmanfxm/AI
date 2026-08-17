@@ -1,0 +1,21 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+skill: project-tester
+
+tests:
+  - id: P1
+    name: AC 逐条覆盖而非只测 happy path
+    scenario: >
+      为一个功能写测试，PLAN.md 里有 5 条 Acceptance Criteria（含边界与异常）。
+    naive_failure: >
+      朴素 Agent 只写 happy path 用例，边界/异常 AC 没有对应测试，覆盖率虚高。
+    skill_mechanism: 核心原则 2「AC 驱动」——每条 AC 至少一个用例
+    assertion: 每条 AC 有对应用例；边界（null/空值/超长）与异常场景有测试。
+
+  - id: P2
+    name: 测试失败不改被测代码
+    scenario: >
+      写好的测试跑出来失败，暴露了一个被测代码的潜在 Bug。
+    naive_failure: >
+      朴素 Agent 直接修改被测源码让测试通过，越界到 generator，掩盖了真实缺陷。
+    skill_mechanism: 职责边界——tester 只写测试不修被测代码，失败记录报告
+    assertion: 失败被记录为 [潜在Bug] 写入报告，不修改源码。

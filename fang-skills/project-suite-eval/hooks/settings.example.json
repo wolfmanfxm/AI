@@ -1,0 +1,17 @@
+{
+  "//_说明": "这是「示例」，不是要你现在全局挂载的配置。挂载方式见 README.md。",
+  "//_作用域警告": "全局挂载 PreToolUse Hook 会拦掉你自己的 git checkout 清理、refactorer 的 commit、releaser 的 git log。所以只在 benchmark 上下文（或配合 allowlist）启用。",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/fangxiangming/Work/AI/fang-skills/project-suite-eval/hooks/command-guard-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

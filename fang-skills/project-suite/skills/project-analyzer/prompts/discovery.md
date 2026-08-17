@@ -6,7 +6,7 @@
 
 0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：从项目路径提取 tags → 查询 `graph.json` → 注入已有的 architecture/patterns/glossary
 1. 探测技术栈：`@adapter:filesystem.read package.json`（dependencies/devDependencies/scripts）、`@adapter:filesystem.read tsconfig.json`（paths/baseUrl）、`@adapter:filesystem.read vite.config.*`（alias/resolve）
-2. 探测目录结构：`@adapter:filesystem.list src/` + `@adapter:filesystem.find "*.vue" workspace/`（若有）
+2. 探测目录结构：`@adapter:filesystem.list src/` + 按技术栈定位组件文件（扩展名从 package.json/配置文件推断）
 3. 探测 Knowledge Vault 路径：`@adapter:filesystem.list "$HOME/Data/Knowledge Vault"` → `@adapter:filesystem.list "./Knowledge Vault"` → `@adapter:filesystem.list "$HOME/Documents/Knowledge Vault"`，取第一个可达路径
 4. `AskUserQuestion` 确认：
    - 项目名（默认 package.json name）

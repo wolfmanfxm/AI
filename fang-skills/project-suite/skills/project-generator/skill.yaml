@@ -5,7 +5,9 @@ owner: project-suite
 category: creation
 complexity: { min: low, max: high }
 cost: high
-description: "按项目规范生成生产级代码，Candidate→Verify"
+description: "按项目规范生成生产级代码，Execute→Verify"
+verification: { mode: direct-verify }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-generation, pattern-matching, query-api]
 confidence_min: 70
 requires: []

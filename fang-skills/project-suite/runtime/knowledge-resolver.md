@@ -22,7 +22,7 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 
 1. 提取实体
    从 Task 描述中提取:
-   - 组件名（如 FormSelect, UserTable）
+   - 组件名（如 <表单字段>, UserTable）
    - API 模块名（如 orderApi, userApi）
    - 模式关键词（如 CRUD, 审批流, 文件上传）
 
@@ -57,7 +57,7 @@ Context Package 是预消化的知识包。Generator 不再读文件、不再自
 Before:  knowledge-list.json = ["patterns/table.md", "api/order.md", ...]
          Generator → 读每个文件 → 自己 parse → 自己判断用哪个段落 → 不可靠
 
-After:   context-package.json = { knowledge: [{ pattern: "PageTable + SchemaTable", constraints: [...] }], ... }
+After:   context-package.json = { knowledge: [{ pattern: "<统一表格> + <schema表格>", constraints: [...] }], ... }
          Generator → for (k of knowledge) { 注入 k.pattern; 遵守 k.constraints; 避免 k.anti_pattern } → 可靠
 ```
 
@@ -74,7 +74,7 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
     "knowledge": [
       {
         "capability": "TablePattern",
-        "pattern": "DataTable + SchemaTable + SearchForm",
+        "pattern": "DataTable + <schema表格> + SearchForm",
         "constraints": ["pageIndex/pageSize 数字", "Element Plus 命名空间"],
         "anti_pattern": "不要手写 el-table + el-pagination",
         "source": "patterns/table.md",

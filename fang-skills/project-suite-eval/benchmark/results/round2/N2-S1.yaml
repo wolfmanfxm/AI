@@ -1,0 +1,44 @@
+task: N2-S1
+category: simple
+prompt: "给催收内访-待跟进列表页的搜索栏加一个「客户姓名」搜索项"
+target_hint: workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+
+native:
+  files:
+    - workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+  what: "发现 customerName 搜索项已存在但 label 是「姓名」，将 label 改为「客户姓名」（2 行改动：label 字符串）。输入触发查询走既有 handleSearchChange → reload 链路，无需额外改动。"
+  requirement_coverage: 1.0   # 需求点1、2 均满足（识别已存在 + label 对齐）
+  context_tokens: 40314
+  task_success: true
+  findings:
+    - "搜索项 customerName 本已存在（key 已对应后端字段），仅 label 命名不精确"
+    - "正确识别'需求已存在'，做最小改动（改 label 而非新增重复 key）"
+
+suite:
+  files:
+    - workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+  what: "同样将 customerName 搜索项 label 从「姓名」改为「客户姓名」。走 Discovery → Execution 工作流，先查知识库再改。"
+  decision_record:
+    - "D1 复用现有 customerName 搜索项（不新建）—— 再新增同样 key 会重复、破坏 SchemaSearch，仅改 label，反 gold-plate"
+    - "D2 label 用「客户姓名」而非「客户名称」—— 需求原文 + legalLitigation 模块先例（litigationDetail:62 / litigationLedgerQuery:67）"
+    - "D3 不改列定义（line 177 prop customerName label「客户名称」）—— 需求仅限搜索栏"
+    - "D4 不改 handleSearchChange/query/reload 链路 —— 已覆盖输入触发查询"
+    - "D5 选 SchemaSearch 声明式 —— 目标文件已是该风格，遵循 patterns/search.md"
+  knowledge_queried:
+    - .project-knowledge/context.json
+    - .project-knowledge/index.md
+    - .project-knowledge/graph.json
+    - .project-knowledge/patterns/search.md
+    - .project-knowledge/domain/vocabulary.yaml
+  requirement_coverage: 1.0
+  context_tokens: 71222
+  task_success: true
+  findings:
+    - "识别需求已存在，仅 label 对齐"
+    - "列定义 label 是「客户名称」与搜索栏「客户姓名」不一致，D3 显式不跨界改列"
+
+key_comparison:
+  - "两者结论一致：搜索项已存在，最小改动 = label 对齐（native 2 行 / suite 2 行，diff 完全相同）"
+  - "suite 有 D1-D5 决策记录（复用裁决 + 反 gold-plate + domain 先例溯源），native 无"
+  - "suite 查了 5 个知识库文件（context.json/index/graph/search/vocabulary），native 纯 grep"
+  - "token：suite 71222 vs native 40314（+76%）—— 简单任务上 suite 的 workflow+知识注入开销显著（印证第一轮'简单任务开销最高'结论）"

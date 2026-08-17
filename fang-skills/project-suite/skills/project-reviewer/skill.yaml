@@ -6,6 +6,8 @@ category: verification
 complexity: { min: low, max: high }
 cost: medium
 description: "五轴审查，BLOCKER→PRAISE分级"
+verification: { mode: candidate-verify-accept }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-review, security-audit, ac-verification]
 confidence_min: 70
 requires: []

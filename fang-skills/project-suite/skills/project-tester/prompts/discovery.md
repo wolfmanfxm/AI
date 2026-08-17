@@ -7,7 +7,7 @@
 0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有 conventions（测试框架/命名/目录）→ 自动适配
 1. 读 `PLAN.md > # Acceptance Criteria` → 提取每条 AC 为测试目标
 2. 检测测试框架：扫描 `package.json` devDependencies（jest/vitest/mocha/playwright）
-3. 定位测试目录和命名约定：`__tests__/` / `*.test.ts` / `*.spec.ts`
+3. 定位测试目录和命名约定（从项目现有测试提取，如 `__tests__/` 或 `.test.*` / `.spec.*` 后缀）
 4. CHECKPOINT — 展示测试策略（框架/目录/命名/AC→用例映射）
 
 ## Exit

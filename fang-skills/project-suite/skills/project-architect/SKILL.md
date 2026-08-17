@@ -12,14 +12,27 @@ description: >
 # Architect
 
 > 需求 → 技术选型 → 模块设计 → API 契约 → ARCHITECTURE.md
-> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
-1. **决策可追溯** — 问题 → 候选方案 → 选择 → 理由（ADR 格式）
+1. **决策可追溯** — 问题 → 候选方案 → 选择 → 理由；严谨度按 [决策成本门](#决策成本门) 定
 2. **上下文驱动** — 选型基于项目约束，不追求银弹
-3. **现状核实先行** — `[已实现]` 的模块不再出设计方案
+3. **现状核实先行** — `[已实现]` 的模块不再出设计方案（先走 [Reuse Check](../../shared/primitives/reuse-check.md)）
 4. **够用就好** — 当前需求 + 可预见扩展
+
+## 决策成本门（Decision Cost Gate）
+
+> 不是所有决策都要完整 ADR。严谨度匹配决策成本（可逆性 / 影响面）。
+
+| 决策类型 | 判据 | 严谨度 |
+|---------|------|--------|
+| **low-impact** | 可逆、局部、单模块内 | 直接选 + reason（1 个方案即可，不强制对比矩阵） |
+| **high-impact** | 不可逆 / 跨模块 / 影响下游 | ≥2 方案 + ≥3 维度对比矩阵（完整 ADR） |
+
+判据优先级：**可逆性 > 影响面**（改个常量可逆 → low；改数据库 schema / 换技术栈 → high）。
+
+> ⚠️ **Decision Impact ≠ Task Complexity**：决策成本门看的是「这个决策的影响」（可逆性/影响面），不是「任务的复杂度」。一个 complex 任务里可能有多个 low-impact 决策，一个 simple 任务里也可能有 irreversible 决策——两者独立判断。
 
 ## 前置条件
 
@@ -43,40 +56,8 @@ description: >
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 architect 只做设计不写代码。
 
-## 反例黑名单
-
-> 禁止: ① 写代码（只做设计） ② 跳过现状核实 ③ 基于猜测做架构决策 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "只有一个方案明显最优，不用对比矩阵" → 仍然 ≥2 方案 + ≥3 维度
-> "Graph 分析太慢，直接出方案" → 仍然 Graph Analysis
-> "API 契约等 Generator 生成时再定义" → Architect 必须定义，Generator 只能引用
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Code Audit | [prompts/code-audit.md](prompts/code-audit.md) |
-| Stage Graph Analysis | [prompts/graph-analysis.md](prompts/graph-analysis.md) |
-| Stage Execution | [prompts/execution.md](prompts/execution.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
-| 技术选型 Prompt | [prompts/tech-selection.md](prompts/tech-selection.md) |
-| 模块设计 Prompt | [prompts/module-design.md](prompts/module-design.md) |
-| API 契约 Prompt | [prompts/api-design.md](prompts/api-design.md) |
-| 职责边界 | [references/boundary.md](references/boundary.md) |
-| 决策框架 | [references/decision-framework.md](references/decision-framework.md) |
-
-## 完成后下一步 → /project-generator 或 /project-reviewer
+> 完成后：/project-generator 或 /project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

@@ -10,7 +10,7 @@ instincts:
   - id: instinct.form-wrapper
     type: Always
     scope: organization
-    statement: "Vue3 项目：Always use FormWrapper pattern for complex forms"
+    statement: "Vue3 项目：Always use <统一表单封装> pattern for complex forms"
     evidence:
       projects: [acme-web]
       total_occurrences: 47

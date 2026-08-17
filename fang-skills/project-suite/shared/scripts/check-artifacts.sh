@@ -53,8 +53,8 @@ echo "" >> "$REPORT"
 
 # 4. Principle Compliance: do plan/architecture respect project principles?
 echo "## 4. Principle Compliance" >> "$REPORT"
-if [ -f "$KNOWLEDGE_DIR/../runtime/registry/project-principles.yaml" ] 2>/dev/null; then
-  principles=$(grep -c "principle\." "$KNOWLEDGE_DIR/../runtime/registry/project-principles.yaml" 2>/dev/null || echo 0)
+if [ -f "$KNOWLEDGE_DIR/../runtime/contracts/project-principles.schema.yaml" ] 2>/dev/null; then
+  principles=$(grep -c "principle\." "$KNOWLEDGE_DIR/../runtime/contracts/project-principles.schema.yaml" 2>/dev/null || echo 0)
   echo "  Project has $principles active principles" >> "$REPORT"
   # Check if PLAN mentions principles
   plan_principles=$(grep -c "principle\|Principle\|原则" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null || echo 0)

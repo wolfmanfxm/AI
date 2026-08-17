@@ -23,7 +23,7 @@
 - Confidence: 0.90
 
 ## D2: 为什么拆 workspace/ 和 src/
-- Evidence: tsconfig paths: { "@": "src", "@workspace": "workspace" }
+- Evidence: tsconfig paths: { "@": "src", "<业务层别名>": "workspace" }
 - Inferred: 框架层(src/)稳定 + 业务层(workspace/)高频变更
 - Confidence: 0.85
 

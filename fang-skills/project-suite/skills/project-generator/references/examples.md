@@ -2,6 +2,8 @@
 
 > 真实输入 → 代码示例。
 
+> ⚠️ **Reference example only**：本文件的组件名/API 名/参数名来自参考项目，仅作示例，**不代表项目默认**。实际名称从 `.project-knowledge/`（catalog.md / context.json）解析。
+
 ---
 
 ## 示例 1：生成表格组件

@@ -33,7 +33,7 @@
 |-----------|--------|----------|
 | readonly 优先 | tsconfig strict | 60% |
 | reactive() 用于表单, ref() 用于单值 | 项目约定 | 85% |
-| PageTable + SchemaTable 而非手写 el-table | workspace 模式 | 90% |
+| <统一表格> + <schema表格> 而非手写 el-table | workspace 模式 | 90% |
 
 ## Avoid
 | Principle | Reason | Current State |

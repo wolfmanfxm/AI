@@ -25,7 +25,7 @@
 ## Import Order
 1. Vue (vue, vue-router, pinia)
 2. Element Plus (element-plus)
-3. 项目别名 (@/, @workspace/)
+3. 项目别名 (@/, <业务层别名>/)
 4. 相对路径 (./)
 
 ## Directory

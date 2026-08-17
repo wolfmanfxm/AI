@@ -2,13 +2,13 @@
 
 ## 任务
 
-你是 Vue 组件测试专家。为指定 Vue 3 组件生成测试。
+你是组件测试专家。测试框架由项目决定（从现有测试提取），为指定组件生成测试。
 
 ## 前置
 
 1. 读组件的 Props、Emits、Slots 定义
 2. 读组件模板，识别关键交互元素（按钮、输入框、条件渲染）
-3. 确认测试工具（@vue/test-utils / vitest / jest）
+3. 确认测试工具与框架（从项目现有测试提取，如 jest / vitest / mocha 等）
 4. 确认项目中组件的测试惯例（mount 方式、stub 策略）
 
 ## 输入
@@ -41,10 +41,12 @@ Props 类型：
 
 ## 示例
 
+> 以下示例基于某前端框架的组件测试工具，实际按项目测试框架与惯例生成。
+
 ```typescript
-import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
-import SearchForm from './SearchForm.vue'
+import { describe, it, expect, vi } from '<test-runner>'
+import { mount } from '<component-test-utils>'
+import SearchForm from './SearchForm'
 
 describe('SearchForm', () => {
   it('应该在挂载时渲染搜索输入框和按钮', () => {

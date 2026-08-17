@@ -47,8 +47,8 @@ results:
   - id: pattern.form-wrapper
     type: pattern
     confidence: 0.96
-    statement: "所有复杂表单使用 FormWrapper 封装"
-    evidence: [{path: workspace/views/, type: ratio, note: "331 files use FormWrapper"}]
+    statement: "所有复杂表单使用 <统一表单封装> 封装"
+    evidence: [{path: workspace/views/, type: ratio, note: "331 files use <统一表单封装>"}]
     related:
       - {id: convention.form-naming, relation: references}
       - {id: principle.always-form-wrapper, relation: implements}

@@ -22,7 +22,7 @@
 
 ## Output
 
-- `*.test.ts` / `*.spec.ts`（测试代码）
+- 测试文件（按项目测试框架与命名约定）
 - `.project-knowledge/reports/TEST-REPORT.md`（覆盖率摘要 + AC 对照表 + QA findings + 失败分析）
 
 ## Exit

@@ -1,0 +1,24 @@
+task: N4-A
+category: simple
+prompt: "给催收内访-待跟进列表页的搜索栏加一个「客户姓名」搜索项"
+dispatch: generator-only（更新后的 skills：#1 瘦身 + #2 direct-verify 后）
+monitor_signal: "#1/#2 是否降 token"
+
+token_chain:
+  native_round2: 40314
+  suite_round2_old_skills: 71222      # 旧 skills（Candidate→Verify→Accept + 样板）
+  suite_round3_mid_skills: 61860      # 中 skills（v2 vocab + reuse）
+  suite_round4_new_skills: 69287      # 新 skills（瘦身 + direct-verify）
+
+suite:
+  files: [workspace/views/collection/internalCollection/pendingFollowUp/index.vue]
+  what: "同 1 行 label 改动（姓名→客户姓名），D1-D4 复用判定。"
+  requirement_coverage: 1.0
+  context_tokens: 69287
+  task_success: true
+
+monitor_result:
+  token_dropped: false       # 69287 vs 61860(N3-C) / 71222(N2-S1) —— 噪声，未降
+  verdict: "❌ #1/#2 不降 token —— 它们是结构性/清晰度改进，不是 token 缩减"
+
+key_finding: "瘦身(#1) + direct-verify(#2) 没有降 token。原因：SKILL.md 只占 agent 总上下文的一小部分——token 被「读知识库 + 读源码 + 读 prompts/」主导（本任务 agent 读了 SchemaSearch 源码 + type.d.ts + 多个 sibling 页），删 5 行样板 ≈ 0.5% 总量，淹没在噪声里。真正的 token 杠杆是 #4/#5（跳过整段 stage），但它们只对 medium/complex 任务生效，简单任务不触发。"

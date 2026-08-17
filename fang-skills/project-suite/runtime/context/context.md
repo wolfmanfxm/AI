@@ -19,78 +19,60 @@ context.json   → 项目知识（用了什么技术栈、有什么约定、有�
 
 ## Schema
 
+> 下面所有值都是**占位符**（`<...>`），表示字段结构；真实值由 analyzer 从项目提取、写入 `.project-knowledge/context.json`。协议文件不含任何具体项目的技术栈/路径/组件名。
+
 ```json
 {
   "schemaVersion": "1.0.0",
   "generatedBy": "project-analyzer",
   "generatedAt": "ISO-8601",
-  "gitCommit": "abc1234",
+  "gitCommit": "<commit-hash>",
 
   "techStack": {
-    "framework": "Vue 3.4",
-    "uiLibrary": "Element Plus 2.13",
-    "language": "TypeScript 5.4",
-    "buildTool": "Vite 7",
-    "stateManagement": "Pinia 2.1",
-    "cssPreprocessor": "SCSS",
-    "microFrontend": "qiankun 2.10"
+    "framework": "<detected>",
+    "uiLibrary": "<detected>",
+    "language": "<detected>",
+    "buildTool": "<detected>",
+    "stateManagement": "<detected>",
+    "cssPreprocessor": "<detected>",
+    "microFrontend": "<detected-or-absent>"
   },
 
   "paths": {
-    "sourceRoots": ["src", "workspace"],
-    "aliases": {
-      "@": "src",
-      "@workspace": "workspace",
-      "@cms": "src/views/cms"
-    },
-    "apiPrefix": "baseService = api/v1"
+    "sourceRoots": ["<source-root-1>", "<source-root-2>"],
+    "aliases": { "<alias>": "<target-path>" },
+    "apiPrefix": "<api-base>"
   },
 
   "conventions": {
-    "componentStyle": "script setup lang=ts",
-    "componentNaming": "PascalCase file, kebab-case tag",
-    "propsDefinition": "defineProps<T>()",
-    "stateManagement": "ref() / reactive()",
-    "apiClient": "request from @/utils/service",
+    "componentStyle": "<detected>",
+    "componentNaming": "<detected>",
+    "propsDefinition": "<detected>",
+    "stateManagement": "<detected>",
+    "apiClient": "<detected>",
     "apiParams": {
-      "pagination": { "pageindex": "string", "pagesize": "string" },
-      "responseWrapper": "IResponseResultRows<T> / IResponseResultRow<T>"
+      "pagination": { "<page-index-field>": "<type>", "<page-size-field>": "<type>" },
+      "responseWrapper": "<response-wrapper-type>"
     },
-    "errorDisplay": "ElMessage.error()",
-    "loadingPattern": "ref(false) + try/catch/finally",
-    "formPattern": "reactive() + defineExpose({ getFormData, getEditorForm })"
+    "errorDisplay": "<detected>",
+    "loadingPattern": "<detected>",
+    "formPattern": "<detected>"
   },
 
   "modules": {
-    "views": {
-      "src": ["PlatformManagement", "OrgManage", "AuthorityManagement", "cms", "dynamicDashboard", "Login"],
-      "workspace": ["approval", "user", "account", "billing", "monitoring", "..."],
-      "total": 40
-    },
-    "stores": {
-      "src": ["user", "menu", "uiSetting", "pending", "industry", "region"],
-      "workspace": ["docs", "region", "vendor", "finance", "counter"],
-      "total": 11
-    },
-    "apis": {
-      "srcModules": 36,
-      "workspaceModules": 110,
-      "totalFunctions": 2084
-    },
+    "views": { "<source-root>": ["<module>", "..."], "total": "<N>" },
+    "stores": { "<source-root>": ["<store>", "..."], "total": "<N>" },
+    "apis": { "srcModules": "<N>", "workspaceModules": "<N>", "totalFunctions": "<N>" },
     "components": {
-      "global": ["MpTable", "OrgTreeVirtual", "BaseDrawer", "..."],
-      "highReuse": ["MpTable (69 refs)", "SchemaTable (605 refs)", "PageTable (334 refs)"]
+      "global": ["<component>", "..."],
+      "highReuse": ["<component> (<N> refs)", "..."]
     }
   },
 
   "quality": {
-    "consoleLogTotal": 1356,
-    "unusedComponents": ["BigFileUpload", "RoleSelector"],
-    "dualPatterns": [
-      "src/pageindex vs workspace/pageNum pagination",
-      "src/Swagger URL vs workspace/RESTful URL",
-      "src/script setup vs cms/JSX+Options API"
-    ]
+    "consoleLogTotal": "<N>",
+    "unusedComponents": ["<component>", "..."],
+    "dualPatterns": ["<pattern-A> vs <pattern-B>", "..."]
   }
 }
 ```

@@ -39,6 +39,17 @@ Project Suite 包含 9 个 skill。最简单的组织方式是把它们串成链
 - **File-based contract**：每个 skill 声明输出路径，下游读路径。比 Knowledge 层更灵活，但格式变更会破坏所有下游。
 - **Event bus**：pub/sub 解耦。对当前的 9 个 skill 来说过度设计，耦合问题的实际成本尚低于 pub/sub 的复杂度。
 
+## 澄清：Knowledge First ≠ Persist Everything
+
+「所有 skill 之间数据传递经过 Knowledge 层」**不等于**「所有中间产物都持久化到 Knowledge Vault」。
+
+| 产物类型 | 传递方式 | 持久化 |
+|---------|---------|--------|
+| **Task Artifact**（PLAN.md / ARCHITECTURE.md / REVIEW.md，本次任务临时） | Task Context / Capability（下游本次消费） | promotion = none，不进个人 Vault |
+| **Long-term Knowledge**（跨项目复用的模式/术语/决策） | Knowledge Query | promotion = project/personal，进 Vault |
+
+判定一句话：**这个产物是「本次任务临时用」还是「下次任务还能复用」？** 前者走 Task Context，后者才 Knowledge Persist。与 promotion 规则（none/project/personal）完全一致——避免把 ADR-001 理解成「所有中间产物都必须知识化」。
+
 ## Related
 - [context.md](../../runtime/context/context.md) — Context Protocol 定义
 - [context-priority.md](../../runtime/context/context-priority.md) — REQUIRED/IMPORTANT/OPTIONAL 分级

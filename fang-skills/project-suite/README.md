@@ -5,16 +5,29 @@
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Architecture**: [docs/architecture.md](docs/architecture.md) · **Roadmap**: [docs/roadmap.md](docs/roadmap.md) · **Trust**: 90/100
 
-## 阅读约定：示例 vs 规范
+## 定位：Agent SDLC Framework，不是 Skills 集合
 
-> 文档与 prompt 中出现的具体组件名（`FormWrapper` / `PageTable` / `MpTable` / `DialogWrapper` / `DocsSelect`）和路径别名（`@workspace` / `el-mp`）均来自**参考项目**，仅作**示例说明**，**不是**本框架的通用规范。
-> 换到你的项目时，这些名字应替换成你项目自己的组件与别名。框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），而不是这些具体名字。
+> project-suite 与「可组合小 Skill」路线（Superpowers / Matt Pocock Skills）是**不同品类**：
+>
+> - **Superpowers** — composable、harness-agnostic，Skill 不绑定工具，由 harness 做 Tool Mapping。
+> - **Matt Pocock Skills** — 小 Skill、可组合、用户掌控流程。
+> - **project-suite** — **Agent SDLC Framework**：10 Skill + Workflow Engine + Runtime + Registry + Gates + Profiles + Adapters + Knowledge，形成有约束、可编排、可验证的流水线。
+
+**设计原则：复杂度藏在 Framework 层，不堆进 Skill。** Skill 保持薄（~50 行），只声明 stages + 业务逻辑；跨 Skill 约束由 Framework 统一提供（生命周期/checkpoint/验证 → workflow-engine；git/命令护栏 → command-guard；复用判定 → [reuse-check primitive](shared/primitives/reuse-check.md)）。
+
+**后果：新增能力落 Framework 层**（`shared/primitives/`、`runtime/engine/`、`runtime/registry/`），不要散落进 10 个 SKILL.md。
+
+## 阅读约定：机制 vs 占位符
+
+> 框架的 prompt / 协议中，具体组件名、路径别名一律用 `<占位符>` 表示（如 `<统一表单封装>`、`<统一表格>`、`<业务层别名>`、`<组件库前缀>`）。真实名称由 Analyzer 从项目提取，经 Knowledge Resolver 动态注入，不写死在框架里。
+> 唯一例外是各 skill 的 `references/examples.md`（已标注「Reference example only」）。
+> 框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），不绑定任何具体项目。
 
 ## 当前版本：1.0.0
 
 ```
 Knowledge Engine     — Object + Context Resolver + Promotion Reviewer + Decay
-Unified Runtime      — Tool Adapter(9/10) + Event Bus + Background Pipeline
+Runtime（Protocol）   — Tool Adapter(9/10) + Event Bus + Background Pipeline（规范层，非独立 Engine）
 Reasoning Engine     — Query API + Orchestrator v2.0 (Decision-Boundary Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
 Organization Layer   — Task→Project→Organization→Personal 四层
@@ -107,7 +120,7 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 | Trigger Eval | clean, no overlaps |
 | Runtime Neutrality | 0 red flags |
 | Trust Score | 90/100 |
-| SKILL.md 平均行数 | 71 行 |
+| SKILL.md 平均行数 | 50 行 |
 
 ## Governed 就绪
 
@@ -138,7 +151,7 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 - **domain drift 检测可靠**：F1 0.966，零误报。三步闭环：存在 → 可纠正 → 可靠。
 - **消除多头权威**：skill.yaml = Skill Contract（intrinsic），workflow/gates/profiles = Orchestration，无字段重叠（ADR-003）。
 
-详见 [project-suite-eval/benchmark/analysis.md](../project-suite-eval/benchmark/analysis.md)（评估证据已独立存放）。
+详见 project-suite-eval（外部评估仓库，独立存放）。
 
 ## 目录
 

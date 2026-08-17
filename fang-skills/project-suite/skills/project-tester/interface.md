@@ -3,7 +3,7 @@
 > 标准化接口契约。Artifact types 与 `artifact-types.yaml` 对齐。
 
 ## Produces
-- **test** — `.test.ts / .spec.ts` + `reports/TEST-REPORT.md`
+- **test** — 测试文件（按项目测试框架）+ `reports/TEST-REPORT.md`
 
 ## Consumes
 | artifact | 优先级 | 缺失行为 |
@@ -22,7 +22,7 @@
 | ARCHITECTURE.md | architect | 🟡 |
 
 ## Output
-- `*.test.ts / *.spec.ts`
+- 测试文件（按项目测试框架）
 - `reports/TEST-REPORT.md` — 覆盖率 + AC 对照表
 - `result.md`
 

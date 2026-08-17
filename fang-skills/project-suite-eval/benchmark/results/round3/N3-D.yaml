@@ -1,0 +1,35 @@
+task: N3-D
+category: simple
+prompt: "给催收内访-待跟进列表页的搜索栏加一个「客户姓名」搜索项"
+target_hint: workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+monitor_signal: "#1 complexity gate — 走 orchestrator 派发，Gate 是否真正执行并路由 Quick Path"
+dispatch: "orchestrator（非 generator-only）"
+
+# token 对照（同任务、不同派发方式）
+token_chain:
+  native_round2: 40314
+  suite_round2_generator_only: 71222     # +76%
+  suite_round3_generator_only: 61860     # +53%（噪声）
+  suite_round3_orchestrator: 47823       # +19%（Gate 生效）
+
+suite:
+  files:
+    - workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+  what: "同 1 行 label 改动（姓名→客户姓名），与所有前轮 diff 逐字节一致。"
+  gate_executed: true
+  gate_output:
+    复杂度: simple
+    路由: "Quick Path (generator → verify)"
+    理由: "complex=0 trivial=1 medium=1 simple=0（trivial 强信号「加一个」压过 medium「搜索」）"
+  route_taken: Quick
+  requirement_coverage: 1.0
+  context_tokens: 47823
+  task_success: true
+
+monitor_result:
+  gate_executed: true
+  route_matched: true       # gate 判 simple → Quick，agent 走 Quick
+  token_delta_vs_native: "+19%"
+  verdict: "✅ #1 生效 — Gate 真正执行 + 路由 Quick Path，suite token 从 +76% 降到 +19%"
+
+key_finding: "这是 #1 从「假完成」到「真完成」的转折：走 orchestrator 派发后，agent 确实运行了 complexity-gate.sh（gate_executed=true），分类 simple → Quick Path，跳过完整 generator workflow。suite token 从 round2 的 71222（+76%）降到 47823（+19%）。同时印证了 trivial 强信号修复（「加一个」压过「搜索」）。"

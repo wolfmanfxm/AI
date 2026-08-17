@@ -6,6 +6,8 @@ category: evolution
 complexity: { min: medium, max: high }
 cost: medium
 description: "安全重构，行为不变，指标量化"
+verification: { mode: direct-verify }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [safe-refactor, test-protection, metric-improvement]
 confidence_min: 70
 requires: [existing tests]

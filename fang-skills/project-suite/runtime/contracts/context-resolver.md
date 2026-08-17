@@ -74,19 +74,19 @@ resolved_at: "2026-08-05T12:00:00Z"
 
 # 三层 context
 long_term_knowledge:
-  - { id: instinct.form-wrapper, statement: "Always use FormWrapper", scope: personal }
+  - { id: instinct.form-wrapper, statement: "Always use <统一表单封装>", scope: personal }
 
 semantic_knowledge:
   - id: pattern.form-wrapper
     type: pattern
-    statement: "所有复杂表单使用 FormWrapper 封装"
+    statement: "所有复杂表单使用 <统一表单封装> 封装"
     confidence: 0.96
     score: 9.1
     why_relevant: "tag match: form"
 
   - id: principle.always-form-wrapper
     type: instinct
-    statement: "Always use FormWrapper pattern for complex forms"
+    statement: "Always use <统一表单封装> pattern for complex forms"
     confidence: 0.97
     score: 9.3
     why_relevant: "tag match: form, principle"
@@ -106,9 +106,9 @@ semantic_knowledge:
     why_relevant: "tag match: form, validation"
 
 structural_facts:
-  - { query: findConsumers(UserApi), result: "被 12 个模块调用, 改动影响范围广" }
-  - { query: findDependencies(UserForm), result: "依赖 FormWrapper + docsStore + userAPI" }
-  - { query: findImpacted([userId字段]), result: "3 个组件 + 2 个 API 受影响" }
+  - { query: findConsumers(<target-api>), result: "被 N 个模块调用, 改动影响范围广" }
+  - { query: findDependencies(<target-component>), result: "依赖 <统一封装> + <store> + <api>" }
+  - { query: findImpacted([<field>]), result: "N 个组件 + N 个 API 受影响" }
 ```
 
 ## 集成

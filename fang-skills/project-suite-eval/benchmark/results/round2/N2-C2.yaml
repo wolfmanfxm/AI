@@ -1,0 +1,52 @@
+task: N2-C2
+category: complex
+prompt: "新增审批流程配置页面：流程定义 + 审批节点配置 + 驳回策略"
+target_hint: workspace/views/workflowManage/processManage/
+
+native:
+  files:
+    - workspace/api/workflowManage/processConfig.ts (新建)
+    - workspace/views/workflowManage/processManage/processConfig/index.vue (新建，463 行)
+    - workspace/router/workflowManage.ts (新增路由)
+    - workspace/views/workflowManage/processManage/index.vue (加「新增流程配置」工具栏按钮)
+  what: "新建全页表单（新增/编辑双模式），流程定义（名称/标识/分类/描述/启用）+ 动态审批节点卡片 + 驳回策略，顶部保存/发布。复用 FormWrapper/FormInput/FormSelect/SectionCard/NavigationBar/SubPageWrapper。"
+  requirement_coverage: 1.0
+  context_tokens: 112417
+  task_success: true
+  findings:
+    - "463 行，功能完整覆盖 4 需求点"
+    - "节点用动态卡片（增删/上下移），native 自述复用了 FormWrapper 系列组件"
+
+suite:
+  files:
+    - workspace/api/workflowManage/processConfig.ts (新建)
+    - workspace/views/workflowManage/processManage/processConfig/index.vue (新建，340 行)
+    - workspace/router/workflowManage.ts (新增路由)
+    - workspace/views/workflowManage/processManage/index.vue (加「配置」操作列 + 「新增流程配置」工具栏)
+  what: "同样新建配置页：流程定义 + 审批节点（el-table 内联编辑）+ 驳回策略（radio + 条件显示）+ 保存/发布。复用 SubPageWrapper/NavigationBar/FormWrapper/SectionCard 等。"
+  decision_record:
+    - "D1 复用 SubPageWrapper/NavigationBar/FormWrapper/SectionCard/FormInput/FormSelect/OperateGroup（catalog.md 核实路径）"
+    - "D2 新建 processConfig.ts 而非扩展 processManage.ts——审批节点+驳回策略是独立关注点"
+    - "D3 用完整路由页（SubPageWrapper+NavigationBar）而非抽屉——节点复杂且需保存/发布，符合 patterns/approval-pages.md"
+    - "D4 入口放 processManage/index.vue 的 actions 列「配置」+ toolbar「新增流程配置」，复用已有列表承载流程定义"
+    - "D5 审批节点用原生 el-table 内联编辑而非 SchemaTable——SchemaTable 是展示型，节点需逐行增删改+排序"
+    - "D6 API 端点沿用 web/employee/workflow 前缀 + verb+entity 命名，端点需后端确认"
+    - "D7 不改列表页原有挂起/激活/删除/迁移逻辑（反 gold-plate）"
+  knowledge_queried:
+    - SKILL.md + prompts/{discovery,execution,verifier,validation,page-gen,component-gen,api-gen}.md
+    - .project-knowledge: context.json / index.md / graph.json / domain/vocabulary.yaml
+    - patterns/{table,form,dialog,crud,approval-pages}.md / components/catalog.md / api/{overview,request}.md
+    - 源码参照: processManage/index.vue、quotaManage/myQuota/activate、workflowPublish/onlineWorkflow/forms/processForm.vue
+  requirement_coverage: 1.0
+  context_tokens: 161248
+  task_success: true
+  findings:
+    - "340 行（比 native 463 行更精简），同样覆盖 4 需求点"
+    - "D5 的 el-table vs SchemaTable 决策（节点需内联编辑）比 native 更显式"
+
+key_comparison:
+  - "两者都建 4 文件结构（API+页面+路由+入口），都覆盖 4 需求点，落点一致"
+  - "suite 340 行 vs native 463 行——suite 更精简（native 用动态卡片，suite 用 el-table 内联编辑）"
+  - "suite 入口更完整（加了「配置」操作列），native 只加工具栏按钮"
+  - "suite 有 D1-D7 决策（含 el-table vs SchemaTable 的显式裁决），native 无"
+  - "token：suite 161k vs native 112k（+44%，suite 查了 9 个 pattern/knowledge 文件 + 多个源码参照）"

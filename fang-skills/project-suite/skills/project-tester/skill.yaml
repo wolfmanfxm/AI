@@ -6,6 +6,8 @@ category: verification
 complexity: { min: low, max: medium }
 cost: medium
 description: "AC驱动测试生成+执行，自动检测测试框架"
+verification: { mode: direct-verify }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [test-generation, ac-coverage, framework-detect]
 confidence_min: 70
 requires: []

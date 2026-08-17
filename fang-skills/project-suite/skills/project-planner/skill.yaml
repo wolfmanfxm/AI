@@ -6,6 +6,8 @@ category: planning
 complexity: { min: medium, max: high }
 cost: medium
 description: "需求收敛→完整性检查→自适应访谈→9模块执行契约"
+verification: { mode: candidate-verify-accept }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [adaptive-interview, completeness-check, plan-generation]
 confidence_min: 70
 requires: []

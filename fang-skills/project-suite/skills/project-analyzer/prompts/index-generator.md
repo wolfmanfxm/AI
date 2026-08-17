@@ -33,9 +33,9 @@
 
 ## Components
 - [[catalog]] — 组件目录
-  - → [[MpTable]] — 核心表格组件
-  - → [[FormWrapper]] — 表单容器组件
-  - → [[DocsSelect]] — 字典选择器
+  - → [[<表格组件>]] — 核心表格组件
+  - → [[<表单容器>]] — 表单容器组件
+  - → [[<字典选择>]] — 字典选择器
 
 ## API
 - [[api-overview]] — API 总览

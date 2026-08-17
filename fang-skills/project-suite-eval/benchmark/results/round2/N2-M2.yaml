@@ -1,0 +1,48 @@
+task: N2-M2
+category: medium
+prompt: "给授信账户查询列表加一个「额度类型」筛选（零售 / 批发两个选项）"
+target_hint: workspace/views/comprehensiveQuery/creditAccountInquiry/index.vue
+domain_note: "零售额度= retailQuota，批发额度= wholesaleQuota（vocabulary confirmed）"
+
+native:
+  files:
+    - workspace/views/comprehensiveQuery/creditAccountInquiry/index.vue
+  what: "searchItems 新增额度类型 select（key=limitType，options 零售=01/批发=02），走既有 SchemaSearch @change → handleSearchChange → reload 链路。"
+  requirement_coverage: 1.0
+  context_tokens: 98344
+  task_success: true
+  findings:
+    - "识别到语义歧义：表格'额度类型'列 limitType 实为 LIMIT_TYPE 字典（新车/二手/零备件），零售/批发实际字段是 financeCustTypeSegm（已被'客户类型细分'占用）。仍按字面落到 limitType，并诚实标注'若后端期望 financeCustTypeSegm 需微调'"
+
+suite:
+  files:
+    - workspace/views/comprehensiveQuery/creditAccountInquiry/index.vue
+  what: "同样新增 limitType select（零售=01/批发=02），复用 SchemaSearch 静态 options 模式。"
+  decision_record:
+    - "D1 复用 SchemaSearch select 静态 options 模式（同文件 creditStatus 项），不新建组件"
+    - "D2 选 key=limitType——表格'额度类型'列 prop 就是 limitType，CreditAccountQueryParams 已含该字段，改动收敛单文件"
+    - "D3 选静态 options 而非字典 getter——需求明确固定两选项，字典会引入多余项"
+    - "D4 不改查询触发链路（handleSearchChange 已正确 reload）"
+    - "D5 不向 REQUIRED_LOOKUP_CODES 增字典"
+    - "D6 语义提醒：limitType 现有 LIMIT_TYPE 字典（新车/二手/零备件），零售/批发实为 financeCustTypeSegm，存在术语漂移，建议后端确认，本次不越界改列/字典"
+  knowledge_queried:
+    - SKILL.md + prompts/{discovery,execution,verifier,validation}.md
+    - .project-knowledge/context.json / index.md / graph.json
+    - .project-knowledge/domain/vocabulary.yaml / domain/domain.yaml
+    - .project-knowledge/patterns/search.md
+    - .project-knowledge/architecture/glossary.md
+    - .project-knowledge/proposals/PLAN-wholesale-quota-v1.1.md
+    - .project-knowledge/decisions/ARCHITECTURE-wholesale-quota-v1.1.md
+    - workspace/quotaManage/retailQuota/index.vue（确认枚举语义）
+  requirement_coverage: 1.0
+  context_tokens: 123162
+  task_success: true
+  findings:
+    - "与 native 完全相同的改动（diff 逐字节一致）"
+    - "D6 把 limitType vs financeCustTypeSegm 的术语漂移显式记录为决策风险，比 native 的补充说明更结构化、可追溯"
+
+key_comparison:
+  - "diff 完全一致：两者都落 limitType + 01/02，都识别到'额度类型'语义歧义并提示后端确认"
+  - "suite 额外查了 wholesale-quota 的 PLAN/ARCHITECTURE（知识库里的历史决策），并写 D6 把漂移风险结构化；native 的歧义提示是非结构化的补充说明"
+  - "token：suite 123k vs native 98k（+25%）"
+  - "这是本轮第一个'diff 逐字节一致'的任务，差异纯粹在决策可追溯性"

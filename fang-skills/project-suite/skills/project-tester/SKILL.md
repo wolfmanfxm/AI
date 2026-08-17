@@ -6,13 +6,13 @@ description: >
   遵循现有测试风格，生成 Given-When-Then 结构的测试用例。
   触发词：写测试、测试用例、单元测试、集成测试、组件测试、测试覆盖、
   跑测试、加测试、write tests、test cases、unit test、test coverage、add test、generate test。
-  产出：测试文件（.test.ts / .spec.ts）+ TEST-REPORT.md。
+  产出：测试文件（按项目测试框架）+ TEST-REPORT.md。
 ---
 
 # Tester
 
 > 代码 + Acceptance Criteria → 测试策略 → 生成 → 执行 → 报告
-> Candidate → Verify → Accept | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -39,36 +39,8 @@ description: >
 | Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
 
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 tester 只写测试不修被测代码。测试失败 → 记录报告，不修改源码。
 
-## 反例黑名单
-
-> 禁止: ① 修改被测代码（记录[潜在Bug]不修） ② 只写happy path不写边界/异常 ③ 生成后不执行验证 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "这个函数很简单，happy path 够了" → 仍然覆盖边界+异常
-> "测试跑了就行，失败可能是环境问题" → 每个失败必须分析原因
-> "AC 太多了，挑几个重要的测" → 每条 AC 至少 1 个用例
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/) | 恢复: manifest.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Execution | [prompts/execution.md](prompts/execution.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| 测试策略 Prompt | [prompts/test-strategy.md](prompts/test-strategy.md) |
-| 单元测试 Prompt | [prompts/unit-test.md](prompts/unit-test.md) |
-| 组件测试 Prompt | [prompts/component-test.md](prompts/component-test.md) |
-| Mock 策略 | [references/mock-strategy.md](references/mock-strategy.md) |
-
-## 完成后下一步 → /project-reviewer
+> 完成后：/project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

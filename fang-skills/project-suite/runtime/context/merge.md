@@ -25,11 +25,11 @@
 Generator 生成一个组件:
 
 User Prompt:     "用卡片布局显示用户列表"
-patterns/table.md: "列表页使用 PageTable + SchemaTable"
-CLAUDE.md:       "Element Plus 使用 el-mp 前缀"
+patterns/table.md: "列表页使用 <统一表格> + <schema表格>"
+CLAUDE.md:       "Element Plus 使用 <组件库前缀> 前缀"
 
 合并结果:
   布局: User Prompt override → 卡片布局（不是表格）
-  组件: project_knowledge override → PageTable + SchemaTable（用户没说用什么组件）
-  前缀: claude_md override → el-mp 前缀（强制约束）
+  组件: project_knowledge override → <统一表格> + <schema表格>（用户没说用什么组件）
+  前缀: claude_md override → <组件库前缀> 前缀（强制约束）
 ```

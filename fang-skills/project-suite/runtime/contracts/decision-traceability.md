@@ -23,7 +23,7 @@ R-007 (Requirement: 支持头像上传)
   ↓ satisfies
 T-012 (Task: 实现头像上传组件)
   ↓ implements
-ADR-004 (Architecture: 头像用 BigFileUpload)
+ADR-004 (Architecture: 头像用 <上传组件>)
   ↓ realized_in
 code (实现代码)
   ↓ verified_by

@@ -1,0 +1,98 @@
+# Benchmark Tasks v2.0（第二轮：新任务验证过程质量）
+#
+# 与第一轮（20 任务，v1.1）的区别：
+#   1. 全部为全新任务，落在第一轮未触碰的模块（collection / vehicleMonitor / marginManage /
+#      comprehensiveQuery / workflowManage / creditChangeManage / rebateManage / components/common）。
+#   2. 每任务显式列出 requirement points（供客观 requirement_coverage rubric 评分，不采信 agent 自报）。
+#   3. 每个任务带 target_hint（消落点发散，apples-to-apples）。
+#   4. 目标项目已含 .project-knowledge/domain/vocabulary.yaml（domain 检测可真正生效）。
+#
+# 本轮焦点：验证 suite 的「过程质量」价值——Decision Record / 边界纪律（反 gold-plate）/
+# 证据密度 / 长任务护栏——在陌生任务上是否依然成立。不重复测 token（第一轮已证 suite 不省 token）。
+
+version: "2.0.0"
+
+target_project: /Users/fangxiangming/Work/Ly/东风汽金/code/afc-newcore-web-code
+branch: benchmark/20260813
+
+tasks:
+  # ══ Simple ══
+  N2-S1:
+    category: simple
+    prompt: "给催收内访-待跟进列表页的搜索栏加一个「客户姓名」搜索项"
+    target_hint: "workspace/views/collection/internalCollection/pendingFollowUp/index.vue"
+    requirement_points:
+      - "搜索栏新增客户姓名输入项"
+      - "输入后能触发列表查询"
+
+  N2-S2:
+    category: simple
+    prompt: "给车辆监控管理-车辆列表页的分页组件补上 total 计数（当前翻页不显示总数）"
+    target_hint: "workspace/views/vehicleMonitor/vehicleMonitorManager/monitorManager/vehicleList.vue"
+    requirement_points:
+      - "分页组件正确绑定 total 总数"
+      - "翻页逻辑不因改动而破坏"
+
+  # ══ Medium ══
+  N2-M1:
+    category: medium
+    prompt: "新增经销商保证金缴纳记录页面，字段：经销商 / 品牌 / 车辆类型 / 缴纳金额 / 状态"
+    target_hint: "workspace/views/marginManage/dealerMargin/（新页面）"
+    domain_note: "保证金= margin（confirmed）；deposit 是 conflicting→margin，测试 domain drift"
+    requirement_points:
+      - "有独立页面"
+      - "经销商字段"
+      - "品牌字段"
+      - "车辆类型字段"
+      - "缴纳金额字段"
+      - "状态字段"
+
+  N2-M2:
+    category: medium
+    prompt: "给授信账户查询列表加一个「额度类型」筛选（零售 / 批发两个选项）"
+    target_hint: "workspace/views/comprehensiveQuery/creditAccountInquiry/index.vue"
+    domain_note: "零售额度= retailQuota，批发额度= wholesaleQuota（均 confirmed）"
+    requirement_points:
+      - "新增额度类型筛选项"
+      - "含零售 / 批发两个选项"
+      - "筛选能触发查询"
+
+  N2-M3:
+    category: medium
+    prompt: "实现一个批量导入组件：模板下载 + 文件选择上传 + 校验结果反馈"
+    target_hint: "workspace/components/common/（新通用组件）"
+    reuse_note: "项目已有 ImportButton / ImportDialog / FilePreviewUpload 等，测试复用 vs 重造"
+    requirement_points:
+      - "模板下载入口"
+      - "文件选择上传"
+      - "校验结果展示"
+
+  # ══ Complex ══
+  N2-C1:
+    category: complex
+    prompt: "重构授信变更管理模块：拆解 God Component + 抽业务逻辑到 composable，行为保持不变"
+    target_hint: "workspace/views/creditChangeManage/batchCreditAdjust/"
+    requirement_points:
+      - "拆解大组件为可维护子结构"
+      - "业务逻辑抽取为 composable"
+      - "重构后行为保持不变"
+
+  N2-C2:
+    category: complex
+    prompt: "新增审批流程配置页面：流程定义 + 审批节点配置 + 驳回策略"
+    target_hint: "workspace/views/workflowManage/processManage/"
+    requirement_points:
+      - "流程定义功能"
+      - "审批节点配置"
+      - "驳回策略配置"
+      - "保存 / 发布动作"
+
+  # ══ Long ══
+  N2-L1:
+    category: long-task
+    prompt: "从零搭建「返利对账报表」子模块：返利对账记录列表（CRUD）+ 月度对账报表 + 对账审批流"
+    target_hint: "workspace/views/rebateManage/rebateStatement/（新建子模块）"
+    requirement_points:
+      - "返利对账记录列表（CRUD）"
+      - "月度对账报表"
+      - "对账审批流"

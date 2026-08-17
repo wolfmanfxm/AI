@@ -2,6 +2,8 @@
 
 > 真实分析场景示例。更多产出示例见 [../../../shared/examples/analyzer-output.md](../../../shared/examples/analyzer-output.md)。
 
+> ⚠️ **Reference example only**：本文件的组件名/API 名/参数名来自参考项目，仅作示例，**不代表项目默认**。实际名称从 `.project-knowledge/`（catalog.md / context.json）解析。
+
 ---
 
 ## 示例 1：首次分析 — Vue3+TS 项目

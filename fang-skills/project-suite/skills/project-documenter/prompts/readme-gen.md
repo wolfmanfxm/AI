@@ -36,7 +36,7 @@
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| Vue 3 | 3.4.x | 前端框架 |
+| `<框架>` | `<版本>` | 前端框架 |
 | ... | ... | ... |
 
 ## 快速开始
@@ -66,8 +66,8 @@ src/
 
 ## 开发指南
 
-- 组件使用 `<script setup lang="ts">` + Composition API
-- API 模块位于 `src/api/`，使用 request 封装
+- 组件写法遵循项目约定（见 `.project-knowledge/`）
+- API 模块位置与 request 封装方式以项目为准
 - [更多开发规范](.project-knowledge/index.md)
 
 ## 部署

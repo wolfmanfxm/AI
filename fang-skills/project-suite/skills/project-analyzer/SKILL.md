@@ -17,9 +17,15 @@ description: >
 ## 核心原则
 
 1. **每个 Extractor 只提取一种知识** — 不做全才，做专才
-2. **Candidate → Verify → Accept** — 不直接写入，先候选再验证
+2. **先候选再验证** — 不直接写入（verification.mode: candidate-verify-accept）
 3. **Evidence Score 溯源** — 每个 Claim 标注证据（路径+行号+次数）
 4. **Rejected 保留** — 失败的知识也存档，供后续分析
+
+## 何时触发（知识缺口入口）
+
+> Analyzer 不是默认入口，是**知识缺口入口**：只在 `.project-knowledge/` 不存在 / 未覆盖当前领域 / `last_scan` 过期时才跑。已有知识库且覆盖当前任务 → 跳过 Analyzer，用 Knowledge Resolver → Reuse（见 [Complexity Gate ②b](../../../shared/prompts/complexity-gate.md)）。
+
+> **增量分析（Incremental Analysis）**：知识库存在、但只有某个领域缺失时，只跑该领域相关的 Extractor，局部更新 graph.json + 对应 .md——不重跑全部 10 个 Extractor。全量 10-Extractor 扫描只在「知识库不存在 / 结构漂移」时才做。
 
 ## 前置条件
 
@@ -35,36 +41,7 @@ description: >
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
 
-### Execution 四阶段
-
-```
-Phase 1: Extractors → candidates/accepted/*.yaml
-Phase 2: 5-Verify → Accepted/Adjusted/Rejected
-Phase 3: Cross-Validator → contradictions + complements
-Phase 4: Knowledge Builder → graph.json + .md
-Phase 5: INDEX Generator → INDEX.md
-Phase 6: Classifier → promotion: none/project/personal
-Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
-Phase 8: Promotion Review → auto-score → Promote/Keep/Reject
-Delivery: 双同步 — Project Sync + Promotion (auto_promote + manual confirm)
-```
-
-### Extractor 矩阵
-
-| # | Extractor | 提取 |
-|---|-----------|------|
-| 1 | Directory | 目录结构与职责 |
-| 2 | Framework | 技术栈与配置 |
-| 3 | Architecture | 分层与模块边界 |
-| 4 | Pattern | 设计模式与代码模式 |
-| 5 | Convention | 命名/import/目录规范 |
-| 6 | Glossary | 领域术语定义 |
-| 7 | Decision | 架构决策（为什么） |
-| 8 | Risk | 风险与技术债 |
-| 9 | AntiPattern | 反模式与坏味道 |
-| 10 | Principle | Always/Never/Prefer/Avoid |
-
-→ 全部 Extractor prompts: [prompts/extractors/](prompts/extractors/)
+> 8-Phase 执行详见 [prompts/execution.md](prompts/execution.md)；10 个 Extractor 详见 [prompts/extractors/](prompts/extractors/)。
 
 ## 后续 Stage
 
@@ -74,35 +51,7 @@ Delivery: 双同步 — Project Sync + Promotion (auto_promote + manual confirm)
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
 
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 
-## 反例黑名单
-
-> 禁止: ① 修改源码（只写知识文件） ② 跳过CHECKPOINT确认 ③ agent提前返回不等待全部完成 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> LLM 可能说这些话来跳过步骤——识别并拒绝：
-> "项目很简单，不需要全量扫描" → 仍然全量
-> "这个维度没什么内容，跳过" → 仍然提取，标注 [MINIMAL]
-> "Verifier 太慢，直接写 knowledge" → 必须经过 Candidate→Verify
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 每stage详见 [prompts/](prompts/)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Extractor Prompts | [prompts/extractors/](prompts/extractors/) |
-| Verifier | [prompts/verifier.md](prompts/verifier.md) |
-| Knowledge Builder | [prompts/knowledge-builder.md](prompts/knowledge-builder.md) |
-| INDEX Generator | [prompts/index-generator.md](prompts/index-generator.md) |
-| 职责边界+反例 | [references/boundary.md](references/boundary.md) |
-| 失败处理 | [references/failure-handling.md](references/failure-handling.md) |
-
-## 完成后下一步 → /project-planner 或 /project-architect
+> 完成后：/project-planner 或 /project-architect。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

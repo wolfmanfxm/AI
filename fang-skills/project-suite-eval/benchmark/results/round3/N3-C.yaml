@@ -1,0 +1,35 @@
+task: N3-C
+category: simple
+prompt: "给催收内访-待跟进列表页的搜索栏加一个「客户姓名」搜索项"
+target_hint: workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+monitor_signal: "#1 complexity gate（token）+ #4 command guard（git 尝试）"
+
+round2_baseline:
+  native_tokens: 40314
+  suite_tokens: 71222   # +76%
+  suite_git_attempted: false   # N2-S1 未试 git（试 git 的是 N2-S2）
+
+suite:
+  files:
+    - workspace/views/collection/internalCollection/pendingFollowUp/index.vue
+  what: "将已有 customerName 输入项 label 从「姓名」改为「客户姓名」，单行改动。"
+  decision_record:
+    - "D1 复用已有搜索项、改 label 而非新建（同 key 会重复）"
+    - "D2 标签取「客户姓名」而非「客户名称」（domain 约定 + 需求原文）"
+    - "D3 不动表格列 label（范围外，改即 gold-plate）"
+    - "D4 不动兄弟页 completedFollowUp"
+    - "D5 placeholder 保持「请输入」"
+  knowledge_queried:
+    - .project-knowledge/{context.json,index.md,patterns/search.md,domain/vocabulary.yaml}
+  requirement_coverage: 1.0
+  context_tokens: 61860
+  task_success: true
+
+monitor_result:
+  git_attempted: false       # #4：3/3 N3 suite 均未试 git（round2 是 1 次/8）
+  suite_tokens: 61860        # vs round2 71222（-13%），但非 gate 效应（见下）
+  gate_route: "未走 Complexity Gate"   # 直接派 generator，未走 orchestrator 路由
+
+verdict: "#4 部分生效（3/3 无 git 尝试）；#1 未生效——token 下降是噪声，非 gate 效应（gate 在 orchestrator 层，generator-only 派发不触发）"
+
+key_finding: "N3-C 印证了 #1 的一个诚实边界：Complexity Gate 在 pipeline-orchestrator 的 Discovery 层，直接派 generator 不会触发它。suite token 61860 vs round2 71222 的 -13% 是模型非确定性，不是 gate 把任务路由到 Quick Path。真正验证 #1 需要走 orchestrator 路径。"

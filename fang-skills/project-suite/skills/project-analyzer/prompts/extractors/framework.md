@@ -15,12 +15,12 @@
 framework: Vue 3.4
 language: TypeScript 5.x
 build: Vite 5.x
-ui: Element Plus 2.13 (el-mp prefix)
+ui: Element Plus 2.13 (<组件库前缀> prefix)
 state: Pinia
 router: Vue Router 4
 test: Vitest
 package_manager: pnpm
-aliases: { "@": "src", "@workspace": "workspace", "@cms": "cms" }
+aliases: { "@": "src", "<业务层别名>": "workspace", "<cms别名>": "cms" }
 strict_mode: true
 ```
 

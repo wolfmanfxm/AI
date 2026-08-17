@@ -6,6 +6,8 @@ category: creation
 complexity: { min: low, max: medium }
 cost: medium
 description: "代码→可溯源技术文档，自动匹配风格"
+verification: { mode: direct-verify }
+depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [doc-generation, style-matching, source-tracing]
 confidence_min: 60
 requires: []

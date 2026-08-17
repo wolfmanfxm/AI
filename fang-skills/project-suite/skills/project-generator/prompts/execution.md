@@ -25,7 +25,7 @@
 
 判定：全部通过 → Accepted → 写入文件。V1/V2 失败 → Rejected → 修正。V3-V6 部分失败 → Accepted + 标注修复建议。
 
-⚡ 每个文件写入后 snapshot: `files_generated: [UserCard.vue, ...]` → 中断后跳过已完成文件。
+⚡ 每个文件写入后 snapshot: `files_generated: [<ComponentName>.<ext>, ...]` → 中断后跳过已完成文件。
 
 ### 1. 结构化知识查询
 
@@ -69,12 +69,12 @@
 ```yaml
 decisions:
   - id: D1
-    decision: "表单组件: 使用 FormWrapper"
-    selected: "FormWrapper"
+    decision: "表单组件: 使用 <统一表单封装>"
+    selected: "<统一表单封装>"
     ignored:
-      - { option: "Raw el-form", reason: "不符合项目规范, Reviewer 会标记为 antipattern" }
+      - { option: "原生表单组件", reason: "不符合项目规范, Reviewer 会标记为 antipattern" }
     reason: "项目 convention, 331 files use it"
-    evidence: ["conventions: FormWrapper is standard"]
+    evidence: ["conventions: <统一表单封装> is standard"]
     confidence: 0.96
     risk: "无"
     owner: "generator"

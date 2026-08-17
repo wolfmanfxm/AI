@@ -10,6 +10,10 @@
 4. 扫描路由名称 → 提取业务模块名（与 views 目录名交叉验证）
 5. 扫描枚举值 → 提取状态/类型常量
 6. 对每个术语：标注定义（**优先用 types 里的中文 JSDoc 注释**）、出现位置、使用频率
+7. **三分提取（entities / actions / artifacts）**——只提实体术语会导致下游 V7/V6 对「订单退款记录」这类动作级页面命名空转。
+   - **entities**：从 views **一级目录名** + types 提取领域实体（order / product / user）。
+   - **actions**：从 api **函数名动词** + 中文 JSDoc 释义提取领域动作（refund / create / approve / review）。
+   - **artifacts**：从 views **二级/三级目录名** + api **verb+entity 命名** + 页面中文标题，提取「实体×动作」的产物（`orderRefundRecord`=订单退款记录、`orderStatement`=订单对账单、`userReview`=用户审核）。每个 artifact 标注 `composed_of: { entity, action, artifact_kind }` 和规范命名前缀 `naming`。
 
 ## Output
 
@@ -25,6 +29,20 @@
 | 账户 | Account | 资金账户 | types/account.ts | 中 |
 | 角色 | Role | 权限角色 | types/role.ts, views/roleManage/ | 中 |
 | 商品 | Product | 商品信息 | types/product.ts | 中 |
+
+## 动作（actions）
+
+| 术语 | 英文 | 定义 | 出现位置 |
+|------|------|------|---------|
+| 退款 | refund | 对订单发起退款 | api/order/refund.ts |
+| 审核 | review | 对内容发起审核 | api/review/index.ts |
+
+## 产物（artifacts）
+
+| 术语 | 英文 | 定义 | composed_of | 命名前缀 |
+|------|------|------|------------|---------|
+| 订单退款记录 | orderRefundRecord | 订单退款的记录页面/API | order + refund + record | orderRefundRecord |
+| 用户审核 | userReview | 用户审核流程 | user + review + workflow | userReview |
 
 ## 状态术语
 

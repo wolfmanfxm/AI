@@ -1,0 +1,30 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+skill: project-analyzer
+
+tests:
+  - id: P1
+    name: 证据溯源而非无依据结论
+    scenario: >
+      分析这个项目的技术栈与代码规范，产出知识库。
+    naive_failure: >
+      朴素 Agent 写一堆「项目使用 XX 模式」的结论，没有路径+行号，无法溯源、无法信任。
+    skill_mechanism: 核心原则 3「Evidence Score 溯源」——每个 Claim 标注证据（路径+行号+次数）
+    assertion: 每条 Claim 附 sources（file:line），无证据的结论标注 [MINIMAL] 或拒绝。
+
+  - id: P2
+    name: 先候选再验证而非直接写入
+    scenario: >
+      从项目提取「命名规范」，写入 knowledge。
+    naive_failure: >
+      朴素 Agent 提取完直接写入 knowledge，跳过验证，导致错误/存疑结论进入知识库污染下游。
+    skill_mechanism: verification.mode: candidate-verify-accept（先候选再 5-Verify）
+    assertion: 产物区分 candidates/accepted/rejected，accepted 均经过验证。
+
+  - id: P3
+    name: 知识缺口入口而非默认全量扫描
+    scenario: >
+      项目已有新鲜知识库（last_scan 未过期），用户再次说「分析这个项目」。
+    naive_failure: >
+      朴素 Agent 重跑全部 10 个 Extractor 做全量扫描，浪费大量 token，产出与已有知识重复。
+    skill_mechanism: 「何时触发（知识缺口入口）」——知识库新鲜且覆盖当前任务时跳过 Analyzer
+    assertion: 不重跑全量；知识库新鲜时直接路由到 Knowledge Resolver → Reuse。

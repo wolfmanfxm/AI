@@ -41,6 +41,6 @@ sources:
 
 | ❌ 不要 | ✅ 要 |
 |--------|------|
-| "项目使用 XX 模式"（无证据） | "项目使用 DataTable+SchemaTable 模式，见 `src/views/order/shippingAddress/index.vue:4-10`" |
+| "项目使用 XX 模式"（无证据） | "项目使用 DataTable+<schema表格> 模式，见 `src/views/order/shippingAddress/index.vue:4-10`" |
 | 凭框架知识写代码 | 读 2+ 个现有文件提取实际模式 |
 | 编造 API 参数名 | 从 `workspace/api/<module>.ts` 源码复制参数名 |

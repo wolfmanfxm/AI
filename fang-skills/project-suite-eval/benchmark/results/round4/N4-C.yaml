@@ -1,0 +1,32 @@
+task: N4-C
+category: complex
+prompt: "新增审批流配置页面：流程定义 + 审批节点配置 + 驳回策略"
+dispatch: orchestrator（更新后 skills：#5 知识缺口入口）
+monitor_signal: "#5 知识缺口判定——是否跳过 Analyzer"
+
+suite:
+  files:
+    - workspace/api/workflowManage/processConfig.ts (新建)
+    - workspace/views/workflowManage/processManage/config/index.vue (新建)
+    - workspace/router/workflowManage.ts (修改)
+    - workspace/views/workflowManage/processManage/index.vue (修改)
+  gate_executed: true
+  gate_output:
+    复杂度: "medium（脚本关键词只命中「新增」，未命中 complex）"
+    路由: "Standard Path"
+    规划深度: "Quick Planning"
+  knowledge_gap_check: "无缺口 → 跳过 Analyzer"
+    依据: ".project-knowledge 存在且完整（v1.6.0）；graph 无独立 workflow 节点但 context.json.modules 含 workflow/workflowManage + approval-pages.md 覆盖；last_scan 5 天前（新鲜）"
+  analyzer_skipped: true
+  route_taken: "Full Path（人工升 complex）→ ②b 无缺口 → 跳过 Analyzer → Knowledge Resolver → Planner → Generator"
+  requirement_coverage: 1.0
+  context_tokens: 147092
+  task_success: true
+
+monitor_result:
+  knowledge_gap_worked: true       # ②b 正确识别「无缺口 → 跳过 Analyzer」✅
+  analyzer_skipped: true           # 没跑 10 个 Extractor ✅
+  classifier_miss: true            # ⚠️ script 把 complex 判成 medium（agent 靠 rubric 人工升 complex）
+  verdict: "✅ #5 机制生效；⚠️ classifier 对多子功能任务有误判（LLM 可纠正，脚本不能）"
+
+key_finding: "#5（知识缺口入口）机制生效：②b 正确判定「.project-knowledge 已覆盖 workflow 领域 + 5 天前新鲜 → 无缺口 → 跳过 Analyzer」，agent 没跑 10 个 Extractor，直接 Knowledge Resolver → Planner → Generator。但暴露 classifier 局限：complexity-gate.sh 关键词只命中「新增」（medium），没识别「审批流配置（3 子功能 + 新 API 契约）」是 complex——脚本是零 token 启发式，对多子功能/语义复杂度天然盲区，只能靠 rubric ② + LLM 人工升档兜底。"

@@ -7,12 +7,12 @@
 | # | Check | Method | On Failure |
 |---|-------|--------|------------|
 | V1 | Import 可达 | 所有 import 路径指向存在的文件/模块 | 修正路径或标注 TODO |
-| V2 | 组件复用 | graph.json 中不存在同功能组件 | 替换为 import 已有组件 |
+| V2 | 组件复用 | 走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)：Existing→REUSE / Similar→EXTEND / 不同→CREATE；graph.json 中不存在同功能组件 | 替换为 import 已有组件（需求已覆盖 → 零改动） |
 | V3 | 模式一致 | 代码风格与 `.project-knowledge/patterns/` 一致 | 修正为符合模式 |
 | V4 | 类型完整 | 无 `any` 滥用，接口定义完整 | 从 types/ 导入或定义 |
 | V5 | 状态覆盖 | loading/empty/error 三态均有处理 | 补全缺失状态 |
 | V6 | 非重复 | graph.json 中无同名节点 | 标记 `[DUPLICATE]` |
-| V7 | Domain 命名一致 | 代码中的类名/变量名与 `.project-knowledge/domain/vocabulary.yaml` 的 confirmed 术语一致 | ⚠️ 命名与 domain 术语不一致 → 修正命名 |
+| V7 | Domain 命名一致 | 代码中的类名/变量名与 vocabulary.yaml 的 confirmed 术语一致；**页面/API 命名须匹配 `artifacts` 的 `naming` 前缀**（如「订单退款记录」→ `orderRefundRecord`，而非泛化的 RefundRecord）。先查 artifact 是否已存在，不存在再查 entity×action 组合是否合法 | ⚠️ 命名与 domain 术语不一致 → 修正命名 |
 
 ## 判定
 
@@ -34,9 +34,9 @@ verdict: accepted
 confidence: 0.88
 evidence:
   imports:
-    - { path: "@/components/FormWrapper", exists: true }
+    - { path: "@/components/<统一表单封装>", exists: true }
     - { path: "element-plus", exists: true }
-  patterns: [PageTable, FormWrapper, defineProps<T>]
+  patterns: [<统一表格>, <统一表单封装>, <组件类型定义>]
   types: { any_count: 0, interfaces: 2 }
   states: [loading, error, empty]
 ```

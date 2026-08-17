@@ -22,7 +22,7 @@
     "user_feedback": ["范围确认通过", "增加撤销审批功能"],
     "assumptions": ["假设审批流程为两级", "假设价格T+1生效"]
   },
-  "discoveries": ["发现已有 approvalWorkflow.ts 可复用"],
+  "discoveries": ["发现已有 <审批流模块> 可复用"],
   "open_questions": ["审批撤回是否需要通知申请人？"]
 }
 ```
@@ -36,14 +36,14 @@
   "project": "my-web-app",
   "constraints": {
     "framework": "Vue 3.4",
-    "ui_library": "Element Plus 2.13 (el-mp prefix)",
+    "ui_library": "Element Plus 2.13 (<组件库前缀> prefix)",
     "typescript": "strict mode",
     "package_manager": "pnpm"
   },
   "conventions": {
     "component_style": "script setup lang=ts",
-    "form_pattern": "FormWrapper + FormInput/FormSelect",
-    "table_pattern": "PageTable + SchemaTable",
+    "form_pattern": "<统一表单封装> + <表单字段>/<表单字段>",
+    "table_pattern": "<统一表格> + <schema表格>",
     "api_pattern": "export function + Promise<AxiosResponse<T>>"
   },
   "known_gotchas": [
@@ -65,7 +65,7 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
   "patterns_learned": {
     "vue_crud": {
       "files_needed": ["index.vue", "detail.vue", "api.ts", "types.ts"],
-      "typical_structure": "PageTable + SchemaSearch + SchemaTable + FormWrapper dialog"
+      "typical_structure": "<统一表格> + <schema搜索> + <schema表格> + <统一表单封装> dialog"
     },
     "approval_flow": {
       "pages": ["申请列表", "申请表单", "审批列表", "审批详情"],
@@ -73,7 +73,7 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
     }
   },
   "cross_project_insights": [
-    "某企业项目的 approvalWorkflow.ts 可复用到其他审批场景",
+    "某项目的 <审批流模块> 可复用到其他审批场景",
     "cms 模式的 json-driven 表单比手写更灵活"
   ]
 }
@@ -94,7 +94,7 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
     { "option": "新建 billingManage", "rejected_because": "太泛，未来可能包含非价格功能" }
   ],
   "chosen": "新建 pricingManage/",
-  "consequences": { "new_module": true, "reuse": ["approvalWorkflow.ts"], "risk": "审批流集成需确认" },
+  "consequences": { "new_module": true, "reuse": ["<审批流模块>"], "risk": "审批流集成需确认" },
   "timestamp": "2026-08-04T15:30:00Z",
   "status": "accepted",
   "revisited_at": null

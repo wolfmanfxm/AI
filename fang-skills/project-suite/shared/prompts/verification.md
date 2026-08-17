@@ -19,7 +19,7 @@
 ### 代码质量
 
 - [ ] **命名一致** — 与项目已有命名风格一致（检查 2+ 个现有文件）
-- [ ] **import 正确** — 路径别名 `@/` `@workspace/` 使用正确，路径存在
+- [ ] **import 正确** — 路径别名 `@/` `<业务层别名>/` 使用正确，路径存在
 - [ ] **复用** — 已检查 graph.json，已有组件不重复生成
 
 ### 契约遵守
@@ -33,7 +33,7 @@
 ### Generator
 
 - [ ] `defineOptions({ name: '...' })` 已添加
-- [ ] 表单使用 FormWrapper（非 el-form），弹窗使用 DialogWrapper
+- [ ] 表单使用 <统一表单封装>（非原生表单），弹窗使用 <统一弹窗>
 - [ ] API 使用 `export function` + `Promise<AxiosResponse<T>>`
 - [ ] 错误提示使用 `ElMessage.error(data?.msg || '默认提示')`
 - [ ] 分页使用 `pageIndex`/`pageSize`（数字）
@@ -58,4 +58,4 @@
 |-----------|----------------|
 | "大概没问题" | "✅ 边界覆盖: loading=有, error=有, empty=有, types=ok" |
 | 只跑 happy path | 至少测 1 个错误路径 + 1 个边界值 |
-| 不检查 import 是否存在 | `grep -r "import.*from.*@workspace"` 确认路径可达 |
+| 不检查 import 是否存在 | `grep -r "import.*from.*<业务层别名>"` 确认路径可达 |

@@ -39,11 +39,11 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 
 | 领域 | 已知 | 未知 → 追问 |
 |------|------|------------|
-| UI Pattern | FormWrapper 是所有表单的标准 | 需要哪些字段？有没有特殊校验？是否上传？ |
-| Data | 用户模块已有 UserStore, UserAPI | 是否需要新的数据源？是否需要关联已有 API？ |
+| UI Pattern | 表单有统一的标准封装（具体名由 Resolver 注入） | 需要哪些字段？有没有特殊校验？是否上传？ |
+| Data | 用户/账户模块已有 Store + API | 是否需要新的数据源？是否需要关联已有 API？ |
 | Permission | 项目使用路由守卫 | 是否需要权限控制？哪些角色？ |
-| Workflow | 审批流程使用 approvalWorkflow | 是否需要审批？几级审批？ |
-| Export | 项目使用 exportGraphImage | 是否需要导出功能？ |
+| Workflow | 审批流程有统一实现 | 是否需要审批？几级审批？ |
+| Export | 项目有导出实现 | 是否需要导出功能？ |
 
 ## Question Template
 
@@ -58,9 +58,9 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 
 例：
 🔍 还需要确认：
-1. 项目已有 FormBase 模式——个人资料表单需要哪些字段？（姓名/手机/邮箱/头像？）
-2. 是否需要审批流？（项目已有 approvalWorkflow 可复用）
-3. 是否关联已有用户数据？（需查询 UserApi 还是新建？）
+1. 项目已有统一表单封装——个人资料表单需要哪些字段？（姓名/手机/邮箱/头像？）
+2. 是否需要审批流？（项目已有审批流实现可复用）
+3. 是否关联已有用户数据？（查询已有 API 还是新建？）
 ```
 
 ## Exit
@@ -71,15 +71,15 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 # Requirement Spec: 新增个人资料登记
 
 ## Confirmed
-- 使用 FormBase 模式（项目 conventions）
+- 使用统一表单封装（项目 conventions）
 - 字段: 姓名, 手机, 邮箱, 头像（上传）
 - 无需审批流
-- 关联已有 UserApi（通过 userId）
+- 关联已有用户 API（通过用户 id）
 
 ## Assumptions
 - 假设单用户单条记录（不涉及多条个人资料）
-- 假设头像使用已有 BigFileUpload 组件
-- 假设移动端适配（项目有 h5/ 目录）
+- 假设头像使用已有上传组件
+- 假设移动端适配（项目有对应目录）
 
 ## Open Questions
 - 是否需要邮箱验证？（留给 Architect 决策）
@@ -89,21 +89,27 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 
 Interview 不只是一次性提问，而是**读写项目 Domain Model**。
 
-### domain/vocabulary.yaml 结构
+### domain/vocabulary.yaml 结构（v2 三分模型）
 
-`.project-knowledge/domain/vocabulary.yaml`（Analyzer 提取 + Interview 维护）：
+`.project-knowledge/domain/vocabulary.yaml`（Analyzer 提取 + Interview 维护），三分：`entities` / `actions` / `artifacts`（详见 [Domain Model](../../../runtime/contracts/domain-model.md)）：
 
 ```yaml
-terms:
-  - id: user
-    name: "用户"
-    definition: "已完成实名认证的用户"
-    kind: entity           # entity | value_object | workflow | role
-    relationships:
-      - { to: user, relation: "is_a_kind_of" }
-    status: confirmed      # candidate | confirmed | conflicting
-    source: interview      # analyzer | interview
-    confidence: 0.9
+entities:   # 领域实体（名词）
+  - id: order
+    name: "订单"
+    status: confirmed
+
+actions:    # 领域动作（动词）
+  - id: refund
+    name: "退款"
+    status: confirmed
+
+artifacts:  # 领域产物（实体×动作 → 页面/API 命名）
+  - id: orderRefundRecord
+    name: "订单退款记录"
+    composed_of: { entity: order, action: refund, artifact_kind: record }
+    naming: "orderRefundRecord"
+    status: confirmed
 ```
 
 ### Interview 三步读写
@@ -117,14 +123,14 @@ terms:
 ### 冲突示例
 
 ```
-Planner 假设 "Customer = 任意登记人"
+Planner 假设 "User = 任意登录者"
   ↓ 读 domain model
-发现: "Customer = 已完成实名认证的用户" (status: confirmed)
+发现: "User = 系统注册用户" (status: confirmed)
   ↓
 ⚠️ Domain conflict:
-  Existing:  Customer = 已完成实名认证的用户
-  Current:   Customer = 任意登记人
-  Need:      "这里的 Customer 指哪个？"
+  Existing:  User = 系统注册用户
+  Current:   User = 任意登录者
+  Need:      "这里的 User 指哪个？"
 ```
 
 → [Glossary Extractor](../project-analyzer/prompts/extractors/glossary.md)
@@ -148,5 +154,5 @@ Interview Decision
 
 Interview 不替代 Context Resolver——Interview 追问**用户不知道的事**，Resolver 查询**项目已经知道的事**。两者互补：
 
-- Resolver: "项目已有什么？" → FormBase, UserApi, approvalWorkflow
+- Resolver: "项目已有什么？" → 统一表单封装, 用户 API, 审批流
 - Interview: "用户想要什么？" → 哪些字段, 是否审批, 是否导出

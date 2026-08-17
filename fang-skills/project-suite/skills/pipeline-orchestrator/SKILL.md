@@ -40,47 +40,11 @@ description: >
 
 ## 可用 Pipeline
 
-→ [workflow-library.yaml](../../runtime/registry/workflow-library.yaml)
-
-| Pipeline | 适用场景 |
-|----------|---------|
-| `full-sdlc` | 全生命周期：analyzer → planner → architect → generator → tester → reviewer → documenter → releaser |
-| `analyze-plan-build` | 新功能开发：analyzer → planner → architect → generator → reviewer |
-| `quick-change` | 轻量改动：generator → reviewer |
-| `refactor-cycle` | 重构循环：reviewer → refactorer → tester → reviewer |
-| `knowledge-refresh` | 知识刷新：analyzer → documenter |
+> Pipeline 路由由 [Complexity Gate](../../shared/prompts/complexity-gate.md) 决定（Reuse Fast Path / Quick / Standard / Full），具体 pipeline 定义见 [workflow-library.yaml](../../runtime/registry/workflow-library.yaml)。
 
 ## 职责边界
-> 🔴 沙箱边界：禁止未经用户确认的破坏性 git 操作（reset --hard / checkout -- . / clean -fd / stash drop / push --force），禁止访问其他项目目录。只改工作目录文件。
 
 → [references/boundary.md](references/boundary.md)
 > 🔴 orchestrator 只调度不执行单个 Skill 的业务逻辑。不替代任何 Skill。
 
-## 反例黑名单
-
-> 禁止: ① 替代单个 Skill 的功能（只调度不执行） ② 硬编码 pipeline（必须从 registry 读取） ③ 中间失败静默跳过不询问用户 ④ 跳过 decision-boundary checkpoint 直接推进 | → [完整清单](references/boundary.md)
-
-## Common Rationalizations
-
-> "上一个 Skill 成功了，直接继续" → 到达 decision boundary 仍要确认
-> "这个 Skill 很快，不用展示 Summary" → 每个 decision boundary 展示 Summary
-> "失败了跳过就行，不影响整体" → 失败必须 AskUserQuestion
-
-## 失败处理
-
-> 一线修复 → 兜底模式: [failure-handling.md](references/failure-handling.md) | 恢复: pipeline-state.json → [checkpoint](../../runtime/engine/checkpoint.md)
-
-## 引用索引
-
-| 资源 | 路径 |
-|------|------|
-| workflow-engine | [../../workflow-engine/SKILL.md](../../workflow-engine/SKILL.md) |
-| Stage Discovery | [prompts/discovery.md](prompts/discovery.md) |
-| Stage Orchestrate | [prompts/orchestrate.md](prompts/orchestrate.md) |
-| Stage Validation | [prompts/validation.md](prompts/validation.md) |
-| Stage Delivery | [prompts/delivery.md](prompts/delivery.md) |
-| Workflow Library | [../../runtime/registry/workflow-library.yaml](../../runtime/registry/workflow-library.yaml) |
-| Capability Registry | [../../runtime/registry/capabilities.yaml](../../runtime/registry/capabilities.yaml) |
-| 职责边界 | [references/boundary.md](references/boundary.md) |
-
-## 完成后下一步 → 人工审核 pipeline 产出 / 或单独触发下游 Skill
+> 完成后：人工审核 pipeline 产出。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
