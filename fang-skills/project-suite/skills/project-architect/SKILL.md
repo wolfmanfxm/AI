@@ -38,8 +38,8 @@ description: >
 
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
-| 0 | `context.json` | 从 `.project-knowledge/architecture/` 提取 |
-| 1 | `.project-knowledge/architecture/` | 标注"未分析" |
+| 0 | `context.json` | 从 architecture 知识（Context Resolver 注入） 提取 |
+| 1 | architecture 知识（Context Resolver 注入） | 标注"未分析" |
 | 2 | `PLAN.md`，若存在必读 | 标注"⚠️ 无规划" |
 | 3 | 上游源码 | 标注"⚠️ 未核实" |
 

@@ -16,7 +16,7 @@
 
 ## 一个 pressure test 的结构
 
-每个反例场景回答四个问题（存于 `<skill>/eval/expected-behavior.yaml`）：
+每个反例场景回答四个问题（存于 `project-suite-eval/benchmark/pressure-tests/<skill>.yaml`，**不在 skill 目录内**——测试验证数据与 skill 本身能力无关，遵循「评估证据与治理契约分离」原则，见 benchmarks.md）：
 
 | 字段 | 含义 |
 |------|------|

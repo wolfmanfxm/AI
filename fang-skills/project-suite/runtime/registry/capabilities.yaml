@@ -28,18 +28,18 @@ capability_types:
   Architecture:     # ARCHITECTURE.md
     description: 技术选型 + 模块设计 + API 契约（ADR 格式）
     format: [.md]
-  Code:             # .vue / .ts / .js
+  Code:             # 源码文件（扩展名按项目技术栈）
     description: 生产级代码
-    format: [.vue, .ts, .js]
+    format: [.ts, .js]
   Test:             # .test.ts / .spec.ts + TEST-REPORT.md
     description: 测试文件 + 测试报告
     format: [.ts, .md]
   Review:           # REVIEW.md
     description: 五轴审查报告（分级问题 + 修复建议）
     format: [.md]
-  RefactoredCode:   # .vue / .ts / .js（重构后）
+  RefactoredCode:   # 源码文件（重构后）
     description: 重构后代码（行为不变）+ REFACTOR.md
-    format: [.vue, .ts, .js, .md]
+    format: [.ts, .js, .md]
   Documentation:    # API/组件/Changelog 文档
     description: 结构化技术文档
     format: [.md]

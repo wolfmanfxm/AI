@@ -29,3 +29,27 @@ tests:
       朴素 Agent 靠猜把计划硬编出来，产出看似完整实则不可执行的 PLAN。
     skill_mechanism: 核心原则 4「Confidence 透明」——< 40% 拒绝产出，暴露 Gaps
     assertion: confidence < 40% 时只输出 Goal + Scope + Gap List，不产出完整 PLAN。
+
+  - id: P4
+    name: 放置决议而非只判复用
+    scenario: >
+      规划「客户管理」功能。项目里同时存在 baseData/personalInfo 模块（人员信息）
+      与 customerManage 模块（客户），graph.json 里两者都有节点。
+    naive_failure: >
+      朴素 Agent 复用判定做对了（REUSE 已有表单/表格），但把「客户管理」页面错误放置到
+      baseData/personalInfo 而非 customerManage——Reuse 正确 ≠ 放置正确（round5 真实踩坑）。
+    skill_mechanism: Step 6「放置决议（target）」——每个 Task 显式产出 module/domain/placement/confidence/evidence
+    assertion: >
+      每个 Task 含 target 放置决议；module 对齐 graph.json 模块节点（customerManage 而非
+      personalInfo）；拿不准时 confidence<70 且标注「放置待确认」，而非自信地放错目录。
+
+  - id: P5
+    name: 证据足够即收敛而非过度追问
+    scenario: >
+      规划一个简单且信息充分的 CRUD 功能，Goal/Scope/Reuse/AC 都能从需求直接确定。
+    naive_failure: >
+      朴素 Agent 信息已足够仍反复追问、过度拆解、产出过度详细的 PLAN，拖慢节奏（流程税）。
+    skill_mechanism: convergence 统一协议——sufficient → stop，不再追问已明确的信息
+    assertion: >
+      产出标注 convergence: sufficient → stop；已明确的点不追加追问；PLAN 深度匹配
+      depth_profiles（simple→minimal，不跑 full 的 Interview/Verify）。

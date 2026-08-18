@@ -39,7 +39,7 @@ failure:
   on_exhausted: pause      # pause | skip | abort
 
 confidence:
-  source: skill_output     # 从 Skill 的 result.md 读取
+  source: skill_output     # 从 Skill 的收尾报告读取（名字由 skill 自定）
   thresholds:
     auto_advance: 90       # ≥ 90 建议自动推进
     warn: 70               # < 70 建议人工确认

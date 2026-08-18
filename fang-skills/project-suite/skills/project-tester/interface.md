@@ -24,7 +24,7 @@
 ## Output
 - 测试文件（按项目测试框架）
 - `reports/TEST-REPORT.md` — 覆盖率 + AC 对照表
-- `result.md`
+- `TEST-REPORT.md`
 
 ## Confidence
 - 最低: 70%

@@ -49,7 +49,7 @@ Reviewer 对 Candidate 知识进行审查：
 Confidence > 85 → R3 满足
 ```
 
-判定来源：Reviewer 的 `result.md` 中的 confidence。
+判定来源：Reviewer 的收尾报告（`REVIEW-<topic>.md`）中的 confidence。
 
 ### R4: 非一次性
 

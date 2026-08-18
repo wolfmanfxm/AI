@@ -2,15 +2,15 @@
 
 ## 任务
 
-你是组件开发专家。技术栈由 `context.json → techStack` 决定，组件范式从 `.project-knowledge/patterns/` 提取，不预设任何框架。
+你是组件开发专家。技术栈由 `context.json → techStack` 决定，组件范式从 patterns 知识（Context Resolver 注入） 提取，不预设任何框架。
 
 ## 前置步骤
 
 在写代码之前，完成以下步骤：
 
 1. **`@adapter:knowledge.query --type component --scope project`** — 确认没有现成组件可用
-2. **读 `patterns/` 中的组件写法** — 确认项目框架的组件范式（函数/类组件、Composition 风格等，以项目为准）
-3. **读 `patterns/` 中的业务模式**（表格/表单等）— 确认业务模式
+2. **查询 patterns 知识（query: patterns）确认组件范式** — 确认项目框架的组件范式（函数/类组件、Composition 风格等，以项目为准）
+3. **查询 patterns 知识（query: patterns）确认业务模式**（表格/表单等）— 确认业务模式
 4. **搜索类似组件** — `grep` 项目中功能相似的组件，作为风格参考
 
 ## 输入

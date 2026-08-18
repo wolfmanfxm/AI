@@ -8,7 +8,7 @@
 |---|-------|--------|------------|
 | V1 | Import 可达 | 所有 import 路径指向存在的文件/模块 | 修正路径或标注 TODO |
 | V2 | 组件复用 | 走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)：Existing→REUSE / Similar→EXTEND / 不同→CREATE；graph.json 中不存在同功能组件 | 替换为 import 已有组件（需求已覆盖 → 零改动） |
-| V3 | 模式一致 | 代码风格与 `.project-knowledge/patterns/` 一致 | 修正为符合模式 |
+| V3 | 模式一致 | 代码风格与 patterns 知识（Context Resolver 注入） 一致 | 修正为符合模式 |
 | V4 | 类型完整 | 无 `any` 滥用，接口定义完整 | 从 types/ 导入或定义 |
 | V5 | 状态覆盖 | loading/empty/error 三态均有处理 | 补全缺失状态 |
 | V6 | 非重复 | graph.json 中无同名节点 | 标记 `[DUPLICATE]` |

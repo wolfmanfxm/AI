@@ -1,6 +1,6 @@
 # Capability Routing v3.0 — 自动生成，勿手改
 # 用户意图 → 能力匹配 → Skill 路由。
-# 单一源：provider/intents/produces/confidence_min 从 skills.generated.yaml 派生，capability 名称为框架常量。
+# 单一源：provider/intents/produces 从 skills.generated.yaml 派生，capability 名称为框架常量。
 
 version: "3.0.0"
 generated: true
@@ -13,7 +13,6 @@ routing:
       en: [analyze codebase, scan project, project refresh]
     provider: project-analyzer
     produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
-    confidence_min: 70
   Planning:
     description: 需求收敛→完整性检查→自适应访谈→9模块执行契约
     intents:
@@ -21,7 +20,6 @@ routing:
       en: [break down tasks, plan sprint, estimate effort, create dev plan]
     provider: project-planner
     produces: [Plan]
-    confidence_min: 70
   ArchitectureDesign:
     description: 技术选型+模块设计+API契约，ADR格式决策记录
     intents:
@@ -29,7 +27,6 @@ routing:
       en: [design architecture, tech stack, system design, API design]
     provider: project-architect
     produces: [Architecture]
-    confidence_min: 70
   CodeGeneration:
     description: 按项目规范生成生产级代码，Execute→Verify
     intents:
@@ -37,7 +34,6 @@ routing:
       en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]
     provider: project-generator
     produces: [Code]
-    confidence_min: 70
   Testing:
     description: AC驱动测试生成+执行，自动检测测试框架
     intents:
@@ -45,7 +41,6 @@ routing:
       en: [write tests, test cases, unit test, test coverage, add test, generate test]
     provider: project-tester
     produces: [Test]
-    confidence_min: 70
   CodeReview:
     description: 五轴审查，BLOCKER→PRAISE分级
     intents:
@@ -53,7 +48,6 @@ routing:
       en: [code review, security review, audit code]
     provider: project-reviewer
     produces: [Review]
-    confidence_min: 70
   Documentation:
     description: 代码→可溯源技术文档，自动匹配风格
     intents:
@@ -61,7 +55,6 @@ routing:
       en: [generate docs, write documentation, update README, api docs]
     provider: project-documenter
     produces: [Documentation]
-    confidence_min: 60
   Refactoring:
     description: 安全重构，行为不变，指标量化
     intents:
@@ -69,7 +62,6 @@ routing:
       en: [refactor, clean up, extract method, simplify, reduce complexity, migrate]
     provider: project-refactorer
     produces: [RefactoredCode]
-    confidence_min: 70
   Release:
     description: 版本bump+Changelog+发布检查
     intents:
@@ -77,7 +69,6 @@ routing:
       en: [release, ship, deploy, version bump, publish]
     provider: project-releaser
     produces: [Release]
-    confidence_min: 70
   PipelineOrchestration:
     description: 跨Skill Pipeline编排，auto-advance+Decision-Boundary Checkpoint
     intents:
@@ -85,7 +76,6 @@ routing:
       en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
     provider: pipeline-orchestrator
     produces: [PipelineExecution]
-    confidence_min: 80
 
 # 匹配规则
 matching:

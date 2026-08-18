@@ -28,3 +28,14 @@ tests:
       朴素 Agent 对可逆小决策也套对比矩阵 + 完整 ADR，产出过度、拖慢节奏。
     skill_mechanism: 决策成本门——low-impact（可逆/局部）直接选 + reason；Decision Impact ≠ Task Complexity
     assertion: 可逆局部决策不强制对比矩阵，只给选择 + reason。
+
+  - id: P4
+    name: 上下文驱动而非追银弹
+    scenario: >
+      为一个「列表查询」功能做技术选型。项目是 Vue 3.4 + Element Plus + TypeScript 单体，
+      已有 PageTable/SchemaTable 列表范式，数据量中等（几千条），无高并发信号。
+    naive_failure: >
+      朴素 Agent 不考虑项目现状，追「银弹」方案——为几千条数据的列表引入虚拟滚动、SSR、
+      微前端、服务端分页缓存等，选型脱离项目约束，制造不必要的复杂度。
+    skill_mechanism: 核心原则 2「上下文驱动」——选型基于项目约束（技术栈/数据量/已有范式），不追银弹
+    assertion: 选型对齐项目现状（复用 PageTable + 后端分页即可），不引入项目约束之外的新技术。

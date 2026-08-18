@@ -1,0 +1,28 @@
+task: N6-S1
+category: simple
+prompt: "把「确认类按钮」颜色改成蓝色（type warning→primary）"
+monitor_signal: "#2 双阈值消除回归（gate 路由 + 无 confidence_min 报错）"
+
+suite:
+  gate_route: "Quick Path"
+  complexity_judged: "trivial"
+  ran_cleanly: true
+  confidence_min_error: false          # 删除 confidence_min 后无报错
+  files_changed:
+    - "workspace/views/trustManage/contractConfirm/components/loanInfo/SubjectMatter/CarConsumption.vue"
+  change_desc: "将「确定并追加」确认按钮的 el-button type 从 warning 改为 primary（第 47 行）"
+  completeness_check: "穷举 grep 全部 warning 用法，逐条分类：el-tag 状态标签 7 处/JS enum 约 40 处/ElMessage.warning 1 处/ElMessageBox.confirm 1 处/签出按钮 1 处均不改，仅「确定并追加」确认按钮 1 处需改且已改"
+  git_attempted: false
+
+monitor_result:
+  regression_clean: true               # #2 双阈值消除后 Quick Path 正常跑通
+  gate_worked: true                    # 复杂度判定正确：trivial → Quick Path
+  confidence_min_error: false          # 无 confidence_min 相关报错
+  completeness_correct: true           # 排查了所有 warning 用法，无遗漏无误改
+
+key_finding: >
+  #2 双阈值消除回归通过。删除 skill.yaml 的 confidence_min + skill-policy.yaml 的 quality_gate 后，
+  gate 判定逻辑无回归：trivial 任务正确走 Quick Path（Discovery→Execution→Verify，跳过 Validation），
+  无「找不到 confidence_min」类报错。这印证了 round5 #5 的判断——confidence_min 是 machine-readable
+  routing 元数据，不被 agent 运行时直接消费，删除只影响派生文件（registry 已同步），不影响行为。
+  同时复用判定正确（修改非新增，复用阶梯不适用），且排查了所有 warning 用法确认改动完整。

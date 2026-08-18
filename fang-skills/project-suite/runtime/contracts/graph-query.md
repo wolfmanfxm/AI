@@ -102,21 +102,23 @@ jq --arg id "comp-OrderForm" '
 **返回：** 传递依赖节点 ID 列表（去重）
 **用途：** Generator 生成 OrderForm → 查 graph → 依赖 Upload、API、Validation → 只加载对应知识文件
 
-## 知识加载流程（Planner → Generator）
+## 知识加载流程（Resolver → Generator）
 
 ```
-Planner:
+Resolver:
   1. 分析需求 → 确定涉及哪些组件/API
   2. 查 graph: findTransitiveDeps("comp-Target") → 得到依赖链
-  3. 生成 knowledge-list.json: 列出需要加载的知识文件（不是整个 patterns/）
+  3. 生成 context-package.json: 预消化 pattern + constraints + components
   4. 写入 artifacts/plans/
 
 Generator:
-  1. 读 knowledge-list.json → 知道要加载哪些文件
-  2. 只加载 files 列表中的文件（~3-5个，不是整个目录）
+  1. 读 context-package.json → 遍历 context.knowledge[] 直接注入
+  2. 只消费知识包里的 pattern/constraints（~3-5 条，不是整个目录）
   3. 不搜索 .project-knowledge/ — 不知道还有别的知识
   4. Context 恒定、可预测
 ```
+
+> ⚠️ **Legacy**：v1 的 `knowledge-list.json`（文件路径清单）已废弃，被 `context-package.json` 取代。见 [knowledge-resolver.md](../knowledge-resolver.md)。
 
 ## 各 Skill 使用方式
 

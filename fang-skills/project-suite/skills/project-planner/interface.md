@@ -24,7 +24,7 @@
 ## Output
 - `proposals/PLAN-<feature>.md` — 9 模块 Contract
 - `state.json` — 追加 history（含 confidence + suggested_next）
-- `result.md` — Status + Confidence + Summary + What Was Done + Issues + Workflow Hint
+- `validation-report.md` — Status + Confidence + Summary + What Was Done + Issues + Workflow Hint
 
 ## Confidence
 - 最低: 40%（低于此拒绝产出完整计划）

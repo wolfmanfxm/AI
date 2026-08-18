@@ -6,8 +6,8 @@ description: "发布管理：semver 版本号推荐（基于 conventional commit
 boundary: "只检查推荐不执行发布命令，不 npm publish / git push --tags"
 produces: [Release]
 consumes: [Documentation,Review,Test]
-depends_on: [project-documenter]
-stages: [discovery, execution, validation, output]
+depends_on: []
+stages: [discovery, execution, validation, delivery]
 verification: { checks: 4, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 15, source: prompts/execution.md }

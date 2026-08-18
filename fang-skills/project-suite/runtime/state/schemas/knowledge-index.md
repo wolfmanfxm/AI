@@ -100,19 +100,19 @@ After（Knowledge as Capability）:
 
 **对比：**
 
-| | 旧方式（knowledge-list.json） | 新方式（knowledge-index.json） |
+| | 旧方式（knowledge-list.json，已废弃） | 新方式（knowledge-index.json → context-package.json） |
 |---|---|---|
-| Planner 产出 | `files: ["patterns/vue.md", "patterns/form.md", ...]` | `capabilities: ["VueConvention", "FormPattern"]` |
-| Generator 加载 | 遍历 files 列表读文件 | lookup index → 解析到 files → 读文件 |
+| Planner 产出 | `files: ["patterns/vue.md", "patterns/form.md", ...]` | `capabilities: ["VueConvention", "FormPattern"]` → Resolver 预消化 |
+| Generator 加载 | 遍历 files 列表读文件 | Resolver 遍历 knowledge[] 直接注入 pattern/constraints |
 | 文件路径变更 | Planner + Generator 都要改 | 只改 index |
-| Context 大小 | N 个文件路径 | ~2-3 个 capability 标签 |
+| Context 大小 | N 个文件路径 | 预消化知识包，无需 Generator 解析 |
 
 ### Planner — 按 capability 推荐
 
 ```
 1. 读 knowledge-index.json → 了解有哪些 capability 可用
 2. 分析需求 → 推导需要的 capability → e.g. "新增审批页面" → [TablePattern, FormPattern, ApiPattern]
-3. 产出 knowledge-list.json，但 files 由 index 解析（而非手写）
+3. 产出 context-package.json（Resolver 预消化，Generator 直接注入）
 ```
 
 ### Reviewer — 按 capability 加载审查规则
@@ -153,10 +153,12 @@ After（Knowledge as Capability）:
 - analyzer 全量模式 → 重新生成整个 index
 - 其他 skill 只读不写
 
-## 与 knowledge-list.json 的关系
+## 与 context-package.json 的关系
 
 ```
 knowledge-index.json   — 全局映射（analyzer 产出，所有 skill 可用）
-knowledge-list.json     — 任务级清单（planner 产出，generator 消费）
-                           ↑ 新版本使用 capability 标签代替文件路径
+context-package.json    — 任务级知识包（Resolver 产出，generator 消费）
+                           ↑ 预消化 pattern + constraints + components
+
+⚠️ Legacy: knowledge-list.json（v1 文件路径清单）已废弃，不再作为正式输入。
 ```

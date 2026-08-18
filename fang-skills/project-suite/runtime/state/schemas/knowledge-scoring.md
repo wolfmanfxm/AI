@@ -22,7 +22,7 @@ usage_weight:    随时间衰减 + 使用反馈调整
 
 ## 使用反馈
 
-Generator 每次生成代码后，在 `result.md` 中记录：
+Generator 每次生成代码后，在收尾报告（`completion-report.md`）中记录：
 
 ```markdown
 ## Knowledge Used

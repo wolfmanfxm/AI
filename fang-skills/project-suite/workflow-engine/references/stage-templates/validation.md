@@ -8,8 +8,21 @@
 |-------|-------|
 | Entry  | Execution 完成，所有产出文件已写入 |
 | Input  | Execution 阶段全部产出文件 + skill.yaml `interface.outputs` |
-| Output | validation-report.md（findings + overall: PASS/NEEDS_FIX/BLOCKED） |
+| Output | validation-report.md（findings + overall: PASS/NEEDS_FIX/BLOCKED）+ **convergence 判定** |
 | Recovery | Validation 是只读检查，中断后直接重新执行即可（无需 resume） |
+
+**Convergence（统一停止条件）**：验证即判断「是否该停」。基于 Checks 结果产出收敛判定（见 [convergence.md](../../../shared/primitives/convergence.md)）：
+
+```yaml
+convergence:
+  status: sufficient | insufficient | blocked
+  evidence: [至少 1 条支撑判断的证据]
+  next_action: stop | execute | investigate
+```
+
+- Checks 全部通过 → `sufficient → stop`（不再补做）
+- 有非 CRITICAL 遗留 → `insufficient → execute`（补一轮）
+- 缺关键输入 → `blocked → investigate`（回上游）
 
 ## Custom Fields (Skill Must Provide)
 

@@ -26,7 +26,7 @@
 ## Output
 - 代码文件（按项目技术栈）
 - `state.json` — 追加 history
-- `result.md` — 含 plan vs actual 完成报告
+- `completion-report.md` — 含 plan vs actual 完成报告
 
 ## Confidence
 - 最低: 70%

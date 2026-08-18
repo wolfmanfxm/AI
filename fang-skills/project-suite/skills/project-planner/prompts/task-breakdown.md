@@ -99,9 +99,9 @@ confidence = 100
 **核心问题：** 哪些已有资产可以直接复用，不需要重新设计？→ [Reuse Ladder](../../../shared/primitives/reuse-check.md)
 
 扫描 `.project-knowledge/`：
-- `components/catalog.md` → 已有组件
+- 组件知识（query: components）→ 已有组件
 - `patterns/*.md` → 已有模式
-- `api/overview.md` → 已有 API
+- api 知识（query: api）→ 已有 API
 - `rules/*.md` → 强制规则
 
 对每个「新增」意图给出 REUSE / EXTEND / CREATE 裁决（需求已覆盖 → 标 REUSE 零改动）。
@@ -135,6 +135,22 @@ confidence = 100
 | 数据驱动 | 按实体拆：User / Order / Product |
 
 **Decision ↔ Task 绑定：** 每个 Task 标注依赖的 Decision ID。Architect 必须先 resolve，Generator 才能开始。
+
+**放置决议（target）— 每个 Task 必填：**
+
+> Reuse 正确 ≠ 放置正确。round5 暴露：需求「客户管理」被错误放置到 `baseData/personalInfo`，而非 `customerManage`——复用判定对了，但 module/domain 归属错了。所以每个 Task 显式产出放置决议：
+
+```
+target: { module, domain, placement, confidence, evidence }
+```
+
+- `module` = 归属业务模块（对齐 graph.json 模块节点，不猜）
+- `domain` = 领域归属（对齐 domain model 的 entity/artifact）
+- `placement` = 具体目录路径（对齐现有同类文件的目录）
+- `confidence` = 放置置信度（< 70 时标注「放置待确认」，Generator 生成前追问）
+- `evidence` = 为何放这里（graph.json 节点 / 已有同类文件路径 / domain artifact）
+
+**放错位置的代价高于放慢一步**：拿不准 module 时，宁可标 `confidence<70 + investigate`，不要自信地放错目录。
 
 → 产出：`# Task Breakdown`
 
@@ -294,6 +310,7 @@ B 完全独立？                 → 无依赖
 
 #### T1: {任务名}
 - **文件:** `path/to/file.ext` [新] / [修改] / [已存在-扩展]
+- **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / domain model artifact]}
 - **依赖:** T0→ / D-01（Architect 先 resolve）
 - **操作:** [具体实现指令 — Generator 可直接执行]
 - **验证:** [可验证命令/grep/URL]

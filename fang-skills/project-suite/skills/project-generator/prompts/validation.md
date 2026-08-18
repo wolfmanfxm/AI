@@ -8,7 +8,7 @@
 |---|-------|--------|------------|
 | V1 | Import 正确性 | 所有 import 路径对应的文件/模块存在 | 修正路径或标注 TODO |
 | V2 | 组件复用 | 未重复生成 graph.json 中已存在的组件 | 替换为 import 已有组件 |
-| V3 | 模式一致性 | 代码风格与 `.project-knowledge/patterns/` 一致 | 修正为符合模式 |
+| V3 | 模式一致性 | 代码风格与 patterns 知识（Context Resolver 注入） 一致 | 修正为符合模式 |
 | V4 | TS 类型完整 | 无 `any` 滥用（除非上游是 `any`） | 从 types/ 导入或定义接口 |
 | V5 | 全状态覆盖 | loading/empty/error 状态都有处理 | 补全缺失状态 |
 

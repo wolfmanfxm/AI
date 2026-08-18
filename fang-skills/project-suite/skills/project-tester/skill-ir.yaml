@@ -2,11 +2,11 @@
 id: project-tester
 version: "1.3.0"
 mode: Production
-description: "生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架， 遵循现有测试风格，生成 Given-When-Then 结构的测试用例。 触发词：写测试、测试用例、单元测试、集成测试、组件测试、测试覆盖、 跑测试、加测试、write tests、test cases、unit test、test coverage。 产出：测试文件（.test.ts / .spec.ts）+ TEST-REPORT.md。"
+description: "生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架， 遵循现有测试风格，生成 Given-When-Then 结构的测试用例。 触发词：写测试、测试用例、单元测试、集成测试、组件测试、测试覆盖、 跑测试、加测试、write tests、test cases、unit test、test coverage、add test、generate test。 产出：测试文件（按项目测试框架）+ TEST-REPORT.md。"
 boundary: "只写测试不修被测代码，测试失败记录报告不修改源码"
 produces: [Test]
 consumes: [Code,Plan,KnowledgeBase,Context]
-depends_on: [project-generator]
+depends_on: []
 stages: [discovery, execution, validation]
 verification: { checks: 4, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

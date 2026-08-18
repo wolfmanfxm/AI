@@ -7,7 +7,7 @@
 //   - capability-routing.yaml ← routing（skill.yaml 派生）+ matching + dependency_graph
 //
 // 权威边界（消除"同一事实两处定义"，而非"所有配置只剩一个"）：
-//   - skill.yaml              = Skill Contract（intrinsic：description/capabilities/confidence_min/...）
+//   - skill.yaml              = Skill Contract（intrinsic：description/capabilities/produces/consumes/...）
 //   - scheduler.yaml          = 路由/调度顺序（skill_order.decision_order / priority）
 //   - workflow-library.yaml   = Workflow 编排（workflow_ref 的权威，即 used_by）
 //   - gates.yaml              = Gate/checkpoint policy（requires_checkpoint/tests/review 的权威）
@@ -82,7 +82,6 @@ for (const name of readdirSync(SKILLS_DIR).sort()) {
     cost: grab(c, 'cost'),
     description: grab(c, 'description'),
     capabilities: grabList(c, 'capabilities'),
-    confidence_min: grab(c, 'confidence_min'),
     requires: grabList(c, 'requires'),
     produces: grabList(c, 'produces'),
     consumes: grabList(c, 'consumes'),
@@ -182,18 +181,18 @@ capability_types:
   Architecture:     # ARCHITECTURE.md
     description: 技术选型 + 模块设计 + API 契约（ADR 格式）
     format: [.md]
-  Code:             # .vue / .ts / .js
+  Code:             # 源码文件（扩展名按项目技术栈）
     description: 生产级代码
-    format: [.vue, .ts, .js]
+    format: [.ts, .js]
   Test:             # .test.ts / .spec.ts + TEST-REPORT.md
     description: 测试文件 + 测试报告
     format: [.ts, .md]
   Review:           # REVIEW.md
     description: 五轴审查报告（分级问题 + 修复建议）
     format: [.md]
-  RefactoredCode:   # .vue / .ts / .js（重构后）
+  RefactoredCode:   # 源码文件（重构后）
     description: 重构后代码（行为不变）+ REFACTOR.md
-    format: [.vue, .ts, .js, .md]
+    format: [.ts, .js, .md]
   Documentation:    # API/组件/Changelog 文档
     description: 结构化技术文档
     format: [.md]
@@ -254,7 +253,6 @@ function genSkillsGenerated() {
     lines.push(`    capabilities: [${s.capabilities.join(', ')}]`);
     lines.push(`    complexity: {${s.complexity}}`);
     lines.push(`    cost: ${s.cost}`);
-    lines.push(`    confidence_min: ${s.confidence_min}`);
     lines.push(`    requires: [${s.requires.join(', ')}]`);
     lines.push(`    produces: [${s.produces.join(', ')}]`);
     lines.push(`    consumes: [${s.consumes.join(', ')}]`);
@@ -325,7 +323,7 @@ function genCapabilityRouting() {
   const lines = [];
   lines.push('# Capability Routing v3.0 — 自动生成，勿手改');
   lines.push('# 用户意图 → 能力匹配 → Skill 路由。');
-  lines.push('# 单一源：provider/intents/produces/confidence_min 从 skills.generated.yaml 派生，capability 名称为框架常量。');
+  lines.push('# 单一源：provider/intents/produces 从 skills.generated.yaml 派生，capability 名称为框架常量。');
   lines.push('');
   lines.push('version: "3.0.0"');
   lines.push('generated: true');
@@ -340,7 +338,6 @@ function genCapabilityRouting() {
     lines.push(`      en: [${s.triggers_en.join(', ')}]`);
     lines.push(`    provider: ${s.id}`);
     lines.push(`    produces: [${s.produces.join(', ')}]`);
-    lines.push(`    confidence_min: ${s.confidence_min}`);
   }
   lines.push('');
   lines.push('# 匹配规则');

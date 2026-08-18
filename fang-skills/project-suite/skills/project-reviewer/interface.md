@@ -26,7 +26,7 @@
 ## Output
 - `reports/REVIEW-<topic>.md` — 分级问题 + AC 逐条对照 + 审查强度
 - `state.json` — 追加 history
-- `result.md`
+- `REVIEW-<topic>.md`
 
 ## Confidence
 - 最低: 50%

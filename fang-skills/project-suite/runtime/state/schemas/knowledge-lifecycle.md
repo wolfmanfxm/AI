@@ -36,7 +36,7 @@ Deprecated ──────────→ 保留历史，不再推荐
 Artifact（任务结束即清理）:
   PLAN-*.md               → 执行完即归档
   REVIEW-*.md              → 修复后即过时
-  result.md                → 一次性执行摘要
+  收尾报告                 → 一次性执行摘要（名字由 skill 自定）
   implementation.md        → 任务结束即删除
 
 这些不是知识。它们是执行记录。留在知识库里只会制造噪音。

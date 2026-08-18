@@ -32,3 +32,14 @@ tests:
       朴素 Agent 只写成功态，忽略 loading / empty / error，页面在慢网络或空数据下表现异常。
     skill_mechanism: 核心原则 3「完整性」——loading、empty、error 全状态覆盖
     assertion: 组件含 loading / empty / error 三态处理，且自检清单 V5 通过。
+
+  - id: P4
+    name: 遵循项目模式而非凭框架记忆
+    scenario: >
+      写一个 API 模块（查询列表 + 新增）。项目已有自己的 request 封装和分页命名约定
+      （记录在 .project-knowledge/api/ 和 patterns/ 里）。
+    naive_failure: >
+      朴素 Agent 凭框架通用知识用原生 fetch/axios 裸写 + 通用分页参数名，忽略项目已有的
+      request 封装路径、参数命名、响应结构约定，生成的代码与项目其他 API 模块风格不符。
+    skill_mechanism: 核心原则 1「遵循项目模式」——从 .project-knowledge/ 提取写法，不凭记忆
+    assertion: 生成的 API 模块 import 项目 request 封装，参数/响应命名对齐项目现有约定，而非框架默认。

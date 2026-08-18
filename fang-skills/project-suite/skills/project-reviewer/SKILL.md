@@ -28,7 +28,7 @@ description: >
 | 0 | 变更 Code（diff / 文件列表） | 🔴 BLOCKED |
 | 1 | `PLAN.md > # Acceptance Criteria` | DEGRADED — 标注"⚠️ 无验收标准" |
 | 2 | `PLAN.md > # Risk Assessment` | DEGRADED — 标准审查强度 |
-| 3 | `.project-knowledge/patterns/` | 标注"⚠️ 缺乏项目规范" |
+| 3 | patterns 知识（Context Resolver 注入） | 标注"⚠️ 缺乏项目规范" |
 
 ## 工作流
 

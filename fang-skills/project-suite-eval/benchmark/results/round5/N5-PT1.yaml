@@ -1,0 +1,25 @@
+task: N5-PT1
+type: pressure-test
+skill: project-planner
+test_id: P1（Contract over Todo）
+scenario: "拆解需求：实现用户管理模块（登录 + 用户列表 + 编辑用户）"
+assertion: "PLAN 含 Goal/Scope/Context/Reuse/Decision/Tasks/Deps/Risk/Acceptance 9 模块"
+
+red:
+  ran_with_skill: false
+  output_structure: "todo 式：登录/列表/编辑 10 个任务 + 依赖关系 + 关键决策点"
+  missing_modules: [Goal, Scope, Context, Reuse Analysis, Risk Assessment, Acceptance Criteria]
+  verdict: "FAIL（缺 6/9 模块，是「任务清单 + 部分结构」，非契约）"
+
+green:
+  ran_with_skill: true
+  output_structure: "完整 9 模块 Contract + Knowledge First 现状探查"
+  modules_present: [Goal, Scope, Context, Reuse Analysis, Decision, Task Breakdown, Dependency Graph, Risk Assessment, Acceptance Criteria]
+  key_behavior: "Knowledge First 扫描发现三子功能已在 src 框架层 90%+ 实现 → REUSE 零改动，核心决策 D-01（层归属：复用 src vs 新建 workspace）"
+  verdict: "PASS（9/9 模块齐全 + reuse 检测）"
+
+monitor_result:
+  mechanism_works: true    # RED→GREEN 区分有效
+  rule_effective: true      # planner「Contract over Todo」真的改变行为
+
+key_finding: "#6 Pressure Test 机制验证有效：planner P1 的 RED（naive 给 todo 清单，缺 6/9 模块）vs GREEN（suite 给完整 9 模块契约 + Knowledge First 发现已有实现→REUSE）区分明显。这证明「Contract over Todo」规则真的改变 agent 行为（不是装饰品），且 RED→GREEN 的 TDD 验证方法可行。注：GREEN 的现状探查命中了主项目（workspace/afc-newcore-web-frontend）而非 benchmark 目标（code/afc-newcore-web-code），是测试 prompt 未锁定项目导致的小瑕疵，不影响契约格式的验证结论。"

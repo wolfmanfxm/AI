@@ -83,7 +83,7 @@
 - [x] Skill 深度统一（depth_profiles：minimal/standard/full 三档，消掉 4 套 Quick/Light/Focused 词汇）
 - [x] Analyzer 知识缺口入口（知识够 → 跳过）+ Reuse Fast Path
 - [x] Skill prompt 瘦身（样板下沉，失败处理并入 boundary）
-- [ ] **Convergence 作为一等能力**：Evidence sufficient? → STOP/EXECUTE（统一「少做事」原则，解决流程税）
+- [x] **Convergence 统一协议**：统一结果字段 `convergence: {status, evidence, next_action}`（[convergence.md](../shared/primitives/convergence.md)），所有 Skill 在收尾报告（名字由 skill 自定）返回。状态：Designed（协议已定义，未 Enforced）
 
 ### P2 — Knowledge Consumption
 

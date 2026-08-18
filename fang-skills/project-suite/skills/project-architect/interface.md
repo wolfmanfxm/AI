@@ -23,7 +23,7 @@
 ## Output
 - `decisions/ARCHITECTURE-<topic>.md` — ADR（Context→Options→Decision→Rationale）
 - `state.json` — 追加 history + confidence
-- `result.md`
+- `ARCHITECTURE-<topic>.md`（ADR 即收尾报告）
 
 ## Confidence
 - 最低: 50%（候选方案无最优时降低）

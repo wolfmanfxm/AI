@@ -1,0 +1,33 @@
+task: N5-M1
+category: medium
+prompt: "新增个人信息登记页面，字段：姓名/手机/邮箱"
+monitor_signal: "#1 context_contract 语义化（Query vs 直接读 .md）+ #3 reuse 结构化裁决"
+
+native:
+  files:
+    - workspace/views/customerManage/customerIndividual/register.vue (新建 113 行)
+    - workspace/api/customerManage/customerManage.ts (修改 +11 行)
+    - workspace/router/customerManage.ts (修改 +6 行)
+  location: "customerManage/customerIndividual/"
+  reuse: "ad-hoc 复用 FormWrapper/FormInput/SectionCard/SubPageWrapper/NavigationBar/RULES（无结构化裁决）"
+  git_attempted: false
+
+suite:
+  files:
+    - workspace/views/baseData/personalInfo/index.vue (新建 97 行)
+    - workspace/router/baseData.ts (修改 +7 行)
+    - workspace/api/baseData.ts (修改 +14 行)
+  location: "baseData/personalInfo/（与 native 的 customerManage 落点发散）"
+  gate_level: "medium"
+  gate_route: "Standard Path（planner → generator → reviewer）"
+  reuse_verdict: "CREATE（复用已有子件 FormWrapper/FormInput/SectionCard/NavigationBar/SubPageWrapper/RULES）"
+  knowledge_access: "直接读 .md 文件：patterns/form.md + crud.md、components/catalog.md、rules/*.md、experience/workspace-page-patterns.md；另读 context.json/graph.json/index.md"
+  git_attempted: false
+
+monitor_result:
+  context_contract_semantic: "❌ 未生效"   # #1 关键发现
+    证据: "suite 读 patterns/form.md、components/catalog.md、rules/*.md、experience/*.md 直接读 .md，未走 @adapter:knowledge.query"
+  reuse_structured: true                     # #3 生效：suite 有结构化 CREATE 裁决（native 是 ad-hoc 复用）
+  location_divergence: true                  # native→customerManage，suite→baseData
+
+key_finding: "#1 context_contract 语义化未生效（只改了声明没改消费逻辑）：suite agent 获取知识时仍直接读 .md 文件（patterns/form.md、components/catalog.md、rules/*.md、experience/*.md），没有走 Query API。should_read→query 只改了 skill.yaml 的字段名 + skills.generated.yaml，但 SKILL.md 核心原则（'查 components/catalog.md'）、workflow-engine 的 Query 声明、prompts 都没改消费逻辑——agent 读到的还是 .md 路径。这是「改声明未改消费」的典型。要真正生效，需把 SKILL.md/prompts 里的 .md 读取改成 @adapter:knowledge.query 语义调用。另外：落点发散（native 选 customerManage，suite 选 baseData），suite 的 standard path 规划把'个人信息登记'归到了 baseData 而非 target_hint 的 customerManage。"

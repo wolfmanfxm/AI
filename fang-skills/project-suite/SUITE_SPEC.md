@@ -15,15 +15,18 @@
 
 | 层级 | 文件 | 定位 | 维护方式 |
 |------|------|------|---------|
-| **单一权威** | `skills/*/skill.yaml` | Skill Contract（intrinsic：description/capabilities/produces/consumes/confidence_min/boundary/interface…） | 手工，唯一源 |
+| **单一权威** | `skills/*/skill.yaml` | Skill Contract（intrinsic：description/capabilities/produces/consumes/boundary/interface…） | 手工，唯一源 |
 | **编排权威** | `runtime/config/scheduler.yaml` | skill_order.decision_order / priority（路由 + 调度顺序） | 手工 |
 | **编排权威** | `runtime/registry/workflow-library.yaml` | workflow 编排（pipeline 定义） | 手工 |
 | **编排权威** | `runtime/config/profiles.yaml` | profile（任务复杂度 → skill 激活范围 + auto_advance） | 手工 |
-| **门禁权威** | `runtime/config/gates.yaml` | gate/checkpoint policy（conf 阈值、审查要求） | 手工 |
+| **门禁权威** | `runtime/config/rules.yaml` | gate（conf pass/review/block 阈值）+ 执行前置条件 | 手工 |
+| **门禁权威** | `runtime/config/gates.yaml` | 维度门禁（knowledge auto_accept / coverage / safety / release） | 手工 |
+| **执行策略** | `runtime/config/skill-policy.yaml` | rollback / recovery / reliability / stage_config | 手工 |
 | **派生（勿手改）** | `runtime/registry/*.yaml`（4 份：skills.generated / skill-catalog / capabilities / capability-routing） | 从 skill.yaml 生成 | `generate-registry.mjs` |
 
 **规则**：
-- `description/capabilities/produces/consumes/confidence_min/boundary/interface…` 以 `skill.yaml` 为准。
+- `description/capabilities/produces/consumes/boundary/interface…` 以 `skill.yaml` 为准。
+- `gate`（conf 阈值）以 `runtime/config/rules.yaml` 为准；`rollback/recovery/reliability/stage_config` 以 `runtime/config/skill-policy.yaml` 为准。
 - `priority/decision_order` 以 `scheduler.yaml` 为准。
 - 并行关系由 produces/consumes 推导的 **Capability DAG** 决定（能力依赖，非强制执行顺序），不再是 skill 固定字段。
 - 派生文件与 skill.yaml 不一致 → `generate-registry.mjs --check` 报漂移（exit 1）。

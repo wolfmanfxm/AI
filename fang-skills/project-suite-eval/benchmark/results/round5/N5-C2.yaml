@@ -1,0 +1,30 @@
+task: N5-C2
+category: complex
+prompt: "重构 groupCustomer/detail.vue 客户信息区块为独立子组件（保持行为不变）"
+monitor_signal: "#2 refactorer git_revert→edit_patch（回滚方式）+ #3 reuse 结构化裁决"
+
+native:
+  files:
+    - workspace/views/customerManage/groupCustomer/components/CustomerInfoForm.vue (新建 150 行)
+    - workspace/views/customerManage/groupCustomer/detail.vue (1684→1566)
+  reuse: "无结构化裁决，直接抽取"
+  rollback_method: "未提及（无 git）"
+  test_status: "无测试（node_modules 缺失），人工核验"
+  git_attempted: false
+
+suite:
+  files:
+    - workspace/views/customerManage/groupCustomer/components/BasicInfoSection.vue (新建 162 行)
+    - workspace/views/customerManage/groupCustomer/detail.vue (1684→1566)
+  reuse_verdict: "CREATE（复用子件 SectionCard/FormInput/FormSelect/ProvinceCityDistrictSelect/TianyanchaQueryButton；查了已有 CustomerInfoForm.vue 语义不同不复用）"
+  rollback_method: "Edit 反向（明确：非 git，遵循 safety-protocol）"
+  test_status: "⚠️ 无测试保护（机械变换），grep 验证标识符残留"
+  quantify: "1684→1566 行（-118），114 行区块内聚为 7 行 props 透传"
+  git_attempted: false
+
+monitor_result:
+  edit_patch_rollback: true   # #2 生效：suite 明确用 Edit 反向回滚，非 git
+  reuse_structured: true       # #3 生效：suite 结构化 CREATE 裁决
+  contract_consistent: true    # refactorer skill 的「Edit 回滚」契约自洽
+
+key_finding: "#2 生效：refactorer skill 的「Edit 回滚」指令被 suite agent 正确遵循（报告明确写「回滚方式 = Edit 反向，非 git，遵循 safety-protocol」），git_revert 契约冲突已解决——agent 按 skill 用 Edit 而非 git。注意：行为测试被「绝对禁止 git」约束部分混淆（native/suite 都不碰 git），但 suite 显式声明 Edit 反向回滚方式，证明 skill 指令自洽。#3 也生效：suite 做了结构化 CREATE 裁决（查了已有 CustomerInfoForm.vue 语义不同→不复用，新建并复用子件）。"

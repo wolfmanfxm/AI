@@ -1,0 +1,29 @@
+task: N5-S1
+category: simple
+prompt: "把按钮颜色改成蓝色（workspace/views/trustManage/ 确认类按钮 warning→primary）"
+monitor_signal: "#5 Runtime Policy 迁移回归 + #3 reuse 判定"
+
+native:
+  files:
+    - workspace/views/trustManage/contractConfirm/components/loanInfo/SubjectMatter/CarConsumption.vue
+  change: "type=warning → primary（1 行）"
+  git_attempted: false
+  analysis_depth: "直接改，无额外排查"
+
+suite:
+  files:
+    - workspace/views/trustManage/contractConfirm/components/loanInfo/SubjectMatter/CarConsumption.vue
+  change: "type=warning → primary（1 行，与同弹窗相邻「确定并覆盖」保持一致）"
+  git_attempted: false
+  gate_level: "trivial/simple"
+  gate_route: "Quick Path（generator → verify，minimal）"
+  reuse_verdict: "不适用（修改已有代码，非新增）"
+  analysis_depth: "排查全目录所有 warning 用法：el-tag 状态标签/ElMessage.warning/ElMessageBox.confirm/CreditDrawer 签出按钮均非「确认类按钮」，仅 1 处需改"
+
+monitor_result:
+  regression_clean: true     # #5 Runtime Policy 迁移后 suite 干净跑通，无回归
+  gate_worked: true          # 复杂度判定正确：trivial/simple → Quick Path
+  reuse_correct: true        # 复用判定正确：修改非新增 → 不适用
+  quality_diff: "suite 多做了改动完整性排查（确认无遗漏的确认类按钮），native 直接改"
+
+key_finding: "#5 回归通过：Runtime Policy 从 skill.yaml 迁到 skill-policy.yaml 后，suite 仍正常调度（Complexity Gate 判定 → Quick Path → generator 执行）。#3 reuse 判定正确识别「修改非新增」不适用复用阶梯。过程质量差异：suite 排查了所有 warning 用法确认改动完整，native 直接改。"

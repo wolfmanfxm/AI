@@ -1,0 +1,41 @@
+task: N6-M1
+category: medium
+prompt: "新增个人信息登记页面，字段：姓名/手机/邮箱"
+monitor_signal: "#4 target 放置决议（planner 显式产出 target，落点对齐 domain model）+ #2 回归"
+
+suite:
+  planner_emitted_target: true          # planner 显式产出了 target 放置决议
+  target_module: "customerManage"
+  target_domain: "customerIndividual"
+  target_placement: "workspace/views/customerManage/customerIndividual/"
+  target_confidence: "0.95"
+  final_location: "workspace/views/customerManage/customerIndividual/"
+  files_created:
+    - "workspace/views/customerManage/customerIndividual/register.vue (新建)"
+    - "workspace/api/customerManage/customerManage.ts (修改: 新增 customerIndividualRegister)"
+    - "workspace/router/customerManage.ts (修改: 新增 register 路由)"
+    - ".project-knowledge/proposals/PLAN-customer-individual-register.md (PLAN 产物)"
+  location_correct: true
+  domain_aligned: true
+  gate_route: "Standard"
+  reuse_verdict: "CREATE（复用 FormWrapper/FormInput/SectionCard/NavigationBar/SubPageWrapper）"
+  knowledge_access: "读 skill + .project-knowledge/(context.json/graph.json/vocabulary.yaml/catalog.md/patterns/form.md/rules/*)"
+  git_attempted: false
+
+monitor_result:
+  target_emitted: true                  # #4 生效：planner 显式产出 target 决议
+  location_correct: true                # 落点 customerManage（round5 错误落点 baseData）
+  domain_aligned: true                  # 对齐 vocabulary.yaml 的 customerIndividual + person→correct_to
+  regression_clean: true                # #2 双阈值消除后无回归（Standard Path 正常）
+
+key_finding: >
+  #4 target 放置决议生效。对比 round5 M1：suite 当时把「个人信息登记」错误放置到
+  baseData/personalInfo（落点发散），本轮 planner 显式产出 target 决议
+  {module: customerManage, domain: customerIndividual, placement: workspace/views/customerManage/customerIndividual/,
+   confidence: 0.95, evidence: vocabulary.yaml 的 customerIndividual 定义 + artifact customerIndividualRegister +
+   person→correct_to 漂移修正 + 已有 sibling 目录 customerIndividual/}，最终落点正确。
+  关键机制：vocabulary.yaml 里 customerIndividual 的定义明确写「个人信息登记归此术语」，
+  且 artifact customerIndividualRegister 的 composed_of {entity: customerIndividual, action: register}，
+  加 conflicting.person → correct_to: customerIndividual 的漂移修正，共同把落点导向 customerManage。
+  这验证了 #4 的「放置决议」从「声明」变成了「真实行为」——planner 不仅复用判定对，放置也对。
+  同时 #2 双阈值消除无回归（Standard Path 正常跑通）。

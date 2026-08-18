@@ -18,7 +18,7 @@
  │
  ▼
 Skill
- │  读 State → 执行 → 写 State → 输出 result.md → 结束
+ │  读 State → 执行 → 写 State → 输出收尾报告 → 结束
  │  Skill 之间互相不知道对方存在
 ```
 
@@ -155,7 +155,7 @@ Skill
    - timeline.json → 追加 run 记录（timing/quality/dependencies）
    - artifacts/ → 写入产出文件
 
-4. 输出 result.md:
+4. 输出收尾报告:
    - 做了什么 / 没做什么
    - confidence
    - 建议下一步（用户参考）

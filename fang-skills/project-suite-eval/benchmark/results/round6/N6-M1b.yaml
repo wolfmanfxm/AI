@@ -1,0 +1,40 @@
+task: N6-M1b
+category: medium
+prompt: "新增个人信息登记页面，字段：姓名/手机/邮箱"
+monitor_signal: "#3 convergence 消费端修复后是否真正被消费（stage 模板注入收敛判定）"
+
+suite:
+  planner_emitted_target: true
+  target_module: "customerManage"
+  target_domain: "customerIndividual"
+  final_location: "workspace/views/customerManage/customerIndividual/register.vue"
+  location_correct: true
+  convergence_emitted: true            # #3 修复后生效：agent 产出了 convergence 判定
+  convergence_status: "sufficient"
+  convergence_next_action: "stop"
+  convergence_evidence:
+    - "放置决议 target 已产出（module=customerManage, domain=customerIndividual, confidence=90）"
+    - "vocabulary.yaml customerIndividualRegister + domain.yaml customerIndividual + conflicting person→customerIndividual"
+    - "规避 round5 陷阱：未放 baseData；customerManage 已有 customerIndividual 同类落点"
+    - "三字段实现 + RULES 校验 + 遵循 FormWrapper 强制表单标准"
+    - "import 全量可达；路由/API 无冲突"
+    - "遗留（非 CRITICAL）：登记接口 URL 待后端契约确认"
+  gate_route: "planner standard → generator Discovery→Execution→Verify→Validation"
+  git_attempted: false
+
+monitor_result:
+  convergence_emitted: true            # 关键：修复前是 false（声明没消费）
+  convergence_correct: true            # sufficient → stop，且 evidence 支撑判断
+  location_still_correct: true         # 复验 #4 仍生效
+  regression_clean: true
+
+key_finding: >
+  #3 convergence 从「声明没消费」修复为「真正被消费」。修复前静态检查发现：convergence 只写进了
+  primitive + skill-io.md + roadmap，消费端（stage 模板 + prompts）完全没接——且它挂的 result.md
+  本身在 prompts 里也没被产出（gates.yaml 声明「必须输出 result.md」，实际产出 completion-report.md /
+  validation-report.md），双重悬空。修复：把 convergence 判定接入 stage-templates/delivery.md +
+  validation.md（所有 skill 经 @engine 自动继承），并更新 convergence.md 的定位从「result.md 附带」
+  改为「收尾 stage 产出」。修复后 M1b 验证：agent 在 validation 收尾真实产出
+  convergence: sufficient → stop，且 evidence 逐条支撑（target 决议 + domain 对齐 + 规避 round5 陷阱）。
+  这再次印证 round5 #1 的规律：改声明 ≠ 改消费，消费端（模板/prompts）才是决定行为的点。
+  同时复验 #4 target 放置决议仍生效（落点 customerManage 正确）。

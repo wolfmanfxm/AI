@@ -9,7 +9,6 @@ description: "需求收敛→完整性检查→自适应访谈→9模块执行�
 verification: { mode: candidate-verify-accept }
 depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [adaptive-interview, completeness-check, plan-generation]
-confidence_min: 70
 requires: []
 produces: [Plan]
 consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
@@ -34,6 +33,7 @@ interface:
   outputs:
     - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
     - { name: context-package.json, type: context, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
+    - { name: target, type: placement, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
     - { condition: 需求信息完全缺失, severity: BLOCKER, recovery: 拒绝执行,提示补充需求 }

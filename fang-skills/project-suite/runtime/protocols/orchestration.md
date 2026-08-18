@@ -17,7 +17,7 @@ Skill
  │  读 State（state.json + knowledge.json + 上游 artifacts）
  │  执行
  │  写 State（更新 state.json + knowledge.json）
- │  输出 result.md（含 confidence + 建议下一步）
+ │  输出收尾报告（含 confidence + convergence + 建议下一步）
  │  结束
  │
  ▼
@@ -103,15 +103,15 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
 /clear
 /project-planner
   → 读 context.json + state.json + .project-knowledge/
-  → 写 PLAN.md + knowledge-list.json + state.json
+  → 写 PLAN.md + context-package.json + state.json
   → 结束（上下文丢弃）
 
 /clear
 /project-generator
-  → 读 knowledge-list.json（精确文件列表，~3-5个）
+  → 读 context-package.json（预消化知识包，~3-5 条 pattern/constraints）
   → 读 PLAN.md > # Task Breakdown
   → 生成代码
-  → 写 result.md + state.json
+  → 写收尾报告 + state.json
   → 结束（上下文丢弃）
 
 /clear
@@ -133,7 +133,7 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
 ✅ 每个 Skill:
    1. 启动（/clear 后的 fresh context）
    2. 读 .project-runtime/state.json（了解当前状态）
-   3. 读 artifact 文件（PLAN.md / knowledge-list.json / diff）
+   3. 读 artifact 文件（PLAN.md / context-package.json / diff）
    4. 执行
    5. 写 .project-runtime/state.json + artifact 文件
    6. 结束

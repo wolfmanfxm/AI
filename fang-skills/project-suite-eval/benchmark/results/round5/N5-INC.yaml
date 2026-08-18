@@ -1,0 +1,24 @@
+task: N5-INC
+category: analysis
+prompt: "补充分析 workspace/views/workflowManage/ 模块，更新项目知识库"
+monitor_signal: "#4 增量分析（Incremental Analyzer）——缺领域只跑相关 Extractor，不重跑全量 10 个"
+
+dispatch: project-analyzer（suite-only，native 无增量概念）
+
+suite:
+  knowledge_gap_check: "workflowManage 已浅层覆盖（modules.md 1 行 + glossary 1 条 + context.json modules），缺深度：modules.md 无详情节、glossary 缺 Flowable 术语、api 缺函数级明细"
+  incremental_chosen: true           # 选择增量而非全量
+  extractors_run: 5                  # directory + architecture + glossary + pattern + api-pattern
+  extractors_skipped: "framework/decision/principle/convention/risk/antipattern（与单模块无关，未跑）"
+  files_updated:
+    - ".project-knowledge/architecture/modules.md（新增 workflowManage 详情节）"
+    - ".project-knowledge/architecture/glossary.md（新增 Flowable 术语 + suspensionState 枚举）"
+    - ".project-knowledge/api/overview.md（新增 workflowManage API 函数表）"
+  git_attempted: false
+
+monitor_result:
+  incremental_worked: true           # #4 生效：5 个相关 Extractor，非全量 10
+  gap_detection_correct: true        # 正确识别「浅层覆盖缺深度」缺口
+  full_scan_avoided: true            # 没重跑全量
+
+key_finding: "#4 增量分析生效：suite agent 正确判定「workflowManage 已浅层覆盖、缺深度分析」→ 选择增量（Incremental），只跑 5 个相关 Extractor（directory/architecture/glossary/pattern/api-pattern），明确跳过 framework/decision/principle/convention/risk/antipattern（与单模块无关）。这验证了 analyzer SKILL.md 的「增量分析」指令确实改变了行为——不是重跑全量 10 个。相比 round3 之前「知识缺口入口」只解决「跳过 vs 不跳过 Analyzer」，这轮「增量」进一步解决了「跑 Analyzer 时只跑相关维度」的粒度问题。"

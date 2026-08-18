@@ -28,7 +28,7 @@ description: >
 |--------|------|--------|
 | 0 | 待重构代码 | 🔴 BLOCKED |
 | 1 | 现有测试 | 🟡 DEGRADED — 无测试保护缩小范围 |
-| 2 | `.project-knowledge/patterns/` | 🟡 DEGRADED |
+| 2 | patterns 知识（Context Resolver 注入） | 🟡 DEGRADED |
 
 ## 工作流
 

@@ -27,7 +27,7 @@ description: >
 |--------|------|--------|
 | 0 | 被测 Code | 🔴 BLOCKED |
 | 1 | `PLAN.md > # Acceptance Criteria` | 从代码推断，标注"⚠️ 无验收标准" |
-| 2 | `.project-knowledge/patterns/` | 标注"⚠️ 缺少项目规范" |
+| 2 | patterns 知识（Context Resolver 注入） | 标注"⚠️ 缺少项目规范" |
 
 ## 工作流
 

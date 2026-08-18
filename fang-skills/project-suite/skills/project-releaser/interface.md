@@ -21,7 +21,7 @@
 ## Output
 - `CHANGELOG.md` — 从 conventional commits + PR + REVIEW 合成
 - `RELEASE-CHECKLIST.md`
-- `result.md`
+- `CHANGELOG.md` + `RELEASE-CHECKLIST.md`
 
 ## Confidence
 - 最低: 70%

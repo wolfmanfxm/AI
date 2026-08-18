@@ -51,7 +51,7 @@
 - `findProducers(<当前模块>)` → 了解已有上游，复用
 
 ### 4. 套用模式生成
-- 遵循 `.project-knowledge/patterns/` 中的编码规范
+- 遵循 patterns 知识（Context Resolver 注入） 中的编码规范
 - `@adapter:knowledge.query --type component --scope project` → 使用已有组件
 - 匹配项目约定：缩进/引号/命名/import 顺序
 

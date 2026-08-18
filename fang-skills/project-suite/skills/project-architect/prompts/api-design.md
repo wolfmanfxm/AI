@@ -48,7 +48,7 @@ METHOD /api/resource[/:id][/action]
 - [ ] 是否支持字段过滤？（`?fields=id,name` 减少不必要数据传输）
 - [ ] 是否考虑版本控制？（`/v1/` 前缀或 Header）
 - [ ] 错误响应是否一致？（所有错误同一格式）
-- [ ] 是否与项目现有 API 风格一致？（读 api/request.md 确认）
+- [ ] 是否与项目现有 API 风格一致？（查询 api 知识确认）
 
 ## 输出格式
 

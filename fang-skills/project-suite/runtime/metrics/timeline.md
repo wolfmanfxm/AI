@@ -157,7 +157,7 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 4. 写回 timeline.json
 ```
 
-**写入时机**：state.json 写入之后，result.md 输出之前。
+**写入时机**：state.json 写入之后，收尾报告输出之前。
 
 **最简写入**（Skill 不知道精确 token 数时可以省略估算字段）：
 ```json

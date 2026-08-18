@@ -21,7 +21,7 @@
 
 ## Output
 - API/组件文档（含 Evidence Header + `file:line`）
-- `result.md`
+- 文档本身（含 Evidence Header）
 
 ## Confidence
 - 最低: 60%

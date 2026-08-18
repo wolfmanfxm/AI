@@ -18,16 +18,16 @@ Skill 的元数据曾被分散在 4 处手工维护：`skills/*/skill.yaml`、`r
 ```
 ┌───────────────────────────┐     ┌──────────────────────────────┐
 │  skill.yaml               │     │  workflow-library.yaml        │
-│  = Skill Contract         │     │  gates.yaml                   │
-│  （intrinsic）             │     │  profiles.yaml                │
-│                           │     │  = Orchestration             │
-│  identity description     │     │  （suite-level）               │
-│  intent capabilities      │     │                              │
-│  consumes produces        │     │  workflow_ref / used_by       │
-│  triggers complexity      │     │  checkpoint/gate policy       │
-│  cost confidence          │     │  pipeline position            │
-│  stages quality_gate      │     │  profile 激活范围              │
-│  context_contract         │     │                              │
+│  = Skill Contract         │     │  rules.yaml (gate)            │
+│  （intrinsic）             │     │  skill-policy.yaml            │
+│                           │     │  profiles.yaml                │
+│  identity description     │     │  = Orchestration             │
+│  intent capabilities      │     │  （suite-level）               │
+│  consumes produces        │     │                              │
+│  triggers complexity      │     │  workflow_ref / used_by       │
+│  cost                     │     │  gate/checkpoint/retry/recovery │
+│  stages context_contract  │     │  pipeline position            │
+│                           │     │  profile 激活范围              │
 └───────────────────────────┘     └──────────────────────────────┘
 ```
 
@@ -35,8 +35,10 @@ Skill 的元数据曾被分散在 4 处手工维护：`skills/*/skill.yaml`、`r
 
 问一句：**「这个字段脱离 project-suite，单独拿这个 Skill 仍然成立吗？」**
 
-- **成立 → skill.yaml**（intrinsic）：description、intent、capabilities、consumes、produces、triggers、complexity、cost、confidence、stages、quality_gate、context_contract。
-- **不成立 → Runtime / Workflow**（orchestration）：workflow_ref、stage_ref、pipeline position、routing priority、checkpoint policy、profile 激活范围。
+- **成立 → skill.yaml**（intrinsic）：description、intent、capabilities、consumes、produces、triggers、complexity、cost、stages、context_contract。
+- **不成立 → Runtime / Workflow**（orchestration）：workflow_ref、stage_ref、pipeline position、routing priority、checkpoint policy、profile 激活范围、gate 阈值（confidence pass/review/block）、rollback/recovery/reliability。
+
+> **冻结规则（2026-08-18 修订）**：`confidence` 与 `quality_gate` 已从 skill.yaml 移除。gate 阈值唯一权威 = `runtime/config/rules.yaml` 的 `gate`；回滚/恢复/可靠性 = `runtime/config/skill-policy.yaml`。checkpoint / retry / recovery / gate policy 不再向 skill.yaml 增长。
 
 ### 权威映射
 
@@ -48,7 +50,9 @@ Skill 的元数据曾被分散在 4 处手工维护：`skills/*/skill.yaml`、`r
 | 路由/调度顺序 | `scheduler.yaml` 的 `skill_order` | 不是 skill.yaml 的 `decision_order`/`priority` |
 | 版本兼容约束 | `compatibility.yaml` 的 `matrix` | 不是 skill.yaml 的 `depends_on_skill` |
 | 走哪条 workflow | `workflow-library.yaml`（`used_by`） | 不是 skill.yaml 的 `workflow_ref` |
-| gate/checkpoint 阈值 | `gates.yaml` | 不是 skill.yaml 的 `requires_*` |
+| gate 阈值（pass/review/block） | `rules.yaml` 的 `gate` | 不是 skill.yaml 的 `confidence_min`（已移除） |
+| 维度门禁（knowledge/coverage/safety/release） | `gates.yaml` | 与 rules.yaml 的 `gate` 分工：维度门槛 vs conf 三档 |
+| rollback/recovery/reliability/stage_config | `skill-policy.yaml` | 不是 skill.yaml 的 `rollback` |
 | 任务复杂度 → 激活哪些 skill | `profiles.yaml` | Profile 编排 |
 | 派生产物 | `generate-registry.mjs` → skills.generated / catalog / capabilities / routing | 不手写 |
 

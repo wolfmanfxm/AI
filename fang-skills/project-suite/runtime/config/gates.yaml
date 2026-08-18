@@ -6,7 +6,7 @@ version: "1.0.0"
 # 全局门禁
 global:
   require_confidence: true     # 所有 Skill 必须输出 confidence
-  require_result_md: true      # 所有 Skill 必须输出 result.md
+  require_closing_report: true  # 所有 Skill 必须产出收尾报告（统一格式见 skill-io.md，文件名由 skill 自定：completion-report.md / validation-report.md / TEST-REPORT.md 等）
   block_on_blocker: true       # 上游 BLOCKER → 阻断下游
 
 # 每个 Skill 的独立门禁阈值

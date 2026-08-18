@@ -19,7 +19,7 @@ description: >
 ## 核心原则
 
 1. **遵循项目模式** — 从 `.project-knowledge/` 提取写法，不凭记忆
-2. **使用项目组件** — 查 `components/catalog.md`，不重复造轮子。先走 [Reuse Ladder](../../shared/primitives/reuse-check.md)：需求已覆盖 → 零改动
+2. **使用项目组件** — 查组件知识（Context Resolver 按 query 注入），不重复造轮子。先走 [Reuse Ladder](../../shared/primitives/reuse-check.md)：需求已覆盖 → 零改动
 3. **完整性** — loading、empty、error 全状态覆盖
 4. **增量修改** — 已存在文件先 Read 再 Edit，不 overwrite
 
@@ -28,7 +28,7 @@ description: >
 | 优先级 | 资源 | 缺失时 |
 |--------|------|--------|
 | 0 | `context.json` + `context-package.json` | 🔴 BLOCK |
-| 1 | `.project-knowledge/index.md` | 降级通用模式 |
+| 1 | 知识索引（Context Resolver 注入） | 降级通用模式 |
 | 2 | `PLAN.md`，若存在必读 | 标注"⚠️ 无规划" |
 | 3 | `ARCHITECTURE.md`，若存在必读 | 标注"⚠️ 无架构约束" |
 

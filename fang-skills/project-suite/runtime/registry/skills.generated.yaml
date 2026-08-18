@@ -17,7 +17,6 @@ skills:
     capabilities: [code-analysis, knowledge-extraction, candidate-verification]
     complexity: {min: medium, max: high}
     cost: high
-    confidence_min: 70
     requires: [general-purpose agent]
     produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
     consumes: []
@@ -55,7 +54,6 @@ skills:
     capabilities: [adaptive-interview, completeness-check, plan-generation]
     complexity: {min: medium, max: high}
     cost: medium
-    confidence_min: 70
     requires: []
     produces: [Plan]
     consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
@@ -77,6 +75,7 @@ skills:
       outputs:
         - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
         - { name: context-package.json, type: context, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
+        - { name: target, type: placement, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
       side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 需求信息完全缺失, severity: BLOCKER, recovery: 拒绝执行,提示补充需求 }
@@ -91,7 +90,6 @@ skills:
     capabilities: [tech-selection, module-design, api-contract]
     complexity: {min: medium, max: high}
     cost: medium
-    confidence_min: 70
     requires: []
     produces: [Architecture]
     consumes: [KnowledgeBase, Plan, Context, Graph]
@@ -126,7 +124,6 @@ skills:
     capabilities: [code-generation, pattern-matching, query-api]
     complexity: {min: low, max: high}
     cost: high
-    confidence_min: 70
     requires: []
     produces: [Code]
     consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
@@ -147,7 +144,7 @@ skills:
         - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: ADR决策记录 }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 已有组件/API不重复生成 }
       outputs:
-        - { name: "*.vue/*.ts/*.js", type: implementation, confidence_range: "70-95", description: 符合项目规范的生产级代码 }
+        - { name: "源码文件", type: implementation, confidence_range: "70-95", description: 符合项目规范的生产级代码（扩展名按项目技术栈） }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
       failure_modes:
         - { condition: context-package.json缺失且PLAN.md缺失, severity: BLOCKER, recovery: 提示先执行planner }
@@ -162,7 +159,6 @@ skills:
     capabilities: [test-generation, ac-coverage, framework-detect]
     complexity: {min: low, max: medium}
     cost: medium
-    confidence_min: 70
     requires: []
     produces: [Test]
     consumes: [Code, Plan, KnowledgeBase, Context]
@@ -198,7 +194,6 @@ skills:
     capabilities: [code-review, security-audit, ac-verification]
     complexity: {min: low, max: high}
     cost: medium
-    confidence_min: 70
     requires: []
     produces: [Review]
     consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
@@ -234,7 +229,6 @@ skills:
     capabilities: [doc-generation, style-matching, source-tracing]
     complexity: {min: low, max: medium}
     cost: medium
-    confidence_min: 60
     requires: []
     produces: [Documentation]
     consumes: [Code, Review, KnowledgeBase, Context]
@@ -268,7 +262,6 @@ skills:
     capabilities: [safe-refactor, test-protection, metric-improvement]
     complexity: {min: medium, max: high}
     cost: medium
-    confidence_min: 70
     requires: [existing tests]
     produces: [RefactoredCode]
     consumes: [Code, KnowledgeBase, Test, Review]
@@ -303,7 +296,6 @@ skills:
     capabilities: [semver, changelog, release-checklist]
     complexity: {min: low, max: medium}
     cost: low
-    confidence_min: 70
     requires: []
     produces: [Release]
     consumes: [Documentation, Review, Test]
@@ -340,7 +332,6 @@ skills:
     capabilities: [pipeline-execution, auto-advance, checkpoint]
     complexity: {min: high, max: high}
     cost: low
-    confidence_min: 80
     requires: []
     produces: [PipelineExecution]
     consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]

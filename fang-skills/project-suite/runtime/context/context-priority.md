@@ -64,8 +64,8 @@
 
 | 字段 | 缺失时降级为 | 影响 |
 |------|------------|------|
-| `techStack.uiLibrary` | Element Plus 默认 | 组件名可能不匹配 |
-| `techStack.buildTool` | Vite 默认 | import.meta 语法可能不兼容 |
+| `techStack.uiLibrary` | 组件库默认 | 组件名可能不匹配 |
+| `techStack.buildTool` | 构建工具默认 | 构建语法可能不兼容 |
 | `conventions.componentStyle` | `<script setup lang="ts">` | 生成代码风格可能不匹配 |
 | `conventions.apiClient` | `fetch` | API 调用方式错误 |
 | `conventions.apiParams.pagination` | `page:1, size:10` | 分页参数名错误 |

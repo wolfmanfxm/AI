@@ -23,7 +23,7 @@
 ## Output
 - 重构后代码（行为不变）
 - `reports/REFACTOR.md` — 变更清单 + 改善指标 + 测试结果
-- `result.md`
+- `REFACTOR.md`
 
 ## Confidence
 - 最低: 70%

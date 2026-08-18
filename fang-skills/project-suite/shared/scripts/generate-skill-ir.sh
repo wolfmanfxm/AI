@@ -8,7 +8,8 @@ SUITE_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SKILLS_DIR="$SUITE_ROOT/skills"
 
 gen() {
-  local dir="$1" name=$(basename "$dir")
+  local dir="$1"
+  local name=$(basename "$dir")
   local y="$dir/skill.yaml" m="$dir/SKILL.md"
   [ ! -f "$y" ] && return
 
@@ -20,7 +21,7 @@ gen() {
   mode=$(grep "^mode:" "$y" | sed 's/^mode: *//')
   produces=$(grep "^produces:" "$y" | sed 's/^produces: *//' | tr -d '[] ')
   consumes=$(grep "^consumes:" "$y" | sed 's/^consumes: *//' | tr -d '[] ')
-  depends_on=$(grep "^depends_on:" "$y" | sed 's/^depends_on: *//' | tr -d '[] ')
+  depends_on=$(grep "^depends_on:" "$y" | sed 's/^depends_on: *//' | tr -d '[] ' || true)
   boundary=$(grep "^boundary:" "$y" | sed 's/^boundary: *//')
   last_reviewed=$(grep "last_reviewed:" "$y" | grep -o '"[^"]*"' | tr -d '"')
   stages=$(grep "stages:" "$y" | grep -o '\[.*\]' | tr -d '[]' | sed 's/, */, /g' | sed 's/^ *//;s/ *$//')
@@ -65,7 +66,7 @@ consumes: [${consumes}]
 depends_on: [${depends_on}]
 stages: [${stages}]
 verification: { checks: ${verify_checks}, source: prompts/verifier.md }
-evidence: { format: knowledge-object.schema.json, source: knowledge-graph.yaml }
+evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: ${exit_count}, source: prompts/execution.md }
 failure_conditions: { modes: ${failure_modes}, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "${last_reviewed}"

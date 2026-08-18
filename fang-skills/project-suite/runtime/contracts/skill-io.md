@@ -43,39 +43,34 @@
 ### task.md（当前任务）
 当前 Skill 需要完成的具体任务描述。来自 PLAN.md 的 Task Breakdown 或用户直接输入。
 
-### knowledge.md（知识摘要）
-仅包含 `status: accepted` 的知识条目摘要，避免上下文膨胀。
+### knowledge.md（知识摘要，v2 预消化）
 
-### knowledge-list.json（精确加载清单）
-
-Planner 产出，Generator 消费。Generator 不搜索知识库——只读这个清单里指定的 capability。
+> 知识注入唯一入口 = `context-package.json`（Knowledge Resolver 产出，预消化 pattern + constraints + components）。
+> Generator 不再读文件、不自己判断——直接遍历 `context.knowledge[]` 注入。见 [knowledge-resolver.md](../knowledge-resolver.md)。
 
 ```json
 {
   "plan": "PLAN-user-activate.md",
-  "generated_by": "project-planner",
+  "generated_by": "knowledge-resolver",
   "schemaVersion": "2.0.0",
-  "capabilities": ["<框架约定>", "TablePattern", "FormPattern", "ApiPattern"],
-  "graph_queries": [
-    {"type": "component", "name": "<表单字段>"},
-    {"type": "api", "name": "order"}
-  ]
+  "context": {
+    "knowledge": [
+      {"capability": "TablePattern", "pattern": "DataTable + <schema表格>", "constraints": ["pageIndex/pageSize 数字"], "anti_pattern": "不要手写 el-table", "source": "patterns/table.md"}
+    ],
+    "components": [{"name": "Dialog", "path": "@app/components/common/Dialog", "reuse": true}],
+    "api": [{"module": "order", "functions": ["getPage"], "conventions": ["export function 风格"]}],
+    "rules": [{"rule": "workspace-priority", "constraint": "组件从 @app/components/ 引入", "blocking": true}]
+  }
 }
 ```
 
-**v2.0 变更（capability 替代 file path）：**
-- `files: [...]` → `capabilities: [...]` — 使用 capability 标签代替具体文件路径
-- Generator 通过 `knowledge-index.json` 解析 capability → 文件列表 → 加载
-- Planner 只需声明 capability，不需要知道文件在哪
-- 文件路径变更 → 只改 `knowledge-index.json`，Planner + Generator 不受影响
-
 **规则：**
-- Planner 在 `# Reuse Analysis` 中已经列出了可复用资产 → 同时生成 `knowledge-list.json`
-- Generator 启动时读 `knowledge-list.json` → 通过 `knowledge-index.json` 解析 capability → 只加载对应文件
+- Planner 在 `# Reuse Analysis` 中列出可复用资产 → Resolver 产出 `context-package.json`
+- Generator 启动时读 `context-package.json` → 遍历 `context.knowledge[]` 直接注入，遵守 constraints、避免 anti_pattern
 - Generator **不搜索** `.project-knowledge/` — 不知道还有别的知识
 - Context 恒定、可预测、不膨胀
 
-→ 详细协议：[../state/schemas/knowledge-index.md](../state/schemas/knowledge-index.md)
+> ⚠️ **Legacy**：`knowledge-list.json`（v1 文件路径清单，Generator 自行解析）已废弃，被 `context-package.json` 取代。新 Skill 不得再以其为正式输入。见 [knowledge-resolver.md](../knowledge-resolver.md)「Legacy Compatibility」。
 
 ## 输出：3 个标准出口
 
@@ -83,19 +78,41 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
 ┌─────────────────────────────────────────┐
 │              Skill Output               │
 ├───────────────┬─────────────────────────┤
-│ result.md     │ 执行结果摘要              │
+│ 收尾报告       │ 执行结果摘要（名字由 skill 自定，见下）│
 │ state.json    │ 更新后的项目状态           │
 │ artifacts/    │ 产出文件                  │
 └───────────────┴─────────────────────────┘
 ```
 
-### result.md（统一格式）
+### 收尾报告（统一格式，文件名由 skill 自定）
+
+> 每个 Skill 必须产出**一份**收尾报告（`gates.yaml` `require_closing_report`），遵循下面的统一格式。
+> **文件名由 skill 自定**，不存在一个强制叫 `result.md` 的文件——各 skill 的实际报告名：
+
+| Skill | 收尾报告文件名 |
+|-------|--------------|
+| analyzer | `validation-report.md`（+ verification-report.md） |
+| planner | `validation-report.md` |
+| architect | `ARCHITECTURE-<topic>.md`（ADR 本身即收尾） |
+| generator | `completion-report.md` |
+| tester | `TEST-REPORT.md` |
+| reviewer | `REVIEW-<topic>.md` |
+| refactorer | `REFACTOR.md` |
+| documenter | 文档本身（含 Evidence Header） |
+| releaser | `CHANGELOG.md` + `RELEASE-CHECKLIST.md` |
+| pipeline-orchestrator | `pipeline-report.md` |
+
+统一格式（内容结构，非文件名）：
+
 ```markdown
 # Result: {skill-name}
 
 **Status:** {completed | degraded | blocked}
 **Confidence:** {0-100}%
 **Summary:** [一句话摘要]
+
+**Convergence:** {sufficient | insufficient | blocked} → {stop | execute | investigate}
+**Evidence:** [支撑收敛判断的证据]
 
 ## What Was Done
 - [具体做了什么]
@@ -112,6 +129,8 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
 **Suggested:** {下一步 Skill 建议}
 **Blockers:** {阻塞后续执行的问题}
 ```
+
+> **Convergence**（统一停止条件）是 Suite 一级原语：`sufficient`=证据够、停下；`insufficient`=缺证据、补；`blocked`=缺输入、回上游。见 [convergence.md](../../shared/primitives/convergence.md)。
 
 ### state.json（增量更新）
 Skill 只更新自己负责的字段，不覆盖整个 state.json：
@@ -168,7 +187,7 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 }
 ```
 
-**写入时机**：state.json 写入之后，result.md 输出之前。
+**写入时机**：state.json 写入之后，收尾报告输出之前。
 **写入方式**：读 timeline.json → 追加 runs[] → 增量更新 aggregates → 写回。
 
 → 完整协议：[../metrics/timeline.md](../metrics/timeline.md)

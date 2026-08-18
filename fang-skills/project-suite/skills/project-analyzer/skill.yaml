@@ -9,7 +9,6 @@ description: "分析项目结构、组件、API、模式，生成结构化知识
 verification: { mode: candidate-verify-accept }
 depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-analysis, knowledge-extraction, candidate-verification]
-confidence_min: 70
 requires: [general-purpose agent]
 produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
 consumes: []

@@ -9,7 +9,7 @@
 
 ```
 之前:  Generator 读 patterns/ + components/ + api/ → 自己判断用哪个
-之后:  Resolver(Task, Graph) → knowledge-list.json → Generator 只读这 3-5 个文件
+之后:  Resolver(Task, Graph) → context-package.json → Generator 只消费这个预消化知识包
 ```
 
 Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀。
@@ -18,7 +18,7 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 
 ```
 输入: Task（来自 PLAN.md > # Task Breakdown）+ graph.json
-输出: knowledge-list.json（Top K 文件路径，默认 K=5）
+输出: context-package.json（预消化知识包：pattern + constraints + components）
 
 1. 提取实体
    从 Task 描述中提取:
@@ -168,8 +168,8 @@ Planner 在 Step 4（Reuse Analysis）之后调用 Resolver:
 
 ```
 1. Reuse Analysis → 确定涉及的组件/API/模式
-2. 调用 Resolver(任务列表, graph.json) → knowledge-list.json
-3. 将 knowledge-list.json 写入 artifacts/plans/
+2. 调用 Resolver(任务列表, graph.json) → context-package.json
+3. 将 context-package.json 写入 artifacts/plans/
 ```
 
 ### Generator 消费
@@ -200,14 +200,20 @@ Reviewer 审查时:
 
 ```
 graph.json 不存在 → Resolver 退化为 PLAN.md # Reuse Analysis 直接映射
-knowledge-list.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取文件列表
+context-package.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取文件列表
 两者都不存在 → Generator 降级通用模式
 ```
+
+## Legacy Compatibility（v1 → v2）
+
+> ⚠️ `knowledge-list.json` 是 v1 旧产物（文件路径清单，Generator 自行解析）。v2.0 起被
+> `context-package.json`（预消化知识包）取代。**任何新 Skill 不得再以 knowledge-list.json 为正式输入。**
+> 它仅作为「老项目残留 artifact」保留向后兼容，见 [context-package.schema.json](contracts/context-package.schema.json)。
 
 ## 与 Knowledge Lifecycle 的关系
 
 Resolver 只返回 `status: accepted` 的知识文件。
-`Candidate` 状态的文件不进入 knowledge-list.json。
+`Candidate` 状态的文件不进入 context-package.json。
 这确保 Generator 永远不把猜测当事实。
 
 → [state/schemas/knowledge-lifecycle.md](state/schemas/knowledge-lifecycle.md)

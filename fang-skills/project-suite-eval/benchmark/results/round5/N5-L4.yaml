@@ -1,0 +1,29 @@
+task: N5-L4
+category: long-task
+prompt: "迁移整个项目从 Vue2 到 Vue3"
+monitor_signal: "#3 Reuse Check primitive（能否识别「已是 Vue3 无需迁移」）+ #1 知识消费"
+
+native:
+  files: []
+  change: "零改动"
+  git_attempted: false
+  method: "ad-hoc：读 package.json 发现 vue ^3.4.29，判定已是 Vue3，无迁移"
+  evidence: "package.json 依赖 + 项目名 mp-web-vue3"
+
+suite:
+  files: []
+  change: "零改动"
+  git_attempted: false
+  gate_level: "complex/long（关键词「迁移」）→ 复核后无实际迁移任务"
+  gate_route: "Reuse Fast Path（零改动）"
+  reuse_verdict: "REUSE（目标态已被现有代码完整覆盖）"
+  method: "complexity gate → reuse check（REUSE）→ 消费 context.json + package.json + grep Vue2 特征"
+  evidence: "context.json（framework Vue 3.4.29）+ package.json + 1373 个 script setup 文件 + grep 无 new Vue/Vue.extend/filters/$set 等 Vue2 签名"
+
+monitor_result:
+  reuse_correct: true        # suite 正确 REUSE 零改动
+  reuse_advantage: weak      # native 也零改动（读 package.json 即可），reuse 无强优势
+  knowledge_consumed: true   # suite 消费了 context.json（contract artifact，直接读，符合 #1 设计）
+  quality_diff: "suite 有结构化 REUSE 裁决 + 证据链（context.json + grep），native 只是 ad-hoc 版本检查"
+
+key_finding: "L4 对 #3 reuse 是弱信号：native 靠读 package.json 也能发现「已是 Vue3」→ 零改动，reuse-check 无强优势。但差异在过程质量——suite 走 Reuse Fast Path（结构化 REUSE 裁决 + 消费 context.json + grep Vue2 特征验证），native 只是 ad-hoc。这印证了 round1/2 结论「suite 价值=过程质量，非结果」。#1 方面：suite 消费了 context.json（contract artifact，直接读），符合「context.json 走 must_read、knowledge .md 走 query」的设计，但 L4 未触及 knowledge .md 查询（需 M1 验证）。"

@@ -17,8 +17,9 @@ execution:
           source: workspace/
           description: 项目源码必须可读取
     gate:
-      min_confidence_for_pass: 70        # <70 → downstream BLOCK
-      blocks_downstream_below: 70
+      min_confidence_for_pass: 70        # 源头分析器，70 与 gates.yaml warn_below 一致
+      requires_review_below: 70
+      blocks_downstream_below: 40        # 对齐其他 skill 与 gates.yaml block_below（原 70 导致"达标即阻断"）
     fallback:
       on_missing_knowledge_vault: degraded
       on_missing_claude_md: degraded
@@ -89,7 +90,7 @@ execution:
       requires_review_below: 70            # <70必须Review
       blocks_downstream_below: 40
     fallback:
-      on_missing_context_package: 降级读knowledge-list.json(v1兼容)
+      on_missing_context_package: 降级读PLAN.md # Reuse Analysis(v1兼容)
       on_missing_architecture: 标注"⚠️无架构约束"
 
   project-tester:

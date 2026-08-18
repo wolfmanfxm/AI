@@ -1,12 +1,20 @@
-# Skill Runtime Policy — 每 skill 的执行/回滚/质量门/可靠性策略
+# Skill Runtime Policy — 每 skill 的回滚/恢复/可靠性/stage 策略
 #
 # 权威边界：本文件 = Runtime Policy（编排层）；skill.yaml = Skill Contract（intrinsic）。
 # 调整 Runtime 策略只改这里，不动 skill.yaml。见 docs/roadmap.md「定位」。
 #
+# 字段分工（消除多头权威，见 ADR-003）：
+#   - quality_gate（conf 阈值 pass/review/block）→ 唯一权威 = runtime/config/rules.yaml 的 `gate`，本文件不再重复。
+#   - 本文件只管 rules.yaml 没有的执行策略：rollback / recovery / reliability / stage_config。
+#   - skill.yaml 不再含 confidence_min（该字段已移除，见 ADR-003）。
+#
+# ⚠️ 状态：Declared（已声明，未 Enforced）——runtime 目前是 Protocol 非 Engine，
+#    没有任何代码 read 本文件。本文件定义了「应该怎么执行」，但运行时强制执行需 Engine 接入
+#    （对应 roadmap「Enforced」状态当前为空）。在 Engine 接入前，本文件是「权威声明 + 文档」。
+#
 version: "1.0.0"
 
 project-analyzer:
-  quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
@@ -17,7 +25,6 @@ project-analyzer:
     delivery: { checkpoint: false, retry: 1 }
 
 project-planner:
-  quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: edit_patch, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }
@@ -29,7 +36,6 @@ project-planner:
     delivery: { checkpoint: false, retry: 1 }
 
 project-architect:
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }
@@ -42,7 +48,6 @@ project-architect:
     delivery: { checkpoint: false, retry: 1 }
 
 project-generator:
-  quality_gate: { min_confidence_for_pass: 95, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: edit_patch, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
@@ -52,7 +57,6 @@ project-generator:
     validation: { checkpoint: false, retry: 0, blocking: true }
 
 project-tester:
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: medium, expected_confidence_delta: 15, output_file_count_tolerance: "20%" }
@@ -62,7 +66,6 @@ project-tester:
     validation: { checkpoint: false, retry: 0, blocking: true }
 
 project-reviewer:
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: none, safe_to_retry: true, retry_max: 2 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 2 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
@@ -73,7 +76,6 @@ project-reviewer:
     delivery: { checkpoint: false, retry: 1 }
 
 project-refactorer:
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: edit_patch, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
@@ -84,7 +86,6 @@ project-refactorer:
     delivery: { checkpoint: false, retry: 1 }
 
 project-documenter:
-  quality_gate: { min_confidence_for_pass: 80, requires_review_below: 60, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
@@ -95,7 +96,6 @@ project-documenter:
     delivery: { checkpoint: false, retry: 1 }
 
 project-releaser:
-  quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: high, expected_confidence_delta: 5, output_file_count_tolerance: "5%" }
@@ -106,7 +106,6 @@ project-releaser:
     delivery: { checkpoint: false, retry: 1 }
 
 pipeline-orchestrator:
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
   rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
   reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }
