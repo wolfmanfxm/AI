@@ -8,7 +8,7 @@
 用户
  │
  │  读 state.json（了解当前状态）
- │  读 Skill 建议（完成后下一步）
+ │  读 Skill 建议（完成后）
  │
  ├──→ 决定执行哪个 Skill
  │
@@ -54,7 +54,7 @@ Skill
 | quick-change | `workflows/quick-change.yaml` | 轻量改动 |
 | (自定义) | `workflows/*.yaml` | 用户按需创建 |
 
-每个 Skill 的 `完成后下一步` 参考这些模板给建议，但最终由用户决定。
+每个 Skill 的 `完成后` 参考这些模板给建议，但最终由用户决定。
 
 ## 并行建议
 

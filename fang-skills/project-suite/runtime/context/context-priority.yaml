@@ -60,19 +60,19 @@ fields:
   # 🟡 IMPORTANT — 缺失则 DEGRADE（降级 + 标注 ⚠️）
   important:
     - path: techStack.uiLibrary
-      fallback: Element Plus
+      fallback: <组件库>
       affects: [generator]
     - path: techStack.buildTool
-      fallback: Vite
+      fallback: <构建工具>
       affects: [generator]
     - path: conventions.componentStyle
-      fallback: "<script setup lang=\"ts\">"
+      fallback: "<组件范式>"
       affects: [generator]
     - path: conventions.apiClient
       fallback: fetch
       affects: [generator]
     - path: conventions.apiParams.pagination
-      fallback: { pageIndex: number, pageSize: number }
+      fallback: { page: number, size: number }  # 分页参数名以项目为准
       affects: [generator, reviewer]
     - path: conventions.errorDisplay
       fallback: console.error

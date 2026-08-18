@@ -41,7 +41,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 releaser 只检查不执行发布命令。
 
 > 完成后：人工审核后发布。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

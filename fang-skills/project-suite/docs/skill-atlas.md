@@ -75,17 +75,17 @@ User Input ──→ architect ──→ Architecture (ADR)
 | Gate | 10/10? | Note |
 |------|------|------|
 | G1: SKILL.md ≤120 lines | ✅ | 58-66 |
-| G2: skill.yaml 完整 | ✅ | 含 interface + stages + recovery + rollback |
+| G2: skill.yaml 完整 | ✅ | 含 interface + stages（Runtime Policy 在 skill-policy.yaml） |
 | G3: boundary.md ≥3 反例 | ✅ | 内嵌在 SKILL.md 或 boundary.md |
 | G4: CHECKPOINT ≥1 | ✅ | 每 stage prompts 含 CHECKPOINT |
 | G5: 职责边界表 | ✅ | ✅/❌ 表在 boundary.md |
 | G6: description 含触发词 | ✅ | 全部含触发词+产出 |
 | G7: capabilities.yaml 注册 | ✅ | 10/10 已注册 |
-| G8: 完成后下一步 | ✅ | 10/10 |
-| G9: failure-handling.md | ✅ | 10/10 |
+| G8: 完成后 next-step | ✅ | 10/10 |
+| G9: boundary.md 失败兜底 | ✅ | 10/10 |
 | G10: Stage prompts | ✅ | 37 个文件 |
 | G11: @engine 声明 | ✅ | 每 stage prompt 含 @engine |
-| G12: interface.rollback | ✅ | 10/10 (Wave A 补齐) |
+| G12: skill-policy.yaml rollback | ✅ | 10/10 |
 
 ## Governed Readiness
 
@@ -95,9 +95,9 @@ User Input ──→ architect ──→ Architecture (ADR)
 | review cadence | ✅ 90-day, last_reviewed 已写入 10/10 skill.yaml |
 | input_files (file-backed fixture) | ✅ 10/10 skills `interface.inputs[].fixture` |
 | output contract | ✅ skill.yaml interface.outputs |
-| rollback boundary | ✅ skill.yaml interface.rollback (10/10) |
+| rollback boundary | ✅ skill-policy.yaml rollback (10/10) |
 | trust report | ✅ `reports/trust-report.md` (90/100) |
 | output_quality_scorecard | ✅ `reports/output-quality-scorecard.md` |
 | telemetry | ✅ `shared/scripts/collect-metrics.sh` (local aggregation) |
-| cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 10/10 `interface.reliability` |
+| cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 10/10 `skill-policy.yaml` reliability |
 | drift detection | ⚠️ `missing evidence` |

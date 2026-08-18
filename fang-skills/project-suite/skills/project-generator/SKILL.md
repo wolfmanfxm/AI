@@ -45,7 +45,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 generator 只写代码。缺少上游产物 → 提示先执行 planner/architect。
 
 > 完成后：/project-reviewer 或 /project-tester。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

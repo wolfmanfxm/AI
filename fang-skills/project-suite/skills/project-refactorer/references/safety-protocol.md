@@ -1,6 +1,7 @@
 # Safety Protocol — Refactorer
 
 > 重构安全协议。确保每次重构可验证、可逆、不引入 bug。
+> 回滚用 Edit 反向，不用 git（git 由 [Command Guard](../../../runtime/engine/command-guard.md) 管控）。
 
 ## 安全层 0：基线确认
 
@@ -12,10 +13,10 @@
    无测试 → 跳到安全层 1
    ```
 
-2. **确认 git 状态**
+2. **记录当前内容**
    ```
-   git status → 工作区干净？有未提交代码？
-   建议：先 commit 当前状态，以便随时 git checkout 回滚
+   读目标文件 → 把要改的函数/片段的 before 内容记进 REFACTOR.md
+   回滚依据 = REFACTOR.md 里的 before 片段（不是 git）
    ```
 
 ## 安全层 1：表征测试
@@ -46,16 +47,16 @@ describe('processOrder (characterization)', () => {
 每次只做一个重构动作：
 
 ```
-✅ Extract Method → 测试 → commit
-✅ Rename → 测试 → commit
+✅ Extract Method → 测试 → 记录改动
+✅ Rename → 测试 → 记录改动
 ❌ Extract Method + Rename + Simplify 一起做 → 失败后不知道哪个出问题
 ```
 
-## 安全层 3：验证后提交
+## 安全层 3：验证后记录
 
 ```
-重构 → npm test → 通过 → git commit -m "refactor: extract validateOrder"
-                 → 失败 → 分析 diff，修复或 git checkout .
+重构 → npm test → 通过 → 记录 before/after 到 REFACTOR.md
+               → 失败 → 分析 diff，修复或用 Edit 反向回滚
 ```
 
 ## 安全层 4：回滚
@@ -63,10 +64,10 @@ describe('processOrder (characterization)', () => {
 如果重构后发现逻辑变了（测试失败且修复成本高于还原）：
 
 ```
-git checkout <target-file>  → 回到重构前状态
+Edit 反向 → 用 REFACTOR.md 记录的 before 片段恢复到重构前状态
 ```
 
-这就是为什么小步提交重要 — 只回滚失败的那一步。
+这就是为什么小步记录重要 — 只回滚失败的那一步。
 
 ## 不适合重构的信号
 

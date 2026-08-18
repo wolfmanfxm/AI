@@ -44,7 +44,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 orchestrator 只调度不执行单个 Skill 的业务逻辑。不替代任何 Skill。
 
 > 完成后：人工审核 pipeline 产出。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

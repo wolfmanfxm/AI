@@ -29,7 +29,7 @@ Command Guard
 | 推送 | `git push` | 🔴 BLOCK |
 | 只读 | `git status` / `git diff` / `git log` / `git branch` / `git rev-parse` | ✅ ALLOW |
 
-> 注：refactorer / releaser 合法使用 git（commit/rollback/log）的场景，由 profile 或 workflow 显式放行，见 [gates.yaml](../config/gates.yaml)。
+> 注：releaser 读 `git log`（changelog 合成）并在回滚方案里**文档化** `git revert` 命令（供人工执行，非自己执行）的场景，由 profile 或 workflow 显式放行，见 [gates.yaml](../config/gates.yaml)。refactorer 已改用 Edit 反向回滚，不再依赖 git。
 
 ## Skill 侧约定
 

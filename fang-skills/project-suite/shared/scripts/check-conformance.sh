@@ -136,19 +136,19 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G8: 完成后下一步 section
-  if grep -q "完成后下一步" "$skill_dir/SKILL.md"; then
+  # G8: 完成后 next-step hint
+  if grep -q "完成后" "$skill_dir/SKILL.md"; then
     green "  G8 PASS: next-step hint found"
   else
     yellow "  G8 WARN: no next-step hint"
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G9: failure-handling.md exists
-  if [ -f "$skill_dir/references/failure-handling.md" ]; then
-    green "  G9 PASS: failure-handling.md exists"
+  # G9: 失败处理在 boundary.md
+  if grep -q "失败兜底" "$skill_dir/references/boundary.md" 2>/dev/null; then
+    green "  G9 PASS: failure handling in boundary.md"
   else
-    yellow "  G9 WARN: failure-handling.md missing"
+    yellow "  G9 WARN: failure handling missing"
     WARNINGS=$((WARNINGS+1))
   fi
 
@@ -211,11 +211,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G15: interface.rollback exists
-  if grep -q "rollback:" "$skill_dir/skill.yaml"; then
-    green "  G15 PASS: interface.rollback exists"
+  # G15: skill-policy.yaml 含 rollback
+  if grep -q "rollback:" "$SUITE_ROOT/runtime/config/skill-policy.yaml"; then
+    green "  G15 PASS: skill-policy.yaml has rollback"
   else
-    yellow "  G15 WARN: interface.rollback missing"
+    yellow "  G15 WARN: skill-policy.yaml missing rollback"
     WARNINGS=$((WARNINGS+1))
   fi
 

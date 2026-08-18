@@ -35,20 +35,20 @@
 {
   "project": "my-web-app",
   "constraints": {
-    "framework": "Vue 3.4",
-    "ui_library": "Element Plus 2.13 (<组件库前缀> prefix)",
+    "framework": "<框架> <版本>",
+    "ui_library": "<组件库> <版本>",
     "typescript": "strict mode",
     "package_manager": "pnpm"
   },
   "conventions": {
-    "component_style": "script setup lang=ts",
+    "component_style": "<组件范式>",
     "form_pattern": "<统一表单封装> + <表单字段>/<表单字段>",
     "table_pattern": "<统一表格> + <schema表格>",
-    "api_pattern": "export function + Promise<AxiosResponse<T>>"
+    "api_pattern": "export function + <响应类型>"
   },
   "known_gotchas": [
-    "workspace/api/ 按模块组织,不是按类型",
-    "分页: workspace用pageIndex/pageSize(数字), 核心平台用pagesize/pageindex(字符串)"
+    "<api 目录> 按模块组织,不是按类型",
+    "分页参数名/类型以项目为准(可能不同平台不同)"
   ],
   "architectural_decisions": ["ADR-001-knowledge-first"],
   "last_updated": "2026-08-04"
@@ -63,8 +63,8 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
 {
   "version": "1.0.0",
   "patterns_learned": {
-    "vue_crud": {
-      "files_needed": ["index.vue", "detail.vue", "api.ts", "types.ts"],
+    "crud": {
+      "files_needed": ["<列表页>.<ext>", "<详情页>.<ext>", "<api 模块>.<ext>", "<类型>.<ext>"],
       "typical_structure": "<统一表格> + <schema搜索> + <schema表格> + <统一表单封装> dialog"
     },
     "approval_flow": {

@@ -34,7 +34,7 @@
 |------|------|------|
 | implementation 不可读 | BLOCKED | 拒绝执行 |
 | test 缺失且无法加表征测试 | DEGRADED | 只做机械变换 |
-| 重构后测试变红 | DEGRADED | git revert 回滚 |
+| 重构后测试变红 | DEGRADED | Edit 回滚 |
 
 ## Checkpoint
 | 位置 | 触发条件 |
@@ -43,7 +43,7 @@
 
 ## Resume
 - 支持: true
-- 方式: git revert（小步提交可回滚）
+- 方式: Edit 反向（小步改动可回滚）
 
 ## State
 - 读: state.json

@@ -23,8 +23,8 @@ triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端
 triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
 
 context_contract:
-  must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml]
-  should_read: [state.json]
+  must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml, state.json]
+  query: []
   neednt_read: []
 
 interface:
@@ -41,13 +41,4 @@ interface:
     - { condition: 下游 Skill 不存在或未安装, severity: BLOCKER, recovery: 提示安装缺失的 Skill }
     - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
     - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-  rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
   stages: [discovery, orchestrate, validation, delivery]
-  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-  stage_config:
-    discovery: { checkpoint: true, retry: 0 }
-    orchestrate: { checkpoint: true, retry: 1 }
-    validation: { checkpoint: false, retry: 0, blocking: true }
-    delivery: { checkpoint: false, retry: 1 }
-  reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }

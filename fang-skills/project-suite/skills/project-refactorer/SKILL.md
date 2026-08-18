@@ -18,7 +18,7 @@ description: >
 
 1. **行为不变** — 重构前后外部行为完全一致
 2. **安全第一** — 有测试先跑绿，没测试先加表征测试
-3. **小步快跑** — 每次一个重构动作，独立 commit 可回滚
+3. **小步快跑** — 每次一个重构动作，Edit 可回滚
 4. **可量化** — "圈复杂度 15→3" > "改好了"
 5. **消除重复** — 提取/新建前先 [Reuse Check](../../shared/primitives/reuse-check.md)，避免产出与现有工具重复的代码
 
@@ -42,7 +42,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 refactorer 只改善结构不改行为。没测试保护不重构。
 
 > 完成后：/project-tester 或 /project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

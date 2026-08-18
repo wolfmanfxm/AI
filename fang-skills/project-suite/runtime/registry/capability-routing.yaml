@@ -31,7 +31,7 @@ routing:
     produces: [Architecture]
     confidence_min: 70
   CodeGeneration:
-    description: 按项目规范生成生产级代码，Candidate→Verify
+    description: 按项目规范生成生产级代码，Execute→Verify
     intents:
       cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
       en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]

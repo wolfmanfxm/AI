@@ -39,14 +39,14 @@ quality_gates:
   G5:  { name: "职责边界表 ✅/❌ ≥3行", level: required }
   G6:  { name: "description 含触发词+产出", level: required }
   G7:  { name: "skills.generated.yaml 已注册", level: important }
-  G8:  { name: "完成后下一步章节", level: important }
-  G9:  { name: "failure-handling.md 存在", level: important }
+  G8:  { name: "完成后 next-step hint", level: important }
+  G9:  { name: "boundary.md 含失败兜底", level: important }
   G10: { name: "无runtime-specific措辞", level: important }
   G11: { name: "prompts/ ≥1文件", level: optional }
   G12: { name: "references/ ≥2文件", level: optional }
   G13: { name: "stages与prompts/<stage>.md对应", level: required }
   G14: { name: "stage prompt含@engine:声明", level: required }
-  G15: { name: "interface.rollback存在", level: required }
+  G15: { name: "skill-policy.yaml 含 rollback", level: required }
   G16: { name: "Skill Atlas条目完整", level: important }
   G17: { name: "last_reviewed在cadence内", level: important }
   G18: { name: "scheduler.yaml 每个skill有entry且priority/decision_order唯一", level: important }
@@ -54,5 +54,5 @@ quality_gates:
 compatibility:
   context_schema: ">=1.0.0"
   state_schema: ">=1.0.0"
-  skill_interface_schema: ">=1.3.0"  # fixture + stage_config + reliability
+  skill_interface_schema: ">=1.2.0"  # intrinsic I/O（Runtime Policy 已移至 skill-policy.yaml）
   suite_minimum: ">=0.8.0"

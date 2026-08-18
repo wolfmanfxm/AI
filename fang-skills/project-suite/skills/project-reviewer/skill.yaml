@@ -21,8 +21,8 @@ triggers_cn: [代码审查, review, 检查代码, 审查 PR, 代码质量, 审�
 triggers_en: [code review, security review, audit code]
 
 context_contract:
-  must_read: [context.json, PLAN.md, knowledge-index.json]
-  should_read: [ARCHITECTURE.md, graph.json]
+  must_read: [context.json, PLAN.md, ARCHITECTURE.md]
+  query: []
   neednt_read: [observations/]
 
 interface:
@@ -37,13 +37,4 @@ interface:
   failure_modes:
     - { condition: 变更文件>20且无法全审, severity: DEGRADED, recovery: 只审核心文件,其余标注"⚠️未审查" }
     - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
-  quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-  rollback: { method: none, safe_to_retry: true, retry_max: 2 }
   stages: [discovery, execution, validation, delivery]
-  recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 2 }
-  reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
-  stage_config:
-    discovery: { checkpoint: true, retry: 0 }
-    execution: { checkpoint: true, retry: 0 }
-    validation: { checkpoint: false, retry: 0, blocking: true }
-    delivery: { checkpoint: false, retry: 1 }

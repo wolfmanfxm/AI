@@ -40,7 +40,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 tester 只写测试不修被测代码。测试失败 → 记录报告，不修改源码。
 
 > 完成后：/project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

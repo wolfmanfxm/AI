@@ -20,10 +20,10 @@
 ### context.json（来自 Analyzer）
 ```json
 {
-  "techStack": { "framework": "Vue 3.4", "ui": "Element Plus 2.13", "lang": "TypeScript" },
+  "techStack": { "framework": "<框架>", "ui": "<组件库>", "lang": "<语言>" },
   "aliases": { "@": "src", "<业务层别名>": "workspace" },
-  "conventions": { "component": "<script setup lang=\"ts\">", "form": "reactive()" },
-  "modules": ["workspace/api/", "workspace/views/", "workspace/components/"]
+  "conventions": { "component": "<组件范式>", "form": "reactive()" },
+  "modules": ["<api 目录>/", "<页面目录>/", "<组件目录>/"]
 }
 ```
 
@@ -55,7 +55,7 @@ Planner 产出，Generator 消费。Generator 不搜索知识库——只读这�
   "plan": "PLAN-user-activate.md",
   "generated_by": "project-planner",
   "schemaVersion": "2.0.0",
-  "capabilities": ["VueConvention", "TablePattern", "FormPattern", "ApiPattern"],
+  "capabilities": ["<框架约定>", "TablePattern", "FormPattern", "ApiPattern"],
   "graph_queries": [
     {"type": "component", "name": "<表单字段>"},
     {"type": "api", "name": "order"}
@@ -146,7 +146,7 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
   "timing": { "startedAt": "...", "finishedAt": "...", "durationMs": 125000 },
   "input": {
     "planFile": "...",
-    "capabilitiesUsed": ["VueConvention","TablePattern"],
+    "capabilitiesUsed": ["<框架约定>","TablePattern"],
     "knowledgeFilesRead": 4,
     "contextSizeEstimate": "~45k tokens"
   },

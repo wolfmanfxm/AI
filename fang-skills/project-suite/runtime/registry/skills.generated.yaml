@@ -29,7 +29,7 @@ skills:
     triggers_en: [analyze codebase, scan project, project refresh]
     context_contract:
       must_read: []
-      should_read: []
+      query: []
       neednt_read: []
     interface:
       inputs:
@@ -45,16 +45,7 @@ skills:
         - { condition: 子agent超时或返回空, severity: DEGRADED, recovery: 重试一次,仍失败标注FAILED并主流程补写 }
         - { condition: Knowledge Vault路径不可达, severity: DEGRADED, recovery: 跳过Vault同步,标注⚠️ }
         - { condition: 无package.json, severity: BLOCKER, recovery: AskUserQuestion手动指定框架 }
-      quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, execution, delivery, validation]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: false, retry: 1, parallel: true }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-planner:
     version: "1.3.0"
     mode: Production
@@ -75,8 +66,8 @@ skills:
     triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量, 分解任务, sprint 规划, 任务规划]
     triggers_en: [break down tasks, plan sprint, estimate effort, create dev plan]
     context_contract:
-      must_read: [knowledge-index.json, context.json]
-      should_read: [architecture/overview.md, components/catalog.md]
+      must_read: [context.json]
+      query: [architecture, components]
       neednt_read: [observations/, reports/]
     interface:
       inputs:
@@ -90,17 +81,7 @@ skills:
       failure_modes:
         - { condition: 需求信息完全缺失, severity: BLOCKER, recovery: 拒绝执行,提示补充需求 }
         - { condition: 上游analyzer confidence<70, severity: DEGRADED, recovery: 标注"⚠️上游低置信度",继续但降级 }
-      quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, code-audit, execution, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        code-audit: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-architect:
     version: "1.3.0"
     mode: Production
@@ -121,8 +102,8 @@ skills:
     triggers_cn: [架构设计, 技术选型, 模块设计, 系统设计, 数据库设计, API 设计, 架构评审, 怎么设计, 选什么技术, 模块怎么划分, 接口怎么定义]
     triggers_en: [design architecture, tech stack, system design, API design]
     context_contract:
-      must_read: [context.json, graph.json, PLAN.md]
-      should_read: [architecture/overview.md, components/catalog.md, api/overview.md]
+      must_read: [context.json, PLAN.md]
+      query: [architecture, components, api]
       neednt_read: [observations/, reports/]
     interface:
       inputs:
@@ -135,24 +116,13 @@ skills:
       failure_modes:
         - { condition: 设计范围完全未指定, severity: BLOCKER, recovery: 提示先执行/project-planner }
         - { condition: 对比矩阵分差<10%无明确最优, severity: WARNING, recovery: AskUserQuestion让用户选择 }
-      quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        code-audit: { checkpoint: false, retry: 0 }
-        graph-analysis: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-generator:
     version: "1.3.0"
     mode: Production
     owner: project-suite
     category: creation
-    description: "按项目规范生成生产级代码，Candidate→Verify"
+    description: "按项目规范生成生产级代码，Execute→Verify"
     capabilities: [code-generation, pattern-matching, query-api]
     complexity: {min: low, max: high}
     cost: high
@@ -167,8 +137,8 @@ skills:
     triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
     triggers_en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]
     context_contract:
-      must_read: [context-package.json, PLAN.md, context.json]
-      should_read: [ARCHITECTURE.md, graph.json]
+      must_read: [context-package.json, PLAN.md, context.json, ARCHITECTURE.md]
+      query: []
       neednt_read: [observations/, reports/]
     interface:
       inputs:
@@ -182,15 +152,7 @@ skills:
       failure_modes:
         - { condition: context-package.json缺失且PLAN.md缺失, severity: BLOCKER, recovery: 提示先执行planner }
         - { condition: graph.json显示组件已存在, severity: WARNING, recovery: "标记[REUSE],跳过生成" }
-      quality_gate: { min_confidence_for_pass: 95, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, execution, validation]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
   project-tester:
     version: "1.3.0"
     mode: Production
@@ -212,7 +174,7 @@ skills:
     triggers_en: [write tests, test cases, unit test, test coverage, add test, generate test]
     context_contract:
       must_read: [context.json, PLAN.md]
-      should_read: [patterns/vue.md, patterns/typescript.md]
+      query: [patterns]
       neednt_read: [observations/, reports/]
     interface:
       inputs:
@@ -226,15 +188,7 @@ skills:
         - { condition: 检测不到测试框架, severity: DEGRADED, recovery: 默认jest风格,标注⚠️ }
         - { condition: 被测代码不可读或不存在, severity: BLOCKER, recovery: 拒绝执行 }
         - { condition: 断言失败(发现潜在bug), severity: WARNING, recovery: "不修改源码,记录[潜在Bug]到报告" }
-      quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, execution, validation]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: medium, expected_confidence_delta: 15, output_file_count_tolerance: "20%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: false, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
   project-reviewer:
     version: "1.3.0"
     mode: Production
@@ -255,8 +209,8 @@ skills:
     triggers_cn: [代码审查, review, 检查代码, 审查 PR, 代码质量, 审查, 帮我看看这段代码, 这个 PR 怎么样]
     triggers_en: [code review, security review, audit code]
     context_contract:
-      must_read: [context.json, PLAN.md, knowledge-index.json]
-      should_read: [ARCHITECTURE.md, graph.json]
+      must_read: [context.json, PLAN.md, ARCHITECTURE.md]
+      query: []
       neednt_read: [observations/]
     interface:
       inputs:
@@ -270,16 +224,7 @@ skills:
       failure_modes:
         - { condition: 变更文件>20且无法全审, severity: DEGRADED, recovery: 只审核心文件,其余标注"⚠️未审查" }
         - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
-      quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: none, safe_to_retry: true, retry_max: 2 }
       stages: [discovery, execution, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 2 }
-      reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 0 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-documenter:
     version: "1.3.0"
     mode: Production
@@ -300,8 +245,8 @@ skills:
     triggers_cn: [生成文档, 写文档, 补文档, API 文档, README, 更新文档, 补全文档, 组件文档]
     triggers_en: [generate docs, write documentation, update README, api docs]
     context_contract:
-      must_read: [context.json, api/overview.md]
-      should_read: [architecture/]
+      must_read: [context.json]
+      query: [api, architecture]
       neednt_read: [observations/]
     interface:
       inputs:
@@ -313,16 +258,7 @@ skills:
       failure_modes:
         - { condition: 源文件不可读或不存在, severity: BLOCKER, recovery: 拒绝执行 }
         - { condition: JSDoc注释缺失或不完整, severity: DEGRADED, recovery: "从类型推断,标注[推断]" }
-      quality_gate: { min_confidence_for_pass: 80, requires_review_below: 60, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, execution, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: high, expected_confidence_delta: 10, output_file_count_tolerance: "10%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-refactorer:
     version: "1.3.0"
     mode: Production
@@ -344,7 +280,7 @@ skills:
     triggers_en: [refactor, clean up, extract method, simplify, reduce complexity, migrate]
     context_contract:
       must_read: [context.json]
-      should_read: [patterns/vue.md, patterns/typescript.md, components/catalog.md]
+      query: [patterns, components]
       neednt_read: [observations/, reports/]
     interface:
       inputs:
@@ -356,17 +292,8 @@ skills:
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
       failure_modes:
         - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
-        - { condition: 重构后测试变红, severity: BLOCKER, recovery: git revert,记录REFACTOR.md失败原因 }
-      quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: git_revert, safe_to_retry: true, retry_max: 1 }
+        - { condition: 重构后测试变红, severity: BLOCKER, recovery: Edit 反向回滚,记录REFACTOR.md失败原因 }
       stages: [discovery, execution, validation, delivery]
-      recovery: { method: git_revert, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: low, expected_confidence_delta: 15, output_file_count_tolerance: "30%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   project-releaser:
     version: "1.3.0"
     mode: Production
@@ -388,7 +315,7 @@ skills:
     triggers_en: [release, ship, deploy, version bump, publish]
     context_contract:
       must_read: [state.json]
-      should_read: []
+      query: []
       neednt_read: []
     interface:
       inputs:
@@ -403,16 +330,7 @@ skills:
       failure_modes:
         - { condition: 全链路confidence<40, severity: BLOCKER, recovery: 拒绝生成发布产物 }
         - { condition: breaking change无迁移说明, severity: BLOCKER, recovery: 生成迁移步骤,AskUserQuestion确认 }
-      quality_gate: { min_confidence_for_pass: 90, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, execution, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      reliability: { structural_stability: high, expected_confidence_delta: 5, output_file_count_tolerance: "5%" }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        execution: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
   pipeline-orchestrator:
     version: "1.0.0"
     mode: Production
@@ -433,8 +351,8 @@ skills:
     triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
     triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
     context_contract:
-      must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml]
-      should_read: [state.json]
+      must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml, state.json]
+      query: []
       neednt_read: []
     interface:
       inputs:
@@ -450,13 +368,4 @@ skills:
         - { condition: 下游 Skill 不存在或未安装, severity: BLOCKER, recovery: 提示安装缺失的 Skill }
         - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
         - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
-      quality_gate: { min_confidence_for_pass: 85, requires_review_below: 70, blocks_downstream_below: 40 }
-      rollback: { method: manifest_resume, safe_to_retry: true, retry_max: 1 }
       stages: [discovery, orchestrate, validation, delivery]
-      recovery: { method: manifest_resume, checkpoint_file: manifest.json, safe_to_retry: true, retry_max: 1 }
-      stage_config:
-        discovery: { checkpoint: true, retry: 0 }
-        orchestrate: { checkpoint: true, retry: 1 }
-        validation: { checkpoint: false, retry: 0, blocking: true }
-        delivery: { checkpoint: false, retry: 1 }
-      reliability: { structural_stability: medium, expected_confidence_delta: 10, output_file_count_tolerance: "15%" }

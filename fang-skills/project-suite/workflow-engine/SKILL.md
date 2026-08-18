@@ -64,7 +64,7 @@ for each stage in interface.stages:
   ENTRY → LOAD(template+prompt) → EXECUTE(Actions) → EXIT(check) → ADVANCE
 ```
 
-Skill 通过 `interface.stage_config` 控制每个 stage 的行为（checkpoint/retry/parallel/blocking/auto_advance）。默认值即可覆盖 90% 场景。
+Skill 通过 `runtime/config/skill-policy.yaml` 的 `stage_config` 控制每个 stage 的行为（checkpoint/retry/parallel/blocking/auto_advance）。默认值即可覆盖 90% 场景。
 
 ## 三大能力
 

@@ -44,7 +44,7 @@ description: >
 
 ## 职责边界
 
-→ [references/boundary.md](references/boundary.md)
+→ [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 修复方案。
 
 > 完成后：/project-generator（修复） 或 /project-documenter 或 /project-releaser。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。

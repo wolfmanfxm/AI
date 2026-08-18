@@ -28,3 +28,13 @@ tests:
       朴素 Agent 重跑全部 10 个 Extractor 做全量扫描，浪费大量 token，产出与已有知识重复。
     skill_mechanism: 「何时触发（知识缺口入口）」——知识库新鲜且覆盖当前任务时跳过 Analyzer
     assertion: 不重跑全量；知识库新鲜时直接路由到 Knowledge Resolver → Reuse。
+
+  - id: P4
+    name: 增量分析而非全量重扫
+    scenario: >
+      项目已有新鲜知识库（graph.json + patterns/ 已覆盖大部分领域），只缺一个新业务模块。
+      用户说「补充分析这个新模块」。
+    naive_failure: >
+      朴素 Agent 重跑全部 10 个 Extractor 做全量扫描，浪费大量 token，且可能覆盖/扰动已有知识。
+    skill_mechanism: 「增量分析（Incremental Analysis）」——知识库存在但某领域缺失时，只跑该领域相关 Extractor，局部更新 graph.json + 对应 .md
+    assertion: 只运行缺失领域相关的 Extractor，局部更新 graph.json + 对应 .md，不重跑全部 10 个 Extractor。

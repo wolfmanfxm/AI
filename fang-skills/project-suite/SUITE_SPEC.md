@@ -3,7 +3,7 @@
 > Project Suite 的正式 Framework 规范。v1.1 新增：Stage Template Injection、interface 统一、Governed 就绪。
 > v1.0 → v1.1 关键变化：
 > - G1 行数限制宽松至 130（为 workflow-engine 留空间）
-> - 新增 G13-G16：stage prompts、@engine 声明、interface.rollback、Skill Atlas
+> - 新增 G13-G16：stage prompts、@engine 声明、skill-policy.yaml rollback、Skill Atlas
 > - 新增第 8 节：Governed Package Boundary
 > - 反例计数规则更新：SKILL.md 内嵌表计入 G3
 
@@ -43,7 +43,7 @@ skills/<skill-name>/
 ├── references/           🔴 REQUIRED    详细指引（至少 2 个）
 │   ├── boundary.md       🔴 REQUIRED    职责边界 + 反例黑名单（≥3 条）
 │   ├── trigger-words.md  🟡 IMPORTANT  触发词列表
-│   └── ...               🟢 OPTIONAL    code-audit / failure-handling / self-check 等
+│   └── ...               🟢 OPTIONAL    code-audit / self-check 等
 └── (无其他目录)           🔴 REQUIRED   禁止 scripts/ assets/ 等非标准目录
 ```
 
@@ -79,7 +79,7 @@ description: >              # 做什么 + 何时用 + 触发词 + 产出，≤10
 | `## 职责边界` | 引用 `[references/boundary.md]` + 一行 🔴 警示 |
 | `## 前置条件` | 优先级表：0=context.json, 1..N=其他 |
 | `## 工作流` | Discover → Execute → Output 三段式 |
-| `## 完成后下一步` | 下游 skill 路由建议 |
+| `> 完成后：` | 下游 skill 路由建议 |
 | `## 引用索引` | 表格：资源名 + 路径 |
 
 ### 2.3 CHECKPOINT（🔴 REQUIRED）
@@ -204,14 +204,14 @@ RefactoredCode | Documentation | Release | PipelineExecution
 | G5 | 职责边界表 ≥3 行 ✅/❌ | 🔴 | 搜索 `✅ 本阶段职责` |
 | G6 | frontmatter 含 `description` + 触发词 + 产出 | 🔴 | YAML 解析 |
 | G7 | capabilities.yaml 中已注册 | 🟡 | grep skill id |
-| G8 | `完成后下一步` 章节存在 | 🟡 | 搜索 |
-| G9 | failure-handling.md 存在 | 🟡 | 文件存在检查 |
+| G8 | `完成后` next-step hint 存在 | 🟡 | 搜索 |
+| G9 | boundary.md 含失败兜底 | 🟡 | 搜索 |
 | G10 | 无 runtime-specific 措辞 | 🟡 | grep `在 Claude Code` |
 | G11 | prompts/ 至少 1 个文件 | 🟢 | `ls` |
 | G12 | references/ 至少 2 个文件 | 🟢 | `ls` |
 | **G13** | **每个 `stages:` 声明有对应 `prompts/<stage>.md`** | 🔴 | 对比 skill.yaml stages 与 prompts/ 文件 |
 | **G14** | **每个 stage prompt 含 `@engine:` 声明** | 🔴 | 搜索 `@engine:` |
-| **G15** | **`interface.rollback` 存在** | 🔴 | grep `rollback:` |
+| **G15** | **`skill-policy.yaml` 含 rollback** | 🔴 | grep `rollback:` skill-policy.yaml |
 | **G16** | **Skill Atlas 条目完整** | 🟡 | 检查 `docs/skill-atlas.md` 含该 Skill |
 | **G17** | **last_reviewed 在 review_cadence_days 内** | 🟡 | 对比当前日期与 skill.yaml `last_reviewed` |
 
@@ -260,7 +260,7 @@ trigger_eval()
 | `review cadence` | 每个 SUITE_SPEC 版本 bump 时审查 |
 | `input_files` (file-backed fixture) | skill.yaml `interface.inputs` |
 | `output contract` | skill.yaml `interface.outputs` |
-| `rollback boundary` | skill.yaml `interface.rollback` |
+| `rollback boundary` | `runtime/config/skill-policy.yaml` 的 rollback |
 | `trust report` | `reports/trust-report.md` |
 | `output_quality_scorecard` | `reports/output-quality-scorecard.md` |
 
