@@ -9,6 +9,7 @@ Skill 获取数据分两类，边界清晰，避免 "Skill A → query, Skill B 
 | 类别 | 访问方式 | 例子 |
 |------|---------|------|
 | **Knowledge**（项目知识/长期积累） | **必须走 Query API** | pattern / convention / decision / instinct / component / glossary |
+| **Knowledge Object**（知识索引/图谱/上下文） | **必须走 Query API**（是 Knowledge 的机器索引，不是普通 Artifact） | `context.json` / `graph.json` / `knowledge-index.json` |
 | **Task Artifact**（任务产物/一次性） | **直接读文件** | PLAN.md / ARCHITECTURE.md / 目标源码 / REVIEW.md |
 
 ```

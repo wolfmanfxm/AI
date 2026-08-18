@@ -45,7 +45,7 @@ Wave 8: releaser ───────── (依赖 documenter)
 Scheduler 自动检测：若 skill_B 和 skill_C 的所有 consumes 均已被前序 Wave 满足，且 B 不依赖 C、C 不依赖 B，则放入同一 Wave。
 
 ```
-并行条件 = (B.depends_on 不含 C) && (C.depends_on 不含 B)
+并行条件 = (B.consumes ∩ C.produces == ∅) && (C.consumes ∩ B.produces == ∅)   # 无能力依赖
          && (B.consumes 全部覆盖) && (C.consumes 全部覆盖)
 ```
 

@@ -20,6 +20,7 @@ description: >
 2. **AC 对照** — 逐条验证 `PLAN.md > # Acceptance Criteria`
 3. **可操作** — 每个问题附带具体修复建议
 4. **分级明确** — 🔴BLOCKER → 🟠HIGH → 🟡MEDIUM → 🟢LOW → 🔵PRAISE
+5. **放置正确** — 对照 Plan target 决议与实际改动路径，落错目录 = BLOCKER（Reuse 正确 ≠ 放置正确）
 
 ## 前置条件
 

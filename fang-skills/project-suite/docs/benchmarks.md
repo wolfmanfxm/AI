@@ -41,9 +41,8 @@ expected:
 input:
   fixture: [context-package.json, PLAN.md]
 expected:
-  files:                           # 至少 1 个 .vue/.ts 文件
-    - "*.vue"                      # min: 100 bytes, valid Vue SFC
-    - "*.ts"                       # min: 50 bytes, no `any` without comment
+  files:                           # 至少 1 个源码文件（扩展名按项目技术栈，不预设框架）
+    - "*.{ts,js,vue,tsx,jsx}"      # min: 50 bytes, 符合 detected project language/framework
   confidence: 65-95
   stages_completed: [discovery, execution, validation]
   no_duplicate_components: true    # 未重复生成已有组件
@@ -127,7 +126,7 @@ expected:
   behavior_unchanged: true         # 重构前后测试全绿
   metric_improved: true            # 至少一项指标改善 >10%
   files_changed: 1-5               # 单次重构范围
-  atomic_commits: true             # 每个重构动作独立 commit
+  rollback_method: edit_patch      # 回滚用 Edit 反向 patch（安全策略禁 Skill 用 git commit）
   confidence: 70-90
 ```
 

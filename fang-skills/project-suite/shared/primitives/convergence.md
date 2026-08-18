@@ -41,12 +41,35 @@ convergence:
 | **execute** | 还有可执行的一步（本 Skill 内再推进） |
 | **investigate** | 需要查明一个未知点（追问/查证），而非继续盲做 |
 
+## Pipeline 行为规则（让收敛改变执行，而非只做报告）
+
+> 不做 Engine，只加三条声明规则。Runtime 是 Protocol，靠 agent 遵守（见 roadmap「Designed/Enforced」）：
+
+| 收敛结果 | Pipeline 行为 |
+|---------|--------------|
+| `sufficient` + `stop` | 当前 Skill 完成，**不再重复当前 Skill**（即使下游发现小问题，也由下游修，不回本 Skill 重跑） |
+| `blocked` | **不允许自动进入下游**——缺关键输入时，下游启动需先补齐 blocker，不猜 |
+| `insufficient` | 只补缺失证据（一轮），补完即走；不因「还可以更好」无限循环 |
+
+**规则**：Convergence 决定「够不够继续」，Confidence Gate 决定「够不够交付」。两者分开记，不混用（见下「与 Confidence 的关系」）。
+
 ## 与 Confidence 的关系
 
-Confidence 是「产出可靠度」（0-100），Convergence 是「是否该停」（三态）。两者正交：
+Confidence 是「产出可靠度」（0-100），Convergence 是「是否该停」（三态）。两者正交，分工明确：
+
+- **Convergence 决定「够不够继续」**，**Confidence Gate 决定「够不够交付」**——分开记，不混用。
+
+按 Skill 类型区分「低 confidence 能否 sufficient」：
+
+| Skill 类型 | 低 confidence + sufficient 的后果 | 规则 |
+|-----------|--------------------------------|------|
+| Knowledge / Planning（analyzer / planner / architect） | 产出是「建议」，下游可裁决 | 可 sufficient，但标注假设 |
+| Code / Test / Release（generator / tester / reviewer / releaser / refactorer / documenter） | 产出是「交付物」，错了影响下游或生产 | confidence 低于 gate 阈值 → **不能 sufficient**，必须 execute 补到阈值 |
+
+统一表述：
 
 - confidence 高 + convergence sufficient → 直接交付
-- confidence 低 + convergence sufficient → 交付但标注假设（用户裁决）
+- confidence 低 + convergence sufficient → 仅 Knowledge/Planning 类可（标注假设）；Code/Test/Release 类改为 insufficient → execute
 - convergence insufficient / blocked → 无论 confidence 多高，都不该假装完成
 
 ## 各 Skill 的收敛判据

@@ -156,3 +156,41 @@ suite 读源码后全对：覆盖 NaN、分单位、thousand 字符串三个易�
 - tester P3 naive 误写主项目 `parseAmount.test.ts`（naive prompt 漏目标路径）
 
 均确认是 git 未跟踪新文件，已删除，主项目工作树干净。教训：**所有 benchmark agent prompt 必须显式给出目标项目路径**，否则 agent 会自己找项目落盘。
+
+---
+
+## V7 Placement Correctness 验证（追加，第四部分）
+
+> 验证 reviewer 新增的 V7「放置正确」检查项（核心原则第 5 条）是否真正生效。
+
+### 结论：V7 的 RED 假设不成立，但真实价值是「纪律性强制」而非「能力增强」
+
+**两轮测试对比**：
+
+| 轮次 | naive prompt | naive 结果 |
+|------|-------------|-----------|
+| 第 1 轮（有落点线索） | 明确告诉「PLAN 说放 customerManage 但实际放 baseData」 | 报了（被诱导） |
+| 第 2 轮（无落点线索） | 只给 diff + 模糊描述 | **仍主动读 PLAN 报了**（11 次 tool_use） |
+
+**第 2 轮关键发现**：即使不给落点线索，naive 也会主动读 `.project-knowledge/proposals/PLAN-*.md` 并对照发现落点错位（报为 BLOCKER）。这说明「对照 PLAN 发现落点矛盾」是 LLM 通用能力，不是 skill 特有纪律。
+
+### V7 的真实价值定位
+
+V7 是「判断型」规则，其价值不在「发现矛盾」（LLM 给了上下文就会），而在：
+
+1. **把「对照 target」从隐性 best-practice 变成显性强制项**——SKILL.md 核心原则第 5 条 + verifier V7 强制 reviewer **每次都**对照 target，降低漏报概率
+2. **交叉检查维度**——suite 的 V7 会触发 V6 Domain Drift 联动（落点错位往往伴随命名 drift），这是 naive 没有的联动
+
+### 但要诚实：这个价值「单次测不出」
+
+「纪律性强制 vs 靠运气」的区别，需要**统计性验证**（多次跑看 naive 漏报率 vs suite 漏报率），单次测试测不出。单次测试只能证明「两者都能发现」，不能证明「suite 更少漏报」。
+
+### 与 round1 核心结论的呼应
+
+这个发现再次印证 round1 就确立的结论：**suite 价值 = 过程质量，非结果**。suite 和 naive 都能完成审查、都能发现错位，但 suite 的过程更结构化（V7 + V6 联动、BLOCKER 分级、PRAISE）、更可追溯（引用 verifier.md 行号）、漏报率更低（有强制检查项）。
+
+### 方法论教训（补充到 pressure test 设计）
+
+「对照 PLAN target」这类**「发现矛盾」**的检查，不适合作为 pressure test 的 RED 假设——因为 LLM 通用能力覆盖。真正能测出 suite 价值的，是**「漏报率」的统计差异**，而非「单次是否发现」。
+
+这比 round7 第三部分「额外动作型 vs 判断型」更进一层：**判断型规则里，还要区分「发现矛盾」（RED 弱，LLM 通用）和「强制每次对照」（RED 统计上成立，需多次测）**。

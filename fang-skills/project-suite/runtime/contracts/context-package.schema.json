@@ -37,7 +37,7 @@
 
         "artifacts": {
           "type": "array",
-          "description": "Upstream artifacts (PLAN/ARCHITECTURE) with relevant sections noted",
+          "description": "Upstream Task Artifacts (PLAN/ARCHITECTURE/REVIEW) with relevant sections noted. NOTE: Knowledge Objects (context.json / graph.json / knowledge-index.json) are NOT here — they go through Knowledge Query, not as raw artifacts.",
           "items": { "$ref": "#/$defs/artifactRef" }
         },
 

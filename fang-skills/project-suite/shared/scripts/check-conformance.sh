@@ -303,6 +303,24 @@ fi
 
 echo ""
 
+# ── 声明链一致性检查（skill.yaml → skill-ir → registry → compatibility → benchmarks）──
+# 任何一层不一致 → 报错。实际行为层（L5）排除，需 benchmark 手动验证。
+echo "========================================"
+echo " 声明链一致性（check-consistency.sh）"
+echo "========================================"
+if [ -f "$SUITE_ROOT/shared/scripts/check-consistency.sh" ]; then
+  if bash "$SUITE_ROOT/shared/scripts/check-consistency.sh"; then
+    green "  ✅ 声明链一致性通过"
+  else
+    red "  ❌ 声明链不一致（skill.yaml/skill-ir/registry/compatibility/benchmarks 某层漂移）"
+    ERRORS=$((ERRORS+1))
+  fi
+else
+  yellow "  ⚠️  check-consistency.sh 缺失，跳过一致性检查"
+fi
+
+echo ""
+
 echo "========================================"
 echo " Summary"
 echo "========================================"

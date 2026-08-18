@@ -10,7 +10,7 @@
 |------|------|------|
 | triggers_cn / triggers_en | `skill.yaml` | 触发词 |
 | produces / consumes | `skills.generated.yaml`（从 `skill.yaml` 派生） | 能力注册 |
-| depends_on / parallel_with | `skill.yaml` | 依赖和并行关系 |
+| 依赖关系 | produces/consumes 推导的 Capability DAG | 能力依赖（非强制执行顺序） |
 
 > 单一源：所有 per-skill 字段以 `skills/*/skill.yaml` 为准，经 `generate-registry.mjs` 生成 `skills.generated.yaml`。手动改 registry 会漂移。
 
