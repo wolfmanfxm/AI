@@ -246,7 +246,7 @@ trigger_eval()
 
 ---
 
-## 8. Governed Package Boundary (v1.1)
+## 8. Governed Package Boundary
 
 > yao-meta-skill Governed 模式要求。所有 Production 模式 Skill 建议满足，Governed 模式 Skill 必须满足。
 

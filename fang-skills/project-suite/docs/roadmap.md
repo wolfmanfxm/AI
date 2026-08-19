@@ -1,6 +1,6 @@
 # Roadmap
 
-> project-suite 演进路线图。当前 Suite v1.1 Spec / Release v1.0。project-suite 是 Protocol 非 Engine（Suite 定义协议，Host 负责执行/强制，见下状态模型）。
+> project-suite 演进路线图。当前 Suite v1.0 Spec / Release v1.0（frozen）。project-suite 是 Protocol 非 Engine（Suite 定义协议，Host 负责执行/强制，见下状态模型）。
 
 ## 定位
 
@@ -35,12 +35,12 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 
 ## 版本
 
-> **Suite v1.1 Spec / Release v1.0**。版本号只此一处，其余不重复声明。
+> **Suite v1.0 Spec / Release v1.0（frozen）**。版本号只此一处，其余不重复声明。后续演进从 release 1.0 后做版本更新。
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
-| **Spec v1.1** | 2026-08 | 当前规范版本（SUITE_SPEC.md）。新增 Stage Template Injection、interface 统一、Governed-ready |
-| **Release v1.0** | 2026-08 | 当前发布版本（suite-manifest.yaml）。Knowledge Consumption 闭环 + Protocol 定位修正（Protocol 非 Engine） |
+| **Spec v1.0** | 2026-08 | 当前规范版本（SUITE_SPEC.md），frozen |
+| **Release v1.0** | 2026-08 | 当前发布版本（suite-manifest.yaml），frozen。Knowledge Consumption 闭环 + Protocol 定位修正 |
 
 ### 历史版本（归档）
 

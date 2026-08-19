@@ -1,4 +1,4 @@
-# Suite Manifest v1.1
+# Suite Manifest v1.0
 #
 # project-suite 统一治理清单（仅身份 + 版本 + 治理 + 引擎）。
 #
@@ -13,7 +13,7 @@
 suite:
   name: project-suite
   version: "1.0.0"
-  spec_version: "1.1.0"
+  spec_version: "1.0.0"
 
 governance:
   owner: project-suite
