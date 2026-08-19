@@ -84,7 +84,7 @@ User Input ──→ architect ──→ Architecture (ADR)
 | G8: 完成后 next-step | ✅ | 10/10 |
 | G9: boundary.md 失败兜底 | ✅ | 10/10 |
 | G10: Stage prompts | ✅ | 37 个文件 |
-| G11: @template 声明 | ✅ | 每 stage prompt 含 @engine |
+| G11: @template 声明 | ✅ | 每 stage prompt 含 @template |
 | G12: skill-policy.yaml rollback | ✅ | 10/10 |
 
 ## Governed Readiness
