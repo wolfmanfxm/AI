@@ -6,7 +6,6 @@ description: "生成和执行测试：单元测试、组件测试、集成测试
 boundary: "只写测试不修被测代码，测试失败记录报告不修改源码"
 produces: [Test]
 consumes: [Code,Plan,KnowledgeBase,Context]
-depends_on: []
 stages: [discovery, execution, validation]
 verification: { checks: 4, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

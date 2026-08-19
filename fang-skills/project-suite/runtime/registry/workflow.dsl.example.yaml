@@ -1,10 +1,10 @@
 # Workflow DSL Example — project-analyzer
 #
-# Engine 读取此 DSL → 按序执行 stages → 检查 entry/exit → 推进
+# Host 读取此 DSL → 按序执行 stages → 检查 entry/exit → 推进
 # 此文件可由 skill.yaml interface.stages 自动生成，也可手写。
 #
-# Usage: workflow-engine SKILL.md 包含 DSL 解释指令
-#        Engine reads skill.yaml → generates workflow.dsl.yaml → executes
+# Usage: workflow-protocol SKILL.md 包含 DSL 解释指令
+#        Host reads skill.yaml → generates workflow.dsl.yaml → executes
 
 version: "1.0.0"
 skill: project-analyzer

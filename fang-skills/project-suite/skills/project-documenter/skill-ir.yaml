@@ -6,7 +6,6 @@ description: "生成和维护项目文档：API 文档（从代码注释提取�
 boundary: "只生成文档不改代码，API/组件文档同步 Vault 其他留在本地"
 produces: [Documentation]
 consumes: [Code,Review,KnowledgeBase,Context]
-depends_on: []
 stages: [discovery, execution, validation, delivery]
 verification: { checks: 4, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

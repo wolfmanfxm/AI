@@ -1,6 +1,6 @@
 # Stage Template: Code Audit
 
-> Engine 拥有。现状探查 — Skill 通过 `@engine: code-audit` 引用。
+> Suite 拥有（Protocol）。现状探查 — Skill 通过 `@template: code-audit` 引用。
 
 ## Standard Contract
 
@@ -27,7 +27,7 @@
 
 ```markdown
 ### Stage: Code Audit
-@engine: code-audit
+@template: code-audit
 
 | Actions  | 标注 `[新][有骨架][基本完成][已完成]`，修正估时 |
 | Exit     | 用户确认现状标注 + 修正后估时 |

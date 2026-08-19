@@ -11,7 +11,7 @@ description: >
 # Project Planning Engine
 
 > 模糊需求 → Pipeline 收敛 → 9 模块执行契约 → 全 Suite 可消费
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -32,13 +32,13 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Interview | [prompts/interview.md](prompts/interview.md) | 需求模糊时启用 |
-| Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @engine: code-audit |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
-| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
+| Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @template: code-audit |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 > 9-Step Pipeline（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→AC）与深度（standard=Goal/Scope/Reuse/Tasks/AC，full=9 模块+Interview+Verify）详见 [task-breakdown.md](prompts/task-breakdown.md)。
 
@@ -47,4 +47,4 @@ description: >
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 Planning Engine 只产出执行契约。不架构设计、不写代码。
 
-> 完成后：/project-architect 或 /project-generator。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-architect 或 /project-generator。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

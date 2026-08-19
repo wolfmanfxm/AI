@@ -14,7 +14,7 @@ description: >
 # Generator
 
 > 需求 + 项目知识 → 生产级代码
-> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -36,10 +36,10 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
 
 > 深度（`depth_profiles`，见 skill.yaml）：**minimal**=跳过 Validation（Discovery → Execution → Verify）；**standard/full**=4 段全走。单文件小改的独立复验是浪费。
 
@@ -48,4 +48,4 @@ description: >
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 generator 只写代码。缺少上游产物 → 提示先执行 planner/architect。
 
-> 完成后：/project-reviewer 或 /project-tester。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-reviewer 或 /project-tester。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

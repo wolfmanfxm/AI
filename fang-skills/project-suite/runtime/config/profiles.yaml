@@ -6,7 +6,7 @@
 version: "1.0.0"
 
 # ⚠️ 语义澄清：auto_advance 是"引擎能力"，不是"默认行为"
-#   capability: auto_advance 被 Pipeline Engine 支持
+#   capability: auto_advance 被 Pipeline Host 支持
 #   profile:    auto_advance 由每个 profile 决定默认值
 #   → foreground profiles (minimal/standard/full) 默认 false（在 Decision Boundary 暂停确认，而非每步都停）
 #   → background profile 默认 true（自动任务，无人值守）

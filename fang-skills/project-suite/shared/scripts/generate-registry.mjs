@@ -199,7 +199,7 @@ capability_types:
   Release:          # CHANGELOG.md + RELEASE-CHECKLIST.md
     description: 发布产物
     format: [.md]
-  PipelineExecution: # pipeline-state.json + pipeline-report.md
+  PipelinePlan: # pipeline-state.json + pipeline-report.md（编排建议，非执行）
     description: Pipeline 执行记录 + 报告
     format: [.json, .md]`;
 
@@ -228,7 +228,7 @@ decision_model:
     question: "怎么执行？"
     input: decision_context + skill_contract
     output: artifacts
-    source: workflow-engine + skill prompts`;
+    source: workflow-protocol + skill prompts`;
 
 // ── 1. skills.generated.yaml ───────────────────────────────────
 function genSkillsGenerated() {

@@ -38,9 +38,15 @@ pipeline:
 
   - step: promotion_review
     tool: "promotion-reviewer"
-    description: 自动评分 personal_candidates → Promote/Keep/Reject
+    description: 自动评分 personal_candidates → 产出 Promote/Keep/Reject 建议（非自动晋升）
     on_failure: warn
-    checkpoint: false  # auto-promote only, manual confirm handled separately
+    checkpoint: true   # personal promotion 需人工确认，Background 只产建议，不 auto-promote
+
+  - step: promotion_confirm
+    tool: "human-confirmation"
+    description: 人工确认 Promotion 建议后才写入 Vault/Knowledge（Personal 是长期资产，治理边界不自动放宽）
+    on_failure: hold
+    checkpoint: true
 
 output:
   file: .project-runtime/background-pipeline-report.md

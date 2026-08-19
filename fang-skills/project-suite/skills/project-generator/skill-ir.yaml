@@ -6,7 +6,6 @@ description: "根据需求和项目规范生成生产级代码：组件、页面
 boundary: "只写代码不做设计，缺少上游产物时提示先执行 planner/architect"
 produces: [Code]
 consumes: [KnowledgeBase,KnowledgeIndex,Plan,Architecture,Context,Graph]
-depends_on: []
 stages: [discovery, execution, validation]
 verification: { checks: 12, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

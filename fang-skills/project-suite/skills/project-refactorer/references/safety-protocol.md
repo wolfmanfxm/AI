@@ -1,7 +1,7 @@
 # Safety Protocol — Refactorer
 
 > 重构安全协议。确保每次重构可验证、可逆、不引入 bug。
-> 回滚用 Edit 反向，不用 git（git 由 [Command Guard](../../../runtime/engine/command-guard.md) 管控）。
+> 回滚用 Edit 反向，不用 git（git 由 [Command Guard](../../../runtime/mechanisms/command-guard.md) 管控）。
 
 ## 安全层 0：基线确认
 

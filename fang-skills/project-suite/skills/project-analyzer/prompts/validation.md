@@ -1,6 +1,6 @@
 # Validation — Analyzer v2.0
 
-> @engine: validation
+> @template: validation
 > v2.0: 新增 Extractor 完整性 + Candidate→Verify 链路 + Evidence Score 检查
 
 ## Checks
@@ -22,7 +22,7 @@
 - Pattern Extractor 的模式名与 Convention Extractor 的命名规范是否一致？
 - Glossary 的术语是否在 API/类型定义中真实出现？
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Output
 

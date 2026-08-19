@@ -45,7 +45,7 @@ description: >
 skill 引用 suite 内其他文件时，使用相对路径：
 
 ```markdown
-[../../runtime/engine/state-machine.md](../../runtime/engine/state-machine.md)
+[../../runtime/mechanisms/state-machine.md](../../runtime/mechanisms/state-machine.md)
 [../../shared/schemas/manifest.schema.json](../../shared/schemas/manifest.schema.json)
 ```
 

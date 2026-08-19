@@ -27,7 +27,7 @@
 
 ## 产出契约
 
-**固定产出** — 每次必定生成：`manifest.json`（含 `knowledgeVersion` + `schemaVersion`）、`statistics.json`、`search-index.json`、`graph.json`、`index.md`。字段定义见 [../../runtime/engine/checkpoint.md](../../runtime/engine/checkpoint.md)。
+**固定产出** — 每次必定生成：`manifest.json`（含 `knowledgeVersion` + `schemaVersion`）、`statistics.json`、`search-index.json`、`graph.json`、`index.md`。字段定义见 [../../../runtime/mechanisms/checkpoint.md](../../../runtime/mechanisms/checkpoint.md)。
 
 **按需产出** — 由 8 个维度并行 agent 按实际代码检测结果动态生成，有内容才建文件。
 

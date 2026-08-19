@@ -46,7 +46,7 @@ capability_types:
   Release:          # CHANGELOG.md + RELEASE-CHECKLIST.md
     description: 发布产物
     format: [.md]
-  PipelineExecution: # pipeline-state.json + pipeline-report.md
+  PipelinePlan: # pipeline-state.json + pipeline-report.md（编排建议，非执行）
     description: Pipeline 执行记录 + 报告
     format: [.json, .md]
 

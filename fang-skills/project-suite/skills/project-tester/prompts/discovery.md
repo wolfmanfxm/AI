@@ -1,6 +1,6 @@
 # Discovery — Tester
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

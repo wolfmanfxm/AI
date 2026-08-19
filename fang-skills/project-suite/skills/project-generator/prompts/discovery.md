@@ -1,6 +1,6 @@
 # Discovery — Generator
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

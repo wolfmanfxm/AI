@@ -1,6 +1,6 @@
 # Runtime Rules — Machine Readable v1.0.0
 #
-# Engine doesn't read prompts. It reads these rules.
+# Host doesn't read prompts. It reads these rules.
 # Defines: when each skill can run, what it needs, what happens on failure.
 
 version: "1.0.0"

@@ -1,7 +1,7 @@
 # Skill Atlas v0.8
 
 > project-suite 全技能地图 — 每个 Skill 的 stage/template/capability/I/O 全景。
-> 由 workflow-engine 解释，供 Dispatcher 和自动化工具消费。
+> 由 workflow-protocol 解释，供 Dispatcher 和自动化工具消费。
 
 ## Atlas
 
@@ -16,7 +16,7 @@
 | 7 | [refactorer](../skills/project-refactorer/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | RefactoredCode | Code, KnowledgeBase, Test, Review | reviewer |
 | 8 | [documenter](../skills/project-documenter/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Documentation | Code, Review, KnowledgeBase | reviewer |
 | 9 | [releaser](../skills/project-releaser/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Release | Documentation, Review, Test | documenter |
-| 10 | [orchestrator](../skills/pipeline-orchestrator/SKILL.md) | discovery, orchestrate, validation, delivery | discovery, execution, validation, delivery | PipelineExecution | KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release | releaser |
+| 10 | [orchestrator](../skills/pipeline-orchestrator/SKILL.md) | discovery, orchestrate, validation, delivery | discovery, execution, validation, delivery | PipelinePlan | KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release | releaser |
 
 ## Stage × Skill Matrix
 
@@ -84,7 +84,7 @@ User Input ──→ architect ──→ Architecture (ADR)
 | G8: 完成后 next-step | ✅ | 10/10 |
 | G9: boundary.md 失败兜底 | ✅ | 10/10 |
 | G10: Stage prompts | ✅ | 37 个文件 |
-| G11: @engine 声明 | ✅ | 每 stage prompt 含 @engine |
+| G11: @template 声明 | ✅ | 每 stage prompt 含 @engine |
 | G12: skill-policy.yaml rollback | ✅ | 10/10 |
 
 ## Governed Readiness

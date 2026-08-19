@@ -1,12 +1,12 @@
 # Execution — Releaser
 
-> @engine: execution
+> @template: execution
 
 ## Actions
 
 ### 0. 全链路 Confidence Gate
 
-→ [confidence-gate](../../../runtime/engine/confidence-gate.md)
+→ [confidence-gate](../../../runtime/mechanisms/confidence-gate.md)
 
 扫描 `state.json` history：
 - 任一上游 confidence <40 → 🔴 BLOCK，拒绝发布

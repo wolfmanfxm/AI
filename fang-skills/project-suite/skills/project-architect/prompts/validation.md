@@ -1,6 +1,6 @@
 # Validation — Architect
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -21,7 +21,7 @@
 2. 遗漏 — 是否有应该考虑的候选方案被忽略
 3. 非功能性需求覆盖 — 安全/性能/可扩展性是否被考虑
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Exit
 

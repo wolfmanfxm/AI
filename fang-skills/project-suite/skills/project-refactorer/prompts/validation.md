@@ -1,6 +1,6 @@
 # Validation — Refactorer
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -20,7 +20,7 @@
 1. 外部行为是否真的没变（对比 API 签名、返回值类型）
 2. 是否有意外的副作用（import 变更、全局状态修改）
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Exit
 

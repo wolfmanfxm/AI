@@ -6,7 +6,6 @@ description: "分析软件项目并生成可复用的项目知识库。v2.0 Mult
 boundary: "只分析项目生成知识文件，不修改源码"
 produces: [KnowledgeBase,KnowledgeIndex,Context,Graph]
 consumes: []
-depends_on: []
 stages: [discovery, execution, delivery, validation]
 verification: { checks: 9, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

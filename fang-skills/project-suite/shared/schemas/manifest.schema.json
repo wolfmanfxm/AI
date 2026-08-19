@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Manifest",
-  "description": "Skill 执行状态文件。所有 skill 通用，由 runtime/engine/checkpoint.md 定义结构。",
+  "description": "Skill 执行状态文件。所有 skill 通用，由 runtime/mechanisms/checkpoint.md 定义结构。",
   "type": "object",
   "required": ["skillVersion", "schemaVersion", "status", "generatedBy", "generatedAt"],
   "properties": {
@@ -16,7 +16,7 @@
     "status": {
       "type": "string",
       "enum": ["idle", "discover", "confirmed", "in_progress", "partial", "interrupted", "completed"],
-      "description": "执行状态，见 runtime/engine/state-machine.md"
+      "description": "执行状态，见 runtime/mechanisms/state-machine.md"
     },
     "generatedBy": {
       "type": "string",

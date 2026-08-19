@@ -1,6 +1,6 @@
 # Delivery — Analyzer
 
-> @engine: delivery
+> @template: delivery
 > v3.0: 双同步策略 — 读取 classification-report.yaml，按 promotion level 同步
 
 ## Actions
@@ -46,7 +46,7 @@ StageCompleted 事件触发 → [background pipeline](../../../runtime/pipeline/
 Knowledge Scan → Decay Check → Graph Refresh → Index Refresh → Promotion Review
 ```
 
-全自动，无需用户干预。`promotion_review` 中 auto_promote 自动执行，promote_candidate 留待人工确认。
+Background 自动完成评分（auto-score/auto-classify/auto-suggest），但 personal promotion 的晋升动作需人工确认（见 [promotion-reviewer.md](promotion-reviewer.md)「人工 Review 边界」）。
 
 ### 6. Write Manifest + State
 

@@ -1,6 +1,6 @@
 # Stage Library v1.0
 #
-# 所有可用 Stage 类型的注册中心。Engine 据此验证 Skill 声明的 stages 是否合法。
+# 所有可用 Stage 类型的注册中心。Host 据此验证 Skill 声明的 stages 是否合法。
 # 每个 stage 定义标准 I/O 契约 + 适用条件。
 
 version: "1.0.0"
@@ -67,7 +67,7 @@ stages:
     template: stage-templates/graph-analysis.md
     used_by: [architect]
 
-# Stage I/O Contracts (Engine 自动验证)
+# Stage I/O Contracts (Host 自动验证)
 contracts:
   discovery:
     consumes: [user_prompt]

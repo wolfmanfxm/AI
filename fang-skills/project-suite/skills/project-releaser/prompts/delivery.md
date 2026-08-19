@@ -1,6 +1,6 @@
 # Delivery — Releaser
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

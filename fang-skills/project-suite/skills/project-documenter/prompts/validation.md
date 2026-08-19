@@ -1,6 +1,6 @@
 # Validation — Documenter
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -21,7 +21,7 @@
 2. 参数/返回值描述与实际类型一致
 3. 示例代码可以运行（至少语法正确）
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Exit
 

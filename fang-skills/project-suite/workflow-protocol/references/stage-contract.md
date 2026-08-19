@@ -1,7 +1,7 @@
 # Stage Contract
 
 > 每个 Stage 的结构化契约格式。**此规范的权威实现是 [stage-templates/](stage-templates/)。**
-> Skill 不直接写 7 字段，而是通过 `@engine: <stage>` 引用模板，只写 Actions/Exit/Failure。
+> Skill 不直接写 7 字段，而是通过 `@template: <stage>` 引用模板，只写 Actions/Exit/Failure。
 
 ## 7 字段 Contract
 

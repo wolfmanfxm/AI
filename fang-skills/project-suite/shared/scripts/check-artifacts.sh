@@ -6,8 +6,15 @@
 # Usage: bash shared/scripts/check-artifacts.sh <project-knowledge-dir>
 # Exit: 0=consistent, 1=warnings, 2=drift detected
 
-set -euo pipefail
+set -uo pipefail
 KNOWLEDGE_DIR="${1:-.project-knowledge}"
+
+# 目录不存在 → SKIP（工具默认前提未满足，不是 drift）
+if [ ! -d "$KNOWLEDGE_DIR" ]; then
+  echo "⚠️ SKIP: $KNOWLEDGE_DIR 不存在（无输入 artifact，非 drift）"
+  exit 0
+fi
+
 REPORT="$KNOWLEDGE_DIR/artifact-consistency-report.md"
 ISSUES=0
 

@@ -6,7 +6,6 @@ description: "架构决策、技术选型、模块设计、API 契约设计。�
 boundary: "只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改"
 produces: [Architecture]
 consumes: [KnowledgeBase,Plan,Context,Graph]
-depends_on: []
 stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
 verification: { checks: 13, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

@@ -1,6 +1,6 @@
 # Validation — Pipeline Orchestrator
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -18,7 +18,7 @@
 2. 是否有跳过的 Skill 影响了后续 Skill 的输入完整性
 3. 整体 confidence 链是否健康
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Exit
 

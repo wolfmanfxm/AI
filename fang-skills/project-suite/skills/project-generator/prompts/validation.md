@@ -1,6 +1,6 @@
 # Validation — Generator
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -22,7 +22,7 @@
 3. 模式是否与项目 conventions 一致
 4. 有无常见的反模式（参见 [references/boundary.md](../references/boundary.md) 反例黑名单）
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Output
 

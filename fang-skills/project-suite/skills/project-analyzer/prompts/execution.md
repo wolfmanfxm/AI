@@ -1,11 +1,11 @@
 # Execution — Analyzer
 
-> @engine: execution
+> @template: execution
 > v2.1: Multi-Extractor + 5-Verify + CHECKPOINT + Pipeline Resume
 
 ## Resume（跨 Session）
 
-启动时检查 `.project-knowledge/.sessions/project-analyzer/state.json` → [session-snapshot](../../../runtime/engine/session-snapshot.md)：
+启动时检查 `.project-knowledge/.sessions/project-analyzer/state.json` → [session-snapshot](../../../runtime/mechanisms/session-snapshot.md)：
 
 1. 存在 + status = paused → 展示已完成 phases + extracted knowledge → 用户选择"继续/重新开始"
 2. 继续 → 从 `current_phase` 开始，跳过已完成

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Skill IR Generator v2.0
 # 从 skill.yaml + SKILL.md 蒸馏出机器可读的 10 字段 IR。
-# 只提取机器真正需要的字段：id / version / mode / description / produces / consumes / depends_on / stages / last_reviewed / boundary
+# 只提取机器真正需要的字段：id / version / mode / description / produces / consumes / stages / last_reviewed / boundary
 
 set -euo pipefail
 SUITE_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -13,7 +13,7 @@ gen() {
   local y="$dir/skill.yaml" m="$dir/SKILL.md"
   [ ! -f "$y" ] && return
 
-  local id version mode produces consumes depends_on stages last_reviewed boundary
+  local id version mode produces consumes stages last_reviewed boundary
 
   # From skill.yaml — simple grep for flat fields
   id=$(grep "^id:" "$y" | sed 's/^id: *//')
@@ -21,7 +21,6 @@ gen() {
   mode=$(grep "^mode:" "$y" | sed 's/^mode: *//')
   produces=$(grep "^produces:" "$y" | sed 's/^produces: *//' | tr -d '[] ')
   consumes=$(grep "^consumes:" "$y" | sed 's/^consumes: *//' | tr -d '[] ')
-  depends_on=$(grep "^depends_on:" "$y" | sed 's/^depends_on: *//' | tr -d '[] ' || true)
   boundary=$(grep "^boundary:" "$y" | sed 's/^boundary: *//')
   last_reviewed=$(grep "last_reviewed:" "$y" | grep -o '"[^"]*"' | tr -d '"')
   stages=$(grep "stages:" "$y" | grep -o '\[.*\]' | tr -d '[]' | sed 's/, */, /g' | sed 's/^ *//;s/ *$//')
@@ -63,7 +62,6 @@ description: "$desc"
 boundary: "$boundary"
 produces: [${produces}]
 consumes: [${consumes}]
-depends_on: [${depends_on}]
 stages: [${stages}]
 verification: { checks: ${verify_checks}, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

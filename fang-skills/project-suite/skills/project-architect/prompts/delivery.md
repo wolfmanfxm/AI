@@ -1,6 +1,6 @@
 # Delivery — Architect
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

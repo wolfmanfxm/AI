@@ -64,7 +64,7 @@ Event Timeline (project-analyzer):
 Knowledge Scan → Decay Check → Graph Refresh → Index Refresh → Promotion Review
 ```
 
-所有步骤自动执行，promotion_review 中 auto_promote (≥9分) 自动提升，promote_candidate (7-8分) 留待人工确认。
+评分/分类/检测步骤自动执行，但 personal promotion 的晋升动作需人工确认（Background 只产建议，不 auto-promote）。见 [background.yaml](../pipeline/background.yaml) 与 [promotion-rules.md](../state/schemas/promotion-rules.md)。
 
 ## 扩展
 

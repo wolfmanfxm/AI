@@ -1,6 +1,6 @@
 # Code Audit — Planner
 
-> @engine: code-audit
+> @template: code-audit
 
 ## Actions
 

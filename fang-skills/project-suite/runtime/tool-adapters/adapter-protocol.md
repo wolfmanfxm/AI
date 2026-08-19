@@ -16,20 +16,20 @@ Skill 在 prompts/ 中使用以下格式声明工具调用：
 @adapter:<domain>.<operation> [args]
 ```
 
-Engine 解析 → 查 adapter-registry.yaml → 找 provider → 执行。
+Host 解析 → 查 adapter-registry.yaml → 找 provider → 执行。
 
 ## 示例
 
 ```
 # Skill prompts/ 中:
 @adapter:filesystem.search "<统一表格>" "src/views/"
-  → Engine: Bash("grep -r '<统一表格>' src/views/")
+  → Host: Bash("grep -r '<统一表格>' src/views/")
 
 @adapter:browser.navigate "http://localhost:3000"
-  → Engine: mcp__playwright__browser_navigate("http://localhost:3000")
+  → Host: mcp__playwright__browser_navigate("http://localhost:3000")
 
 @adapter:git.diff
-  → Engine: Bash("git diff")
+  → Host: Bash("git diff")
 
 # Provider 不可用时自动降级:
 @adapter:filesystem.search → mcp__filesystem 不可用 → fallback: Bash(grep)
@@ -37,7 +37,7 @@ Engine 解析 → 查 adapter-registry.yaml → 找 provider → 执行。
 
 ## Provider 降级
 
-Engine 按 adapter-registry.yaml 的 `providers` 顺序尝试：
+ Host 按 adapter-registry.yaml 的 `providers` 顺序尝试：
 1. primary → 可用则使用
 2. fallback → primary 不可用时降级
 

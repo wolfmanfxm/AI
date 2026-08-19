@@ -1,6 +1,6 @@
 # Execution — Documenter
 
-> @engine: execution
+> @template: execution
 
 ## Actions
 

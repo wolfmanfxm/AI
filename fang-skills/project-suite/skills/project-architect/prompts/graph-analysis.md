@@ -1,6 +1,6 @@
 # Graph Analysis — Architect
 
-> @engine: graph-analysis
+> @template: graph-analysis
 
 ## Actions
 

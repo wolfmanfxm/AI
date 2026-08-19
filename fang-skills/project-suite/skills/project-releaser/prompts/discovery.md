@@ -1,6 +1,6 @@
 # Discovery — Releaser
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

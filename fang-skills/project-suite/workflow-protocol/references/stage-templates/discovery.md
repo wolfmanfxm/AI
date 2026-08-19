@@ -1,6 +1,6 @@
 # Stage Template: Discovery
 
-> Engine 拥有。Skill 通过 `@engine: discovery` 引用，只需提供 Actions/Exit/Failure。
+> Suite 拥有（Protocol）。Skill 通过 `@template: discovery` 引用，只需提供 Actions/Exit/Failure。
 
 ## Standard Contract
 
@@ -29,7 +29,7 @@ Discovery 完成后必须 CHECKPOINT → [checkpoint-pattern](../../../shared/co
 
 ```markdown
 ### Stage: Discovery
-@engine: discovery
+@template: discovery
 
 | Actions  | 1. 探测技术栈、目录结构、Vault 路径 2. AskUserQuestion 确认项目名/深度/范围 3. 写入 analysis-config.json + manifest.json |
 | Exit     | framework identified, package manager identified, scope confirmed, config written |

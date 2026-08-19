@@ -1,6 +1,6 @@
 # Delivery — Reviewer
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

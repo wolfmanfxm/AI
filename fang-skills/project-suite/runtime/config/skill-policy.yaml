@@ -8,9 +8,9 @@
 #   - 本文件只管 rules.yaml 没有的执行策略：rollback / recovery / reliability / stage_config。
 #   - skill.yaml 不再含 confidence_min（该字段已移除，见 ADR-003）。
 #
-# ⚠️ 状态：Declared（已声明，未 Enforced）——runtime 目前是 Protocol 非 Engine，
-#    没有任何代码 read 本文件。本文件定义了「应该怎么执行」，但运行时强制执行需 Engine 接入
-#    （对应 roadmap「Enforced」状态当前为空）。在 Engine 接入前，本文件是「权威声明 + 文档」。
+# ⚠️ 状态：Specified（已声明）——本文件是 Protocol 层的「执行策略声明」，供 Host 参考。
+#    Suite 是 Protocol 不是 Engine：本文件不要求「强制执行」，Host 按 host-capability.md
+#    的能力决定是否 enforce（见 runtime/contracts/host-capability.md）。
 #
 version: "1.0.0"
 

@@ -1,8 +1,9 @@
 # Execution Driver v1.0
 
-> Stage 执行循环 — Engine 驱动阶段推进，不依赖 Claude 自行判断。
+> Stage 执行循环（Protocol）— Suite 定义阶段推进协议，Host 按协议推进。
+> 本文件是「阶段推进协议」，不是执行引擎。强制推进能力取决于 Host 的 `stage_progression` capability（见 [host-capability.md](../../runtime/contracts/host-capability.md)）。
 
-## 核心循环
+## 核心循环（Host 按此协议推进）
 
 ```
 for each stage in skill.yaml interface.stages:
@@ -37,7 +38,7 @@ for each stage in skill.yaml interface.stages:
 
 ## 阶段配置
 
-skill.yaml 中可选 `stage_config`，Engine 据此调整行为：
+skill.yaml 中可选 `stage_config`，Host 据此调整推进行为（这是给 Host 的建议，非强制）：
 
 ```yaml
 # skill.yaml interface 块中新增
@@ -63,11 +64,11 @@ stage_config:
 | `retry` | 0 | exit 不满足时重试次数 |
 | `parallel` | false | 该 stage 内部子任务是否可并行 |
 | `blocking` | false | exit 不满足是否阻断 pipeline |
-| `auto_advance` | false | exit 满足是否自动进入下一 stage（无需 CHECKPOINT） |
+| `auto_advance` | false | 建议 Host：exit 满足是否可跳过 CHECKPOINT 直接进下一 stage |
 
 ## Entry 条件检查
 
-Engine 在进入每个 stage 前检查：
+Host 在进入每个 stage 前按协议检查：
 
 ```
 1. 读取前一个 stage 的 manifest 状态 = <prev_stage>_done
@@ -81,7 +82,7 @@ Engine 在进入每个 stage 前检查：
 
 ## Exit 条件验证
 
-Engine 在 stage 执行完成后验证：
+Host 在 stage 执行完成后按协议验证：
 
 ```
 1. 读取 prompts/<stage>.md 中的 Exit 章节
@@ -95,7 +96,7 @@ Engine 在 stage 执行完成后验证：
 
 ## 失败处理
 
-执行期间 failure 按 `runtime/engine/error-recovery.md` 分级处理：
+执行期间 failure 按 `runtime/mechanisms/error-recovery.md` 分级处理：
 
 | 级别 | 行为 |
 |------|------|
@@ -115,13 +116,13 @@ EXECUTE  → StageStarted
            → CheckpointReached (CHECKPOINT 等待时)
 EXIT     → GateTriggered (confidence 检查)
            → StageCompleted (全部满足) 或 StageFailed (不满足+retry=0)
-ADVANCE  → PipelineAdvanced + 写入 [session snapshot](../../runtime/engine/session-snapshot.md)
+ADVANCE  → PipelineAdvanced + 写入 [session snapshot](../../runtime/mechanisms/session-snapshot.md)
            → 若 skill=analyzer + stage=delivery → trigger [background pipeline](../../runtime/pipeline/background.yaml)
            → 跨 Session Resume: 下次启动 → 读 snapshot → 从中断 Phase 继续
 
 ## Context Budget
 
-每个 Profile 定义 `context_budget`（token 上限）。Engine 追踪 utilization：
+每个 Profile 定义 `context_budget`（token 上限）。Host 追踪 utilization：
 
 ```
 utilization < 70%  → 正常执行
@@ -132,7 +133,7 @@ utilization > 90%  → split + checkpoint（写 snapshot，建议用户在新 se
 → [profiles.yaml](../../runtime/config/profiles.yaml)
 ```
 
-→ [Event Bus](../../runtime/engine/event-bus.md) | [Event Schema](../../shared/schemas/event.schema.json)
+→ [Event Bus](../../runtime/mechanisms/event-bus.md) | [Event Schema](../../shared/schemas/event.schema.json)
 
 ## 与 Stage Template Injection 的关系
 

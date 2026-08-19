@@ -21,13 +21,13 @@ governance:
   review_cadence_days: 90
   last_reviewed: "2026-08-04"
 
-engines:
+protocols:
   workflow:
     version: "1.0.0"
-    type: Stage Template Injection + Execution Driver + Workflow DSL
+    type: Stage Template Injection + Execution Guidance + Workflow DSL
     templates: [discovery, execution, validation, delivery, code-audit, graph-analysis]
     dsl_schema: shared/schemas/workflow.schema.json
-  runtime:
+  mechanisms:
     version: "0.7.0"
     components: [state-machine, checkpoint, error-recovery, confidence-gate, event-bus, scheduler]
 
@@ -45,7 +45,7 @@ quality_gates:
   G11: { name: "prompts/ ≥1文件", level: optional }
   G12: { name: "references/ ≥2文件", level: optional }
   G13: { name: "stages与prompts/<stage>.md对应", level: required }
-  G14: { name: "stage prompt含@engine:声明", level: required }
+  G14: { name: "stage prompt含@template:声明", level: required }
   G15: { name: "skill-policy.yaml 含 rollback", level: required }
   G16: { name: "Skill Atlas条目完整", level: important }
   G17: { name: "last_reviewed在cadence内", level: important }

@@ -38,7 +38,7 @@ adapters:
       primary: bash  # git CLI
       fallback: mcp__github
     guard:
-      # 命令护栏：见 runtime/engine/command-guard.md。改写工作树/历史的一律 BLOCK。
+      # 命令护栏：见 runtime/mechanisms/command-guard.md。改写工作树/历史的一律 BLOCK。
       blocklist:
         - "git checkout"
         - "git reset"
@@ -102,5 +102,5 @@ adapters:
 # 不直接调用: Bash("grep -r 'pattern' src/")
 # 而是调用:   adapter.filesystem.search("pattern", "src/")
 #
-# Engine 负责解析 adapter 调用 → 找到对应 provider → 执行。
+# Host 负责解析 adapter 调用 → 找到对应 provider → 执行。
 # 替换 provider 时只需改本文件，不改任何 Skill。

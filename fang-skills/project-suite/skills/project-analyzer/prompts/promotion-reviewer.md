@@ -64,4 +64,16 @@ summary:
 
 ## 人工 Review 边界
 
-仅 `promote_candidate`（7-8 分）需要人工确认。`auto_promote` 和 `keep_project`/`reject` 自动执行。
+`recommendation` 是**评分建议**，不是自动执行。Personal 晋升（跨项目写入 Vault）是长期资产，**无论 auto_promote 还是 promote_candidate，都需人工确认后才晋升**：
+
+- `auto_promote`（≥9 分）→ 强烈建议晋升，但仍是建议，等人工确认
+- `promote_candidate`（7-8 分）→ 建议晋升，人工确认
+- `keep_project` / `reject` → 项目内保留 / 拒绝，不涉及跨项目晋升
+
+统一模型（见 [promotion-rules.md](../../../runtime/state/schemas/promotion-rules.md)）：
+
+```
+Candidate → Background Reviewer 评分 → Promote/Keep/Reject 建议 → [人工确认] → Vault
+```
+
+Background 只产建议（auto-score/auto-classify/auto-suggest），Personal promotion 的最终动作是 human confirmation。

@@ -1,7 +1,7 @@
 # Skill Interface Standard v1.2.0
 #
 # 所有 skill 的标准化接口定义（intrinsic 部分）。
-# 每个 skill.yaml 必须包含 interface: 块，Engine 直接解析即可调度。
+# 每个 skill.yaml 必须包含 interface: 块，Host 直接解析即可调度。
 #
 # ⚠️ v1.2.0 变更：Runtime Policy 字段（quality_gate / rollback / recovery / reliability / stage_config）
 # 已从 interface 块移至 runtime/config/skill-policy.yaml（编排层，非 Skill Contract）。
@@ -14,7 +14,7 @@ version: "1.2.0"
 fields:
 
   inputs:
-    description: 本 Skill 运行需要什么。Engine 据此检查前置条件。
+    description: 本 Skill 运行需要什么。Host 据此检查前置条件。
     type: array
     item_schema:
       name: string          # 资源名，如 "context.json"
@@ -25,7 +25,7 @@ fields:
       description: string   # 在本 Skill 中的用途
 
   outputs:
-    description: 本 Skill 产出什么。Engine 据此连接上下游。
+    description: 本 Skill 产出什么。Host 据此连接上下游。
     type: array
     item_schema:
       name: string          # 产出文件名或资源名，如 "PLAN.md"
@@ -34,7 +34,7 @@ fields:
       depends_on_inputs: [string]  # 产出依赖哪些输入
 
   side_effects:
-    description: 执行副作用。Engine 据此决定是否可并行、是否可重试。
+    description: 执行副作用。Host 据此决定是否可并行、是否可重试。
     type: object
     properties:
       writes_state: boolean       # 是否写入 .project-runtime/state.json
@@ -43,7 +43,7 @@ fields:
       writes_timeline: boolean    # 是否追加 timeline.json
 
   failure_modes:
-    description: 已知失败模式。Engine 据此决定重试/降级/阻断。
+    description: 已知失败模式。Host 据此决定重试/降级/阻断。
     type: array
     item_schema:
       condition: string     # 触发条件
@@ -51,8 +51,8 @@ fields:
       recovery: string      # 恢复动作
 
   stages:
-    description: 本 Skill 的阶段列表。Engine 据此加载对应的 Stage Contract 模板。
+    description: 本 Skill 的阶段列表。Host 据此加载对应的 Stage Contract 模板。
     type: array
     item_schema:
       name: string          # discovery | planning | execution | validation | delivery
-                            # Engine 从 workflow-engine/references/stage-contract.md 加载模板
+                            # Host 从 workflow-protocol/references/stage-contract.md 加载模板

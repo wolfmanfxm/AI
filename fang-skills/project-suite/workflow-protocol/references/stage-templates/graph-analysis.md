@@ -1,6 +1,6 @@
 # Stage Template: Graph Analysis
 
-> Engine 拥有。Graph 依赖分析 — Skill 通过 `@engine: graph-analysis` 引用。
+> Suite 拥有（Protocol）。Graph 依赖分析 — Skill 通过 `@template: graph-analysis` 引用。
 
 ## Standard Contract
 
@@ -33,7 +33,7 @@
 
 ```markdown
 ### Stage: Graph Analysis
-@engine: graph-analysis
+@template: graph-analysis
 
 | Actions  | 1. `findDependencies(<目标模块>)` → 耦合度 2. 全图 edges 按 group 聚合 → 识别跨层依赖(view→infrastructure) 3. `findConsumers(<目标API>)` → 影响范围 4. 循环依赖检测 |
 | Exit     | 用户确认分析结果，设计范围已调整 |

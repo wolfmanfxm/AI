@@ -70,12 +70,12 @@ routing:
     provider: project-releaser
     produces: [Release]
   PipelineOrchestration:
-    description: 跨Skill Pipeline编排，auto-advance+Decision-Boundary Checkpoint
+    description: 跨Skill Pipeline编排（Pipeline Protocol + Decision Boundary，非执行引擎）
     intents:
       cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
       en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
     provider: pipeline-orchestrator
-    produces: [PipelineExecution]
+    produces: [PipelinePlan]
 
 # 匹配规则
 matching:
@@ -96,4 +96,4 @@ dependency_graph:
   Documentation: { provides: [Documentation], needs: [Code, Review, KnowledgeBase, Context] }
   Refactoring: { provides: [RefactoredCode], needs: [Code, KnowledgeBase, Test, Review] }
   Release: { provides: [Release], needs: [Documentation, Review, Test] }
-  PipelineOrchestration: { provides: [PipelineExecution], needs: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release] }
+  PipelineOrchestration: { provides: [PipelinePlan], needs: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release] }

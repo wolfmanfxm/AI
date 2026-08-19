@@ -12,7 +12,7 @@ description: >
 # Refactorer
 
 > 代码 → 识别坏味道 → 安全重构 → 验证 → REFACTOR.md
-> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -34,15 +34,15 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
-| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 ## 职责边界
 
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 refactorer 只改善结构不改行为。没测试保护不重构。
 
-> 完成后：/project-tester 或 /project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-tester 或 /project-reviewer。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

@@ -1,6 +1,6 @@
 # Stage Template: Delivery
 
-> Engine 拥有。Skill 通过 `@engine: delivery` 引用，只需提供 Actions/Exit/Failure。
+> Suite 拥有（Protocol）。Skill 通过 `@template: delivery` 引用，只需提供 Actions/Exit/Failure。
 
 ## Standard Contract
 
@@ -17,12 +17,12 @@
 convergence:
   status: sufficient | insufficient | blocked
   evidence: [至少 1 条支撑判断的证据]
-  next_action: stop | execute | investigate
+  next_action: handoff | continue | investigate | blocked
 ```
 
-- 交付完成且证据足够 → `sufficient → stop`
-- 有遗留但可交付 → `insufficient → execute`（标注缺什么）
-- 缺关键输入无法交付 → `blocked → investigate`（回上游，不猜）
+- 交付完成且证据足够 → `sufficient → handoff`（交下游）
+- 有遗留但可交付 → `insufficient → continue`（标注缺什么，补一轮）
+- 缺关键输入无法交付 → `blocked`（回上游，不猜）
 
 ## Custom Fields (Skill Must Provide)
 
@@ -36,7 +36,7 @@ convergence:
 
 ```markdown
 ### Stage: Delivery
-@engine: delivery
+@template: delivery
 
 | Actions  | Phase A 强制刷新JSON → Phase B 状态初始化 → Phase C 差异化更新 → Phase D 质量验证 + Vault sync + CLAUDE.md + timeline |
 | Exit     | manifest status = completed, Vault sync 验证通过（文件差 ≤3） |

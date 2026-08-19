@@ -196,18 +196,18 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G14: @engine declarations in stage prompts
-  engine_count=0
+  # G14: @template declarations in stage prompts
+  template_count=0
   for prompt in "$skill_dir/prompts/"*.md; do
     if [ -f "$prompt" ]; then
-      pc=$(grep -c "@engine:" "$prompt" || true)
-      engine_count=$((engine_count + pc))
+      pc=$(grep -c "@template:" "$prompt" || true)
+      template_count=$((template_count + pc))
     fi
   done
-  if [ "$engine_count" -ge "$stage_count" ]; then
-    green "  G14 PASS: ${engine_count} @engine declarations in prompts"
+  if [ "$template_count" -ge "$stage_count" ]; then
+    green "  G14 PASS: ${template_count} @template declarations in prompts"
   else
-    yellow "  G14 WARN: only ${engine_count}/${stage_count} stages have @engine"
+    yellow "  G14 WARN: only ${template_count}/${stage_count} stages have @template"
     WARNINGS=$((WARNINGS+1))
   fi
 

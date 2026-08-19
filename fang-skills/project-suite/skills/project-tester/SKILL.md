@@ -12,7 +12,7 @@ description: >
 # Tester
 
 > 代码 + Acceptance Criteria → 测试策略 → 生成 → 执行 → 报告
-> Execute → Verify | 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -33,14 +33,14 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
 
 ## 职责边界
 
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 tester 只写测试不修被测代码。测试失败 → 记录报告，不修改源码。
 
-> 完成后：/project-reviewer。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-reviewer。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

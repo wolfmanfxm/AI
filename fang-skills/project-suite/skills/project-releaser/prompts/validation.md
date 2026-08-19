@@ -1,6 +1,6 @@
 # Validation — Releaser
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -21,7 +21,7 @@
 2. Changelog 完整性 — 是否有遗漏的 breaking change
 3. 回滚方案可行性 — 回滚命令是否具体可执行
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Exit
 

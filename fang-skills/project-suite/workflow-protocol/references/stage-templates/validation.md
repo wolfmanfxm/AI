@@ -1,6 +1,6 @@
 # Stage Template: Validation
 
-> Engine 拥有。Skill 通过 `@engine: validation` 引用，只需提供 Checks 表格 + Exit。
+> Suite 拥有（Protocol）。Skill 通过 `@template: validation` 引用，只需提供 Checks 表格 + Exit。
 
 ## Standard Contract
 
@@ -17,12 +17,12 @@
 convergence:
   status: sufficient | insufficient | blocked
   evidence: [至少 1 条支撑判断的证据]
-  next_action: stop | execute | investigate
+  next_action: handoff | continue | investigate | blocked
 ```
 
-- Checks 全部通过 → `sufficient → stop`（不再补做）
-- 有非 CRITICAL 遗留 → `insufficient → execute`（补一轮）
-- 缺关键输入 → `blocked → investigate`（回上游）
+- Checks 全部通过 → `sufficient → handoff`（交下游）
+- 有非 CRITICAL 遗留 → `insufficient → continue`（补一轮）
+- 缺关键输入 → `blocked`（回上游）
 
 ## Custom Fields (Skill Must Provide)
 
@@ -41,7 +41,7 @@ convergence:
 
 ```markdown
 ### Stage: Validation
-@engine: validation
+@template: validation
 
 | # | Check | Method | On Failure |
 |---|-------|--------|------------|

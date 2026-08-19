@@ -7,9 +7,9 @@
 
 ## 定位：Agent SDLC Framework
 
-> - **project-suite** — **Agent SDLC Framework**：10 Skill + Workflow Engine + Runtime + Registry + Gates + Profiles + Adapters + Knowledge，形成有约束、可编排、可验证的流水线。
+> - **project-suite** — **Agent SDLC Framework**：10 Skill + Workflow Protocol + Runtime Protocol + Registry + Gates + Profiles + Adapters + Knowledge，形成有约束、可编排、可验证的流水线。
 
-**设计原则：复杂度藏在 Framework 层，不堆进 Skill。** Skill 保持薄（~50 行），只声明 stages + 业务逻辑；跨 Skill 约束由 Framework 统一提供（生命周期/checkpoint/验证 → workflow-engine；git/命令护栏 → command-guard；复用判定 → [reuse-check primitive](shared/primitives/reuse-check.md)）。新增能力落 `shared/primitives/` / `runtime/engine/` / `runtime/registry/`，不散落进 SKILL.md。
+**设计原则：复杂度藏在 Framework 层，不堆进 Skill。** Skill 保持薄（~50 行），只声明 stages + 业务逻辑；跨 Skill 约束由 Framework 统一提供（生命周期/checkpoint/验证 → workflow-protocol；git/命令护栏 → command-guard；复用判定 → [reuse-check primitive](shared/primitives/reuse-check.md)）。新增能力落 `shared/primitives/` / `runtime/mechanisms/` / `runtime/registry/`，不散落进 SKILL.md。
 
 **收益定位：过程质量，不是速度。** 收益是 Decision Record 可追溯、边界纪律（反 gold-plate）、证据密度、长任务护栏——**不是** token 省或复用率。
 
@@ -19,12 +19,12 @@
 > 唯一例外是各 skill 的 `references/examples.md`（已标注「Reference example only」）。
 > 框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），不绑定任何具体项目。
 
-## 当前版本：1.0.0
+## 当前版本：Suite v1.1 Spec / Release v1.0
 
 ```
-Knowledge Engine     — Object + Context Resolver + Promotion Reviewer + Decay
+Knowledge 层         — Object + Context Resolver + Promotion Reviewer + Decay
 Runtime（Protocol）   — Tool Adapter(9/10) + Event Bus + Background Pipeline（规范层，非独立 Engine）
-Reasoning Engine     — Query API + Orchestrator v2.0 (Decision-Boundary Checkpoint, auto-advance 仅 background)
+Reasoning 层         — Query API + Orchestrator (Decision-Boundary Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
 Organization Layer   — Task→Project→Organization→Personal 四层
 ```
@@ -33,13 +33,13 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 
 ```
 ┌─────────────────────────────────────────┐
-│ Workflow Engine                          │
-│ Stage Injection · Execution Driver · DSL │
+│ Workflow Protocol                        │
+│ Stage Injection · Execution Guidance · DSL│
 │ Event Bus · Memory Layer                │
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────┴──────────────────────────┐
-│ Runtime Engine                           │
+│ Runtime Protocol                         │
 │ State Machine · Checkpoint · Error       │
 │ Confidence Gate · Scheduler              │
 │ Registry (Capability · Stage · Routing)  │
@@ -55,6 +55,8 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 └─────────────────────────────────────────┘
 ```
 
+> **Suite 是 Protocol，Host 是唯一 Execute/Enforce 的地方**（见 [host-capability.md](runtime/contracts/host-capability.md)）。上面的「Workflow Protocol」「Runtime Protocol」是协议层，不是执行引擎。
+
 ## Skill 矩阵
 
 | # | Skill | 职责 | 关键能力 |
@@ -68,7 +70,7 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 | 7 | **refactorer** | 安全重构（行为不变） | 小步循环 + 指标量化 |
 | 8 | **documenter** | API/组件/README 文档 | 源码溯源 + Vault 同步 |
 | 9 | **releaser** | 版本 bump + Changelog + 发布检查 | 全链路 Confidence Gate |
-| 10 | **orchestrator** | 跨 Skill Pipeline 编排 | Registry-driven 自动调度 |
+| 10 | **orchestrator** | 跨 Skill Pipeline 编排建议 | Registry-driven + Decision Boundary |
 
 ## Analyzer v3.0 — 核心 Skill
 
@@ -135,9 +137,9 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 
 ```
 project-suite/
-├── workflow-engine/       ← Stage Injection + Execution Driver + DSL
+├── workflow-protocol/       ← Stage Injection + Execution Guidance + DSL
 ├── runtime/
-│   ├── engine/            ← State · Checkpoint · Error · Gate · Event · Approval
+│   ├── mechanisms/            ← State · Checkpoint · Error · Gate · Event · Approval
 │   ├── registry/          ← Capability · Stage · Workflow · Routing · Extractor
 │   ├── memory/            ← Session · Project · Suite · Decision
 │   ├── tool-adapters/     ← Filesystem · Browser · Git · Network · Design

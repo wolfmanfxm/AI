@@ -56,4 +56,4 @@ decision_model:
     question: "怎么执行？"
     input: decision_context + skill_contract
     output: artifacts
-    source: workflow-engine + skill prompts
+    source: workflow-protocol + skill prompts

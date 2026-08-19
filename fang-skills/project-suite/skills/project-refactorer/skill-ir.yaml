@@ -6,7 +6,6 @@ description: "改善代码结构不改变外部行为：提取函数/组件、�
 boundary: "只改善结构不改行为，没测试保护不重构"
 produces: [RefactoredCode]
 consumes: [Code,KnowledgeBase,Test,Review]
-depends_on: []
 stages: [discovery, execution, validation, delivery]
 verification: { checks: 3, source: prompts/verifier.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }

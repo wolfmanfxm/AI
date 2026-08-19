@@ -111,7 +111,7 @@
 **Confidence:** {0-100}%
 **Summary:** [一句话摘要]
 
-**Convergence:** {sufficient | insufficient | blocked} → {stop | execute | investigate}
+**Convergence:** {sufficient | insufficient | blocked} → {handoff | continue | investigate | blocked}
 **Evidence:** [支撑收敛判断的证据]
 
 ## What Was Done
@@ -237,4 +237,4 @@ confidence = 100
 - 🟠 GATE → Reviewer 强制执行后才能进入 Generator；Releaser 拒绝执行
 - 🔴 BLOCK → state.json 写入 blocker，下游 Skill 启动时检测到 blocker → 拒绝执行
 
-→ 完整 Gate 协议：[../engine/confidence-gate.md](../engine/confidence-gate.md)
+→ 完整 Gate 协议：[../mechanisms/confidence-gate.md](../mechanisms/confidence-gate.md)

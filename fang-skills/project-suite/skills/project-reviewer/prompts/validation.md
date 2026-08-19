@@ -1,6 +1,6 @@
 # Validation — Reviewer
 
-> @engine: validation
+> @template: validation
 
 > reviewer 的 Validation 是**元审查** — 检查审查本身的质量
 
@@ -23,7 +23,7 @@
 2. 修复建议是否具体可操作（"改一下"不通过）
 3. 是否遗漏了明显的安全问题或逻辑错误
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Output
 

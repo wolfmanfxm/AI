@@ -1,6 +1,6 @@
 # Validation — Tester
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -18,7 +18,7 @@
 
 **方法**：spawn 独立 agent，仅读测试文件 + AC（不含对话上下文），验证 AC 覆盖完整性
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Output
 

@@ -1,6 +1,6 @@
 # Validation — Planner
 
-> @engine: validation
+> @template: validation
 
 ## Checks
 
@@ -21,7 +21,7 @@
 2. 遗漏 — PLAN.md 声称要做的和 AC 描述的是否对应
 3. 依赖完整性 — 是否遗漏了隐性依赖
 
-→ [qa-pattern](../../../workflow-engine/references/qa-pattern.md)
+→ [qa-pattern](../../../workflow-protocol/references/qa-pattern.md)
 
 ## Output
 

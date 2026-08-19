@@ -5,14 +5,14 @@ owner: project-suite
 category: orchestration
 complexity: { min: high, max: high }
 cost: low
-description: "跨Skill Pipeline编排，auto-advance+Decision-Boundary Checkpoint"
+description: "跨Skill Pipeline编排（Pipeline Protocol + Decision Boundary，非执行引擎）"
 verification: { mode: direct-verify }
 depth_profiles: { simple: minimal, medium: standard, complex: full }
-capabilities: [pipeline-execution, auto-advance, checkpoint]
+capabilities: [pipeline-coordination, checkpoint, resume]
 requires: []
-produces: [PipelineExecution]
+produces: [PipelinePlan]
 consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
-boundary: 编排跨 Skill pipeline 执行，不替代任何单个 Skill 的功能
+boundary: 编排跨 Skill pipeline 建议（供 Host 参考），不替代任何单个 Skill 的功能
 last_reviewed: "2026-08-04"
 review_cadence_days: 90
 waivers:

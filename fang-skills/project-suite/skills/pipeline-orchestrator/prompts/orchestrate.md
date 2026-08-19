@@ -1,11 +1,11 @@
 # Orchestrate — Pipeline Orchestrator v2.0
 
-> @engine: execution
-> v2.0: Decision-Boundary Checkpoint。auto_advance 是引擎能力（capability），profile 决定哪些点是决策边界（非每步都停）。
+> @template: execution
+> v2.0: Decision-Boundary Checkpoint。是否自动推进（auto-advance）是 Host capability，非 Suite 能力；profile 声明「希望哪些点是决策边界」，Host 决定实际是否自动推进。
 
 ## Actions
 
-按 pipeline 定义的 DAG 顺序，逐 Skill 执行，在 Decision Boundary 暂停确认：
+按 pipeline 定义的路径，逐 Skill 建议推进，在 Decision Boundary 暂停确认：
 
 ```
 for each skill in pipeline:
@@ -13,8 +13,8 @@ for each skill in pipeline:
      - 上游 Skill 的 required_outputs 全部存在 → ✅ 自动进入
      - 缺失 → ⚠️ 标注缺失，AskUserQuestion：跳过/重试上游/终止
 
-  2. EXECUTE: 触发 Skill
-     - 提示: "下一步: /project-<skill> — <description>"
+  2. DISPATCH: 建议下一步 Skill（由 Host/用户决定是否执行）
+     - 提示: "建议下一步: /project-<skill> — <description>"
 
   3. CHECKPOINT: 仅在 Decision Boundary 暂停（非每 skill）
      - 展示 Summary: <skill> 完成 | confidence: XX% | 产出: <files>
@@ -30,7 +30,7 @@ for each skill in pipeline:
 
 ### Decision-Boundary Gate（profile 决定哪些点是决策边界）
 
-> 不是每个 skill 都 checkpoint。默认决策边界：planner（Goal/Scope）、architect（选型）、reviewer（是否修复）、releaser（发布确认）。其余默认 auto-advance，除非 profile/workflow 显式标记。
+> 不是每个 skill 都 checkpoint。默认决策边界：planner（Goal/Scope）、architect（选型）、reviewer（是否修复）、releaser（发布确认）。其余默认「建议自动推进」（auto_advance_preference），Host 决定是否真的自动推进，除非 profile/workflow 显式标记。
 
 | Skill | 若为决策边界，展示什么 |
 |-------|----------------------|

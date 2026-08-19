@@ -1,6 +1,6 @@
 # Delivery — Documenter
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

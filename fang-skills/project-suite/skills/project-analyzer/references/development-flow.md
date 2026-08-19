@@ -1,6 +1,6 @@
 # Development Flow
 
-> analyzer skill 专属的开发前检查流程。通用发现/执行流程见 ../../runtime/engine/state-machine.md。
+> analyzer skill 专属的开发前检查流程。通用发现/执行流程见 ../../runtime/mechanisms/state-machine.md。
 
 ## 保障
 

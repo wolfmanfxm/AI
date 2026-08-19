@@ -2,8 +2,8 @@
 
 > Project Suite 的正式 Framework 规范。v1.1 新增：Stage Template Injection、interface 统一、Governed 就绪。
 > v1.0 → v1.1 关键变化：
-> - G1 行数限制宽松至 130（为 workflow-engine 留空间）
-> - 新增 G13-G16：stage prompts、@engine 声明、skill-policy.yaml rollback、Skill Atlas
+> - G1 行数限制宽松至 130（为 workflow-protocol 留空间）
+> - 新增 G13-G16：stage prompts、@template 声明、skill-policy.yaml rollback、Skill Atlas
 > - 新增第 8 节：Governed Package Boundary
 > - 反例计数规则更新：SKILL.md 内嵌表计入 G3
 
@@ -102,17 +102,17 @@ id: <kebab-case>            # 与目录名一致
 version: "<semver>"         # 遵循 semver
 mode: Production            # Scaffold | Production | Library | Governed
 owner: project-suite        # 固定
-priority: <1-9>             # DAG 调度优先级
-produces: [<Capability>+]   # 产出的能力类型
-consumes: [<Capability>*]   # 消费的能力类型
-depends_on: [<skill-id>*]   # 硬依赖
-parallel_with: [<skill-id>*]# 同 Wave 并行伙伴
+produces: [<Capability>+]   # 产出的能力类型（Capability Requirement 的供给侧）
+consumes: [<Capability>*]   # 消费的能力类型（Capability Requirement 的需求侧，依赖由它推导）
 requires: [<resource>*]     # 运行前提（agent 类型/外部依赖）
 context_contract:           # 🔴 Context 裁剪（减少 context 膨胀）
   must_read: [<path>*]      #  必须加载，缺失则 DEGRADED
   should_read: [<path>*]    #  有则加载，无则跳过
   neednt_read: [<path>*]    #  明确不需要加载
 boundary: <string>          # 一行职责边界
+```
+
+> 已移除字段（ADR-003）：`priority`（→ scheduler.yaml skill_order）、`depends_on`/`parallel_with`（→ produces/consumes 推导的 Capability DAG）。skill 不声明「依赖哪个 skill」，只声明「需要什么能力」——依赖关系由 produces/consumes 推导。
 ```
 
 ### 3.2 版本兼容声明（🟡 IMPORTANT）
@@ -133,7 +133,7 @@ Skill 独立迭代版本号时，必须声明对上游 schema 的最低版本要
 
 ```
 KnowledgeBase | KnowledgeIndex | Context | State | Graph | Plan | Architecture | Code | Test | Review |
-RefactoredCode | Documentation | Release | PipelineExecution
+RefactoredCode | Documentation | Release | PipelinePlan
 ```
 
 ---
@@ -181,13 +181,13 @@ RefactoredCode | Documentation | Release | PipelineExecution
 | Project State | `runtime/state/state.md` | ✅（读写 .project-runtime/state.json） |
 | Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted；Reviewer 验证 Candidate） |
 | Knowledge Index | `runtime/state/schemas/knowledge-index.md` | ✅（analyzer 生成，下游按 capability 查询） |
-| Confidence Gate | `runtime/engine/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |
+| Confidence Gate | `runtime/mechanisms/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |
 | Timeline | `runtime/metrics/timeline.md` | ✅（所有 Skill 追加执行指标到 timeline.json） |
 | Knowledge Health | `runtime/metrics/knowledge-health.md` | ✅（analyzer 增量模式自动检测知识库质量） |
 | Unified I/O | `runtime/contracts/skill-io.md` | 🟡（建议遵循，非强制） |
-| 状态机 | `runtime/engine/state-machine.md` | ✅ |
-| 断点续传 | `runtime/engine/checkpoint.md` | ✅（manifest.json 读写） |
-| DAG 调度 | `runtime/engine/scheduler.md` | ✅（按 capabilities.yaml 优先级） |
+| 状态机 | `runtime/mechanisms/state-machine.md` | ✅ |
+| 断点续传 | `runtime/mechanisms/checkpoint.md` | ✅（manifest.json 读写） |
+| DAG 调度 | `runtime/mechanisms/scheduler.md` | ✅（按 capabilities.yaml 优先级） |
 | Context Protocol | `runtime/context/context.md` | ✅（下游 skill 读 context.json） |
 | 能力注册 | `runtime/registry/capabilities.yaml` | ✅（定义 produces/consumes） |
 | Workflow 模板 | `runtime/registry/workflow-library.yaml` | 🟢（Pipeline 模式，用户是 Dispatcher） |
@@ -213,7 +213,7 @@ RefactoredCode | Documentation | Release | PipelineExecution
 | G11 | prompts/ 至少 1 个文件 | 🟢 | `ls` |
 | G12 | references/ 至少 2 个文件 | 🟢 | `ls` |
 | **G13** | **每个 `stages:` 声明有对应 `prompts/<stage>.md`** | 🔴 | 对比 skill.yaml stages 与 prompts/ 文件 |
-| **G14** | **每个 stage prompt 含 `@engine:` 声明** | 🔴 | 搜索 `@engine:` |
+| **G14** | **每个 stage prompt 含 `@template:` 声明** | 🔴 | 搜索 `@template:` |
 | **G15** | **`skill-policy.yaml` 含 rollback** | 🔴 | grep `rollback:` skill-policy.yaml |
 | **G16** | **Skill Atlas 条目完整** | 🟡 | 检查 `docs/skill-atlas.md` 含该 Skill |
 | **G17** | **last_reviewed 在 review_cadence_days 内** | 🟡 | 对比当前日期与 skill.yaml `last_reviewed` |

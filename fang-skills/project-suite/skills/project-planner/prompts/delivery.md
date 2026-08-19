@@ -1,6 +1,6 @@
 # Delivery — Planner
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

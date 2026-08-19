@@ -130,6 +130,46 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 done
 
 echo ""
+# ── L3.5: scheduler / policy 的 skill 集合 ──────────────────
+echo "【L3.5】scheduler.skill_order / skill-policy 的 skill 集合完整性"
+echo "----------------------------------------"
+SCHED="$SUITE_ROOT/runtime/config/scheduler.yaml"
+POLICY="$SUITE_ROOT/runtime/config/skill-policy.yaml"
+
+# skills 目录集合（规范）
+skills_set=$(ls "$SKILLS_DIR" | sort | tr '\n' ' ')
+
+# scheduler.skill_order 集合
+sched_set=$(grep -E "^\s+(project|pipeline)-" "$SCHED" 2>/dev/null | sed 's/:.*//' | tr -d ' ' | sort | tr '\n' ' ')
+
+# skill-policy 的顶层 skill 键集合
+policy_set=$(grep -E "^[a-z].*:$" "$POLICY" 2>/dev/null | sed 's/:$//' | sort | tr '\n' ' ')
+
+# 对比 scheduler
+for s in $skills_set; do
+  echo "$sched_set" | grep -qw "$s" || { red "  ❌ $s: scheduler.skill_order 缺调度条目"; FAIL=$((FAIL+1)); }
+done
+for s in $sched_set; do
+  echo "$skills_set" | grep -qw "$s" || { red "  ❌ $s: scheduler.skill_order 指向不存在的 skill"; FAIL=$((FAIL+1)); }
+done
+
+# 对比 policy
+for s in $skills_set; do
+  echo "$policy_set" | grep -qw "$s" || { red "  ❌ $s: skill-policy.yaml 缺策略条目"; FAIL=$((FAIL+1)); }
+done
+for s in $policy_set; do
+  echo "$skills_set" | grep -qw "$s" || { red "  ❌ $s: skill-policy.yaml 指向不存在的 skill"; FAIL=$((FAIL+1)); }
+done
+
+# 若两组都无差异
+sched_ok=$( [ "$(echo "$sched_set" | tr ' ' '\n' | sort)" = "$(echo "$skills_set" | tr ' ' '\n' | sort)" ] && echo 1 || echo 0 )
+policy_ok=$( [ "$(echo "$policy_set" | tr ' ' '\n' | sort)" = "$(echo "$skills_set" | tr ' ' '\n' | sort)" ] && echo 1 || echo 0 )
+if [ "$sched_ok" = "1" ] && [ "$policy_ok" = "1" ]; then
+  green "  ✅ scheduler.skill_order 与 skill-policy 集合完整（10/10）"
+  PASS=$((PASS+1))
+fi
+
+echo ""
 # ── L4: benchmarks 硬约束 ──────────────────────────────────
 echo "【L4】benchmarks 硬约束（技术栈硬编码 / 已废弃要求）"
 echo "----------------------------------------"

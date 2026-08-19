@@ -32,7 +32,7 @@ sources:
 | `generatedBy` | 生成工具，固定 `analyzer` | 是 |
 | `generatedAt` | 首次生成时间 | 是 |
 | `last_scan` | 最后校验时间。增量扫描确认内容仍然准确但无需修改时更新此字段 | 是 |
-| `lifecycle` | 生命周期状态：`draft` / `confirmed` / `deprecated`（与 [../../shared/templates/evidence-header.md](../../shared/templates/evidence-header.md) 一致）| 是 |
+| `lifecycle` | 生命周期状态：`draft` / `confirmed` / `deprecated`（与 [../../../shared/templates/evidence-header.md](../../../shared/templates/evidence-header.md) 一致）| 是 |
 | `confidence` | 置信度，见下方分级 | 是 |
 | `sources` | 证据源文件列表 | 是 |
 

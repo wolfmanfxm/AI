@@ -1,6 +1,6 @@
 # Discovery — Architect
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

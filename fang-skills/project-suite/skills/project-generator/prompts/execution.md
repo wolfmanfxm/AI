@@ -1,6 +1,6 @@
 # Execution — Generator
 
-> @engine: execution
+> @template: execution
 > Session Snapshot: 每个文件生成后写入 `.project-knowledge/.sessions/project-generator/state.json` → 跨 session resume
 
 ## Actions
@@ -98,4 +98,4 @@ decisions:
 
 ## Confidence Gate
 
-→ [confidence.yaml](../../../runtime/engine/confidence.yaml)：<70 🟠 GATE 必须Review，≥95 🟢 直通
+→ [confidence.yaml](../../../runtime/mechanisms/confidence.yaml)：<70 🟠 GATE 必须Review，≥95 🟢 直通

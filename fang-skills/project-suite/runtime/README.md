@@ -6,7 +6,7 @@
 
 | 目录 | 说明 |
 |------|------|
-| [engine/](engine/) | 执行引擎 — State · Checkpoint · Error · Confidence · Event · Approval |
+| [mechanisms/](mechanisms/) | 执行引擎 — State · Checkpoint · Error · Confidence · Event · Approval |
 | [registry/](registry/) | 能力注册 — Capability · Stage · Workflow · Routing · Extractor |
 | [memory/](memory/) | 四级记忆 — Session · Project · Suite · Decision |
 | [tool-adapters/](tool-adapters/) | 工具适配 — Filesystem · Browser · Git · Network · Design |
@@ -23,10 +23,10 @@
 | 我想做什么 | 核心文件 |
 |-----------|---------|
 | 新增一个 Skill | [capabilities.yaml](registry/capabilities.yaml) → [skill-io.md](contracts/skill-io.md) |
-| 了解 Skill 如何执行 | [state-machine.md](engine/state-machine.md) → [execution-driver.md](../workflow-engine/references/execution-driver.md) |
-| 中断后恢复 | [checkpoint.md](engine/checkpoint.md) → [error-recovery.md](engine/error-recovery.md) |
+| 了解 Skill 如何执行 | [state-machine.md](mechanisms/state-machine.md) → [execution-driver.md](../workflow-protocol/references/execution-driver.md) |
+| 中断后恢复 | [checkpoint.md](mechanisms/checkpoint.md) → [error-recovery.md](mechanisms/error-recovery.md) |
 | 新增 Pipeline 模式 | [workflow-library.yaml](registry/workflow-library.yaml) |
 | 新增能力类型 | [capabilities.yaml](registry/capabilities.yaml) → [capability-routing.yaml](registry/capability-routing.yaml) |
 | 新增 Extractor | [extractor-registry.yaml](registry/extractor-registry.yaml) |
 | 查询项目知识 | [graph-query.md](contracts/graph-query.md) → [knowledge-resolver.md](knowledge-resolver.md) |
-| 理解整体架构 | [orchestration.md](protocols/orchestration.md) → [scheduler.md](engine/scheduler.md) |
+| 理解整体架构 | [orchestration.md](protocols/orchestration.md) → [scheduler.md](mechanisms/scheduler.md) |

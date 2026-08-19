@@ -12,7 +12,7 @@ description: >
 # Reviewer
 
 > 代码变更 + AC + Risk → 五轴审查 → 问题分级 → REVIEW.md
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -35,11 +35,11 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @engine: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
-| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
+| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 > 深度（`depth_profiles`，见 skill.yaml）：**minimal**=只审正确性+安全（小 diff）；**standard/full**=五轴全审。小改动不必跑架构/性能轴。
 
@@ -48,4 +48,4 @@ description: >
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 reviewer 只查不修。发现问题 → 记录 file:line + 修复方案。
 
-> 完成后：/project-generator（修复） 或 /project-documenter 或 /project-releaser。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-generator（修复） 或 /project-documenter 或 /project-releaser。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

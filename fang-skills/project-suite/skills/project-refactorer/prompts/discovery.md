@@ -1,6 +1,6 @@
 # Discovery — Refactorer
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

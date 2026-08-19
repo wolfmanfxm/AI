@@ -1,6 +1,6 @@
 # Delivery — Pipeline Orchestrator
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

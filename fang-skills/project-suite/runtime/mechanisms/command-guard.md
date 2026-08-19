@@ -39,9 +39,9 @@ SKILL.md 的职责边界只写一句：`git 由 [Runtime Command Guard](command-
 
 - [shared/scripts/command-guard.sh](../../shared/scripts/command-guard.sh) — 确定性拦截器。`bash command-guard.sh "<cmd>"` → BLOCK/ALLOW；`--exit` 让 BLOCK 时 exit 1（供 pipeline 直接拦）。黑名单与 adapter-registry.yaml 的 `git.guard.blocklist` 同步。
 
-## 拦截钩子（Engine 集成点）
+## 拦截钩子（Host 集成点）
 
-> Guard 不是孤立的脚本，而是 engine 在「每次 Bash 工具调用前」的强制前置拦截点。这是把 #4 从「脚本」变成「运行时边界」的最后一环。
+> Guard 不是孤立的脚本，而是 Host 在「每次 Bash 工具调用前」的强制前置拦截点。这是把 #4 从「脚本」变成「运行时边界」的最后一环。
 
 ```
 Skill 声明工具调用（@adapter:* 或直接 Bash）
@@ -62,7 +62,7 @@ provider 执行
 
 | 项 | 约定 |
 |----|------|
-| 挂载点 | engine 的 tool-call dispatch 层（scheduler → tool-adapter 之间），每次 Bash 调用前 |
+| 挂载点 | Host 的 tool-call dispatch 层（scheduler → tool-adapter 之间），每次 Bash 调用前 |
 | 判定 | 调 `command-guard.sh "<cmd>" --exit`，exit 1 = BLOCK |
 | BLOCK 行为 | 不执行命令，返回错误，追加 `guard-events.json`（`{ts, cmd, verdict}`） |
 | 放行名单 | profile/workflow 显式放行（refactorer/releaser 合法用 git）见 [gates.yaml](../config/gates.yaml) |

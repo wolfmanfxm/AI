@@ -75,9 +75,9 @@
 | **Skill Resolver** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
 | **Knowledge Resolver** | context-resolver.md + graph.json | 需要知道什么？ | Task→tags→Query→Top-K injection |
 | **Decision Engine** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
-| **Execution** | 10 Skills + workflow-engine + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
+| **Execution** | 10 Skills + workflow-protocol + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
 | **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |
-| **Reflection** | promotion-reviewer + instinct-extractor + decay-engine | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |
+| **Reflection** | promotion-reviewer + instinct-extractor + decay | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |
 | **Governance** | conformance(G1-G17) + drift(40/40) + trust(90/100) | 持续可信吗？ | 10/10 governed boundary |
 
 ## Skill Ecosystem 三件套
@@ -115,7 +115,7 @@ v1.0 的 Runtime 本质是 Workflow Runtime（流程执行器）。v2.0 目标�
 | **Tool Resolver** | ✅ adapter-registry 已定义，Skill 声明 `@adapter:` | — 不继续做。adapter 声明式映射足够，不需要 AI 推理 |
 | **Workflow Resolver** | orchestrator 选 pipeline（5 模式）+ profiles.yaml | 动态规划（Bug→Reviewer, Feature→Planner+Architect） |
 | **Promotion Resolver** | ✅ Phase 8 | — |
-| **Execution** | ✅ 10 Skills + workflow-engine | — |
+| **Execution** | ✅ 10 Skills + workflow-protocol | — |
 | **Learning** | ✅ Extract→Verify→Promote→Decay | — |
 
 ### 决策链（v2.0 目标形态）

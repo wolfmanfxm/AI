@@ -12,7 +12,7 @@ description: >
 # Analyzer v2.0
 
 > 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json
-> 遵循 [workflow-engine](../../workflow-engine/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
 
 ## 核心原则
 
@@ -23,7 +23,7 @@ description: >
 
 ## 何时触发（知识缺口入口）
 
-> Analyzer 不是默认入口，是**知识缺口入口**：只在 `.project-knowledge/` 不存在 / 未覆盖当前领域 / `last_scan` 过期时才跑。已有知识库且覆盖当前任务 → 跳过 Analyzer，用 Knowledge Resolver → Reuse（见 [Complexity Gate ②b](../../../shared/prompts/complexity-gate.md)）。
+> Analyzer 不是默认入口，是**知识缺口入口**：只在 `.project-knowledge/` 不存在 / 未覆盖当前领域 / `last_scan` 过期时才跑。已有知识库且覆盖当前任务 → 跳过 Analyzer，用 Knowledge Resolver → Reuse（见 [Complexity Gate ②b](../../shared/prompts/complexity-gate.md)）。
 
 > **增量分析（Incremental Analysis）**：知识库存在、但只有某个领域缺失时，只跑该领域相关的 Extractor，局部更新 graph.json + 对应 .md——不重跑全部 10 个 Extractor。全量 10-Extractor 扫描只在「知识库不存在 / 结构漂移」时才做。
 
@@ -38,8 +38,8 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @engine: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @engine: execution |
+| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
+| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
 
 > 8-Phase 执行详见 [prompts/execution.md](prompts/execution.md)；10 个 Extractor 详见 [prompts/extractors/](prompts/extractors/)。
 
@@ -47,11 +47,11 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Validation | [prompts/validation.md](prompts/validation.md) | @engine: validation |
-| Delivery | [prompts/delivery.md](prompts/delivery.md) | @engine: delivery |
+| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 ## 职责边界
 
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 
-> 完成后：/project-planner 或 /project-architect。通用约束 → [workflow-engine](../../workflow-engine/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/engine/command-guard.md)。
+> 完成后：/project-planner 或 /project-architect。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

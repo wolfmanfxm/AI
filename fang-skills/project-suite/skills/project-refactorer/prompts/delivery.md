@@ -1,6 +1,6 @@
 # Delivery — Refactorer
 
-> @engine: delivery
+> @template: delivery
 
 ## Actions
 

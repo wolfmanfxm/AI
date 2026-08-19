@@ -1,6 +1,6 @@
 # Execution — Planner
 
-> @engine: execution
+> @template: execution
 > Session Snapshot: 每步 Pipeline 后写入 `.project-knowledge/.sessions/project-planner/state.json` → 跨 session resume
 
 ## Actions
@@ -57,5 +57,5 @@ decisions:
 |-----------|--------|
 | 需求自相矛盾 | 在 Context 假设表中标注，分别给出两个方案覆盖矛盾分支 |
 | 时间不可行（估时远超可用工时） | 给出最小可行版 + 完整版两个方案，AskUserQuestion |
-| Confidence < 40% | **拒绝产出完整 PLAN**，只输出 `# Goal` + `# Scope`（含 Gap List）→ [confidence-gate](../../../runtime/engine/confidence-gate.md) |
+| Confidence < 40% | **拒绝产出完整 PLAN**，只输出 `# Goal` + `# Scope`（含 Gap List）→ [confidence-gate](../../../runtime/mechanisms/confidence-gate.md) |
 | 用户中途修改需求范围 | 重新划定 Scope，废弃任务标 `[deprecated]` |

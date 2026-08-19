@@ -1,6 +1,6 @@
 # Discovery — Documenter
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

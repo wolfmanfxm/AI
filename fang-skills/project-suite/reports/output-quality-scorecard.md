@@ -1,6 +1,6 @@
 # Output Quality Scorecard v1.0
 
-> 评估 Skill 产出质量的标准化评分卡。由 workflow-engine 或独立 Reviewer 填写。
+> 评估 Skill 产出质量的标准化评分卡。由 workflow-protocol 或独立 Reviewer 填写。
 > yao-meta-skill Governed 模式要求。
 
 ## Scorecard Template

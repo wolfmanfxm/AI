@@ -1,6 +1,6 @@
 # Code Audit — Architect
 
-> @engine: code-audit
+> @template: code-audit
 
 ## Actions
 

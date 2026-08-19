@@ -1,7 +1,14 @@
 # Workflow Library v1.0
 #
-# 通用 Workflow 模式。Skill 可引用预定义 workflow，Engine 自动展开 stages。
+# 通用 Workflow 模式。Skill 可引用预定义 workflow，Host 自动展开 stages。
 # Pipeline Orchestrator 使用跨 Skill workflow。
+#
+# ⚠️ 命名 pipeline 与 complexity-gate 的关系：
+#   本文件的「命名 pipeline」是**按业务场景命名**的参考模板（场景参考），
+#   不是「按复杂度收敛」的执行路径。实际执行以 complexity-gate 的路径为准
+#   （见 shared/prompts/complexity-gate.md「路由 → 命名 pipeline 映射」）。
+#   例：medium 任务走 Standard Path（planner→generator→reviewer），
+#   本库无同名 pipeline，最接近 analyze-plan-build 但多 analyzer+architect——以路径为准。
 
 version: "1.0.0"
 

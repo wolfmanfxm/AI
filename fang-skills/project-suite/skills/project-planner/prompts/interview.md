@@ -133,7 +133,7 @@ Planner 假设 "User = 任意登录者"
   Need:      "这里的 User 指哪个？"
 ```
 
-→ [Glossary Extractor](../project-analyzer/prompts/extractors/glossary.md)
+→ [Glossary Extractor](../../project-analyzer/prompts/extractors/glossary.md)
 → [Domain Model](../../../runtime/contracts/domain-model.md)
 
 ## Decision → Promotion 分流
@@ -148,7 +148,7 @@ Interview Decision
     → Cross-project (promotion:personal) → Knowledge Vault
 ```
 
-→ [Promotion Reviewer](../project-analyzer/prompts/promotion-reviewer.md)
+→ [Promotion Reviewer](../../project-analyzer/prompts/promotion-reviewer.md)
 
 ## 与 Context Resolver 的关系
 

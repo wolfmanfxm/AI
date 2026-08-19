@@ -3,6 +3,20 @@
 > `.project-runtime/` — 项目的持久化状态层。Skill 退出后信息不丢失。
 > 用户是 Dispatcher。State 是 Skill 间的共享记忆。
 
+## 状态真相边界（单一权威）
+
+> 状态文件很多，但**只有一个 Execution State 权威**，其余是派生/恢复/指标。避免「多个状态真相」。
+
+| 文件 | 性质 | 权威关系 |
+|------|------|---------|
+| **`state.json`** | **Execution State（唯一权威）** — 项目当前 phase/status/history/blockers | 唯一权威，其他 Skill 读它了解「现在到哪了」 |
+| `knowledge.json` | 知识生命周期（独立维度，不是执行状态） | 权威：知识的 Accepted/Candidate 状态 |
+| `manifest.json` | 断点续传辅助（skill 级子任务进度） | **派生自 state.json，仅恢复用**，不是独立执行状态真相 |
+| `.sessions/<skill>/state.json` | Session 快照（跨 session 恢复） | **恢复辅助**，内容以 state.json 为准 |
+| `timeline.json` | 执行指标（timing/quality） | **指标派生**，不含执行状态决策信息 |
+
+**规则**：判断「项目现在什么阶段、哪些 skill 完成了、有什么 blocker」——**只读 `state.json`**。manifest/session-snapshot/timeline 是 state.json 的辅助数据，冲突时以 state.json 为准。
+
 ## 核心理念
 
 ```

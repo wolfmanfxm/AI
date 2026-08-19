@@ -1,6 +1,6 @@
 # Discovery — Analyzer
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 

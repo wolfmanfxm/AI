@@ -63,6 +63,21 @@ Intent
 
 > 深度统一为 **minimal / standard / full** 三档。每个 skill 在 skill.yaml 声明 `depth_profiles`（simple→minimal, medium→standard, complex→full），并在 prompts 里定义该深度对本 skill 的具体含义（如 planner 的 minimal=只产 Goal/Scope/Tasks/AC、generator 的 minimal=跳过 Validation、reviewer 的 minimal=只审正确性+安全）。原则是**复杂度越低，深度越浅**——降 token 只靠少做事。
 
+### 路由 → 命名 pipeline 映射（消除语义间隙）
+
+> ⚠️ 本 gate 的「路径」是**按复杂度收敛的执行路径**（抽象层 A）；workflow-library.yaml 的「命名 pipeline」是**按业务场景命名**（抽象层 B）。两者不是一一对应，映射关系如下：
+
+| 本 gate 路由 | workflow-library 命名 pipeline | 关系 |
+|-------------|-------------------------------|------|
+| Reuse Fast Path | 无（零改动，不进 pipeline） | 独立 |
+| Quick Path | 无直接对应（最接近 `quick-change`，但 quick-change 含 reviewer） | 路径更轻 |
+| Standard Path | 无同名（最接近 `analyze-plan-build`，多 analyzer+architect） | 路径更轻 |
+| Full Path | `full-sdlc`（但 full-sdlc 多 documenter+releaser） | 路径更轻 |
+
+**规则**：orchestrator 先按本 gate 决定「路径」（几个 skill + 什么深度），再**按路径收敛结果**选择或微调命名 pipeline，而非反过来「按命名 pipeline 决定路径」。若命名 pipeline 与路径不一致，以路径为准（路径是复杂度驱动，pipeline 是场景参考）。
+
+**例如**：medium 任务 → Standard Path（planner→generator→reviewer），命名上最接近 `analyze-plan-build`，但因知识新鲜跳过 analyzer、medium 省略 architect，实际执行 Standard Path 的三个 skill，不硬套 analyze-plan-build 的五个 skill。
+
 ## 输出
 
 ```markdown

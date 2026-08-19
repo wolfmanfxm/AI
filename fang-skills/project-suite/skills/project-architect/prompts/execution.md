@@ -1,6 +1,6 @@
 # Execution — Architect
 
-> @engine: execution
+> @template: execution
 
 ## Actions
 

@@ -1,6 +1,6 @@
 # Discovery — Planner
 
-> @engine: discovery
+> @template: discovery
 
 ## Actions
 
