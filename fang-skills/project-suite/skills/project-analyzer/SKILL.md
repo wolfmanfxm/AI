@@ -2,14 +2,14 @@
 name: project-analyzer
 metadata: skill.yaml
 description: >
-  分析软件项目并生成可复用的项目知识库。v2.0 Multi-Extractor 架构：
+  分析软件项目并生成可复用的项目知识库。Multi-Extractor 架构：
   10 个专业化提取器 + Candidate→Verify→Accept + Evidence Score + INDEX.md。
   触发词：分析项目、代码分析、项目审计、扫描项目、梳理组件、更新项目知识、刷新项目知识、
   项目规范、编码规范、analyze codebase、scan project、project refresh。
   产出：.project-knowledge/ + Knowledge Vault。仅写知识文件，不修改源码。
 ---
 
-# Analyzer v2.0
+# Analyzer
 
 > 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json
 > 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph

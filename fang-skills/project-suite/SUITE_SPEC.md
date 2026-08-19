@@ -1,11 +1,6 @@
-# Suite Spec v1.1.0
+# Suite Spec v1.0.0
 
-> Project Suite 的正式 Framework 规范。v1.1 新增：Stage Template Injection、interface 统一、Governed 就绪。
-> v1.0 → v1.1 关键变化：
-> - G1 行数限制宽松至 130（为 workflow-protocol 留空间）
-> - 新增 G13-G16：stage prompts、@template 声明、skill-policy.yaml rollback、Skill Atlas
-> - 新增第 8 节：Governed Package Boundary
-> - 反例计数规则更新：SKILL.md 内嵌表计入 G3
+> Project Suite 的正式 Framework 规范。
 
 ---
 

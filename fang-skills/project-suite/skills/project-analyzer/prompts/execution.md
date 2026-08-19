@@ -1,7 +1,7 @@
 # Execution — Analyzer
 
 > @template: execution
-> v2.1: Multi-Extractor + 5-Verify + CHECKPOINT + Pipeline Resume
+> Multi-Extractor + 5-Verify + CHECKPOINT + Pipeline Resume
 
 ## Resume（跨 Session）
 

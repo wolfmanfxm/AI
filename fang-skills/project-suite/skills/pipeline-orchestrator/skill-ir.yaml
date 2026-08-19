@@ -3,7 +3,7 @@ id: pipeline-orchestrator
 version: "1.0.0"
 mode: Production
 description: "跨 Skill Pipeline 编排协议（Pipeline Protocol + Decision Boundary，非执行引擎）。 读取 registry 建议 pipeline 路径，在决策边界处交给用户确认，传递上下文，处理失败。 触发词：全流程、一键执行、自动编排、pipeline、完整链路、端到端、从分析到发布、自动化开发、full pipeline、orchestrate、end-to-end、auto sdlc、run all、complete workflow。 产出：pipeline-state.json + pipeline-report.md。"
-boundary: "编排跨 Skill pipeline 执行，不替代任何单个 Skill 的功能"
+boundary: "编排跨 Skill pipeline 建议（供 Host 参考），不替代任何单个 Skill 的功能"
 produces: [PipelinePlan]
 consumes: [KnowledgeBase,Plan,Architecture,Code,Test,Review,Documentation,Release]
 stages: [discovery, orchestrate, validation, delivery]

@@ -1,7 +1,7 @@
 # Delivery — Analyzer
 
 > @template: delivery
-> v3.0: 双同步策略 — 读取 classification-report.yaml，按 promotion level 同步
+> 双同步策略 — 读取 classification-report.yaml，按 promotion level 同步
 
 ## Actions
 

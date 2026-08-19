@@ -1,7 +1,7 @@
-# Validation — Analyzer v2.0
+# Validation — Analyzer
 
 > @template: validation
-> v2.0: 新增 Extractor 完整性 + Candidate→Verify 链路 + Evidence Score 检查
+> 新增 Extractor 完整性 + Candidate→Verify 链路 + Evidence Score 检查
 
 ## Checks
 

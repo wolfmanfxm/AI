@@ -19,7 +19,7 @@
 > 唯一例外是各 skill 的 `references/examples.md`（已标注「Reference example only」）。
 > 框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），不绑定任何具体项目。
 
-## 当前版本：Suite v1.1 Spec / Release v1.0
+## 当前版本：Suite v1.0 Spec / Release v1.0
 
 ```
 Knowledge 层         — Object + Context Resolver + Promotion Reviewer + Decay
@@ -72,7 +72,7 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 | 9 | **releaser** | 版本 bump + Changelog + 发布检查 | 全链路 Confidence Gate |
 | 10 | **orchestrator** | 跨 Skill Pipeline 编排建议 | Registry-driven + Decision Boundary |
 
-## Analyzer v3.0 — 核心 Skill
+## Analyzer — 核心 Skill
 
 ```
 Phase 1: 10 Extractors (Registry-driven) → candidates/accepted/*.yaml

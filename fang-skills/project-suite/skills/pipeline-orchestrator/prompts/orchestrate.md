@@ -1,7 +1,7 @@
-# Orchestrate — Pipeline Orchestrator v2.0
+# Orchestrate — Pipeline Orchestrator
 
 > @template: execution
-> v2.0: Decision-Boundary Checkpoint。是否自动推进（auto-advance）是 Host capability，非 Suite 能力；profile 声明「希望哪些点是决策边界」，Host 决定实际是否自动推进。
+> Decision-Boundary Checkpoint。是否自动推进（auto-advance）是 Host capability，非 Suite 能力；profile 声明「希望哪些点是决策边界」，Host 决定实际是否自动推进。
 
 ## Actions
 
