@@ -88,8 +88,8 @@ confidence = 100
 
 **核心问题：** 项目现状是什么？有哪些技术/业务约束？
 
-- `@adapter:knowledge.query --type module,decision --scope project` 了解现有架构
-- 引用 `.project-knowledge/rules/` 了解编码约束
+- 结构事实：查 graph.json（`findNode(module)` / `findDependencies`，见 [graph-query.md](../../../runtime/contracts/graph-query.md)）了解现有架构
+- 约束：读 context-package.json 的 rules[]（blocking 约束，resolver 产出）了解编码约束
 - 标注信息缺口（不确定的事 + 错了的代价）
 
 → 产出：`# Context`
@@ -201,6 +201,7 @@ B 完全独立？                 → 无依赖
 > | `# Scope` | Generator、Reviewer |
 > | `# Context` | Architect、Generator |
 > | `# Reuse Analysis` | Generator |
+> | `# Knowledge Constraints` | Generator |
 > | `# Decision` | Architect |
 > | `# Task Breakdown` | Generator |
 > | `# Dependency Graph` | Generator、Runtime |
@@ -279,6 +280,31 @@ B 完全独立？                 → 无依赖
 | 规则 | 来源 | 约束内容 |
 |------|------|---------|
 | {rule} | .project-knowledge/rules/{file} | {必须遵守的规范} |
+
+---
+
+# Knowledge Constraints
+
+> Generator：本块是 Resolver + Reuse Analysis 的**机器可读 ID 清单**，直接消费，
+> 不要重新扫描 `.project-knowledge/`。与 context-package.json 的 rules[]/knowledge[] 同源。
+
+## Rules（blocking — 必须遵守）
+| id | 来源 | 约束 |
+|----|------|------|
+| rule.{id} | rules/{file}.md | {constraint 一句话} |
+
+## Decisions（blocking — project-scope，必须遵守）
+| id | 来源 | 约束 |
+|----|------|------|
+| decision.{id} | decisions/{file}.md | {constraint 一句话} |
+
+## Relevant Patterns / Components / API（recommended — 用于实现）
+| id | 来源 | 用于 Task |
+|----|------|-----------|
+| pattern.{name} | patterns/{file}.md | T{N} |
+| component.{name} | components/catalog.md | T{N} |
+
+> 注：task-scope decision（`ARCHITECTURE-*.md` 一次性 feature ADR）不进本块，作 advisory 参考（见 context-package.json 的 guidance）。
 
 ---
 

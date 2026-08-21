@@ -7,7 +7,7 @@
 ## 前置
 
 1. 读组件源码（文件格式按项目技术栈）
-2. `@adapter:knowledge.query --type component --scope project` 确认现有组件和文档风格
+2. 查 graph.json（graph-query.md 的 findNode component）确认现有组件和文档风格
 3. 读 1 份已有组件文档（若存在）
 
 ## 输入

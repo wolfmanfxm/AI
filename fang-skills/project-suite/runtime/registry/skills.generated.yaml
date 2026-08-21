@@ -70,7 +70,7 @@ skills:
     interface:
       inputs:
         - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }
-        - { name: knowledge-index.json, type: state, required: true, source: project-analyzer, fixture: true, description: capability→文件映射 }
+        - { name: knowledge-index.json, type: state, required: true, source: knowledge-compiler, fixture: true, description: capability→文件映射 }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 模块依赖关系 }
       outputs:
         - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }

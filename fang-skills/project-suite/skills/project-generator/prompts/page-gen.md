@@ -6,9 +6,9 @@
 
 ## 前置步骤
 
-1. **查询 architecture 知识（query: architecture）** — 确认路由和目录结构
-2. **查询 patterns 知识（query: patterns）确认页面模式**（列表/表单等）
-3. **`@adapter:knowledge.query --type component --scope project`** — 确认可复用的项目组件
+1. **读 context-package.json 的 knowledge[]（architecture）** — 确认路由和目录结构
+2. **读 context-package.json 的 knowledge[]（pattern）确认页面模式**（列表/表单等）
+3. **查 graph.json（graph-query.md 的 findNode("component")）** — 确认可复用的项目组件
 4. **搜索类似页面** — `grep` 项目中功能相似的页面作为参考
 
 ## 输入

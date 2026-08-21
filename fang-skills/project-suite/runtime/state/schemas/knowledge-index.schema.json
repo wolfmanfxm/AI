@@ -12,7 +12,8 @@
     },
     "generatedBy": {
       "type": "string",
-      "const": "project-analyzer"
+      "const": "knowledge-compiler",
+      "description": "Producer: standalone runtime/knowledge/ module. Scans .md files in the 8 knowledge directories (rules/decisions/patterns/components/api/architecture/experience/playbooks). graph.json is the Resolver's structural input, NOT the Compiler's input."
     },
     "generatedAt": {
       "type": "string",
@@ -23,7 +24,7 @@
       "description": "Capability label → definition mapping",
       "additionalProperties": {
         "type": "object",
-        "required": ["description", "files", "keywords", "confidence"],
+        "required": ["description", "files"],
         "properties": {
           "description": {
             "type": "string",
@@ -31,21 +32,38 @@
           },
           "files": {
             "type": "array",
-            "description": "Relative paths under .project-knowledge/",
-            "items": { "type": "string" },
+            "description": "Knowledge files under .project-knowledge/, each carrying unified Knowledge Metadata.",
+            "items": {
+              "type": "object",
+              "required": ["source", "type", "enforcement", "priority"],
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "description": "Relative path under .project-knowledge/, e.g. rules/form-component-standard.md"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["rule", "decision", "pattern", "component", "api", "experience", "playbook"],
+                  "description": "Knowledge object category"
+                },
+                "enforcement": {
+                  "type": "string",
+                  "enum": ["blocking", "recommended", "advisory"],
+                  "description": "blocking = MUST follow; recommended = should follow; advisory = reference only"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": ["P1", "P2", "P3"],
+                  "description": "P1=rules/project-decisions, P2=patterns/architecture/components/api/task-decisions, P3=experience/playbooks"
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["task", "project", "organization", "personal"],
+                  "description": "仅 decision 使用：task=一次性 feature ADR（不进 blocking constraints），project=长期项目决策（blocking）"
+                }
+              }
+            },
             "minItems": 1
-          },
-          "keywords": {
-            "type": "array",
-            "description": "Search keywords (Chinese + English)",
-            "items": { "type": "string" },
-            "minItems": 2
-          },
-          "confidence": {
-            "type": "integer",
-            "description": "Confidence score 0-100",
-            "minimum": 0,
-            "maximum": 100
           },
           "depends_on": {
             "type": "array",

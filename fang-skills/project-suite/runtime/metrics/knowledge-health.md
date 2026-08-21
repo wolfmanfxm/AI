@@ -13,7 +13,7 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
 
 ## 文件位置
 
-`.project-runtime/metrics/knowledge-health.json`
+`.project-knowledge/runtime/metrics/knowledge-health.json`
 
 ## Schema
 
@@ -87,9 +87,9 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
     {
       "id": "KH-006",
       "severity": "warning",
-      "type": "outdated_evidence",
+      "type": "evidence_freshness",
       "file": "overview.md",
-      "detail": "Evidence Header 记录 `generatedAt: 2026-04-01`，超过 90 天未刷新",
+      "detail": "Evidence Header 记录 `generatedAt: 2026-04-01`，超过 90 天未刷新（证据新鲜度，≠ 知识可信度）",
       "generatedAt": "2026-04-01",
       "daysSinceRefresh": 120,
       "suggestion": "执行增量分析刷新"
@@ -119,8 +119,13 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
 |------|---------|------|
 | `empty_document` | `wc -c` | < 200 bytes |
 | `duplicate_content` | 标题相似度（编辑距离 / 最长公共子串） | > 80% |
-| `outdated_evidence` | Evidence Header `generatedAt` 距今 | > 90 天 |
+| `evidence_freshness` | Evidence Header `generatedAt` 距今 | > 90 天 |
 | `missing_evidence_header` | 检查文件前 5 行是否有 Evidence Header | 不存在 |
+
+> **`evidence_freshness`（证据新鲜度 warning）≠ 知识可信度衰减（decay）。**
+> 前者是「证据多久没刷新」，输入是 analyzer 的扫描时间 `generatedAt`；后者是「知识还值不值得信」，
+> 输入是 `last_verified` / `stability` / `decay_score`——目前**无 Producer**，见 [knowledge-decay.md](../knowledge/knowledge-decay.md)（planned）。
+> 扫描时间推断知识失效是「假运行能力」：200 天没扫描 ≠ 知识失效。
 
 ### info（建议修 — 可积累）
 
@@ -145,7 +150,7 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
 
 ```
 1. 只扫描 manifest.json 中标记 [CHANGED] 的文件 + 其引用目标
-2. 对变更文件执行 broken_link + empty_document + outdated_evidence
+2. 对变更文件执行 broken_link + empty_document + evidence_freshness
 3. 对全量执行 duplicate_content（去重新增文件与已有文件的相似度）
 4. 更新 knowledge-health.json：
    - 已修复的 issue → 从 issues[] 移除
@@ -190,7 +195,7 @@ for each file in .project-knowledge/:
 → trend.delta（负数=改善，正数=恶化）
 
 "哪些文件该退休了？"
-→ issues[type=orphan_knowledge] + issues[type=outdated_evidence]
+→ issues[type=orphan_knowledge] + issues[type=evidence_freshness]
 
 "有没有两个人在写同一件事？"
 → issues[type=duplicate_content]

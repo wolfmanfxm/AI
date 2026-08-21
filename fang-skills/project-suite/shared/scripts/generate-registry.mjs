@@ -169,7 +169,7 @@ capability_types:
   Context:          # context.json
     description: 下游 skill 标准上下文（技术栈/路径别名/约定/模块清单）
     format: [.json]
-  State:            # .project-runtime/state.json + knowledge.json
+  State:            # .project-knowledge/runtime/state.json + knowledge.json
     description: 项目持久化状态（执行历史/置信度/知识生命周期）
     format: [.json]
   Graph:            # graph.json
@@ -216,7 +216,7 @@ decision_model:
     question: "需要哪些知识？"
     input: matched_skill + project_context
     output: curated_knowledge
-    source: context-resolver.md + graph.json
+    source: context-resolver.md + knowledge-index.json
   step_3:
     name: Decision Engine
     question: "基于这些知识应该怎么做？"

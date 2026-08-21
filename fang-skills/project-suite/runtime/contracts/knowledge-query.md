@@ -1,84 +1,39 @@
-# Knowledge Query API v1.0
+# Knowledge Access 边界 v2.0
 
-> 统一知识查询接口。Skill 通过结构化查询获取 Knowledge Object，而非读取 .md 文件。
+> 统一知识访问边界。Skill 通过结构化入口获取知识，而非直接读 .md 文件。
+>
+> 上一版（v1.0）把「知识查询」设计成单一 `@knowledge:<type>` 接口，底层落到
+> `knowledge-graph.yaml` —— 但该文件从未被任何 Producer 产出，从未闭环。
+> 本版收口为**两条明确路径**，各管一类，不再混用。
 
-## Knowledge Access 边界（两类访问）
+## 两类知识访问（边界唯一权威）
 
-Skill 获取数据分两类，边界清晰，避免 "Skill A → query, Skill B → md, Skill C → graph" 的失控：
+| 类别 | 访问方式 | 底层产物 | 契约 |
+|------|---------|---------|------|
+| **结构事实**（组件/API/模块存在性、依赖链、影响半径） | 图查询 | `graph.json` | [graph-query.md](graph-query.md) |
+| **知识**（rules/decisions/patterns/components/api/experience/playbooks 的约束与模式） | Resolver 预消化 | `knowledge-index.json` → `context-package.json` | [../knowledge-resolver.md](../knowledge-resolver.md) |
 
-| 类别 | 访问方式 | 例子 |
-|------|---------|------|
-| **Knowledge**（项目知识/长期积累） | **必须走 Query API** | pattern / convention / decision / instinct / component / glossary |
-| **Knowledge Object**（知识索引/图谱/上下文） | **必须走 Query API**（是 Knowledge 的机器索引，不是普通 Artifact） | `context.json` / `graph.json` / `knowledge-index.json` |
-| **Task Artifact**（任务产物/一次性） | **直接读文件** | PLAN.md / ARCHITECTURE.md / 目标源码 / REVIEW.md |
+## 规则
 
-```
-Knowledge（需要什么知识？）
-  → knowledge.query
-  → Context Package（预消化，注入而非读文件）
+1. **Knowledge 不直接读 .md** —— 结构事实走 `graph-query`，知识走 `Resolver` 产出的
+   `context-package.json`，Skill 不手翻 `.project-knowledge/**/*.md`。
+2. **Task Artifact 不通过 Query** —— PLAN.md / ARCHITECTURE.md / 目标源码直接
+   `@adapter:filesystem.read`。
+3. **两条路径不混用** —— `component/api/module` 属于结构事实（graph.json 节点）；
+   `rule/decision/pattern/experience/playbook` 属于知识（knowledge-index → context-package）。
 
-Task Artifact（本次任务的具体输入）
-  → @adapter:filesystem.read
-```
+## 各 Skill 的典型访问
 
-**规则**：Knowledge 不直接读 .md；Artifact 不通过 Query。这条边界由 Context Resolver 统一守护——所有知识消费必经它。
+| Skill | 结构事实（graph-query） | 知识（Resolver） |
+|-------|------------------------|------------------|
+| Planner | `findNode(component/api)` 了解可复用资产 | context-package.json 的 rules/knowledge/guidance |
+| Architect | `findDependencies` 看耦合、`findConsumers` 看影响 | `decision`(scope=project) 避免重复决策 |
+| Generator | `findNode(api)` 避免重复建 API | context-package.json 直接注入 pattern/constraints |
+| Reviewer | `findImpacted` 看变更影响 | rules 的 blocking 约束对照审查 |
+| Documenter | `findNode(component/api)` 溯源 | context-package.json 的 knowledge |
 
-## 查询语法
+## 历史（已废弃）
 
-```
-@knowledge:<type> [filters]
-```
-
-## 查询参数
-
-| 参数 | 示例 | 说明 |
-|------|------|------|
-| `type` | `pattern` `convention` `principle` `decision` `risk` `antipattern` `instinct` `all` | 知识类型 |
-| `scope` | `project` `organization` `personal` | 范围过滤 |
-| `tags` | `form,vue3,validation` | 标签（AND） |
-| `confidence>=` | `0.8` | 最低置信度 |
-| `related_to` | `pattern.repository` | 与指定 id 关联的知识 |
-| `limit` | `10` | 返回条数上限 |
-
-## 返回格式
-
-```yaml
-query: { type: pattern, scope: project, tags: [form], confidence>=: 0.8 }
-results:
-  - id: pattern.form-wrapper
-    type: pattern
-    confidence: 0.96
-    statement: "所有复杂表单使用 <统一表单封装> 封装"
-    evidence: [{path: workspace/views/, type: ratio, note: "331 files use <统一表单封装>"}]
-    related:
-      - {id: convention.form-naming, relation: references}
-      - {id: principle.always-form-wrapper, relation: implements}
-    score: { quality: 0.95, reuse: 12, freshness: 1.0 }
-    tags: [form, vue3, wrapper]
-```
-
-## 各 Skill 查询模式
-
-| Skill | 典型查询 | 用途 |
-|-------|---------|------|
-| **Planner** | `type=pattern,component,api scope=project` | 了解可复用资产 |
-| **Architect** | `type=decision scope=project` | 避免重复决策 |
-| **Generator** | `type=pattern,convention,component tags=<module>` | 套用模式生成代码 |
-| **Reviewer** | `type=antipattern,risk scope=project` | 对照审查 |
-| **Documenter** | `type=api,component scope=project` | 溯源文档 |
-| **Tester** | `type=convention tags=test` | 遵循测试规范 |
-
-## CLI 工具
-
-`shared/scripts/knowledge-query.sh` — 从 `graph.json` 中查询：
-
-```bash
-# 查询所有 Form 相关的 pattern
-bash shared/scripts/knowledge-query.sh --type pattern --tags form
-
-# 查询高置信度 convention
-bash shared/scripts/knowledge-query.sh --type convention --confidence 0.8
-
-# 查询与 repository pattern 关联的所有知识
-bash shared/scripts/knowledge-query.sh --related-to pattern.repository
-```
+- `knowledge-query.sh` / `check-decay.sh`（旧 CLI，查询从未产出的 `knowledge-graph.yaml`）
+  已废弃，见脚本头部说明。
+- `knowledge-list.json`（v1 文件路径清单）已废弃，被 `context-package.json` 取代。

@@ -1,15 +1,15 @@
 # Knowledge Resolver v1.0.0
 
-> Task → Knowledge Graph → Top K → Generator
+> Task → 分桶（constraints/knowledge/guidance）→ context-package.json → Generator
 > Generator 永远不自己搜索知识库。Resolver 是唯一的检索入口。
 >
-> 📖 **人类读这里**（算法说明） · ⚙️ **Schema: [knowledge-index.schema.json](state/schemas/knowledge-index.schema.json)** · 📍 **输出: `.project-runtime/knowledge-index.json`**
+> 📖 **人类读这里**（算法说明） · ⚙️ **Schema: [context-package.schema.json](contracts/context-package.schema.json)** · 📍 **输出: `.project-knowledge/context-package.json`**
 
 ## 核心原则
 
 ```
 之前:  Generator 读 patterns/ + components/ + api/ → 自己判断用哪个
-之后:  Resolver(Task, Graph) → context-package.json → Generator 只消费这个预消化知识包
+之后:  Resolver(Task, Index) → context-package.json → Generator 只消费这个预消化知识包
 ```
 
 Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀。
@@ -17,33 +17,35 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 ## 算法
 
 ```
-输入: Task（来自 PLAN.md > # Task Breakdown）+ graph.json
-输出: context-package.json（预消化知识包：pattern + constraints + components）
+输入: Task + candidates（Planner # Reuse Analysis 传入：source/capability/tag）+ knowledge-index.json
+输出: context-package.json（分桶：constraints 全量 + knowledge Top-K + guidance Top-K）
 
-1. 提取实体
-   从 Task 描述中提取:
-   - 组件名（如 <表单字段>, UserTable）
-   - API 模块名（如 orderApi, userApi）
-   - 模式关键词（如 CRUD, 审批流, 文件上传）
+1. 分桶（按 type，确定性）
+   遍历 knowledge-index.json 每个 capability 的每个 file entry，按 type 归桶：
+   - rule → rules（blocking 约束，恒全量）
+   - decision → scope=project（blocking）→ rules；scope=task（advisory）→ guidance
+   - experience / playbook → guidance
+   - pattern / component / api → knowledge
 
-2. 图查询
-   对每个实体:
-   - findNode(type, name) → 定位节点
-   - findTransitiveDeps(nodeId) → 获取传递依赖链（深度 ≤ 2）
-   
-3. 映射到知识文件
-   每个图节点映射到 .project-knowledge/ 中的文件:
-   - component 类型 → components/catalog.md + 对应 pattern
-   - api 类型 → api/<module>.md + api/overview.md
-   - pattern 类型 → patterns/<name>.md
-   
-4. 去重 + 排序
-   - 去重: 同一文件只保留一次
-   - 排序: 按节点在依赖链中的距离（直接依赖 > 间接依赖）
-   - 限制: Top K（默认 5，可配置）
-   
-5. 输出 Context Package（`context-package.json`）
+2. 候选集过滤（candidates：Planner # Reuse Analysis 传入的 source/capability/tag）
+   - rules（blocking constraints）：恒全量，不受 candidates / Top-K 影响
+   - knowledge / guidance：按 candidates 过滤（传了才过滤 + 裁 Top-K；不传 = 全量，向后兼容）
+   - Top-K：knowledge 默认 5，guidance 默认 3；rank 恒按 priority → confidence↓ → tag-overlap↓ → source
+
+3. Hydrate（读源取正文，确定性）
+   - rule / project-decision：读 frontmatter `constraint` → context.rules[].constraint
+   - knowledge / guidance：读 frontmatter `statement`/`summary`（否则首个 `# 标题`）→ pattern
+   - Index 只存 metadata（discover），正文在 hydrate 阶段取（retrieve + hydrate）
+
+4. 输出 Context Package
+   context.rules[]     = 全量 blocking 约束（type=rule/decision）
+   context.knowledge[] = 预消化 pattern（P2）
+   context.guidance[]  = experience/playbooks（P3）
 ```
+
+> **结构事实不走 Resolver**：component/api/module 的存在性、依赖链、影响半径由 Planner/Architect/Generator
+> 经 [graph-query.md](contracts/graph-query.md)（findNode/findTransitiveDeps/findConsumers）直接查 `graph.json`，
+> 再填入 context-package 的 `components`/`api`。Resolver 只读 `knowledge-index.json`（Compiler 产出），**graph.json 不是 Resolver 输入**。
 
 ## Context Package（主输出，v2.0）
 
@@ -167,9 +169,9 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
 Planner 在 Step 4（Reuse Analysis）之后调用 Resolver:
 
 ```
-1. Reuse Analysis → 确定涉及的组件/API/模式
-2. 调用 Resolver(任务列表, graph.json) → context-package.json
-3. 将 context-package.json 写入 artifacts/plans/
+1. Reuse Analysis → 确定涉及的组件/API/模式 → 产出 candidates
+2. 调用 Resolver(任务列表, candidates) → context-package.json
+3. 将 context-package.json 写入 `.project-knowledge/context-package.json`
 ```
 
 ### Generator 消费
@@ -199,7 +201,7 @@ Reviewer 审查时:
 ## 降级
 
 ```
-graph.json 不存在 → Resolver 退化为 PLAN.md # Reuse Analysis 直接映射
+knowledge-index.json 不存在 → Resolver 无法运行（需先跑 knowledge-compiler.sh 生成 index）
 context-package.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取文件列表
 两者都不存在 → Generator 降级通用模式
 ```
@@ -212,8 +214,10 @@ context-package.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取
 
 ## 与 Knowledge Lifecycle 的关系
 
-Resolver 只返回 `status: accepted` 的知识文件。
-`Candidate` 状态的文件不进入 context-package.json。
-这确保 Generator 永远不把猜测当事实。
+Resolver **不读 status** —— 它消费 Compiler 产出的 `knowledge-index.json`，而 Compiler 已对 analyzer 产出的目录
+（patterns/components/api/architecture）排除了 status 明确非 Accepted 的文件（见 [knowledge-compiler.md](knowledge/knowledge-compiler.md) 的 lifecycle 过滤）。
+`rules/decisions/experience/playbooks` 是用户手写的权威约束，恒入 index，不受 lifecycle 门控。
+
+所以 Candidate 的 analyzer 产出知识不会进入 context-package.json —— 这确保 Generator 永远不把猜测当事实。
 
 → [state/schemas/knowledge-lifecycle.md](state/schemas/knowledge-lifecycle.md)

@@ -19,8 +19,8 @@
                      ┌─────────────────────┐
                      │  Knowledge Resolver │
                      │  "需要知道什么？"     │
-                     │  context-resolver   │
-                     │  + knowledge-graph   │
+                     │  knowledge-index.json│
+                     │  → context-package   │
                      └──────────┬──────────┘
                                 │
                                 ▼
@@ -64,7 +64,7 @@
                      │   + Promotion       │
                      │   candidate→verify  │
                      │   →accepted→vault   │
-                     │   + Decay Engine    │
+                     │   + Decay (planned) │
                      └─────────────────────┘
 ```
 
@@ -73,7 +73,7 @@
 | 层 | 组件 | 回答 | 实现 |
 |----|------|------|------|
 | **Skill Resolver** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
-| **Knowledge Resolver** | context-resolver.md + graph.json | 需要知道什么？ | Task→tags→Query→Top-K injection |
+| **Knowledge Resolver** | context-resolver + knowledge-index.json | 需要知道什么？ | Task→分桶(constraints/knowledge/guidance)→context-package.json |
 | **Decision Engine** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
 | **Execution** | 10 Skills + workflow-protocol + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
 | **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |
@@ -101,7 +101,7 @@ Verify: 9/10 | @adapter: 27 refs | Skill IR: 10/10
 Context Resolver: 10/10 | Rationalizations: 10/10
 Decision Record: 3/3 | Completeness Check: ✅
 Session Snapshot: 3/3 (analyzer/planner/generator)
-Background Pipeline: ✅ | Decay Engine: ✅
+Background Pipeline: ✅ | Decay Engine: planned（无 Producer，见 knowledge-decay.md）
 ```
 
 ## v2.0 方向
@@ -116,7 +116,7 @@ v1.0 的 Runtime 本质是 Workflow Runtime（流程执行器）。v2.0 目标�
 | **Workflow Resolver** | orchestrator 选 pipeline（5 模式）+ profiles.yaml | 动态规划（Bug→Reviewer, Feature→Planner+Architect） |
 | **Promotion Resolver** | ✅ Phase 8 | — |
 | **Execution** | ✅ 10 Skills + workflow-protocol | — |
-| **Learning** | ✅ Extract→Verify→Promote→Decay | — |
+| **Learning** | ✅ Extract→Verify→Promote（Decay：planned） | — |
 
 ### 决策链（v2.0 目标形态）
 

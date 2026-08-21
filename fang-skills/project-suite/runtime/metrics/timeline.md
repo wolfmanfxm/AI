@@ -2,7 +2,7 @@
 
 > 执行链路可观测。记录每个 Skill 的运行指标，解决"哪个 Skill 最慢？哪个最容易失败？"只能凭感觉的问题。
 >
-> 📖 **人类读这里** · ⚙️ **Schema: [timeline.schema.json](timeline.schema.json)** · 📍 **输出: `.project-runtime/metrics/timeline.json`**
+> 📖 **人类读这里** · ⚙️ **Schema: [timeline.schema.json](timeline.schema.json)** · 📍 **输出: `.project-knowledge/runtime/metrics/timeline.json`**
 
 ## 定位
 
@@ -15,7 +15,7 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 
 ## 文件位置
 
-`.project-runtime/metrics/timeline.json`
+`.project-knowledge/runtime/metrics/timeline.json`
 
 ## Schema
 
@@ -76,8 +76,8 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
       },
 
       "input": {
-        "planFile": "artifacts/plans/PLAN-user-activate.md",
-        "architectureFile": "artifacts/decisions/ARCHITECTURE-user.md",
+        "planFile": "proposals/PLAN-user-activate.md",
+        "architectureFile": "decisions/ARCHITECTURE-user.md",
         "capabilitiesUsed": ["VueConvention","TablePattern","FormPattern","ApiPattern"],
         "knowledgeFilesRead": 4,
         "contextSizeEstimate": "~45k tokens"

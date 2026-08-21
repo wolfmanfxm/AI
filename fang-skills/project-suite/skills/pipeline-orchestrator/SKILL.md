@@ -26,7 +26,7 @@ description: >
 |--------|------|--------|
 | 0 | `runtime/registry/capabilities.yaml` | 🔴 BLOCKED |
 | 1 | `runtime/registry/workflow-library.yaml` | 🔴 BLOCKED |
-| 2 | `.project-runtime/state.json` | 🟡 DEGRADED — 无历史状态 |
+| 2 | `.project-knowledge/runtime/state.json` | 🟡 DEGRADED — 无历史状态 |
 | 3 | 被编排的 Skill 均可用 | 🟡 DEGRADED — 跳过缺失 Skill |
 
 ## 工作流

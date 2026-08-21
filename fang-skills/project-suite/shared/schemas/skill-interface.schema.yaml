@@ -37,7 +37,7 @@ fields:
     description: 执行副作用。Host 据此决定是否可并行、是否可重试。
     type: object
     properties:
-      writes_state: boolean       # 是否写入 .project-runtime/state.json
+      writes_state: boolean       # 是否写入 .project-knowledge/runtime/state.json
       writes_knowledge: boolean   # 是否写入 .project-knowledge/
       modifies_code: boolean      # 是否修改项目源码
       writes_timeline: boolean    # 是否追加 timeline.json

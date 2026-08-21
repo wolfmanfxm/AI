@@ -1,6 +1,6 @@
 #!/bin/bash
 # Cross-Run Reliability Checker v1.0
-# Compares two .project-runtime/ snapshots to measure skill stability.
+# Compares two .project-knowledge/runtime/ snapshots to measure skill stability.
 #
 # Usage: bash shared/scripts/check-reliability.sh <snapshot-A> <snapshot-B> [skill-name]
 #   snapshot-A/B: directories containing state.json + manifest.json + output files
@@ -15,8 +15,8 @@ SKILL_FILTER="${3:-}"
 if [ -z "$SNAPSHOT_A" ] || [ -z "$SNAPSHOT_B" ]; then
   echo "Usage: bash check-reliability.sh <snapshot-A-dir> <snapshot-B-dir> [skill-name]"
   echo ""
-  echo "Snapshots are directories containing .project-runtime/ files from two different runs."
-  echo "Create a snapshot: cp -r .project-runtime/ snapshots/run-$(date +%Y%m%d-%H%M%S)/"
+  echo "Snapshots are directories containing .project-knowledge/runtime/ files from two different runs."
+  echo "Create a snapshot: cp -r .project-knowledge/runtime/ snapshots/run-$(date +%Y%m%d-%H%M%S)/"
   exit 1
 fi
 

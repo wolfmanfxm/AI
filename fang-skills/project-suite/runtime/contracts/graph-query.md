@@ -109,7 +109,7 @@ Resolver:
   1. 分析需求 → 确定涉及哪些组件/API
   2. 查 graph: findTransitiveDeps("comp-Target") → 得到依赖链
   3. 生成 context-package.json: 预消化 pattern + constraints + components
-  4. 写入 artifacts/plans/
+  4. 写入 `.project-knowledge/context-package.json`
 
 Generator:
   1. 读 context-package.json → 遍历 context.knowledge[] 直接注入

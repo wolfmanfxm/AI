@@ -17,7 +17,7 @@
 | 字段 | 来源 | 必须 |
 |------|------|------|
 | context.json | analyzer | 🔴 |
-| state.json | .project-runtime/ | 🟡 |
+| state.json | .project-knowledge/runtime/ | 🟡 |
 | knowledge.md | .project-knowledge/ | 🟡 |
 | 用户需求 | User Prompt | 🔴 |
 

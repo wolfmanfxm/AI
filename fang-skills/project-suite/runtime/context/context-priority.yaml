@@ -19,7 +19,7 @@ sources:
     merge: override            # 用户说了算，覆盖一切
   - index: 2
     name: project_runtime
-    description: .project-runtime/ 项目状态与上游产出
+    description: .project-knowledge/runtime/ 项目状态与上游产出
     merge: override
   - index: 3
     name: project_knowledge

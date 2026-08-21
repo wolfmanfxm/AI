@@ -1,6 +1,6 @@
 # Project State
 
-> `.project-runtime/` — 项目的持久化状态层。Skill 退出后信息不丢失。
+> `.project-knowledge/runtime/` — 项目的持久化状态层。Skill 退出后信息不丢失。
 > 用户是 Dispatcher。State 是 Skill 间的共享记忆。
 
 ## 状态真相边界（单一权威）
@@ -22,7 +22,7 @@
 ```
 用户（Dispatcher）
  │
- │  读 .project-runtime/ 了解：
+ │  读 .project-knowledge/runtime/ 了解：
  │    - 当前什么阶段
  │    - 哪些 Skill 已完成
  │    - 每个 Skill 的置信度
@@ -40,33 +40,29 @@ Skill
 
 ## 初始化
 
-**由 project-analyzer 在首次执行时创建 `.project-runtime/`**：
+**由 project-analyzer 在首次执行时创建 `.project-knowledge/runtime/`**：
 
-1. analyzer Finish Phase B 检测 `.project-runtime/` 是否存在
-2. 不存在 → 创建目录结构：`state.json` + `knowledge.json` + `metrics/` + `artifacts/`
+1. analyzer Finish Phase B 检测 `.project-knowledge/runtime/` 是否存在
+2. 不存在 → 创建目录结构：`state.json` + `knowledge.json` + `metrics/`
 3. 写入初始 state（`phase: analyzing, status: in_progress`）
 4. 后续 skill 通过读 state 了解当前阶段
 
-**其他 skill 不负责创建 `.project-runtime/`**，仅 analyzer 有这个职责。若 analyzer 未执行（如直接调用 generator），下游 skill 降级为无状态模式。
+**其他 skill 不负责创建 `.project-knowledge/runtime/`**，仅 analyzer 有这个职责。若 analyzer 未执行（如直接调用 generator），下游 skill 降级为无状态模式。
 
 ## 目录结构
 
 ```
-.project-runtime/
+.project-knowledge/runtime/
 ├── state.json              # 项目当前状态 + 执行历史（含 confidence gate）
 ├── knowledge.json           # 知识文件生命周期追踪
-├── knowledge-index.json     # Capability→文件映射
 ├── metrics/                 # 可观测层（v1.3.0）
 │   ├── timeline.json        # 全量执行历史指标
 │   ├── knowledge-health.json # 知识库质量检测报告
 │   └── archive/             # 归档的旧 timeline（按季度）
-└── artifacts/               # 统一产出目录
-    ├── plans/               # PLAN-*.md
-    ├── decisions/           # ARCHITECTURE-*.md
-    ├── reviews/             # REVIEW-*.md
-    ├── reports/             # TEST-REPORT.md, REFACTOR.md
-    └── releases/            # CHANGELOG.md
 ```
+
+> 产出文件不在 `runtime/` 下——统一写入 `.project-knowledge/` 对应子目录：
+> PLAN→`proposals/`、ARCHITECTURE→`decisions/`、REVIEW/TEST-REPORT/CHANGELOG→`reports/`。
 
 ## state.json
 
@@ -85,7 +81,7 @@ Skill
       "skill": "project-analyzer",
       "status": "completed",
       "confidence": 92,
-      "output": "artifacts/knowledge/",
+      "output": ".project-knowledge/",
       "suggested_next": "project-planner",
       "at": "2026-07-28T14:00:00"
     }
@@ -167,7 +163,7 @@ Skill
    - state.json → 追加 history（含 confidence + suggested_next）
    - knowledge.json → 更新知识状态（analyzer/reviewer）
    - timeline.json → 追加 run 记录（timing/quality/dependencies）
-   - artifacts/ → 写入产出文件
+   - 产出文件 → 写入 `.project-knowledge/` 对应子目录（proposals/decisions/reports/）
 
 4. 输出收尾报告:
    - 做了什么 / 没做什么

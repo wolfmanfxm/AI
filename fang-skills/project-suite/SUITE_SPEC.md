@@ -173,7 +173,7 @@ RefactoredCode | Documentation | Release | PipelinePlan
 
 | 协议 | 路径 | 所有 skill 必须遵循 |
 |------|------|-------------------|
-| Project State | `runtime/state/state.md` | ✅（读写 .project-runtime/state.json） |
+| Project State | `runtime/state/state.md` | ✅（读写 .project-knowledge/runtime/state.json） |
 | Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted；Reviewer 验证 Candidate） |
 | Knowledge Index | `runtime/state/schemas/knowledge-index.md` | ✅（analyzer 生成，下游按 capability 查询） |
 | Confidence Gate | `runtime/mechanisms/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |

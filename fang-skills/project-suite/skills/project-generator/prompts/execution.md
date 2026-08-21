@@ -8,7 +8,7 @@
 ### Phase 1: Candidate Generation
 
 ```
-`@adapter:knowledge.query type=pattern,component --scope project` → `@adapter:filesystem.search "similar implementation" workspace/` → 提取模式 → 套用模式生成 → `@adapter:filesystem.write <file>` → Candidate 代码
+读 context-package.json（pattern + component）→ `@adapter:filesystem.search "similar implementation" workspace/` → 提取模式 → 套用模式生成 → `@adapter:filesystem.write <file>` → Candidate 代码
 ```
 
 ### Phase 2: Verification
@@ -27,22 +27,13 @@
 
 ⚡ 每个文件写入后 snapshot: `files_generated: [<ComponentName>.<ext>, ...]` → 中断后跳过已完成文件。
 
-### 1. 结构化知识查询
+### 1. 知识加载（不读 .md）
 
-不读 .md 文件。通过 [Knowledge Query API](../../../runtime/contracts/knowledge-query.md) 查询 `graph.json`：
+读 context-package.json（Resolver 已编译），分两类：
+- **知识**（pattern / convention）：context-package.json 的 knowledge[]
+- **结构**（component / api 是否已存在）：查 graph.json（[Graph Query Protocol](../../../runtime/contracts/graph-query.md) 的 findNode）
 
-```bash
-# 查询可复用组件
-@knowledge:type=component scope=project
-# 查询目标模块的 pattern
-@knowledge:type=pattern tags=<target_module>
-# 查询命名/import 等 convention
-@knowledge:type=convention scope=project
-# 查询已有 API（避免重复生成）
-@knowledge:type=api scope=project
-```
-
-降级：`graph.json` 缺失 → 读 `context-package.json` → `context.json`。
+降级：`context-package.json` 缺失 → 兜底直读 `.project-knowledge/rules/`、`decisions/`（project-scope）、`experience/`。
 
 ### 2-3. Graph 查询 + 参考实现
 → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)
@@ -51,8 +42,8 @@
 - `findProducers(<当前模块>)` → 了解已有上游，复用
 
 ### 4. 套用模式生成
-- 遵循 patterns 知识（Context Resolver 注入） 中的编码规范
-- `@adapter:knowledge.query --type component --scope project` → 使用已有组件
+- 遵循 context-package.json 的 knowledge[]（pattern）中的编码规范
+- 查 graph.json（findNode component）→ 已有组件直接 import，不重新生成
 - 匹配项目约定：缩进/引号/命名/import 顺序
 
 ### 5. 自检

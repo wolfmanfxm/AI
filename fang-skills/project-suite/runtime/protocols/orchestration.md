@@ -24,22 +24,16 @@ Skill
 用户（再次决策）
 ```
 
-**Skill 之间互相不知道对方存在。** 通信只靠 `.project-runtime/` 中的文件。Skill 完成后给出建议，用户决定是否采纳。
+**Skill 之间互相不知道对方存在。** 通信只靠 `.project-knowledge/runtime/` 中的文件。Skill 完成后给出建议，用户决定是否采纳。
 
 ## State 层
 
-`.project-runtime/` 是 Skill 间的共享记忆：
+`.project-knowledge/runtime/` 是 Skill 间的共享记忆：
 
 ```
-.project-runtime/
+.project-knowledge/runtime/
 ├── state.json         # 项目当前状态 + 执行历史
-├── knowledge.json      # 知识文件生命周期追踪
-└── artifacts/          # 统一产出目录
-    ├── plans/          # PLAN-*.md
-    ├── decisions/      # ARCHITECTURE-*.md
-    ├── reviews/        # REVIEW-*.md
-    ├── reports/        # TEST-REPORT.md, REFACTOR.md
-    └── releases/       # CHANGELOG.md
+└── knowledge.json      # 知识文件生命周期追踪
 ```
 
 → 详细规范：[../state/state.md](../state/state.md)
@@ -80,7 +74,7 @@ tester + documenter（都只依赖 generator，互不依赖）→ 可并行
 
 ## State 更新协议
 
-每个 Skill 执行完成后更新 `.project-runtime/state.json`：
+每个 Skill 执行完成后更新 `.project-knowledge/runtime/state.json`：
 
 ```json
 {
@@ -125,17 +119,17 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
 
 **每个 Skill 的上下文只有几 KB，不是几十万 token。**
 
-**State 层是唯一的信息传递媒介。** Skill 不依赖对话历史——所有需要的信息都从 `.project-runtime/` 和 artifact 文件中读取。
+**State 层是唯一的信息传递媒介。** Skill 不依赖对话历史——所有需要的信息都从 `.project-knowledge/runtime/` 和 artifact 文件中读取。
 
 ### Stateless Skill 原则
 
 ```
 ✅ 每个 Skill:
    1. 启动（/clear 后的 fresh context）
-   2. 读 .project-runtime/state.json（了解当前状态）
+   2. 读 .project-knowledge/runtime/state.json（了解当前状态）
    3. 读 artifact 文件（PLAN.md / context-package.json / diff）
    4. 执行
-   5. 写 .project-runtime/state.json + artifact 文件
+   5. 写 .project-knowledge/runtime/state.json + artifact 文件
    6. 结束
 
 ❌ 禁止:

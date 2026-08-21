@@ -4,11 +4,11 @@
 
 ## Actions
 
-0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有 antipatterns/risks → 对照审查重点
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 context-package.json 的 rules[]（blocking 约束）+ guidance[]（experience 里的风险/反模式）→ 对照审查重点
 1. 加载 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
-2. 查询已知风险 + 反模式（不读 .md）：
-   - `@knowledge:type=antipattern scope=project` → 对照审查
-   - `@knowledge:type=risk scope=project` → 重点关注
+2. 对照已知约束 + 风险/反模式（不读 .md）：
+   - context-package.json 的 rules[]（blocking）→ 逐条对照，违反即 BLOCKER
+   - context-package.json 的 guidance[]（experience）→ 重点关注
 2. **上游 Confidence 检查**：读 `state.json` history → 检查 generator/tester 的 confidence → <70 → 审查强度自动升至 HIGH → [confidence-gate](../../../runtime/mechanisms/confidence-gate.md)
 3. **Graph 影响分析** → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)：
    - `findImpacted([变更文件列表])` → 本次修改影响哪些节点

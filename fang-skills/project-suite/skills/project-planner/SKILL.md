@@ -5,7 +5,7 @@ description: >
   Project Planning Engine — 把模糊需求收敛成整个 Suite 都能消费的执行契约（不是 Task Planner）。
   触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、
   break down tasks、plan sprint、estimate effort、create dev plan、任务规划。
-  产出：PLAN.md — 9 模块 Contract（Goal → Scope → Context → Reuse → Decision → Tasks → Deps → Risk → Acceptance）。
+  产出：PLAN.md — 9 模块 Contract + Knowledge Constraints 块（Goal → Scope → Context → Reuse → Decision → Tasks → Deps → Risk → Acceptance）。
 ---
 
 # Project Planning Engine

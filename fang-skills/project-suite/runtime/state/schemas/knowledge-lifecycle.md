@@ -3,6 +3,21 @@
 > 核心问题不是"有没有知识"，而是"有没有长期复用价值"。
 > **90% 的 Artifact 永远停留在第一层。** 这不是 bug，是筛选机制。
 
+> ⚠️ **落地状态（Runtime Contract vs policy-only）**
+> 为避免「这些自动发生」的错觉，本文件把规则分成两档（与 [knowledge-decay.md](../../knowledge/knowledge-decay.md) 同一诚实标准）：
+>
+> **已机器落地（Runtime Contract）**
+> - `knowledge.json` 记录每个文件的 `status`（analyzer Finish 阶段写入，见 finish-workflow.md）
+> - Compiler 对 analyzer 产出目录做 Accepted 过滤（见 knowledge-compiler.md「lifecycle 过滤」）
+>
+> **尚未机器落地（policy-only，需 agent 按 prompt 执行，无独立 Producer/GC 机制）**
+> - Candidate「6 个月未晋升」自动淘汰
+> - Deprecated「90 天无引用无查询」GC / Purge
+> - `usage_feedback`（times_used/times_good/times_abandoned）
+> - 「occurrences ≥3 自动 Accepted」的自动晋升（目前是 Reviewer/analyzer 手动执行）
+>
+> 下列「过期淘汰规则」「GC 策略」属于 policy-only：它们描述的是**该怎么做**，不是**自动发生**。
+
 ## 状态机
 
 ```
@@ -109,6 +124,8 @@ for each Candidate in knowledge.json:
 
 ### 过期淘汰规则
 
+> ⚠️ policy-only（未机器落地）—— 无独立定时 GC 机制，依赖 Reviewer/analyzer 在每次执行时按此规则手动标记。
+
 | 状态 | 条件 | 动作 |
 |------|------|------|
 | Candidate | 6 个月内未被晋升 | 标记 Deprecated，reason: "expired" |
@@ -117,8 +134,12 @@ for each Candidate in knowledge.json:
 
 ### knowledge-index.json 与 Candidate
 
-`knowledge-index.json` 中只列出 `status: Accepted` 的 capability。
+`knowledge-index.json` 中，**analyzer 产出的目录**（patterns/components/api/architecture）只列出 `status: Accepted` 的文件。
 Candidate 知识不进入 index → Generator 通过 index 加载时自动过滤 Candidate。
+`rules/decisions/experience/playbooks` 是用户手写的权威约束，恒入 index，不受 lifecycle 门控。
+
+> 该过滤由 [knowledge-compiler.sh](../../../shared/scripts/knowledge-compiler.sh) 实现（读 `runtime/knowledge.json`，排除 status 明确非 Accepted 的 source）。
+> `runtime/knowledge.json` 缺失时不过滤（bootstrap 向后兼容）。
 
 ## Deprecated：停止推荐
 
@@ -177,6 +198,8 @@ Candidate 知识不进入 index → Generator 通过 index 加载时自动过滤
 ```
 
 ## GC 策略（Deprecated → Purge）
+
+> ⚠️ policy-only（未机器落地）—— 无独立 GC Producer/定时器，Purge 依赖 analyzer 全量执行时手动检查。
 
 Deprecated 条目何时可被物理删除的规则：
 

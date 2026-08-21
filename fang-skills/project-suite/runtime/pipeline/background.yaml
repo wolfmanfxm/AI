@@ -11,20 +11,11 @@ triggers:
     stage: delivery
     action: run_background_pipeline
 
-  - event: KnowledgeDecay
-    source: check-decay.sh
-    action: run_background_pipeline
-
 pipeline:
   - step: knowledge_scan
     tool: "@adapter:knowledge.scan"
     description: 检查 broken-links / duplicates / evidence gaps
     on_failure: warn  # 不阻断后续
-
-  - step: decay_check
-    tool: "@adapter:knowledge.decay"
-    description: 检查 STALE / DECAYING / DEPRECATED
-    on_failure: warn
 
   - step: graph_refresh
     tool: "@adapter:filesystem.run generate-skill-ir.sh"
@@ -32,8 +23,8 @@ pipeline:
     on_failure: skip
 
   - step: index_refresh
-    tool: "@adapter:knowledge.query type=all scope=project"
-    description: 验证 INDEX.md 链接可达性
+    tool: "@adapter:filesystem.run knowledge-compiler.sh"
+    description: 重扫知识源 → 刷新 knowledge-index.json（含 rules/decisions 的 scope/constraint 校验）
     on_failure: warn
 
   - step: promotion_review
@@ -49,7 +40,7 @@ pipeline:
     checkpoint: true
 
 output:
-  file: .project-runtime/background-pipeline-report.md
+  file: .project-knowledge/runtime/background-pipeline-report.md
   format: markdown
 
 notification:

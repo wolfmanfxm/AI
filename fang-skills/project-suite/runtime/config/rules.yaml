@@ -33,7 +33,7 @@ execution:
           required: true
         - type: knowledge
           name: knowledge-index.json
-          from: project-analyzer
+          from: knowledge-compiler
           required: true
       recommend:
         - type: knowledge

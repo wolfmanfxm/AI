@@ -6,10 +6,10 @@
 
 | Level | 存活时间 | 存什么 | 存在哪 |
 |-------|---------|--------|--------|
-| **Session** | 当前会话 | 本次执行的上下文、中间产出、用户反馈 | `.project-runtime/memory/session.json` |
-| **Project** | 项目生命周期 | 架构决策、已知约束、团队约定 | `.project-runtime/memory/project.json` |
+| **Session** | 当前会话 | 本次执行的上下文、中间产出、用户反馈 | `.project-knowledge/runtime/memory/session.json` |
+| **Project** | 项目生命周期 | 架构决策、已知约束、团队约定 | `.project-knowledge/runtime/memory/project.json` |
 | **Suite** | 跨项目 | 通用模式、最佳实践、学习到的规则 | `runtime/memory/suite.json` |
-| **Decision** | 永久 | 为什么做某个决策（ADR的"为什么"部分） | `.project-runtime/memory/decisions/<id>.json` |
+| **Decision** | 永久 | 为什么做某个决策（ADR的"为什么"部分） | `.project-knowledge/runtime/memory/decisions/<id>.json` |
 
 ## Session Memory
 

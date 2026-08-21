@@ -27,14 +27,14 @@
 }
 ```
 
-### state.json（来自 .project-runtime/）
+### state.json（来自 .project-knowledge/runtime/）
 ```json
 {
   "phase": "generating",
   "current": { "skill": "project-generator", "task": null },
   "history": [
-    {"skill": "project-planner", "confidence": 85, "output": "artifacts/plans/PLAN-user-activate.md"},
-    {"skill": "project-architect", "confidence": 90, "output": "artifacts/decisions/ARCHITECTURE-auth.md"}
+    {"skill": "project-planner", "confidence": 85, "output": "proposals/PLAN-user-activate.md"},
+    {"skill": "project-architect", "confidence": 90, "output": "decisions/ARCHITECTURE-auth.md"}
   ],
   "blockers": []
 }
@@ -80,7 +80,7 @@
 ├───────────────┬─────────────────────────┤
 │ 收尾报告       │ 执行结果摘要（名字由 skill 自定，见下）│
 │ state.json    │ 更新后的项目状态           │
-│ artifacts/    │ 产出文件                  │
+│ 产出文件       │ .project-knowledge/ 子目录 │
 └───────────────┴─────────────────────────┘
 ```
 
@@ -192,22 +192,22 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 
 → 完整协议：[../metrics/timeline.md](../metrics/timeline.md)
 
-### artifacts/
-按类型放入对应子目录：`plans/` / `decisions/` / `reviews/` / `reports/` / `releases/`
+### 产出文件
+按类型写入 `.project-knowledge/` 对应子目录：`proposals/`（PLAN）/ `decisions/`（ARCHITECTURE）/ `reports/`（REVIEW / TEST-REPORT / CHANGELOG）
 
 ## 各 Skill 的映射
 
-| Skill | Input: task.md 来源 | Output: artifacts/ |
+| Skill | Input: task.md 来源 | Output（.project-knowledge/ 子目录） |
 |-------|--------------------|--------------------|
-| analyzer | 用户需求（分析范围） | knowledge/ |
-| planner | 用户需求 | plans/ |
+| analyzer | 用户需求（分析范围） | 知识文件（patterns/ components/ api/ 等） |
+| planner | 用户需求 | proposals/ |
 | architect | PLAN.md > # Decision | decisions/ |
 | generator | PLAN.md > # Task Breakdown | code（项目目录） |
 | tester | PLAN.md > # Acceptance Criteria | reports/ |
-| reviewer | 变更 diff | reviews/ |
+| reviewer | 变更 diff | reports/ |
 | refactorer | 重构目标描述 | code + reports/ |
-| documenter | 文档需求 | documents/ |
-| releaser | 发布指令 | releases/ |
+| documenter | 文档需求 | 项目内文档（含 Evidence Header） |
+| releaser | 发布指令 | reports/ |
 
 ## 置信度（Confidence）
 

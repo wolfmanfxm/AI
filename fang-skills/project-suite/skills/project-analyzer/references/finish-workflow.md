@@ -16,9 +16,9 @@
 3. **graph.json** — 从 modules 列表重建节点：每个业务模块目录 → node，每个 `patterns/*.md` → node，新增模块自动追加，已删除自动移除，`dependsOn` 按 import 关系推导
 4. **search-index.json** — 扫描全部 `.md` 提取关键词（组件名/API 函数名前缀/模式名），目标条目数 `min(80, 模块数×3 + 组件数×1 + API模块数×2)`，⚠️ 禁止只复制旧 index
 
-## Phase B — .project-runtime/ 初始化或更新
+## Phase B — .project-knowledge/runtime/ 初始化或更新
 
-5. 检查 `.project-runtime/` 目录：不存在 → 按 `runtime/state/state.md` 创建（`state.json` + `knowledge.json` + `metrics/` + `artifacts/`）；已存在 → 追加本次执行记录
+5. 检查 `.project-knowledge/runtime/` 目录：不存在 → 按 `runtime/state/state.md` 创建（`state.json` + `knowledge.json` + `metrics/`）；已存在 → 追加本次执行记录
 6. **state.json** — 写入 `{ current: { skill, started }, history: [...] }`，含 confidence + suggested_next
 7. **knowledge.json** — 扫描 `.project-knowledge/` 每个文件：新文件 → Candidate；occurrences ≥3 → Accepted
 
@@ -33,12 +33,12 @@
 
 ## Phase D — 质量验证与同步
 
-12. **knowledge-health.json** — 逐项执行以下检测，将结果写入 `.project-runtime/metrics/knowledge-health.json`：
+12. **knowledge-health.json** — 逐项执行以下检测，将结果写入 `.project-knowledge/runtime/metrics/knowledge-health.json`：
 
    a. **broken_link** — 扫描所有 `.md` 中的 `[text](path.md)` → 检查目标文件是否存在。任一不存在 → error。
    b. **empty_document** — `wc -c < file.md`，< 200 bytes → warning。
    c. **duplicate_content** — 比较所有 `.md` 的 `# 标题`（大小写归一），完全相同的标题 → warning。
-   d. **outdated_evidence** — 读 Evidence Header `generatedAt`，距今 > 90 天 → warning。
+   d. **evidence_freshness** — 读 Evidence Header `generatedAt`，距今 > 90 天 → warning（证据新鲜度，≠ 知识可信度衰减 decay）。
    e. **missing_evidence_header** — 文件前 5 行无 `generatedAt:` → warning（`index.md` 豁免）。
    f. **large_file** — `wc -l` > 500 → info。
 

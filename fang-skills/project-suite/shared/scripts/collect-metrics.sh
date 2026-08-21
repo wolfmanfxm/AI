@@ -1,6 +1,6 @@
 #!/bin/bash
 # Telemetry Collector v1.0
-# Aggregates execution metrics from .project-runtime/ across sessions.
+# Aggregates execution metrics from .project-knowledge/runtime/ across sessions.
 # No external service needed — reads local state files.
 #
 # Usage: bash shared/scripts/collect-metrics.sh [project-root]
@@ -8,7 +8,7 @@
 
 set -euo pipefail
 PROJECT_ROOT="${1:-.}"
-RUNTIME_DIR="$PROJECT_ROOT/.project-runtime"
+RUNTIME_DIR="$PROJECT_ROOT/.project-knowledge/runtime"
 STATE_FILE="$RUNTIME_DIR/state.json"
 TIMELINE_FILE="$RUNTIME_DIR/timeline.json"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -49,26 +49,24 @@ if [ -f "$TIMELINE_FILE" ]; then
   total_timeline_entries=$(grep -c '"startedAt"' "$TIMELINE_FILE" 2>/dev/null || echo 0)
 
   # Extract durations (finishedAt - startedAt in seconds, if both present)
-  durations=$(python3 -c "
-import json, sys
-try:
-    with open('$TIMELINE_FILE') as f:
-        entries = json.load(f)
-    durations = []
-    for e in entries if isinstance(entries, list) else []:
-        if 'startedAt' in e and 'finishedAt' in e:
-            from datetime import datetime
-            try:
-                start = datetime.fromisoformat(e['startedAt'].replace('Z','+00:00'))
-                end = datetime.fromisoformat(e['finishedAt'].replace('Z','+00:00'))
-                durations.append((end - start).total_seconds())
-            except: pass
-    if durations:
-        print(f'{min(durations):.0f} {max(durations):.0f} {sum(durations)/len(durations):.0f} {len(durations)}')
-    else:
-        print('0 0 0 0')
-except: print('0 0 0 0')
-" 2>/dev/null || echo "0 0 0 0")
+  durations=$(node -e '
+const fs = require("fs");
+let entries; try { entries = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch { entries = []; }
+const list = Array.isArray(entries) ? entries : [];
+const ds = [];
+for (const e of list) {
+  if (e.startedAt && e.finishedAt) {
+    const s = Date.parse(e.startedAt), f = Date.parse(e.finishedAt);
+    if (!isNaN(s) && !isNaN(f)) ds.push((f - s) / 1000);
+  }
+}
+if (ds.length) {
+  const min = Math.min(...ds), max = Math.max(...ds), avg = ds.reduce((a, b) => a + b, 0) / ds.length;
+  console.log(`${Math.round(min)} ${Math.round(max)} ${Math.round(avg)} ${ds.length}`);
+} else {
+  console.log("0 0 0 0");
+}
+' "$TIMELINE_FILE" 2>/dev/null || echo "0 0 0 0")
   read min_dur max_dur avg_dur dur_count <<< "$durations"
 else
   total_timeline_entries=0; min_dur=0; max_dur=0; avg_dur=0; dur_count=0
@@ -82,7 +80,7 @@ manifest_count=$(find "$RUNTIME_DIR" -name "manifest.json" 2>/dev/null | wc -l |
 cat > "$REPORT" << EOF
 # Telemetry Report
 
-> Generated: $TODAY | Source: \`.project-runtime/\` | No external service
+> Generated: $TODAY | Source: \`.project-knowledge/runtime/\` | No external service
 
 ## Summary
 
@@ -129,7 +127,7 @@ cat > "$REPORT" << EOF
 
 ---
 
-> This report is generated locally from \`.project-runtime/\` files.
+> This report is generated locally from \`.project-knowledge/runtime/\` files.
 > For cross-project or team-level aggregation, feed this data into your observability stack.
 EOF
 

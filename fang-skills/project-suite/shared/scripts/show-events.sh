@@ -1,17 +1,23 @@
 #!/bin/bash
 # Event Timeline Viewer v1.0
-# Reads .project-runtime/events.jsonl and displays event timeline + stats
+# Reads .project-knowledge/runtime/events.jsonl and displays event timeline + stats
+# Node-only（无 Python 依赖）
 #
 # Usage: bash shared/scripts/show-events.sh [project-root]
 
 set -euo pipefail
 PROJECT_ROOT="${1:-.}"
-EVENTS_FILE="$PROJECT_ROOT/.project-runtime/events.jsonl"
+EVENTS_FILE="$PROJECT_ROOT/.project-knowledge/runtime/events.jsonl"
 
 if [ ! -f "$EVENTS_FILE" ]; then
   echo "No events found. Run any project-suite skill to generate events."
   exit 0
 fi
+
+# JSON 字段抽取（Node，替代 python3）
+jget() {
+  node -e 'let v;try{const d=JSON.parse(require("fs").readFileSync(0,"utf8"));v=d[process.argv[1]]}catch(e){v=null}process.stdout.write(v==null?"?":String(v))' "$1" 2>/dev/null
+}
 
 echo "========================================"
 echo " Event Timeline"
@@ -20,18 +26,19 @@ echo ""
 
 # Parse and display events
 while IFS= read -r line; do
-  event=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('event','?'))" 2>/dev/null || echo "parse_error")
-  skill=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('skill','?'))" 2>/dev/null || echo "?")
-  stage=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('stage','?'))" 2>/dev/null || echo "?")
-  ts=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('timestamp','?')[:19])" 2>/dev/null || echo "?")
+  event=$(echo "$line" | jget event)
+  skill=$(echo "$line" | jget skill)
+  stage=$(echo "$line" | jget stage)
+  ts=$(echo "$line" | jget timestamp)
+  ts="${ts:0:19}"
 
   case "$event" in
     StageStarted)      icon="▶";  detail="";;
-    StageCompleted)    conf=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('confidence','?'))" 2>/dev/null); icon="✅"; detail="(${conf}%)";;
+    StageCompleted)    conf=$(echo "$line" | jget confidence); icon="✅"; detail="(${conf}%)";;
     StageFailed)       icon="❌"; detail="";;
-    ArtifactGenerated) file=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('file_path','?'))" 2>/dev/null); size=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('file_size','?'))" 2>/dev/null); icon="📄"; detail="$file (${size}B)";;
-    PipelineAdvanced)  from=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('from_stage','?'))" 2>/dev/null); to=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('to_stage','?'))" 2>/dev/null); icon="→"; detail="$from → $to"; stage="";;
-    GateTriggered)     level=$(echo "$line" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('gate_level','?'))" 2>/dev/null); icon="🚦"; detail="$level";;
+    ArtifactGenerated) file=$(echo "$line" | jget file_path); size=$(echo "$line" | jget file_size); icon="📄"; detail="$file (${size}B)";;
+    PipelineAdvanced)  from=$(echo "$line" | jget from_stage); to=$(echo "$line" | jget to_stage); icon="→"; detail="$from → $to"; stage="";;
+    GateTriggered)     level=$(echo "$line" | jget gate_level); icon="🚦"; detail="$level";;
     CheckpointReached) icon="🛑"; detail="";;
     RecoveryStarted)   icon="🔄"; detail="";;
     *)                 icon="•"; detail="";;
@@ -55,19 +62,19 @@ done
 # Calculate durations
 echo ""
 echo "  Stage Durations:"
-python3 -c "
-import json, sys
-starts = {}
-with open('$EVENTS_FILE') as f:
-    for line in f:
-        d = json.loads(line)
-        if d['event'] == 'StageStarted':
-            starts[(d['skill'],d['stage'])] = d['timestamp']
-        elif d['event'] == 'StageCompleted' and (d['skill'],d['stage']) in starts:
-            from datetime import datetime
-            start = datetime.fromisoformat(starts[(d['skill'],d['stage'])].replace('Z','+00:00'))
-            end = datetime.fromisoformat(d['timestamp'].replace('Z','+00:00'))
-            dur = (end - start).total_seconds()
-            print(f'    {d[\"skill\"]}/{d[\"stage\"]}: {dur:.0f}s')
-            del starts[(d['skill'],d['stage'])]
-" 2>/dev/null || echo "    (no completed stages)"
+node -e '
+const fs = require("fs");
+const lines = fs.readFileSync(process.argv[1], "utf8").split("\n").filter(Boolean);
+const starts = {};
+for (const line of lines) {
+  let d; try { d = JSON.parse(line); } catch { continue; }
+  const k = d.skill + "|" + d.stage;
+  if (d.event === "StageStarted") starts[k] = d.timestamp;
+  else if (d.event === "StageCompleted" && starts[k] != null) {
+    const s = Date.parse(starts[k]), e = Date.parse(d.timestamp);
+    if (!isNaN(s) && !isNaN(e)) {
+      console.log(`    ${d.skill}/${d.stage}: ${Math.round((e - s) / 1000)}s`);
+    }
+    delete starts[k];
+  }
+}' "$EVENTS_FILE" 2>/dev/null || echo "    (no completed stages)"

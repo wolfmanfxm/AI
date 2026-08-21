@@ -52,6 +52,29 @@
 └── context.json
 ```
 
+## .md frontmatter（供 Resolver hydrate）
+
+每个 patterns/components/api 的 .md 文件 frontmatter，除 `id`/`generatedBy`/`lifecycle`/`confidence` 外，
+**必须写 `statement:`**——一句可执行的 convention/pattern 摘要。Resolver hydrate 直接抽它注入
+context-package.json，Generator 不再读文件正文：
+
+```yaml
+---
+id: patterns-table
+statement: "列表页用 PageTable 包裹 + SchemaTable 声明式列配置渲染"
+constraints: "分页 pageIndex/pageSize 数字；Element Plus 命名空间 el-mp"
+anti_pattern: "不要手写 el-table + el-pagination"
+tags: "table, list, search, workspace"
+---
+```
+
+- `statement` = 一句 convention（Generator 直接注入，不读文件正文）——**必写**
+- `constraints` = 逗号/分号分隔的硬约束（可选）
+- `anti_pattern` = 什么不该做（可选）
+- `tags` = 逗号分隔的标签（Resolver 用 tag 过滤/排序）——**推荐写**
+
+没有 `statement` 时，Resolver 退化为「`# 标题` + `##` 节标题」拼接（仍可用，但不如 statement 精确）。
+
 ## graph.json — Knowledge Objects
 
 从 accepted candidates 组装 → [schema](../../../shared/schemas/knowledge-object.schema.json)

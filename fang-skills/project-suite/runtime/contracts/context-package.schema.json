@@ -27,11 +27,12 @@
     "context": {
       "type": "object",
       "required": ["knowledge"],
+      "description": "Producer 分工：rules/knowledge/guidance 由 knowledge-resolver 产出；components/api/artifacts 由 Planner 经 graph-query（findNode）+ 上游 artifact 填充，resolver 不填。",
       "properties": {
 
         "knowledge": {
           "type": "array",
-          "description": "Extracted patterns/conventions that Generator directly applies. Each entry is a pre-digested rule — no file reading needed.",
+          "description": "Metadata pointers to relevant patterns/components/api (P2, recommended). pattern/constraints 正文在方案 B hydrate 阶段注入。",
           "items": { "$ref": "#/$defs/knowledgeEntry" }
         },
 
@@ -55,8 +56,13 @@
 
         "rules": {
           "type": "array",
-          "description": "Mandatory constraints that must be followed",
+          "description": "Mandatory constraints (rules + project decisions). Always the full set — never dropped by Top-K.",
           "items": { "$ref": "#/$defs/ruleEntry" }
+        },
+        "guidance": {
+          "type": "array",
+          "description": "Advisory knowledge (experience/playbooks + task-scope decisions). Reference material, not binding.",
+          "items": { "$ref": "#/$defs/knowledgeEntry" }
         }
       }
     }
@@ -65,28 +71,53 @@
   "$defs": {
     "knowledgeEntry": {
       "type": "object",
-      "required": ["capability", "pattern", "source"],
+      "required": ["source"],
+      "description": "Metadata-only pointer（v2.1）。resolver 分桶产出 source + 元数据；pattern/constraints 正文在 hydrate 阶段（方案 B）按需注入，metadata-only 阶段可为空。",
       "properties": {
         "capability": {
           "type": "string",
-          "description": "Capability label from knowledge-index.json"
+          "description": "Capability label from knowledge-index.json（knowledge 桶用）"
         },
-        "pattern": {
+        "type": {
           "type": "string",
-          "description": "The actual convention/pattern — Generator injects this directly. Example: '<统一表格> + <schema表格> + <schema搜索>'"
-        },
-        "constraints": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Hard constraints within this pattern. Example: ['<分页字段> 类型', '<组件库前缀> 命名空间']"
-        },
-        "anti_pattern": {
-          "type": "string",
-          "description": "What NOT to do. Example: '不要手写 el-table + el-pagination'"
+          "enum": ["rule", "decision", "pattern", "component", "api", "experience", "playbook"],
+          "description": "Knowledge object category（guidance 桶用）"
         },
         "source": {
           "type": "string",
           "description": "Source file in .project-knowledge/"
+        },
+        "enforcement": {
+          "type": "string",
+          "enum": ["blocking", "recommended", "advisory"],
+          "description": "Copied from index metadata"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["P1", "P2", "P3"]
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["task", "project", "organization", "personal"],
+          "description": "仅 decision 使用"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "逗号分隔的标签（Resolver 用 tag 过滤/排序）"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "[方案 B hydrate] 提取的 convention/pattern 正文，Generator 直接注入。metadata-only 阶段可省略。"
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "[方案 B hydrate] pattern 内的硬约束"
+        },
+        "anti_pattern": {
+          "type": "string",
+          "description": "[方案 B hydrate] 什么不该做"
         },
         "confidence": {
           "type": "integer",
@@ -155,14 +186,26 @@
 
     "ruleEntry": {
       "type": "object",
-      "required": ["rule", "constraint"],
+      "required": ["rule", "constraint", "enforcement", "source"],
       "properties": {
         "rule": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["rule", "decision"],
+          "default": "rule",
+          "description": "rule = team coding rule; decision = project-level ADR. Both default to blocking."
+        },
         "constraint": { "type": "string" },
         "source": { "type": "string" },
+        "enforcement": {
+          "type": "string",
+          "enum": ["blocking", "recommended", "advisory"],
+          "default": "blocking",
+          "description": "Source of truth, copied from index metadata."
+        },
         "blocking": {
           "type": "boolean",
-          "description": "true = Generator must follow or BLOCK. false = recommendation."
+          "description": "DERIVED 兼容字段 = (enforcement === 'blocking')。判断逻辑只认 enforcement；blocking 仅向后兼容，禁止出现 A 判 blocking / B 判 enforcement 的双语义。"
         }
       }
     }

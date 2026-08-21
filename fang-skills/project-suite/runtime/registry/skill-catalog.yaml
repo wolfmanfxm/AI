@@ -44,7 +44,7 @@ decision_model:
     question: "需要哪些知识？"
     input: matched_skill + project_context
     output: curated_knowledge
-    source: context-resolver.md + graph.json
+    source: context-resolver.md + knowledge-index.json
   step_3:
     name: Decision Engine
     question: "基于这些知识应该怎么做？"

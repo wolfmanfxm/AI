@@ -1,7 +1,7 @@
 # Project Suite
 
 > Agent Pipeline Framework — 10 个 Skill，覆盖分析→规划→设计→生成→测试→审查→重构→文档→发布→编排。
-> Registry-driven + Evidence-based Knowledge Graph + Continuous Learning Loop。
+> Registry-driven + Evidence-based Knowledge（graph.json 结构事实 + knowledge-index.json → context-package）+ Continuous Learning Loop。
 >
 > **Framework Spec**: [SUITE_SPEC.md](SUITE_SPEC.md) · **Architecture**: [docs/architecture.md](docs/architecture.md) · **Roadmap**: [docs/roadmap.md](docs/roadmap.md) · **Trust**: 90/100
 
@@ -22,7 +22,7 @@
 ## 当前版本：Suite v1.0 Spec / Release v1.0
 
 ```
-Knowledge 层         — Object + Context Resolver + Promotion Reviewer + Decay
+Knowledge 层         — Object + Context Resolver + Promotion Reviewer（Decay：planned，未实现）
 Runtime（Protocol）   — Tool Adapter(9/10) + Event Bus + Background Pipeline（规范层，非独立 Engine）
 Reasoning 层         — Query API + Orchestrator (Decision-Boundary Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
@@ -151,7 +151,7 @@ project-suite/
 │   ├── metrics/           ← Timeline + Knowledge Health
 │   └── artifacts/         ← Artifact Types Registry
 ├── skills/                ← 10 Skills
-├── shared/                ← Schemas(8) · Scripts(9) · Conventions · Examples · Templates
+├── shared/                ← Schemas(7) · Scripts(19) · Conventions · Examples · Templates
 ├── docs/                  ← Skill Atlas · Benchmarks · Review Cadence · Review Studio · Waiver · Prompt Quality · Cross-Run Reliability · Roadmap · Architecture
 ├── reports/               ← Trust(90) · Quality Scorecard · Trigger Eval
 └── suite-manifest.yaml    ← 单文件治理

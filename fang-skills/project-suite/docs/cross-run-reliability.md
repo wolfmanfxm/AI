@@ -22,7 +22,7 @@
 
 ## 对比工具
 
-`shared/scripts/check-reliability.sh` — 输入两次运行的 `.project-runtime/` 快照，输出可靠性报告。
+`shared/scripts/check-reliability.sh` — 输入两次运行的 `.project-knowledge/runtime/` 快照，输出可靠性报告。
 
 ```
 bash shared/scripts/check-reliability.sh <snapshot-A-dir> <snapshot-B-dir>

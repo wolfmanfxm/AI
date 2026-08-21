@@ -107,7 +107,7 @@ Host 在 stage 执行完成后按协议验证：
 
 ## Event Bus 集成
 
-每个步骤触发对应事件，写入 `.project-runtime/events.jsonl`：
+每个步骤触发对应事件，写入 `.project-knowledge/runtime/events.jsonl`：
 
 ```
 ENTRY    → (无事件，或 RecoveryStarted 若从 checkpoint 恢复)

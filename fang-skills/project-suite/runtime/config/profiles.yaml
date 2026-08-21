@@ -39,7 +39,7 @@ profiles:
   background:
     description: "后台自动任务"
     skills: [project-analyzer]
-    pipeline: [knowledge-scan, decay-check, graph-refresh, index-refresh, promotion-review]
+    pipeline: [knowledge-scan, graph-refresh, index-refresh, promotion-review, promotion-confirm]
     context_budget: 8000
     auto_advance: true
     interview: never

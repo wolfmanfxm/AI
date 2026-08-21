@@ -49,7 +49,7 @@
 
 ## 上下文感知路由
 
-读取 `.project-runtime/state.json`，根据上一个 skill 的执行状态推荐下一步：
+读取 `.project-knowledge/runtime/state.json`，根据上一个 skill 的执行状态推荐下一步：
 
 | 上一个 skill | 状态 | 推荐下一步 | 理由 |
 |-------------|------|-----------|------|

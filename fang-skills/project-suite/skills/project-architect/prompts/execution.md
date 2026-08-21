@@ -4,7 +4,7 @@
 
 ## Actions
 
-### 0. 查询已有决策：`@adapter:knowledge.query --type decision --scope project`（先查再设计）
+### 0. 查询已有决策：读 context-package.json 的 rules[]（project-scope decision）（先查再设计）
 
 ### 按用户意图路由：
 

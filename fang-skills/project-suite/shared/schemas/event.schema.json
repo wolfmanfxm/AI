@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "event.schema.json",
   "title": "Event Bus Event Schema",
-  "description": "Stage lifecycle events written to .project-runtime/events.jsonl",
+  "description": "Stage lifecycle events written to .project-knowledge/runtime/events.jsonl",
   "definitions": {
     "BaseEvent": {
       "type": "object",

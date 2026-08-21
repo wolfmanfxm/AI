@@ -89,13 +89,14 @@ adapters:
       background: { tool: Bash, run_in_background: true, description: 后台执行 }
 
   knowledge:
-    description: 知识查询
+    description: 知识访问（结构 graph-query + 知识 resolver 分桶）
     providers:
-      primary: bash  # knowledge-query.sh
+      primary: bash
     operations:
-      query: { tool: Bash, command: knowledge-query.sh, description: 结构化查询 graph.json }
-      scan: { tool: Bash, command: knowledge-scan.sh, description: 知识质量扫描 }
-      decay: { tool: Bash, command: check-decay.sh, description: 知识衰减检查 }
+      graph_query: { tool: Bash, command: jq, description: "结构查询 graph.json（见 runtime/contracts/graph-query.md 的 7 个查询）" }
+      compile: { tool: Bash, command: knowledge-compiler.sh, description: "扫描知识源 → knowledge-index.json" }
+      resolve: { tool: Bash, command: knowledge-resolver.sh, description: "分桶+hydrate → context-package.json" }
+      scan: { tool: Bash, command: knowledge-scan.sh, description: "知识质量扫描（broken-links/duplicates/evidence）" }
 
 # Skill 调用方式
 #

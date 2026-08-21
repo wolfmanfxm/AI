@@ -14,8 +14,8 @@
 ## 前置要求
 
 启动前必须：
-1. `@adapter:knowledge.query --type pattern,component,convention --scope project` 定位相关模式
-2. 按 SKILL.md 中的读取策略加载对应知识（不读 .md，走 Query API）
+1. 读 context-package.json（knowledge[] 定位 pattern/component，rules[] 加载 blocking 约束）
+2. 查 graph.json（graph-query.md 的 findNode）确认可复用组件
 3. 搜索项目中类似功能代码作为风格参考
 
 ## 要求

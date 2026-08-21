@@ -1,89 +1,30 @@
 #!/bin/bash
-# Knowledge Query Tool v1.0
-# 从 knowledge-graph.yaml 中结构化查询 Knowledge Object。
-# 零依赖：纯 bash + grep，无需 jq/yq。
+# Knowledge Query Tool — DEPRECATED
 #
-# Usage:
-#   bash knowledge-query.sh --type pattern --tags form
-#   bash knowledge-query.sh --type convention --confidence 0.8
-#   bash knowledge-query.sh --related-to pattern.repository
-#   bash knowledge-query.sh --scope project --limit 10
+# ⚠️ 已废弃。本工具原设计为查询 `.project-knowledge/knowledge-graph.yaml`，
+#    但该文件从未被任何 Producer 产出（真实产物是 graph.json + knowledge-index.json），
+#    因此这条查询路径从未闭环。
+#
+# 替代路径（按用途二选一）：
+#   - 结构查询（组件/API/模块存在性、依赖链、影响半径）→ runtime/contracts/graph-query.md
+#     （jq 直查 .project-knowledge/graph.json，7 个标准查询）
+#   - 知识检索（rules/decisions/patterns/experience/playbooks 的约束与模式）
+#     → knowledge-resolver.sh 读 .project-knowledge/knowledge-index.json → context-package.json
+#
+# 保留本文件仅为兼容旧引用，不再维护。
 
 set -euo pipefail
-GRAPH="${KNOWLEDGE_GRAPH:-.project-knowledge/knowledge-graph.yaml}"
-TYPE=""; SCOPE=""; TAGS=""; MIN_CONF=""; RELATED=""; LIMIT="20"
 
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --type)       TYPE="$2"; shift 2 ;;
-    --scope)      SCOPE="$2"; shift 2 ;;
-    --tags)       TAGS="$2"; shift 2 ;;
-    --confidence) MIN_CONF="$2"; shift 2 ;;
-    --related-to) RELATED="$2"; shift 2 ;;
-    --limit)      LIMIT="$2"; shift 2 ;;
-    *) echo "Unknown: $1"; exit 1 ;;
-  esac
-done
+cat >&2 <<'MSG'
+⚠️ knowledge-query.sh 已废弃。
 
-if [ ! -f "$GRAPH" ]; then
-  echo "No knowledge-graph.yaml found. Run project-analyzer first."
-  exit 1
-fi
+它原本查询 .project-knowledge/knowledge-graph.yaml，但该文件从未被产出（真实产物是
+graph.json + knowledge-index.json），所以这条查询路径没有闭环。
 
-echo "---"
-echo "query:"
-[ -n "$TYPE" ]     && echo "  type: $TYPE"
-[ -n "$SCOPE" ]    && echo "  scope: $SCOPE"
-[ -n "$TAGS" ]     && echo "  tags: [$TAGS]"
-[ -n "$MIN_CONF" ] && echo "  confidence>=: $MIN_CONF"
-[ -n "$RELATED" ]  && echo "  related_to: $RELATED"
-echo "  limit: $LIMIT"
-echo "results:"
-
-count=0
-in_node=0; node=""
-while IFS= read -r line; do
-  # Start of a node
-  if echo "$line" | grep -q "^\s*- id:"; then
-    [ -n "$node" ] && { echo "$node"; ((count++)); }
-    node="$line"; in_node=1
-    [ "$count" -ge "$LIMIT" ] && break
-    continue
-  fi
-  [ "$in_node" -eq 0 ] && continue
-
-  # Accumulate node lines
-  node="$node"$'\n'"$line"
-
-  # Filter: type
-  if [ -n "$TYPE" ] && [ "$TYPE" != "all" ]; then
-    if echo "$node" | grep -q "type: $TYPE"; then :; else node=""; in_node=0; continue; fi
-  fi
-  # Filter: scope
-  if [ -n "$SCOPE" ]; then
-    if echo "$node" | grep -q "scope: $SCOPE"; then :; else node=""; in_node=0; continue; fi
-  fi
-  # Filter: tags (AND — must contain all)
-  if [ -n "$TAGS" ]; then
-    all_match=true
-    for tag in $(echo "$TAGS" | tr ',' ' '); do
-      if ! echo "$node" | grep -q "$tag"; then all_match=false; break; fi
-    done
-    [ "$all_match" = false ] && { node=""; in_node=0; continue; }
-  fi
-  # Filter: confidence
-  if [ -n "$MIN_CONF" ]; then
-    conf=$(echo "$node" | grep "confidence:" | grep -o '[0-9.]*' | head -1 || echo "0")
-    if [ "$(echo "$conf < $MIN_CONF" | bc -l 2>/dev/null || echo 1)" = "1" ]; then
-      node=""; in_node=0; continue
-    fi
-  fi
-  # Filter: related_to
-  if [ -n "$RELATED" ]; then
-    if ! echo "$node" | grep -q "$RELATED"; then node=""; in_node=0; continue; fi
-  fi
-done < "$GRAPH"
-[ -n "$node" ] && { echo "$node"; ((count++)); }
-
-echo ""
-echo "  count: $count"
+请改用：
+  - 结构查询（组件/API/模块存在性、依赖链）→ runtime/contracts/graph-query.md
+    （jq 直查 .project-knowledge/graph.json，7 个标准查询）
+  - 知识检索（rules/decisions/patterns/experience/playbooks）→ knowledge-resolver.sh
+    （读 .project-knowledge/knowledge-index.json → context-package.json）
+MSG
+exit 1

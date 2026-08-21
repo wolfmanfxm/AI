@@ -38,7 +38,7 @@ types:
     description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）
     schema: skills/project-planner/prompts/task-breakdown.md
     schema_version: "1.0.0"
-    location: proposals/PLAN-*.md | artifacts/plans/
+    location: proposals/PLAN-*.md
     producer: project-planner
     consumers: [project-architect, project-generator, project-reviewer, project-tester]
 
@@ -46,7 +46,7 @@ types:
     description: 架构决策记录（ADR 格式）— 技术选型/模块设计/API 契约
     schema: skills/project-architect/SKILL.md
     schema_version: "1.0.0"
-    location: decisions/ARCHITECTURE-*.md | artifacts/decisions/
+    location: decisions/ARCHITECTURE-*.md
     producer: project-architect
     consumers: [project-generator, project-reviewer]
 
@@ -67,7 +67,7 @@ types:
   review:
     description: 五轴审查报告（分级问题 + 修复建议 + AC 对照）
     schema_version: "1.0.0"
-    location: .project-knowledge/reports/REVIEW-*.md | artifacts/reviews/
+    location: .project-knowledge/reports/REVIEW-*.md
     producer: project-reviewer
     consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
 
@@ -96,7 +96,7 @@ types:
     description: 项目持久化状态（执行历史 + 知识生命周期 + 置信度追踪）
     schema: runtime/state/state.md
     schema_version: "1.0.0"
-    location: .project-runtime/state.json + knowledge.json
+    location: .project-knowledge/runtime/state.json + knowledge.json
     producer: null
     consumers: [all]
 

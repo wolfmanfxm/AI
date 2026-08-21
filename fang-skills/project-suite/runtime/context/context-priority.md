@@ -11,7 +11,7 @@
 ```
 优先级 高 ↑
   1. User Prompt            ← 用户显式指令，最高优先级
-  2. .project-runtime/       ← 项目当前状态 + 上游产出
+  2. .project-knowledge/runtime/       ← 项目当前状态 + 上游产出
   3. .project-knowledge/     ← 项目结构化知识（组件/模式/API）
   4. CLAUDE.md               ← 项目强制约束（安全/编码规范）
   5. Knowledge Vault         ← 跨项目经验参考

@@ -1,13 +1,13 @@
 #!/bin/bash
 # Approval Audit Checker v1.0
-# Validates approval trail completeness in .project-runtime/state.json
+# Validates approval trail completeness in .project-knowledge/runtime/state.json
 #
 # Usage: bash shared/scripts/check-approval-audit.sh [project-root]
 # Exit: 0=clean, 1=warnings, 2=violations
 
 set -euo pipefail
 PROJECT_ROOT="${1:-.}"
-STATE_FILE="$PROJECT_ROOT/.project-runtime/state.json"
+STATE_FILE="$PROJECT_ROOT/.project-knowledge/runtime/state.json"
 
 red() { echo -e "\033[31m$1\033[0m"; }
 yellow() { echo -e "\033[33m$1\033[0m"; }

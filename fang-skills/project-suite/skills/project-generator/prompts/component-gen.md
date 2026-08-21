@@ -8,9 +8,9 @@
 
 在写代码之前，完成以下步骤：
 
-1. **`@adapter:knowledge.query --type component --scope project`** — 确认没有现成组件可用
-2. **查询 patterns 知识（query: patterns）确认组件范式** — 确认项目框架的组件范式（函数/类组件、Composition 风格等，以项目为准）
-3. **查询 patterns 知识（query: patterns）确认业务模式**（表格/表单等）— 确认业务模式
+1. **查 graph.json（graph-query.md 的 findNode("component")）** — 确认没有现成组件可用
+2. **读 context-package.json 的 knowledge[]（pattern）确认组件范式** — 确认项目框架的组件范式（函数/类组件、Composition 风格等，以项目为准）
+3. **读 context-package.json 的 knowledge[]（pattern）确认业务模式**（表格/表单等）— 确认业务模式
 4. **搜索类似组件** — `grep` 项目中功能相似的组件，作为风格参考
 
 ## 输入

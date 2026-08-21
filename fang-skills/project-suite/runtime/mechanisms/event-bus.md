@@ -1,7 +1,7 @@
 # Event Bus v1.0
 
 > Stage 生命周期事件系统。监控、日志、扩展的标准化接口。
-> 事件写入 `.project-runtime/events.jsonl`（JSONL 格式，追加写入）。
+> 事件写入 `.project-knowledge/runtime/events.jsonl`（JSONL 格式，追加写入）。
 
 ## 事件类型
 
@@ -18,7 +18,7 @@
 
 ## 日志格式（JSONL）
 
-每行一个 JSON 事件，追加写入 `.project-runtime/events.jsonl`：
+每行一个 JSON 事件，追加写入 `.project-knowledge/runtime/events.jsonl`：
 
 ```json
 {"event":"StageStarted","skill":"project-analyzer","stage":"discovery","timestamp":"2026-08-04T15:30:00Z","manifest":{"status":"discover"}}
@@ -61,7 +61,7 @@ Event Timeline (project-analyzer):
 `StageCompleted(analyzer, delivery)` → 自动触发 [background pipeline](../pipeline/background.yaml)：
 
 ```
-Knowledge Scan → Decay Check → Graph Refresh → Index Refresh → Promotion Review
+Knowledge Scan → Graph Refresh → Index Refresh → Promotion Review
 ```
 
 评分/分类/检测步骤自动执行，但 personal promotion 的晋升动作需人工确认（Background 只产建议，不 auto-promote）。见 [background.yaml](../pipeline/background.yaml) 与 [promotion-rules.md](../state/schemas/promotion-rules.md)。

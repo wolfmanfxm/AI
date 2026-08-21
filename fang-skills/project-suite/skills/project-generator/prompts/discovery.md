@@ -4,16 +4,24 @@
 
 ## Actions
 
-0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：从用户需求提取 tags → 查询 `graph.json` → 注入相关 patterns/components/conventions
-1. 结构化查询知识（不读 .md）：`@adapter:knowledge.query --type component,pattern,api --scope project`
-2. **Reuse Check**（不搜索代码库，先查结构化知识）→ [Reuse Ladder](../../../shared/primitives/reuse-check.md)：
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 context-package.json → 拿 rules[]/knowledge[]/guidance[]
+   - **Fallback（Knowledge Context unavailable）**：若 `context-package.json` 缺失 → 兜底直读 `.project-knowledge/rules/`、`decisions/`（project-scope，非 `ARCHITECTURE-*`）、`experience/`、`playbooks/` 全部文件，逐条记录为本次生成的硬约束。`context-package.json` 已存在且含 rules/guidance 时**禁止**重复扫描这些目录（避免双路径 + context 重复）。
+
+1. **Load blocking rules** — context-package.json 的 rules[]（type=rule + project-scope decision）→ 生成时必须遵守，违反即错。
+
+2. **Load applicable patterns/components/API** — context-package.json 的 knowledge[] → 套用模式。
+
+3. **Reuse Check**（不搜索代码库，先查结构化知识）→ [Reuse Ladder](../../../shared/primitives/reuse-check.md)：
    - `findNode("component", <目标>)` → **完全覆盖 → `[REUSE]` 零改动**（已有组件已覆盖，不新建冗余组件）
    - 相近 → **`[EXTEND]`** 加 prop/slot/config，不复制粘贴
    - `findNode("api", <目标>)` → 已存在 → 直接 import，不复创建
    - 仅「语义确实不同」才进入生成流程（`[CREATE]`，复用已有子件）
-3. 代码存在性检查 → [references/code-audit.md](../references/code-audit.md)
-4. 找类似实现：grep 同模块其他页面的 import/组件使用方式，确认技术栈和模式
-5. CHECKPOINT — 展示过滤后改动范围（新建/修改文件清单 + 每文件预估行数 + REUSE 标注）
+
+4. 代码存在性检查 → [references/code-audit.md](../references/code-audit.md)
+
+5. 找类似实现：grep 同模块其他页面的 import/组件使用方式，确认技术栈和模式
+
+6. CHECKPOINT — 展示过滤后改动范围（新建/修改文件清单 + 每文件预估行数 + REUSE 标注）
 
 ## Exit
 

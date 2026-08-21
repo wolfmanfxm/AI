@@ -13,7 +13,7 @@
 
 ## 前置要求
 
-1. `@adapter:knowledge.query --type decision,pattern --scope project` 了解现有架构决策
+1. 读 context-package.json 的 rules[]（project-scope decision）+ knowledge[]（pattern）了解现有架构决策
 2. 读 PLAN.md（若存在）了解任务范围
 
 ## 要求
