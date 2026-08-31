@@ -121,7 +121,7 @@ skills:
     owner: project-suite
     category: creation
     description: "按项目规范生成生产级代码，Execute→Verify"
-    capabilities: [code-generation, pattern-matching, query-api]
+    capabilities: [code-generation, pattern-matching]
     complexity: {min: low, max: high}
     cost: high
     requires: []

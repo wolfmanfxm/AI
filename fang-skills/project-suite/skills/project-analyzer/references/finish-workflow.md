@@ -20,7 +20,7 @@
 
 5. 检查 `.project-knowledge/runtime/` 目录：不存在 → 按 `runtime/state/state.md` 创建（`state.json` + `knowledge.json` + `metrics/`）；已存在 → 追加本次执行记录
 6. **state.json** — 写入 `{ current: { skill, started }, history: [...] }`，含 confidence + suggested_next
-7. **knowledge.json** — 扫描 `.project-knowledge/` 每个文件：新文件 → Candidate；occurrences ≥3 → Accepted
+7. **knowledge.json** — 扫描 `.project-knowledge/` 每个文件：新文件 → Candidate；occurrences ≥3 → 保持 Candidate（达到晋升阈值，**不自动 Accepted**）；真正 Accepted 由 Reviewer/promotion-reviewer 按 [promotion-rules.md](../../../runtime/state/schemas/promotion-rules.md) 验证后更新
 
 ## Phase C — 差异化更新
 

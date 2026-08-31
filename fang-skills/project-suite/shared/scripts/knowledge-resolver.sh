@@ -10,10 +10,11 @@
 #   - guidance（experience/playbooks + task-scope decisions）：P3/advisory，受 candidates + Top-K 约束
 #   - hydrate：读命中 source 的 frontmatter（constraint/statement/summary）→ 注入 pattern/constraints
 #
-# 候选集（#3）：Planner 的 # Reuse Analysis 产出命中的 source 路径 / capability 名 / tag 名，
+# 候选集（#3）：Planner 的 # Reuse Analysis 产出命中的 source 路径 / capability 名 / tag / basename，
 #   作为第 2 个参数传入（逗号分隔）。传了 candidates 才触发过滤 + Top-K；不传 = 全量（向后兼容）。
 #   rank：priority → confidence↓ → tag-overlap↓ → source 字母序。
 #   Top-K：knowledge 默认 5，guidance 默认 3。
+#   全未命中 → stderr 显式告警（避免 garbage candidates 静默返回空 knowledge）。
 #
 # Lifecycle 插槽（暂不消费，见 runtime/knowledge/knowledge-decay.md）：
 #   `.lifecycle/health.json` 存在 → 未来做降级（stale→warning / decaying→非 blocking / deprecated→排除）

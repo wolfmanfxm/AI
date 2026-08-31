@@ -61,7 +61,7 @@ Event Timeline (project-analyzer):
 `StageCompleted(analyzer, delivery)` → 自动触发 [background pipeline](../pipeline/background.yaml)：
 
 ```
-Knowledge Scan → Graph Refresh → Index Refresh → Promotion Review
+Knowledge Scan → Skill IR Refresh → Index Refresh → Promotion Review
 ```
 
 评分/分类/检测步骤自动执行，但 personal promotion 的晋升动作需人工确认（Background 只产建议，不 auto-promote）。见 [background.yaml](../pipeline/background.yaml) 与 [promotion-rules.md](../state/schemas/promotion-rules.md)。

@@ -17,7 +17,7 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 ## 算法
 
 ```
-输入: Task + candidates（Planner # Reuse Analysis 传入：source/capability/tag）+ knowledge-index.json
+输入: Task + candidates（Planner # Reuse Analysis 传入：source/capability/tag/basename）+ knowledge-index.json
 输出: context-package.json（分桶：constraints 全量 + knowledge Top-K + guidance Top-K）
 
 1. 分桶（按 type，确定性）
@@ -27,10 +27,11 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
    - experience / playbook → guidance
    - pattern / component / api → knowledge
 
-2. 候选集过滤（candidates：Planner # Reuse Analysis 传入的 source/capability/tag）
+2. 候选集过滤（candidates：Planner # Reuse Analysis 传入的 source/capability/tag/basename）
    - rules（blocking constraints）：恒全量，不受 candidates / Top-K 影响
    - knowledge / guidance：按 candidates 过滤（传了才过滤 + 裁 Top-K；不传 = 全量，向后兼容）
    - Top-K：knowledge 默认 5，guidance 默认 3；rank 恒按 priority → confidence↓ → tag-overlap↓ → source
+   - candidates 全未命中 → 显式告警（stderr），不静默返回空 knowledge/guidance
 
 3. Hydrate（读源取正文，确定性）
    - rule / project-decision：读 frontmatter `constraint` → context.rules[].constraint

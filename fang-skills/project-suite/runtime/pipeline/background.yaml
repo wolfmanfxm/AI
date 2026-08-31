@@ -17,7 +17,7 @@ pipeline:
     description: 检查 broken-links / duplicates / evidence gaps
     on_failure: warn  # 不阻断后续
 
-  - step: graph_refresh
+  - step: skill_ir_refresh
     tool: "@adapter:filesystem.run generate-skill-ir.sh"
     description: 刷新 skill-ir.yaml
     on_failure: skip

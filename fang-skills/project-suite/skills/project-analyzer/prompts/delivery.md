@@ -43,7 +43,7 @@ rsync -av --exclude='proposals/' --exclude='reports/REVIEW-*' \
 StageCompleted 事件触发 → [background pipeline](../../../runtime/pipeline/background.yaml)：
 
 ```
-Knowledge Scan → Graph Refresh → Index Refresh → Promotion Review
+Knowledge Scan → Skill IR Refresh → Index Refresh → Promotion Review
 ```
 
 Background 自动完成评分（auto-score/auto-classify/auto-suggest），但 personal promotion 的晋升动作需人工确认（见 [promotion-reviewer.md](promotion-reviewer.md)「人工 Review 边界」）。

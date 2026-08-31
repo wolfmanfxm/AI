@@ -206,7 +206,7 @@ capability_types:
 const DECISION_MODEL = `# 四步决策模型
 decision_model:
   step_1:
-    name: Skill Resolver
+    name: Skill Routing
     question: "哪个 Skill？"
     input: user_task
     output: matched_skill
@@ -218,7 +218,7 @@ decision_model:
     output: curated_knowledge
     source: context-resolver.md + knowledge-index.json
   step_3:
-    name: Decision Engine
+    name: Decision Protocol
     question: "基于这些知识应该怎么做？"
     input: curated_knowledge + requirement
     output: decision_context

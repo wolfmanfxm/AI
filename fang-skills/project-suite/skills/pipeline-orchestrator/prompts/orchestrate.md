@@ -49,7 +49,7 @@ for each skill in pipeline:
 Pipeline 结束后自动触发 → [background pipeline](../../../runtime/pipeline/background.yaml)：
 
 ```
-Knowledge Scan → Graph Refresh → Index Refresh → Promotion Review
+Knowledge Scan → Skill IR Refresh → Index Refresh → Promotion Review
 ```
 
 ### Exit

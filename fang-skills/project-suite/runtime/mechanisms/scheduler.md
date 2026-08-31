@@ -11,7 +11,7 @@
 ```
 Intent
   ↓
-Skill Resolver（意图 → skill）
+Skill Routing（意图 → skill）
   ↓
 Knowledge Resolver（skill + 任务 → 知识）
   ↓

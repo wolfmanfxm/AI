@@ -2,7 +2,7 @@
 id: project-planner
 version: "1.3.0"
 mode: Production
-description: "Project Planning Engine — 把模糊需求收敛成整个 Suite 都能消费的执行契约（不是 Task Planner）。 触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、 break down tasks、plan sprint、estimate effort、create dev plan、任务规划。 产出：PLAN.md — 9 模块 Contract（Goal → Scope → Context → Reuse → Decision → Tasks → Deps → Risk → Acceptance）。"
+description: "Project Planning Engine — 把模糊需求收敛成整个 Suite 都能消费的执行契约（不是 Task Planner）。 触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、 break down tasks、plan sprint、estimate effort、create dev plan、任务规划。 产出：PLAN.md — 9 模块 Contract + Knowledge Constraints 块（Goal → Scope → Context → Reuse → Decision → Tasks → Deps → Risk → Acceptance）。"
 boundary: "只做计划不写代码，发现问题记录在风险矩阵不直接修改"
 produces: [Plan]
 consumes: [KnowledgeBase,KnowledgeIndex,Context,Graph]

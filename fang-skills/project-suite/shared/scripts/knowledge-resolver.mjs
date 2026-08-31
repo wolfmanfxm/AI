@@ -81,7 +81,13 @@ function tagsOf(fm) {
 
 function isCandidate(capName, source, tags) {
   if (candidates.size === 0) return true;
-  return candidates.has(source) || candidates.has(capName) || tags.some(t => candidates.has(t));
+  const base = path.basename(source);
+  const baseNoExt = path.basename(source, path.extname(source));
+  return candidates.has(source)
+    || candidates.has(capName)
+    || candidates.has(base)
+    || candidates.has(baseNoExt)
+    || tags.some(t => candidates.has(t));
 }
 
 const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
@@ -190,6 +196,13 @@ guidance.sort((a, b) => cmp(rankKey(a), rankKey(b)));
 if (candidates.size) {
   knowledge.length = Math.min(knowledge.length, TOP_K_KNOWLEDGE);
   guidance.length = Math.min(guidance.length, TOP_K_GUIDANCE);
+}
+
+// 保护：candidates 全未命中 → 显式告警（避免「garbage candidates → 静默空 knowledge」）
+if (candidates.size > 0 && knowledge.length === 0 && guidance.length === 0) {
+  console.warn(`⚠️  ${candidates.size} 个 candidates 未命中任何 pattern/component/api/experience/playbook（knowledge/guidance 桶）`);
+  console.warn(`   candidates 应为 source 路径（patterns/table.md）/ capability 名（patterns）/ tag / basename（table）`);
+  console.warn(`   实际传入：[${[...candidates].join(', ')}]`);
 }
 
 const pkg = {

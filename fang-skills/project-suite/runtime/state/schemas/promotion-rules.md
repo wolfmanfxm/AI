@@ -91,7 +91,7 @@ Confidence > 85 → R3 满足
    
 3. Architect 评估可复用性 (R5)
 
-4. 满足 ≥3/5 → 自动标记为 accepted
+4. 满足 ≥3/5 → 标记为 accepted（Reviewer/Architect 判定，非机器自动）
    - 从 candidate/ 移动到 patterns/ 或 architecture/
    
 5. 不满足 → 保留在 candidate/

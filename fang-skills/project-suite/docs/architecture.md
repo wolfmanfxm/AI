@@ -10,7 +10,7 @@
                                │
                                ▼
                      ┌─────────────────────┐
-                     │   Skill Resolver    │
+                     │   Skill Routing     │
                      │   "谁来做？"          │
                      │   skill-catalog.yaml │
                      └──────────┬──────────┘
@@ -25,7 +25,7 @@
                                 │
                                 ▼
                      ┌─────────────────────┐
-                     │  Decision Engine    │
+                     │  Decision Protocol  │
                      │  "应该怎么做？"       │
                      │  completeness-check │
                      │  + project-principles │
@@ -60,7 +60,7 @@
                                 │
                                 ▼
                      ┌─────────────────────┐
-                     │   Reflection        │
+                     │ Knowledge Promotion │
                      │   + Promotion       │
                      │   candidate→verify  │
                      │   →accepted→vault   │
@@ -72,12 +72,12 @@
 
 | 层 | 组件 | 回答 | 实现 |
 |----|------|------|------|
-| **Skill Resolver** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
+| **Skill Routing** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
 | **Knowledge Resolver** | context-resolver + knowledge-index.json | 需要知道什么？ | Task→分桶(constraints/knowledge/guidance)→context-package.json |
-| **Decision Engine** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
+| **Decision Protocol** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
 | **Execution** | 10 Skills + workflow-protocol + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
 | **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |
-| **Reflection** | promotion-reviewer + instinct-extractor + decay | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |
+| **Knowledge Promotion** | promotion-reviewer + instinct-extractor + decay | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |
 | **Governance** | conformance(G1-G17) + drift(40/40) + trust(90/100) | 持续可信吗？ | 10/10 governed boundary |
 
 ## Skill Ecosystem 三件套
@@ -101,7 +101,7 @@ Verify: 9/10 | @adapter: 27 refs | Skill IR: 10/10
 Context Resolver: 10/10 | Rationalizations: 10/10
 Decision Record: 3/3 | Completeness Check: ✅
 Session Snapshot: 3/3 (analyzer/planner/generator)
-Background Pipeline: ✅ | Decay Engine: planned（无 Producer，见 knowledge-decay.md）
+Background Pipeline: ✅ | Decay: planned（无 Producer，见 knowledge-decay.md）
 ```
 
 ## v2.0 方向
@@ -113,8 +113,8 @@ v1.0 的 Runtime 本质是 Workflow Runtime（流程执行器）。v2.0 目标�
 | **Perception** | 分散在各 Skill Discovery | 探索方向：统一 Perception 层（Intent → Domain → Tech → Need） |
 | **Context Resolver** | ✅ 10/10 | — |
 | **Tool Resolver** | ✅ adapter-registry 已定义，Skill 声明 `@adapter:` | — 不继续做。adapter 声明式映射足够，不需要 AI 推理 |
-| **Workflow Resolver** | orchestrator 选 pipeline（5 模式）+ profiles.yaml | 动态规划（Bug→Reviewer, Feature→Planner+Architect） |
-| **Promotion Resolver** | ✅ Phase 8 | — |
+| **Workflow Routing** | orchestrator 选 pipeline（5 模式）+ profiles.yaml | 动态规划（Bug→Reviewer, Feature→Planner+Architect） |
+| **Promotion Protocol** | ✅ Phase 8 | — |
 | **Execution** | ✅ 10 Skills + workflow-protocol | — |
 | **Learning** | ✅ Extract→Verify→Promote（Decay：planned） | — |
 

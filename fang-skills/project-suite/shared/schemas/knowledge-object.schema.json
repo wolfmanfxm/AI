@@ -39,24 +39,12 @@
       }
     },
 
-    "decay": {
-      "type": "object",
-      "properties": {
-        "last_verified": { "type": "string", "format": "date-time" },
-        "last_used": { "type": "string", "format": "date-time" },
-        "stability": { "type": "number", "minimum": 0, "maximum": 1, "description": "1.0=稳定, <0.3=触发decay" },
-        "deprecated": { "type": "boolean", "default": false },
-        "decay_reason": { "type": "string" }
-      }
-    },
-
     "score": {
       "type": "object",
       "properties": {
         "quality": { "type": "number", "minimum": 0, "maximum": 1 },
         "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
-        "reuse": { "type": "integer", "description": "被下游 Skill 消费的次数" },
-        "freshness": { "type": "number", "minimum": 0, "maximum": 1, "description": "1.0=今天验证, 0=从未验证" }
+        "reuse": { "type": "integer", "description": "被下游 Skill 消费的次数" }
       }
     },
 
