@@ -11,7 +11,7 @@ depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-generation, pattern-matching]
 requires: []
 produces: [Code]
-consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
+consumes: [KnowledgeBase, Plan, Architecture, Context, Graph]
 
 boundary: 只写代码不做设计，缺少上游产物时提示先执行 planner/architect
 last_reviewed: "2026-08-04"
@@ -27,7 +27,7 @@ context_contract:
 
 interface:
   inputs:
-    - { name: context-package.json, type: context, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }
+    - { name: context-package.json, type: context-package, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }
     - { name: PLAN.md, type: planning, required: true, source: project-planner, fixture: true, description: Goal+Scope+Task Breakdown }
     - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: ADR决策记录 }
     - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 已有组件/API不重复生成 }

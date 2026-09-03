@@ -26,7 +26,10 @@ context_contract:
 
 interface:
   inputs:
-    - { name: 源码文件, type: code, required: true, source: user, fixture: false, description: 待文档化的源文件 }
+    - { name: 源码文件, type: implementation, required: true, source: user, fixture: false, description: 待文档化的源文件 }
+    - { name: .project-knowledge/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 风格/模式参考 }
+    - { name: context.json, type: context, required: false, source: project-analyzer, fixture: true, description: 约定/路径别名 }
+    - { name: REVIEW.md, type: review, required: false, source: project-reviewer, fixture: true, description: 审查结果（增量更新参考） }
     - { name: 已有文档, type: documentation, required: false, source: user, fixture: true, description: 风格参考 }
   outputs:
     - { name: "api/<module>.md / components/<name>.md", type: documentation, confidence_range: "75-90", description: 可溯源技术文档,含Evidence Header }

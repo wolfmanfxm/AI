@@ -11,7 +11,7 @@ depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-review, security-audit, ac-verification]
 requires: []
 produces: [Review]
-consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+consumes: [Code, Plan, KnowledgeBase, Architecture, Test]
 boundary: 只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复
 last_reviewed: "2026-08-04"
 review_cadence_days: 90
@@ -28,7 +28,9 @@ interface:
   inputs:
     - { name: 变更代码, type: implementation, required: true, source: project-generator, fixture: false, description: 待审查的diff/文件列表 }
     - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria对照 }
-    - { name: context-package.json, type: context, required: false, source: knowledge-resolver, fixture: true, description: 验证Generator是否正确使用知识 }
+    - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: 架构决策对照（架构轴） }
+    - { name: TEST-REPORT.md, type: test, required: false, source: project-tester, fixture: true, description: 测试结果对照（回归风险） }
+    - { name: context-package.json, type: context-package, required: false, source: knowledge-resolver, fixture: true, description: 验证Generator是否正确使用知识 }
     - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 循环依赖检测+影响范围 }
   outputs:
     - { name: REVIEW-<topic>.md, type: review, confidence_range: "70-90", description: 五轴审查报告, BLOCKER→PRAISE }

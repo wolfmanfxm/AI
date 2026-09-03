@@ -12,7 +12,7 @@ routing:
       cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
       en: [analyze codebase, scan project, project refresh]
     provider: project-analyzer
-    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    produces: [KnowledgeBase, Context, Graph]
   Planning:
     description: 需求收敛→完整性检查→自适应访谈→9模块执行契约
     intents:
@@ -87,12 +87,12 @@ matching:
 
 # 能力依赖图（从 produces/consumes 推导，Capability DAG，非强制执行顺序）
 dependency_graph:
-  ProjectAnalysis: { provides: [KnowledgeBase, KnowledgeIndex, Context, Graph], needs: [] }
-  Planning: { provides: [Plan], needs: [KnowledgeBase, KnowledgeIndex, Context, Graph] }
+  ProjectAnalysis: { provides: [KnowledgeBase, Context, Graph], needs: [] }
+  Planning: { provides: [Plan], needs: [KnowledgeBase, Context, Graph] }
   ArchitectureDesign: { provides: [Architecture], needs: [KnowledgeBase, Plan, Context, Graph] }
-  CodeGeneration: { provides: [Code], needs: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph] }
+  CodeGeneration: { provides: [Code], needs: [KnowledgeBase, Plan, Architecture, Context, Graph] }
   Testing: { provides: [Test], needs: [Code, Plan, KnowledgeBase, Context] }
-  CodeReview: { provides: [Review], needs: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test] }
+  CodeReview: { provides: [Review], needs: [Code, Plan, KnowledgeBase, Architecture, Test] }
   Documentation: { provides: [Documentation], needs: [Code, Review, KnowledgeBase, Context] }
   Refactoring: { provides: [RefactoredCode], needs: [Code, KnowledgeBase, Test, Review] }
   Release: { provides: [Release], needs: [Documentation, Review, Test] }

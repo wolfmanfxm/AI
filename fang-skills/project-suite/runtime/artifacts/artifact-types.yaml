@@ -5,18 +5,29 @@
 #
 # 这是 Suite 最大的解耦：数据层先统一，调度层才有意义。
 
+# ── 词汇分工（避免与 Capability 混读）──────────────────────
+#   Capability（skills/*/skill.yaml 顶层 produces/consumes）：
+#     语义 = "我能产出/消费哪种能力"，用于 DAG 推导（B.consumes ∩ A.produces ≠ ∅ → B 依赖 A）。
+#     例：KnowledgeBase / Code / Plan / Review / RefactoredCode ...
+#   Artifact Type（本文件的 types + mapping）：
+#     语义 = "我消费哪种产物类型、谁生产它"，用于 Runtime 路由（producer/consumer 解耦）。
+#     例：knowledge / implementation / planning / review / refactored-code ...
+#   两者用途不同：Capability = 能力依赖（调度 DAG）；Artifact Type = 数据流（产物路由）。
+#   故 analyzer 的 skill.yaml `consumes: []` 是合法的——它消费外部存量代码，不依赖任何 suite skill 的产出；
+#   而本文件 mapping 里 analyzer `consumes: [implementation]` 表达的是"输入类型是 implementation"。
+
 version: "1.0.0"
 
 types:
 
   knowledge:
-    description: 项目结构化知识（架构/组件/API/模式/编码约定）
+    description: 项目长期知识（Knowledge Base 持久化产物，由 analyzer 产出，经 Compiler→Resolver→context-package 注入，不作为下游 skill 的直接输入）
     schema: shared/schemas/manifest.schema.json
     schema_version: "1.2.0"
     location: .project-knowledge/
     lifecycle: [draft, verified, accepted, archived]
     producer: project-analyzer
-    consumers: [project-planner, project-architect, project-generator, project-reviewer, project-tester, project-refactorer, project-documenter]
+    consumers: []   # 下游经 knowledge-index → context-package 注入，不直接消费 knowledge
 
   context:
     description: 下游 skill 标准项目上下文（技术栈/路径别名/约定/模块清单）
@@ -35,7 +46,7 @@ types:
     consumers: [project-planner, project-architect, project-generator, project-reviewer]
 
   planning:
-    description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance）
+    description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance），含每个 Task 的 placement/target 放置决议
     schema: skills/project-planner/prompts/task-breakdown.md
     schema_version: "1.0.0"
     location: proposals/PLAN-*.md
@@ -72,9 +83,9 @@ types:
     consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
 
   refactored-code:
-    description: 重构后代码 + REFACTOR.md（变更记录 + 改善指标）
+    description: 重构后的代码（行为不变）；变更记录见 REFACTOR.md（type: review）
     schema_version: "1.0.0"
-    location: workspace/ | src/ + .project-knowledge/reports/REFACTOR.md
+    location: workspace/ | src/
     producer: project-refactorer
     consumers: [project-reviewer, project-tester]
 
@@ -100,6 +111,13 @@ types:
     producer: null
     consumers: [all]
 
+  request:
+    description: 用户需求/任务描述（Planner 的核心输入，非 skill 产出）
+    schema_version: "1.0.0"
+    location: user prompt
+    producer: null
+    consumers: [project-planner]
+
 # Skill → Artifact 映射
 # 每个 Skill 通过 artifact type 声明输入输出，不知道 producer/consumer 是谁
 
@@ -110,7 +128,7 @@ mapping:
 
   project-planner:
     produces: [planning]
-    consumes: [knowledge, context, graph]
+    consumes: [request, knowledge, context, graph]
 
   project-architect:
     produces: [design]

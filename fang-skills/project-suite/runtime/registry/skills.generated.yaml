@@ -18,7 +18,7 @@ skills:
     complexity: {min: medium, max: high}
     cost: high
     requires: [general-purpose agent]
-    produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    produces: [KnowledgeBase, Context, Graph]
     consumes: []
     boundary: "只分析项目生成知识文件，不修改源码"
     last_reviewed: "2026-08-04"
@@ -32,7 +32,7 @@ skills:
       neednt_read: []
     interface:
       inputs:
-        - { name: 项目源码, type: code, required: true, source: user, fixture: false, description: 工作目录 }
+        - { name: 项目源码, type: implementation, required: true, source: user, fixture: false, description: 工作目录 }
         - { name: Knowledge Vault, type: knowledge, required: false, source: user, fixture: false, description: Vault 同步目标路径 }
       outputs:
         - { name: .project-knowledge/, type: knowledge, confidence_range: "80-95", description: 7维度结构化知识库 }
@@ -57,7 +57,7 @@ skills:
     cost: medium
     requires: []
     produces: [Plan]
-    consumes: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+    consumes: [KnowledgeBase, Context, Graph]
     boundary: "只做计划不写代码，发现问题记录在风险矩阵不直接修改"
     last_reviewed: "2026-08-04"
     review_cadence_days: 90
@@ -70,12 +70,13 @@ skills:
       neednt_read: [observations/, reports/]
     interface:
       inputs:
+        - { name: user-request, type: request, required: true, source: user, fixture: false, description: 用户需求/任务描述 }
         - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }
         - { name: knowledge-index.json, type: state, required: true, source: knowledge-compiler, fixture: true, description: capability→文件映射 }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 模块依赖关系 }
       outputs:
         - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
-        - { name: context-package.json, type: context, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
+        - { name: context-package.json, type: context-package, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
         - { name: target, type: placement, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
       side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:
@@ -129,7 +130,7 @@ skills:
     cost: high
     requires: []
     produces: [Code]
-    consumes: [KnowledgeBase, KnowledgeIndex, Plan, Architecture, Context, Graph]
+    consumes: [KnowledgeBase, Plan, Architecture, Context, Graph]
     boundary: "只写代码不做设计，缺少上游产物时提示先执行 planner/architect"
     last_reviewed: "2026-08-04"
     review_cadence_days: 90
@@ -142,7 +143,7 @@ skills:
       neednt_read: [observations/, reports/]
     interface:
       inputs:
-        - { name: context-package.json, type: context, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }
+        - { name: context-package.json, type: context-package, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }
         - { name: PLAN.md, type: planning, required: true, source: project-planner, fixture: true, description: Goal+Scope+Task Breakdown }
         - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: ADR决策记录 }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 已有组件/API不重复生成 }
@@ -178,11 +179,11 @@ skills:
       neednt_read: [observations/, reports/]
     interface:
       inputs:
-        - { name: 被测代码, type: code, required: true, source: user, fixture: false, description: 待测试的源文件或变更列表 }
+        - { name: 被测代码, type: implementation, required: true, source: user, fixture: false, description: 待测试的源文件或变更列表 }
         - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria }
       outputs:
         - { name: "*.test.ts/*.spec.ts", type: test, confidence_range: "70-90", description: Given-When-Then结构测试用例 }
-        - { name: TEST-REPORT.md, type: review, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
+        - { name: TEST-REPORT.md, type: test, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 检测不到测试框架, severity: DEGRADED, recovery: 默认jest风格,标注⚠️ }
@@ -201,7 +202,7 @@ skills:
     cost: medium
     requires: []
     produces: [Review]
-    consumes: [Code, Plan, KnowledgeBase, KnowledgeIndex, Architecture, Test]
+    consumes: [Code, Plan, KnowledgeBase, Architecture, Test]
     boundary: "只审查不修代码，发现问题记录 file:line + 修复方案由 generator 修复"
     last_reviewed: "2026-08-04"
     review_cadence_days: 90
@@ -216,7 +217,9 @@ skills:
       inputs:
         - { name: 变更代码, type: implementation, required: true, source: project-generator, fixture: false, description: 待审查的diff/文件列表 }
         - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria对照 }
-        - { name: context-package.json, type: context, required: false, source: knowledge-resolver, fixture: true, description: 验证Generator是否正确使用知识 }
+        - { name: ARCHITECTURE.md, type: design, required: false, source: project-architect, fixture: true, description: 架构决策对照（架构轴） }
+        - { name: TEST-REPORT.md, type: test, required: false, source: project-tester, fixture: true, description: 测试结果对照（回归风险） }
+        - { name: context-package.json, type: context-package, required: false, source: knowledge-resolver, fixture: true, description: 验证Generator是否正确使用知识 }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 循环依赖检测+影响范围 }
       outputs:
         - { name: REVIEW-<topic>.md, type: review, confidence_range: "70-90", description: 五轴审查报告, BLOCKER→PRAISE }
@@ -250,7 +253,10 @@ skills:
       neednt_read: [observations/]
     interface:
       inputs:
-        - { name: 源码文件, type: code, required: true, source: user, fixture: false, description: 待文档化的源文件 }
+        - { name: 源码文件, type: implementation, required: true, source: user, fixture: false, description: 待文档化的源文件 }
+        - { name: .project-knowledge/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 风格/模式参考 }
+        - { name: context.json, type: context, required: false, source: project-analyzer, fixture: true, description: 约定/路径别名 }
+        - { name: REVIEW.md, type: review, required: false, source: project-reviewer, fixture: true, description: 审查结果（增量更新参考） }
         - { name: 已有文档, type: documentation, required: false, source: user, fixture: true, description: 风格参考 }
       outputs:
         - { name: "api/<module>.md / components/<name>.md", type: documentation, confidence_range: "75-90", description: 可溯源技术文档,含Evidence Header }
@@ -286,10 +292,11 @@ skills:
       neednt_read: [observations/, reports/]
     interface:
       inputs:
-        - { name: 待重构代码, type: code, required: true, source: user, fixture: false, description: 待重构的源文件 }
+        - { name: 待重构代码, type: implementation, required: true, source: user, fixture: false, description: 待重构的源文件 }
         - { name: 现有测试, type: test, required: false, source: project-tester, fixture: true, description: 回归测试保护 }
+        - { name: .project-knowledge/patterns/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 项目模式/编码规范 }
       outputs:
-        - { name: 重构后代码, type: code, confidence_range: "75-90", description: 行为不变+指标改善 }
+        - { name: 重构后代码, type: implementation, confidence_range: "75-90", description: 行为不变+指标改善 }
         - { name: REFACTOR.md, type: review, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
       failure_modes:
@@ -327,7 +334,7 @@ skills:
       outputs:
         - { name: CHANGELOG.md, type: documentation, confidence_range: "80-90", description: 按版本分组变更记录 }
         - { name: RELEASE-CHECKLIST.md, type: review, confidence_range: "80-90", description: 发布前逐项检查结果 }
-        - { name: 版本号推荐, type: planning, confidence_range: "85-95", description: semver版本号+推荐理由 }
+        - { name: 版本号推荐, type: release, confidence_range: "85-95", description: semver版本号+推荐理由 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 全链路confidence<40, severity: FATAL, recovery: 拒绝生成发布产物 }

@@ -18,7 +18,7 @@ fields:
     type: array
     item_schema:
       name: string          # 资源名，如 "context.json"
-      type: string          # artifact-type: knowledge/context/planning/design/code/test/review/documentation/release/state
+      type: string          # artifact-type: knowledge/context/graph/planning/design/implementation/test/review/refactored-code/documentation/release/state/request；或 context-package（Knowledge 注入契约，非路由 artifact，见 context-package.schema.json）
       required: boolean     # true = 缺失时 BLOCK
       source: string        # producer skill 或文件路径
       fixture: boolean      # v1.2: true = file-backed fixture (可 checksum 验证); false = ephemeral/会话临时

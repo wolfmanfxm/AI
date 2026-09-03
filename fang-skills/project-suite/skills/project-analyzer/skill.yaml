@@ -10,7 +10,7 @@ verification: { mode: candidate-verify-accept }
 depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-analysis, knowledge-extraction, candidate-verification]
 requires: [general-purpose agent]
-produces: [KnowledgeBase, KnowledgeIndex, Context, Graph]
+produces: [KnowledgeBase, Context, Graph]
 consumes: []
 boundary: 只分析项目生成知识文件，不修改源码
 last_reviewed: "2026-08-04"
@@ -28,7 +28,7 @@ context_contract:
 
 interface:
   inputs:
-    - { name: 项目源码, type: code, required: true, source: user, fixture: false, description: 工作目录 }
+    - { name: 项目源码, type: implementation, required: true, source: user, fixture: false, description: 工作目录 }
     - { name: Knowledge Vault, type: knowledge, required: false, source: user, fixture: false, description: Vault 同步目标路径 }
   outputs:
     - { name: .project-knowledge/, type: knowledge, confidence_range: "80-95", description: 7维度结构化知识库 }

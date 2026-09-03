@@ -6,6 +6,8 @@
 
 0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 context-package.json 的 rules[]（blocking 约束）+ guidance[]（experience 里的风险/反模式）→ 对照审查重点
 1. 加载 `PLAN.md > # Acceptance Criteria` + `# Risk Assessment` + `# Scope`
+   - 若存在 `ARCHITECTURE.md`（design）→ 一并加载架构决策，作为「架构轴」对照基准
+   - 若存在 `TEST-REPORT.md`（test）→ 一并加载测试结果，作为「回归风险」对照依据
 2. 对照已知约束 + 风险/反模式（不读 .md）：
    - context-package.json 的 rules[]（blocking）→ 逐条对照，违反即 BLOCKER
    - context-package.json 的 guidance[]（experience）→ 重点关注

@@ -26,10 +26,11 @@ context_contract:
 
 interface:
   inputs:
-    - { name: 待重构代码, type: code, required: true, source: user, fixture: false, description: 待重构的源文件 }
+    - { name: 待重构代码, type: implementation, required: true, source: user, fixture: false, description: 待重构的源文件 }
     - { name: 现有测试, type: test, required: false, source: project-tester, fixture: true, description: 回归测试保护 }
+    - { name: .project-knowledge/patterns/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 项目模式/编码规范 }
   outputs:
-    - { name: 重构后代码, type: code, confidence_range: "75-90", description: 行为不变+指标改善 }
+    - { name: 重构后代码, type: refactored-code, confidence_range: "75-90", description: 行为不变+指标改善 }
     - { name: REFACTOR.md, type: review, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
   failure_modes:
