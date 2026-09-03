@@ -34,5 +34,6 @@ interface:
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
   failure_modes:
     - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
-    - { condition: 重构后测试变红, severity: BLOCKER, recovery: Edit 反向回滚,记录REFACTOR.md失败原因 }
+    - { condition: 重构后测试变红, severity: FATAL, recovery: Edit 反向回滚,记录REFACTOR.md失败原因 }
+    - { condition: 待重构代码不可读, severity: FATAL, recovery: 拒绝执行 }
   stages: [discovery, execution, validation, delivery]

@@ -29,32 +29,5 @@
 - `completion-report.md` — 含 plan vs actual 完成报告
 
 ## Confidence
-- 最低: 70%
 - 计算: 100 - knowledge非accepted(15) - design未resolve(15) - 全新模式(10) - 无参考实现(10)
 
-## Failure
-| 条件 | 模式 | 行为 |
-|------|------|------|
-| context 缺 REQUIRED 字段 | BLOCKED | 拒绝执行 |
-| planning 缺失 | DEGRADED | 标注"⚠️ 无规划" |
-| design 未全部 resolve | DEGRADED | 降级生成 |
-| 代码已存在 | DEGRADED | 标注 [已存在] |
-| 需新增依赖 | DEGRADED | 标注 TODO |
-
-## Checkpoint
-| 位置 | 触发条件 |
-|------|---------|
-| Discover 后 | 展示改动范围（文件清单+预估行数） |
-| Execute 后 | 展示代码摘要 |
-
-## Resume
-- 支持: true
-- 方式: state.json
-
-## State
-- 读: state.json / knowledge.json / graph.json
-- 写: state.json（追加 history）
-
-## Artifacts
-- 入: [knowledge, context, graph, planning, design]
-- 出: [implementation]

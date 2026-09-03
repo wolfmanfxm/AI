@@ -34,6 +34,7 @@ interface:
     - { name: ARCHITECTURE-<topic>.md, type: design, confidence_range: "75-90", description: ADR决策记录+模块图+API契约 }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
-    - { condition: 设计范围完全未指定, severity: BLOCKER, recovery: 提示先执行/project-planner }
+    - { condition: 设计范围完全未指定, severity: BLOCKED, recovery: 提示先执行/project-planner }
+    - { condition: 源码不可读, severity: DEGRADED, recovery: 标注"⚠️未核实" }
     - { condition: 对比矩阵分差<10%无明确最优, severity: WARNING, recovery: AskUserQuestion让用户选择 }
   stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]

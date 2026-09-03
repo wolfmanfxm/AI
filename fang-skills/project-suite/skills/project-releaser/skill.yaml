@@ -35,6 +35,7 @@ interface:
     - { name: 版本号推荐, type: planning, confidence_range: "85-95", description: semver版本号+推荐理由 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
   failure_modes:
-    - { condition: 全链路confidence<40, severity: BLOCKER, recovery: 拒绝生成发布产物 }
-    - { condition: breaking change无迁移说明, severity: BLOCKER, recovery: 生成迁移步骤,AskUserQuestion确认 }
+    - { condition: 全链路confidence<40, severity: FATAL, recovery: 拒绝生成发布产物 }
+    - { condition: breaking change无迁移说明, severity: BLOCKED, recovery: 生成迁移步骤,AskUserQuestion确认 }
+    - { condition: review缺失, severity: DEGRADED, recovery: 标注"⚠️未审查" }
   stages: [discovery, execution, validation, delivery]

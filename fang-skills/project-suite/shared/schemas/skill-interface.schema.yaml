@@ -47,7 +47,7 @@ fields:
     type: array
     item_schema:
       condition: string     # 触发条件
-      severity: string      # BLOCKER | DEGRADED | WARNING
+      severity: string      # BLOCKED | DEGRADED | WARNING | FATAL
       recovery: string      # 恢复动作
 
   stages:

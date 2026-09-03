@@ -36,6 +36,7 @@ interface:
     - { name: target, type: placement, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
-    - { condition: 需求信息完全缺失, severity: BLOCKER, recovery: 拒绝执行,提示补充需求 }
+    - { condition: 需求信息完全缺失, severity: BLOCKED, recovery: 拒绝执行,提示补充需求 }
+    - { condition: 需求自相矛盾, severity: DEGRADED, recovery: 标注于Context假设表 }
     - { condition: 上游analyzer confidence<70, severity: DEGRADED, recovery: 标注"⚠️上游低置信度",继续但降级 }
   stages: [discovery, code-audit, execution, validation, delivery]

@@ -36,4 +36,5 @@ interface:
   failure_modes:
     - { condition: 变更文件>20且无法全审, severity: DEGRADED, recovery: 只审核心文件,其余标注"⚠️未审查" }
     - { condition: PLAN.md缺失无法对照AC, severity: DEGRADED, recovery: 降级为纯代码审查,标注"⚠️无验收标准" }
+    - { condition: 不熟悉框架, severity: DEGRADED, recovery: 仅通用检查 }
   stages: [discovery, execution, validation, delivery]

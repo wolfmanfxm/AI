@@ -37,7 +37,8 @@ interface:
     - { name: statistics.json, type: state, confidence_range: "90-95", description: 项目统计数据 }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
+    - { condition: 源码不可读, severity: FATAL, recovery: 终止分析 }
     - { condition: 子agent超时或返回空, severity: DEGRADED, recovery: 重试一次,仍失败标注FAILED并主流程补写 }
     - { condition: Knowledge Vault路径不可达, severity: DEGRADED, recovery: 跳过Vault同步,标注⚠️ }
-    - { condition: 无package.json, severity: BLOCKER, recovery: AskUserQuestion手动指定框架 }
+    - { condition: 无package.json, severity: BLOCKED, recovery: AskUserQuestion手动指定框架 }
   stages: [discovery, execution, delivery, validation]

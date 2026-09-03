@@ -51,22 +51,10 @@ workflows:
   full-sdlc:
     description: 全生命周期 — 分析→规划→设计→生成→测试→审查→文档→发布
     pipeline: [project-analyzer, project-planner, project-architect, project-generator, project-tester, project-reviewer, project-documenter, project-releaser]
-    parallel_groups:
-      wave_1: [project-analyzer]
-      wave_2: [project-planner]
-      wave_3: [project-architect]
-      wave_4: [project-generator]
-      wave_5: [project-tester]
-      wave_6: [project-reviewer]
-      wave_7: [project-refactorer, project-documenter]
-      wave_8: [project-releaser]
 
   quick-change:
     description: 轻量改动 — 生成→审查
     pipeline: [project-generator, project-reviewer]
-    parallel_groups:
-      wave_1: [project-generator]
-      wave_2: [project-reviewer]
 
   analyze-plan-build:
     description: 新功能开发 — 分析→规划→设计→生成→审查

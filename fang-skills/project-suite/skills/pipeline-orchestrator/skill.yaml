@@ -37,7 +37,7 @@ interface:
     - { name: pipeline-report.md, type: review, confidence_range: "80-95", description: Pipeline 执行报告 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
   failure_modes:
-    - { condition: 下游 Skill 不存在或未安装, severity: BLOCKER, recovery: 提示安装缺失的 Skill }
+    - { condition: 下游 Skill 不存在或未安装, severity: BLOCKED, recovery: 提示安装缺失的 Skill }
     - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
     - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
   stages: [discovery, orchestrate, validation, delivery]

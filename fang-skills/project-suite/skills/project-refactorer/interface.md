@@ -26,29 +26,5 @@
 - `REFACTOR.md`
 
 ## Confidence
-- 最低: 70%
 - 计算: 100 - 无测试保护(20) - 重构范围大(10) - 逻辑复杂(10)
 
-## Failure
-| 条件 | 模式 | 行为 |
-|------|------|------|
-| implementation 不可读 | BLOCKED | 拒绝执行 |
-| test 缺失且无法加表征测试 | DEGRADED | 只做机械变换 |
-| 重构后测试变红 | DEGRADED | Edit 回滚 |
-
-## Checkpoint
-| 位置 | 触发条件 |
-|------|---------|
-| Discover 后 | 确认重构范围 + 测试覆盖状态 |
-
-## Resume
-- 支持: true
-- 方式: Edit 反向（小步改动可回滚）
-
-## State
-- 读: state.json
-- 写: state.json（追加 history）
-
-## Artifacts
-- 入: [implementation, test, knowledge, review]
-- 出: [refactored-code]

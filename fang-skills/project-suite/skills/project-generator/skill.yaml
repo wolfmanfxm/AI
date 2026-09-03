@@ -35,6 +35,7 @@ interface:
     - { name: "源码文件", type: implementation, confidence_range: "70-95", description: 符合项目规范的生产级代码（扩展名按项目技术栈） }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
   failure_modes:
-    - { condition: context-package.json缺失且PLAN.md缺失, severity: BLOCKER, recovery: 提示先执行planner }
+    - { condition: context-package.json缺失且PLAN.md缺失, severity: BLOCKED, recovery: 提示先执行planner }
     - { condition: graph.json显示组件已存在, severity: WARNING, recovery: "标记[REUSE],跳过生成" }
+    - { condition: 需新增依赖, severity: DEGRADED, recovery: 标注TODO }
   stages: [discovery, execution, validation]

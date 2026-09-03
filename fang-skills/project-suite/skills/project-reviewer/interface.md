@@ -29,30 +29,5 @@
 - `REVIEW-<topic>.md`
 
 ## Confidence
-- 最低: 50%
 - 计算: 100 - 变更量大(15) - 不熟悉技术栈(15) - AC不可验证(10) - 上下文不足(10)
 
-## Failure
-| 条件 | 模式 | 行为 |
-|------|------|------|
-| implementation 不可读 | BLOCKED | 拒绝执行 |
-| 变更文件 > 20 | DEGRADED | 只审查核心文件 |
-| AC 不可验证 | DEGRADED | 标注 [需确认] |
-| 不熟悉的框架 | DEGRADED | 仅通用检查 |
-
-## Checkpoint
-| 位置 | 触发条件 |
-|------|---------|
-| 审查范围确认后 | 展示审查范围 + graph 影响分析结果 |
-
-## Resume
-- 支持: true
-- 方式: state.json
-
-## State
-- 读: state.json / knowledge.json / graph.json
-- 写: state.json（追加 history）
-
-## Artifacts
-- 入: [implementation, planning, knowledge, design, test]
-- 出: [review]

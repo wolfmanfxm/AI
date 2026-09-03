@@ -24,31 +24,5 @@
 - 文档本身（含 Evidence Header）
 
 ## Confidence
-- 最低: 60%
 - 计算: 100 - 源码不可读(20) - 注释缺失(15) - 无风格参考(10)
 
-## Failure
-| 条件 | 模式 | 行为 |
-|------|------|------|
-| 源码不可读 | DEGRADED | 标注跳过 |
-| 无风格参考 | DEGRADED | 默认模板 |
-| 文档已存在 | DEGRADED | 增量更新，不覆盖人工章节 |
-| content 冲突 | DEGRADED | 标记 [CONFLICT] |
-
-## Checkpoint
-| 位置 | 触发条件 |
-|------|---------|
-| Discover 后 | 确认文档类型 + 范围 |
-| Execute 后 | 展示文档预览 |
-
-## Resume
-- 支持: true
-- 方式: state.json
-
-## State
-- 读: state.json
-- 写: state.json（追加 history）
-
-## Artifacts
-- 入: [implementation, review, knowledge, context]
-- 出: [documentation]

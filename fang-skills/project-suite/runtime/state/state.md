@@ -11,11 +11,11 @@
 |------|------|---------|
 | **`state.json`** | **Execution State（唯一权威）** — 项目当前 phase/status/history/blockers | 唯一权威，其他 Skill 读它了解「现在到哪了」 |
 | `knowledge.json` | 知识生命周期（独立维度，不是执行状态） | 权威：知识的 Accepted/Candidate 状态 |
-| `manifest.json` | 断点续传辅助（skill 级子任务进度） | **派生自 state.json，仅恢复用**，不是独立执行状态真相 |
+| `manifest.json` | 断点续传辅助（skill 级子任务进度） | **skill 自维护的执行级状态（子任务粒度），非 state.json 派生**，不是独立执行状态真相 |
 | `.sessions/<skill>/state.json` | Session 快照（跨 session 恢复） | **恢复辅助**，内容以 state.json 为准 |
 | `timeline.json` | 执行指标（timing/quality） | **指标派生**，不含执行状态决策信息 |
 
-**规则**：判断「项目现在什么阶段、哪些 skill 完成了、有什么 blocker」——**只读 `state.json`**。manifest/session-snapshot/timeline 是 state.json 的辅助数据，冲突时以 state.json 为准。
+**规则**：判断「项目现在什么阶段、哪些 skill 完成了、有什么 blocker」——**只读 `state.json`**。manifest/session-snapshot/timeline 记录不同粒度的执行细节（skill 内子任务进度 / session 快照 / 指标），不参与「项目当前阶段」判定；冲突时以 state.json 为准。
 
 ## 核心理念
 

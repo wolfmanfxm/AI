@@ -32,6 +32,9 @@ interface:
     - { name: "api/<module>.md / components/<name>.md", type: documentation, confidence_range: "75-90", description: 可溯源技术文档,含Evidence Header }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
-    - { condition: 源文件不可读或不存在, severity: BLOCKER, recovery: 拒绝执行 }
+    - { condition: 源文件不可读或不存在, severity: FATAL, recovery: 拒绝执行 }
     - { condition: JSDoc注释缺失或不完整, severity: DEGRADED, recovery: "从类型推断,标注[推断]" }
+    - { condition: 文档已存在, severity: DEGRADED, recovery: 增量更新,不覆盖人工章节 }
+    - { condition: 无风格参考, severity: DEGRADED, recovery: 默认模板 }
+    - { condition: 文档内容冲突, severity: DEGRADED, recovery: 标记[CONFLICT] }
   stages: [discovery, execution, validation, delivery]
