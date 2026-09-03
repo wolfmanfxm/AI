@@ -13,7 +13,7 @@
 │ context.json  │ 项目技术上下文            │
 │ state.json    │ 项目当前状态 + 上游产出    │
 │ task.md       │ 当前任务描述              │
-│ knowledge.md  │ 可用知识摘要（仅 accepted）│
+│ context-package.json │ 知识注入（预消化，唯一入口）│
 └───────────────┴─────────────────────────┘
 ```
 
@@ -43,7 +43,7 @@
 ### task.md（当前任务）
 当前 Skill 需要完成的具体任务描述。来自 PLAN.md 的 Task Breakdown 或用户直接输入。
 
-### knowledge.md（知识摘要，v2 预消化）
+### context-package.json（知识注入，v2 预消化）
 
 > 知识注入唯一入口 = `context-package.json`（Knowledge Resolver 产出，预消化 pattern + constraints + components）。
 > Generator 不再读文件、不自己判断——直接遍历 `context.knowledge[]` 注入。见 [knowledge-resolver.md](../knowledge-resolver.md)。
