@@ -7,6 +7,9 @@ Accepted (2026-09-03)
 I/O 事实曾分散在四处：`skill.yaml` 顶层 `produces/consumes`（Capability）、`artifact-types.yaml` `mapping`（Artifact Type）、`skill.yaml` `interface.inputs/outputs`（执行契约），加上 `knowledge-index → context-package` 的知识注入链。多轮「对齐」试图让前几层字面一致，反而制造语义错误——releaser 版本推荐被标成 `planning`、tester TEST-REPORT 被标成 `review`、`knowledge-index` 被硬当 Capability、`knowledge` 的 consumers 误指向下游。
 
 ## Decision
+
+> **一句话边界**：knowledge 是持久化知识资产；knowledge-index 是 Compiler 内部索引；context-package 是下游 Skill 的正式知识注入接口；test 和 release 是业务 Artifact 类型，而不是把其中的某个文件/字段拆成新的类型。
+
 四层各司其职，**不强制字面相等**。它们回答四个不同问题：
 
 | 层 | 载体 | 词汇 | 语义 | 消费方 |

@@ -77,7 +77,7 @@ skills:
       outputs:
         - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
         - { name: context-package.json, type: context-package, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
-        - { name: target, type: placement, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
+        - { name: target, type: planning, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
       side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 需求信息完全缺失, severity: BLOCKED, recovery: 拒绝执行,提示补充需求 }
@@ -296,8 +296,8 @@ skills:
         - { name: 现有测试, type: test, required: false, source: project-tester, fixture: true, description: 回归测试保护 }
         - { name: .project-knowledge/patterns/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 项目模式/编码规范 }
       outputs:
-        - { name: 重构后代码, type: implementation, confidence_range: "75-90", description: 行为不变+指标改善 }
-        - { name: REFACTOR.md, type: review, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
+        - { name: 重构后代码, type: refactored-code, confidence_range: "75-90", description: 行为不变+指标改善 }
+        - { name: REFACTOR.md, type: refactored-code, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
       failure_modes:
         - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
@@ -332,8 +332,8 @@ skills:
         - { name: state.json, type: state, required: true, source: runtime, fixture: true, description: 全链路confidence检查 }
         - { name: REVIEW.md, type: review, required: false, source: project-reviewer, fixture: true, description: 审查状态 }
       outputs:
-        - { name: CHANGELOG.md, type: documentation, confidence_range: "80-90", description: 按版本分组变更记录 }
-        - { name: RELEASE-CHECKLIST.md, type: review, confidence_range: "80-90", description: 发布前逐项检查结果 }
+        - { name: CHANGELOG.md, type: release, confidence_range: "80-90", description: 按版本分组变更记录 }
+        - { name: RELEASE-CHECKLIST.md, type: release, confidence_range: "80-90", description: 发布前逐项检查结果 }
         - { name: 版本号推荐, type: release, confidence_range: "85-95", description: semver版本号+推荐理由 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
       failure_modes:
@@ -371,7 +371,7 @@ skills:
         - { name: 用户目标描述, type: context, required: true, source: user, fixture: false, description: 用户想达成的目标 }
       outputs:
         - { name: pipeline-state.json, type: state, confidence_range: "80-95", description: Pipeline 执行状态 }
-        - { name: pipeline-report.md, type: review, confidence_range: "80-95", description: Pipeline 执行报告 }
+        - { name: pipeline-report.md, type: state, confidence_range: "80-95", description: Pipeline 执行报告 }
       side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 下游 Skill 不存在或未安装, severity: BLOCKED, recovery: 提示安装缺失的 Skill }

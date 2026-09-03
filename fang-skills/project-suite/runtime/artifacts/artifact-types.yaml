@@ -83,9 +83,9 @@ types:
     consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
 
   refactored-code:
-    description: 重构后的代码（行为不变）；变更记录见 REFACTOR.md（type: review）
+    description: 重构后的代码 + REFACTOR.md 变更记录（行为不变 + 改善指标）
     schema_version: "1.0.0"
-    location: workspace/ | src/
+    location: workspace/ | src/ + .project-knowledge/reports/REFACTOR.md
     producer: project-refactorer
     consumers: [project-reviewer, project-tester]
 

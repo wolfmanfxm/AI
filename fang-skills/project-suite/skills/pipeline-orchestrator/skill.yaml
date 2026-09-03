@@ -34,7 +34,7 @@ interface:
     - { name: 用户目标描述, type: context, required: true, source: user, fixture: false, description: 用户想达成的目标 }
   outputs:
     - { name: pipeline-state.json, type: state, confidence_range: "80-95", description: Pipeline 执行状态 }
-    - { name: pipeline-report.md, type: review, confidence_range: "80-95", description: Pipeline 执行报告 }
+    - { name: pipeline-report.md, type: state, confidence_range: "80-95", description: Pipeline 执行报告 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
   failure_modes:
     - { condition: 下游 Skill 不存在或未安装, severity: BLOCKED, recovery: 提示安装缺失的 Skill }

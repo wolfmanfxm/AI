@@ -31,7 +31,7 @@ interface:
     - { name: .project-knowledge/patterns/, type: knowledge, required: false, source: project-analyzer, fixture: true, description: 项目模式/编码规范 }
   outputs:
     - { name: 重构后代码, type: refactored-code, confidence_range: "75-90", description: 行为不变+指标改善 }
-    - { name: REFACTOR.md, type: review, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
+    - { name: REFACTOR.md, type: refactored-code, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
   failure_modes:
     - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }

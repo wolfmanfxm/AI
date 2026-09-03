@@ -26,6 +26,21 @@
 - 并行关系由 produces/consumes 推导的 **Capability DAG** 决定（能力依赖，非强制执行顺序），不再是 skill 固定字段。
 - 派生文件与 skill.yaml 不一致 → `generate-registry.mjs --check` 报漂移（exit 1）。
 
+**I/O 三层（易混淆，勿强制相等）**：
+
+`skill.yaml` 里出现"三个 consumes"不是重复，是三个不同视图：
+
+| 层 | 载体 | 权威内容 | 用途 |
+|----|------|---------|------|
+| **Interface** | `skill.yaml` `interface.inputs/outputs` | 具体输入/输出（type / required / source） | Skill 执行契约（Host 前置检查 + LLM） |
+| **Capability** | `skill.yaml` 顶层 `produces/consumes` | 能力类型（KnowledgeBase / Code / Plan…） | DAG / Skill 依赖 |
+| **Artifact** | `artifact-types.yaml` `types` + `mapping` | artifact type + producer / consumer | 数据路由 |
+
+> **一句话边界**：knowledge 是持久化知识资产；knowledge-index 是 Compiler 内部索引；context-package 是下游 Skill 的正式知识注入接口；test 和 release 是业务 Artifact 类型，而不是把其中的某个文件/字段拆成新的类型。
+
+> 例：analyzer 的顶层 `consumes: []`（无上游依赖）与 `artifact-types.yaml` 的 `consumes: [implementation]`（输入类型）是**两个不同事实**，不矛盾、不要统一。详见 [ADR-004](docs/decisions/ADR-004-four-layer-io-boundaries.md)。
+> 语义一致性由 `shared/scripts/check-io-connectivity.sh` 验证——只查「能接通」（type 合法、source→produces 断链、output 有对应 Capability），不查「完全相等」。
+
 ---
 
 ## 1. 目录结构契约

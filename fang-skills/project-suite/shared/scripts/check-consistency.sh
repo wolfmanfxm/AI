@@ -170,6 +170,18 @@ if [ "$sched_ok" = "1" ] && [ "$policy_ok" = "1" ]; then
 fi
 
 echo ""
+# ── L3.6: I/O 连通性（能接通 ≠ 相等）──────────────────
+echo "【L3.6】I/O 连通性（type 合法 / source→produces / output→Capability）"
+echo "----------------------------------------"
+if bash "$SUITE_ROOT/shared/scripts/check-io-connectivity.sh" >/dev/null 2>&1; then
+  green "  ✅ I/O 语义连通"
+  PASS=$((PASS+1))
+else
+  red "  ❌ I/O 语义不通（错标 type / 来源断链 / 产出无 Capability）"
+  FAIL=$((FAIL+1))
+fi
+
+echo ""
 # ── L4: benchmarks 硬约束 ──────────────────────────────────
 echo "【L4】benchmarks 硬约束（技术栈硬编码 / 已废弃要求）"
 echo "----------------------------------------"

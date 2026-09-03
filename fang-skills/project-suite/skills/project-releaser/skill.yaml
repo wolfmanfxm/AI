@@ -30,8 +30,8 @@ interface:
     - { name: state.json, type: state, required: true, source: runtime, fixture: true, description: 全链路confidence检查 }
     - { name: REVIEW.md, type: review, required: false, source: project-reviewer, fixture: true, description: 审查状态 }
   outputs:
-    - { name: CHANGELOG.md, type: documentation, confidence_range: "80-90", description: 按版本分组变更记录 }
-    - { name: RELEASE-CHECKLIST.md, type: review, confidence_range: "80-90", description: 发布前逐项检查结果 }
+    - { name: CHANGELOG.md, type: release, confidence_range: "80-90", description: 按版本分组变更记录 }
+    - { name: RELEASE-CHECKLIST.md, type: release, confidence_range: "80-90", description: 发布前逐项检查结果 }
     - { name: 版本号推荐, type: release, confidence_range: "85-95", description: semver版本号+推荐理由 }
   side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
   failure_modes:
