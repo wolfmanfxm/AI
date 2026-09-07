@@ -31,7 +31,7 @@
 
 ```yaml
 decisions:
-  - id: D1
+  - id: D-001
     decision: "模块划分: 新建 pricingManage/"
     selected: "pricingManage/"
     ignored:

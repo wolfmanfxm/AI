@@ -11,6 +11,7 @@
 | V3 | AC 可验证 | 每条 AC 有明确的 pass/fail 条件（不含"体验好""性能好"等主观描述） | 降级 confidence -10 |
 | V4 | Decision→Task 绑定 | 每个 Decision 已标注影响哪些 Task | 补充映射 |
 | V5 | 估时合理 | 单任务 ≤8h，总估时 ≤ 可用工时 | 标注风险 |
+| V6 | Decision 语义合法 | 每个 D-XX 是选择题/问句而非 Task（不含实现动词），且足够具体 | 反例改写为 Task 或降级为 Gap |
 
 ## QA Agent
 

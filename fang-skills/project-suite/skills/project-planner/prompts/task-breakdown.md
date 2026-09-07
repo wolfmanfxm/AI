@@ -118,6 +118,20 @@ confidence = 100
 - 只有一个合理方案 → 不是决策，记录为 Context 中的约束
 - 每个 D-XX 标注 ≥2 个 Options + Affected Tasks
 
+**决策资格（两条硬规则）：**
+
+1. **D-XX 必须是「选择题 / 问句」，不是「做某件事」。** 含实现动词的是 Task，不是 Decision：
+
+   | ❌ 反例（是 Task） | ✅ 正例（是 Decision） |
+   |------------------|---------------------|
+   | D-001: 实现客户管理模块 | D-001: 客户管理归属哪个业务模块？ |
+   | D-002: 新增 Customer API | D-002: 复用现有 Customer API 还是新建？ |
+   | D-003: 重构登录鉴权 | D-003: 客户唯一标识用 User ID 还是独立 Customer ID？ |
+
+   禁止动词（出现即归 Task）：实现 / 新增 / 修改 / 删除 / 构建 / 重构 / 开发 / 搭建 / 编写。
+
+2. **D-XX 必须是「足够具体、当前值得解决的题」，不是「所有未知的容器」。** 信息不足、还表述不成明确选择题的 → 放 `# Scope > Gaps`（G-XX），等 Code Audit / Interview 补齐后再晋升为 D-XX。不要过早制造 Decision。
+
 → 产出：`# Decision`
 
 ### Step 6: Task Breakdown — 可执行任务
@@ -216,12 +230,15 @@ B 完全独立？                 → 无依赖
 
 **Why:** [业务驱动 — 为什么需要这个结果]
 
+**Done 判据:** [一句话 — 这个 Plan 何时算真正走完。不是「所有 Task 完成」，而是「系统达到什么可观察状态」；后续 Decision / Task 的增长以此为准，越界即停]
+
 ---
 
 # Scope
 
 **In:**
-- [计划覆盖的内容]
+- R-001: [计划覆盖的需求 1]
+- R-002: [计划覆盖的需求 2]
 
 **Out:**
 - [明确排除的内容 — 防止范围蔓延]
@@ -264,12 +281,12 @@ B 完全独立？                 → 无依赖
 ## 已有组件
 | 组件 | 路径 | 用于 Task | 复用方式 |
 |------|------|----------|---------|
-| {name} | {path} | T{N} | {直接使用 / 扩展 / 参考模式} |
+| {name} | {path} | T-{NNN} | {直接使用 / 扩展 / 参考模式} |
 
 ## 已有模式
 | 模式 | 来源 | 应用于 |
 |------|------|--------|
-| {name} | graph.json 中的 pattern 节点 | T{N} |
+| {name} | graph.json 中的 pattern 节点 | T-{NNN} |
 
 ## 已有 API
 | 模块 | 路径 | 已有端点 |
@@ -301,8 +318,8 @@ B 完全独立？                 → 无依赖
 ## Relevant Patterns / Components / API（recommended — 用于实现）
 | id | 来源 | 用于 Task |
 |----|------|-----------|
-| pattern.{name} | patterns/{file}.md | T{N} |
-| component.{name} | components/catalog.md | T{N} |
+| pattern.{name} | patterns/{file}.md | T-{NNN} |
+| component.{name} | components/catalog.md | T-{NNN} |
 
 > 注：task-scope decision（`ARCHITECTURE-*.md` 一次性 feature ADR）不进本块，作 advisory 参考（见 context-package.json 的 guidance）。
 
@@ -314,9 +331,11 @@ B 完全独立？                 → 无依赖
 
 | ID | 决策内容 | 上下文 | 候选方案 | 影响 Tasks |
 |----|---------|--------|---------|-----------|
-| D-01 | {需决策的技术/业务问题} | {为什么需要决策} | A: {option} / B: {option} | T{N}, T{M} |
+| D-001 | {需决策的技术/业务问题} | {为什么需要决策} | A: {option} / B: {option} | T-{NNN}, T-{MMM} |
 
 **规则:**
+- D-XX 必须描述「需要选择/判断的问题」，不是实现动作——含实现动词（实现/新增/修改/删除/构建/重构/开发/搭建/编写）的是 Task，不是 Decision（正反例见 Step 5「决策资格」）
+- D-XX 必须是「当前可收敛的问题」——信息不足、还表述不成明确选择题的，放 `# Scope > Gaps`（G-XX），等补齐后再晋升，不要过早制造 Decision
 - 标注了 D-XX 的 Task，Architect 必须先 resolve 才能执行
 - 只有一个合理方案的不是决策 → 记录在 `# Context > 约束`
 - 每个决策至少 2 个可信候选方案
@@ -327,17 +346,18 @@ B 完全独立？                 → 无依赖
 
 | ID | 任务 | 依赖 | 估时 | 优先级 | 风险 | Decision Deps | 验证方式 |
 |----|------|------|------|--------|------|--------------|---------|
-| T1 | {任务名} | - | M / 1.5d | P0 | Low | - | {验证命令/grep/URL} |
-| T2 | {任务名} | T1→ | L / 2.5d | P0 | Med | D-01 | {验证命令/grep/URL} |
+| T-001 | {任务名} | - | M / 1.5d | P0 | Low | - | {验证命令/grep/URL} |
+| T-002 | {任务名} | T-001→ | L / 2.5d | P0 | Med | D-001 | {验证命令/grep/URL} |
 
 **依赖符号:** → 硬依赖 / ⇢ 软依赖 / ⤳ 外部依赖
 
 ### Task 详情
 
-#### T1: {任务名}
+#### T-001: {任务名}
 - **文件:** `path/to/file.ext` [新] / [修改] / [已存在-扩展]
 - **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / domain model artifact]}
-- **依赖:** T0→ / D-01（Architect 先 resolve）
+- **依赖:** - / D-001（Architect 先 resolve）
+- **satisfies:** R-001（追溯 requirement）
 - **操作:** [具体实现指令 — Generator 可直接执行]
 - **验证:** [可验证命令/grep/URL]
 - **完成标准:** [可测量的验收条件]
@@ -347,9 +367,9 @@ B 完全独立？                 → 无依赖
 # Dependency Graph
 
 ```
-T1 ──→ T2 ──→ T4
-  ──→ T3 ──⇢ T5
-  ⤳ T6（外部：第三方服务上线）
+T-001 ──→ T-002 ──→ T-004
+  ──→ T-003 ──⇢ T-005
+  ⤳ T-006（外部：第三方服务上线）
 ```
 
 | 符号 | 含义 |
@@ -361,9 +381,12 @@ T1 ──→ T2 ──→ T4
 **Wave 分组（建议执行顺序）:**
 | Wave | Tasks | 可并行 |
 |------|-------|--------|
-| 1 | T1, T4 | ✅ |
-| 2 | T2, T3, T5 | ✅ |
-| 3 | T6, T7 | ✅ |
+| 1 | T-001, T-004 | ✅ |
+| 2 | T-002, T-003, T-005 | ✅ |
+| 3 | T-006, T-007 | ✅ |
+
+**Decision Frontier（查询视图，不新建结构）:**
+> Frontier = 当前「无未决上游 Decision 阻塞」的 D-XX 集合，由本 Dependency Graph 查询得出，不新建 artifact / structure。Architect 每次只 resolve 当前 Frontier 中的一个 D-XX，resolve 后重查，新的 D-XX 才进入 Frontier。
 
 ---
 
@@ -373,7 +396,7 @@ T1 ──→ T2 ──→ T4
 
 | ID | 描述 | 类别 | 级别 | 概率 | 影响 Tasks | 缓解措施 |
 |----|------|------|------|------|-----------|---------|
-| R-01 | {什么可能出错} | technical | High | Med | T{N} | {预防/恢复措施} |
+| RSK-001 | {什么可能出错} | technical | High | Med | T-{NNN} | {预防/恢复措施} |
 
 ## 下游行为指引
 
@@ -389,10 +412,10 @@ T1 ──→ T2 ──→ T4
 
 ## 验收条件
 
-| # | 条件 | 验证方式 | 验证角色 |
-|---|------|---------|---------|
-| 1 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} |
-| 2 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} |
+| ID | 条件 | 验证方式 | 验证角色 | 追溯 |
+|----|------|---------|---------|------|
+| AC-001 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} | verifies: T-001 |
+| AC-002 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} | verifies: T-002 |
 
 ## Definition of Done
 - [ ] 所有 Tasks 通过验证
@@ -419,27 +442,27 @@ T1 ──→ T2 ──→ T4
 
 | ID | 决策 | 候选 | 影响 |
 |----|------|------|------|
-| D-01 | 认证方案 | A: JWT / B: Session+Cookie | T4, T5, T9 |
-| D-02 | 富文本编辑器 | A: TipTap / B: Quill / C: textarea | T7 |
+| D-001 | 认证方案 | A: JWT / B: Session+Cookie | T-004, T-005, T-009 |
+| D-002 | 富文本编辑器 | A: TipTap / B: Quill / C: textarea | T-007 |
 
 **Task Breakdown + Dependency Graph:**
 
 ```
-T1(DB) ──→ T2(文章API) ──→ T6(列表页)
-       ──→ T3(标签API) ──→ T8(标签组件)
-                      ──→ T7(编辑器) [需 D-02]
-T4(认证API) [需 D-01] ──→ T5(登录页)
-                       ──→ T9(权限守卫)
+T-001(DB) ──→ T-002(文章API) ──→ T-006(列表页)
+       ──→ T-003(标签API) ──→ T-008(标签组件)
+                      ──→ T-007(编辑器) [需 D-002]
+T-004(认证API) [需 D-001] ──→ T-005(登录页)
+                       ──→ T-009(权限守卫)
 ```
 
 | ID | Task | 依赖 | 估时 | Prio | Decision |
 |----|------|------|------|------|----------|
-| T1 | DB: articles + tags | - | M/1.5d | P0 | - |
-| T2 | API: 文章 CRUD | T1→ | L/2.5d | P0 | - |
-| T3 | API: 标签管理 | T1→ | M/1.5d | P0 | - |
-| T4 | API: 认证 | - | L/2d | P0 | D-01 |
-| T5 | 前端: 登录页 | T4→ | M/1.5d | P0 | D-01 |
-| T6 | 前端: 列表+搜索 | T2→ | L/2d | P1 | - |
-| T7 | 前端: 编辑器 | T2→,T3→ | L/2.5d | P1 | D-02 |
-| T8 | 前端: 标签组件 | T3→ | S/1d | P1 | - |
-| T9 | 前端: 权限守卫 | T4→,T5→ | S/0.5d | P1 | D-01 |
+| T-001 | DB: articles + tags | - | M/1.5d | P0 | - |
+| T-002 | API: 文章 CRUD | T-001→ | L/2.5d | P0 | - |
+| T-003 | API: 标签管理 | T-001→ | M/1.5d | P0 | - |
+| T-004 | API: 认证 | - | L/2d | P0 | D-001 |
+| T-005 | 前端: 登录页 | T-004→ | M/1.5d | P0 | D-001 |
+| T-006 | 前端: 列表+搜索 | T-002→ | L/2d | P1 | - |
+| T-007 | 前端: 编辑器 | T-002→,T-003→ | L/2.5d | P1 | D-002 |
+| T-008 | 前端: 标签组件 | T-003→ | S/1d | P1 | - |
+| T-009 | 前端: 权限守卫 | T-004→,T-005→ | S/0.5d | P1 | D-001 |

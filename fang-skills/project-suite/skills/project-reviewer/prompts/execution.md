@@ -29,6 +29,8 @@
 
 逐条验证 `# Acceptance Criteria` → 标注 ✅/❌/⚠️。不能验证的（主观描述）→ 标注 ⚠️ + 原因。
 
+每个 finding（`F-xxx`）标注 `against: AC-xxx` —— 指向它违反的 AC，供 check-artifacts.sh 做 F→AC 追溯。
+
 ### 3. Scope 边界检查
 
 变更是否超出 `# Scope` → 超出标注 `[SCOPE CREEP]`。

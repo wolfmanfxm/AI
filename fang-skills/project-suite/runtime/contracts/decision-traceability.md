@@ -16,6 +16,9 @@
 
 格式：`<PREFIX>-<3位数字>`（R-007, T-012）。
 
+> ⚠️ `R-` 保留给 Requirement。非追踪链的编号（如 Risk）用独立前缀（`RSK-`），避免与 Requirement 的 `R-` 冲突。
+> Generator 的实现/复用决策用 `REUSE-` 前缀（本地记录，不在追踪链内），区别于 planner 的 `D-`。
+
 ## 追踪链
 
 ```

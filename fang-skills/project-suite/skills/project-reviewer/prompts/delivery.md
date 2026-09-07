@@ -6,7 +6,7 @@
 
 写入 `.project-knowledge/reports/REVIEW-<topic>.md`：
 
-1. **问题列表**（按 BLOCKER → HIGH → MEDIUM → LOW 排序）
+1. **问题列表**（按 BLOCKER → HIGH → MEDIUM → LOW 排序）—— 每个 finding 分配 `F-xxx` ID，并标注 `against: AC-xxx`（该 finding 违反哪条 AC，无对应 AC 则标 `against: -`）
 2. **PRAISE**（值得学习的代码）
 3. **AC 对照表**（每条 AC 的 ✅/❌/⚠️ 状态）
 4. **审查结论**（PASS / NEEDS_FIX / BLOCKED）

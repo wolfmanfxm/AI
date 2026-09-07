@@ -1,6 +1,7 @@
 # Examples — Reviewer
 
 > 真实审查示例。
+> Finding 的 ID 用 `F-xxx`，并标注 `against: AC-xxx`（见 [delivery.md](../prompts/delivery.md)）；下表为内容示例，ID 栏省略以聚焦审查内容。
 
 ---
 

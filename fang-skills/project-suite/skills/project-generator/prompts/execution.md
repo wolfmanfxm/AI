@@ -59,7 +59,7 @@
 
 ```yaml
 decisions:
-  - id: D1
+  - id: REUSE-001
     decision: "表单组件: 使用 <统一表单封装>"
     selected: "<统一表单封装>"
     ignored:

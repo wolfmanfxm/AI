@@ -46,7 +46,8 @@
 
 ```yaml
 decisions:
-  - id: D1
+  - id: ADR-001
+    implements: D-003          # 追溯 planner decision
     decision: "状态管理: 使用 Pinia"
     selected: "Pinia"
     ignored:
