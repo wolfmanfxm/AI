@@ -14,10 +14,10 @@
 | 3 | Context 引用 | `# Context` | context.json 关键信息摘要 + 假设表 |
 | 4 | Reuse Analysis | `# Reuse Analysis` | 可复用组件/API/模式清单 + 复用方式 |
 | 5 | Decision 识别 | `# Decision` | 待决策点列表 + 每个决策影响哪些 Task |
-| 6 | Task Breakdown | `# Task Breakdown` | 任务列表（每任务含：名称/估时/依赖/AC/风险） |
+| 6 | Task Breakdown | `# Task Breakdown` | 垂直切片列表（每 slice 含：slice_goal/demo/估时/依赖/AC/风险） |
 | 7 | Dependency Graph | `# Dependency Graph` | 任务依赖图（拓扑序，标注并行机会） |
 | 8 | Risk Assessment | `# Risk Assessment` | Top-3 风险 + 缓解措施 + 置信度 |
-| 9 | Acceptance Criteria | `# Acceptance Criteria` | 可验证的 AC 列表（每条有 pass/fail 条件） |
+| 9 | Acceptance Criteria | `# Acceptance Criteria` | 可证伪的 AC 列表（每条含 base-state + falsify） |
 
 → 详细 Prompt：[prompts/task-breakdown.md](task-breakdown.md)
 → 工作量评估：[prompts/estimation.md](estimation.md)

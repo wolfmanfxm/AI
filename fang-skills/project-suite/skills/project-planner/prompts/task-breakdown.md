@@ -134,19 +134,39 @@ confidence = 100
 
 → 产出：`# Decision`
 
-### Step 6: Task Breakdown — 可执行任务
+### Step 6: Task Breakdown — 可独立验证的实现切片（Implementation Slice）
 
-**粒度控制：** 每个任务 0.5-2 人天。超过 → 继续拆分。含"和"字 → 考虑拆。
+**核心单位是「切片」，不是「任务」。** 一个 Task = 一个垂直切片：完成后用户/Tester 能独立看到一个可观察行为，而不是一个技术层或一个 CRUD 操作。
 
-**拆分维度：**
+**粒度控制：** 每个 Task 0.5-2 人天。超过 → 继续拆。含"和"字 → 考虑拆。
 
-| 需求特征 | 拆分维度 |
-|---------|---------|
-| CRUD 操作 | 按操作拆：Create / Read / Update / Delete |
-| 前后端都有 | 按层拆：API / 数据 / UI |
-| 多角色 | 按角色拆：Admin / User / Guest |
-| 流程类 | 按步骤拆：Step1 → Step2 → Step3 |
-| 数据驱动 | 按实体拆：User / Order / Product |
+**Slice Test（每个 Task 必答）：**
+
+> 「完成这个 Task 后，我能独立 demo / verify 什么行为？」
+> 答不出 → 大概率是 horizontal slice（按层/按操作横切）→ 重新拆。
+>
+> ❌ 新增 customer API
+> ✅ 创建客户后，客户列表能显示刚创建的客户，刷新后仍存在（贯穿 api 模块 + 组件 + 页面）
+
+**Preflight（切切片前，仅发现结构性改动时触发）：**
+
+> 是否存在会导致后续所有 Task 都无法独立保持绿色的结构性改动？（如全局 User 类型改造、公共组件重构）
+> 有 → 产出 1 个前置重构 Task（标 `prerequisite`，后续 Task 依赖它），不新建 PREF/CONTRACT 体系。
+
+**切片边界选择（二级，仅用于选 slice 的切分维度）：**
+
+| 需求特征 | 切片边界 | 注意 |
+|---------|---------|------|
+| 多角色 | 按角色：Admin / User / Guest | 每个角色切片仍要贯穿实现到 demo |
+| 流程类 | 按步骤：Step1 → Step2 | 每步需有可观察结果，不是「API 步」→「UI 步」 |
+| 数据驱动 | 按实体：User / Order / Product | 每个实体切片贯穿「创建→展示→验证」，不是实体层 |
+
+**❌ 禁止的横向切法：**
+
+| 反例 | 为什么错 |
+|------|---------|
+| 按操作拆：Create / Read / Update / Delete 各一个 Task | Create 无法脱离 Read/List 独立 demo |
+| 按层拆：API / 数据 / UI 各一个 Task | 单层不是可观察行为，拼接时才见真容 |
 
 **Decision ↔ Task 绑定：** 每个 Task 标注依赖的 Decision ID。Architect 必须先 resolve，Generator 才能开始。
 
@@ -191,11 +211,20 @@ B 完全独立？                 → 无依赖
 
 → 产出：`# Risk Assessment`
 
-### Step 9: Acceptance Criteria — 验收标准
+### Step 9: Acceptance Criteria — 可证伪验收标准
 
 - 每条 AC 可验证（grep / test / URL / CLI）
 - 每条 AC 标注负责验证的角色（Reviewer / Tester）
 - Definition of Done
+
+**每条 AC 必答「三问」（缺一不可，否则不是有效 AC）：**
+
+1. **base-state**：当前代码是否已经满足？已满足 → 不是有效 AC，删掉或改写。
+2. **owner**：哪个 Task 的完成会让它变真？（AC 必须能回溯到一个 Task）
+3. **falsify**：什么可观察证据会证明它失败 / 通过？（例：base commit 上测试失败 → 该 Task 完成后通过）
+
+> ❌ AC: Customer API 存在（HEAD 上可能已有，base-state 已满足 → 无效）
+> ✅ AC: POST 不存在的 customer 成功 → GET 列表能返回该 customer → 测试在 base commit 失败、本 Task 完成后通过
 
 → 产出：`# Acceptance Criteria`
 
@@ -358,9 +387,12 @@ B 完全独立？                 → 无依赖
 - **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / domain model artifact]}
 - **依赖:** - / D-001（Architect 先 resolve）
 - **satisfies:** R-001（追溯 requirement）
+- **slice_goal:** [一句话 — 完成后可独立 demo 的用户可见行为]
+- **demo:** [可观察路径 — 例：创建客户 → 列表立即出现 → 刷新后仍存在]
 - **操作:** [具体实现指令 — Generator 可直接执行]
 - **验证:** [可验证命令/grep/URL]
 - **完成标准:** [可测量的验收条件]
+- **context 指针:** [需读 context-package.json 的哪几条 + 上游哪个 Decision 摘要，只引用不复制全文]
 
 ---
 
@@ -412,10 +444,12 @@ T-001 ──→ T-002 ──→ T-004
 
 ## 验收条件
 
-| ID | 条件 | 验证方式 | 验证角色 | 追溯 |
-|----|------|---------|---------|------|
+| ID | 可证伪条件 | 验证方式 | 验证角色 | 追溯 |
+|----|-----------|---------|---------|------|
 | AC-001 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} | verifies: T-001 |
 | AC-002 | {可验证条件} | {grep / test / URL / CLI} | {Reviewer / Tester} | verifies: T-002 |
+
+> 每条 AC 必须满足三问：**base-state**（当前代码未满足）/ **owner**（可回溯到某个 Task）/ **falsify**（可观察证据证明失败或通过）。当前代码已满足的 AC 是无效 AC，直接删。
 
 ## Definition of Done
 - [ ] 所有 Tasks 通过验证
@@ -448,21 +482,16 @@ T-001 ──→ T-002 ──→ T-004
 **Task Breakdown + Dependency Graph:**
 
 ```
-T-001(DB) ──→ T-002(文章API) ──→ T-006(列表页)
-       ──→ T-003(标签API) ──→ T-008(标签组件)
-                      ──→ T-007(编辑器) [需 D-002]
-T-004(认证API) [需 D-001] ──→ T-005(登录页)
-                       ──→ T-009(权限守卫)
+T-001(登录+权限守卫 slice) [需 D-001] ──→ T-002(文章创建 slice)
+T-002 ──→ T-003(编辑+发布状态 slice)
+T-002 ──→ T-004(标签 slice) [需 D-002]
 ```
 
-| ID | Task | 依赖 | 估时 | Prio | Decision |
-|----|------|------|------|------|----------|
-| T-001 | DB: articles + tags | - | M/1.5d | P0 | - |
-| T-002 | API: 文章 CRUD | T-001→ | L/2.5d | P0 | - |
-| T-003 | API: 标签管理 | T-001→ | M/1.5d | P0 | - |
-| T-004 | API: 认证 | - | L/2d | P0 | D-001 |
-| T-005 | 前端: 登录页 | T-004→ | M/1.5d | P0 | D-001 |
-| T-006 | 前端: 列表+搜索 | T-002→ | L/2d | P1 | - |
-| T-007 | 前端: 编辑器 | T-002→,T-003→ | L/2.5d | P1 | D-002 |
-| T-008 | 前端: 标签组件 | T-003→ | S/1d | P1 | - |
-| T-009 | 前端: 权限守卫 | T-004→,T-005→ | S/0.5d | P1 | D-001 |
+| ID | Slice（可观察行为） | 依赖 | 估时 | Prio | Decision |
+|----|---------------------|------|------|------|----------|
+| T-001 | 登录后进入管理页，未登录访问被重定向 | - | L/2d | P0 | D-001 |
+| T-002 | 创建文章后列表/详情可见，刷新仍存在 | T-001→ | L/2.5d | P0 | - |
+| T-003 | 编辑文章并切换草稿/发布状态后可见 | T-002→ | L/2d | P1 | - |
+| T-004 | 给文章打标签后详情页展示该标签 | T-002→ | M/1.5d | P1 | D-002 |
+
+> 每个 slice 贯穿 DB/API/UI 到一个可观察行为——不再出现「DB / API / 前端」分层的 Task。
