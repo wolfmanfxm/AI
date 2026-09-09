@@ -33,7 +33,7 @@ expected:
     - statistics.json               # valid JSON
     - context.json                  # valid JSON, required fields present
     - graph.json                    # valid JSON, nodes > 0
-    - recommendations.md            # 存在即可（现状→建议+依据；无跨项目 Instinct 时标注「暂无建议」）
+    - recommendations.md            # 存在即可（现状→建议+依据；根据项目自身现状生成，不依赖跨项目）
   confidence: 70-95
   stages_completed: [discovery, execution, delivery, validation]
 ```

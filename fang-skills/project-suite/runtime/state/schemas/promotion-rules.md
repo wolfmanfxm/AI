@@ -32,8 +32,8 @@ Candidate 必须满足 **≥3/5** 才能晋升为 Accepted：
 ### R2: 跨模块影响
 
 ```
-✅ upload pattern 被 approvalManage 和 userManage 两个模块使用 → R2 满足
-❌ upload pattern 只被 approvalManage 一个模块使用 → 不满足
+✅ upload pattern 被 <模块A> 和 <模块B> 两个模块使用 → R2 满足
+❌ upload pattern 只被 <模块A> 一个模块使用 → 不满足
 ```
 
 判定来源：`graph.json` 中的 `findConsumers(nodeId)` 查询结果。

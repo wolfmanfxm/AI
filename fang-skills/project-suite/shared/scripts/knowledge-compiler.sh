@@ -153,6 +153,7 @@ emit_one() {
   emit_one "architecture" "架构总览"                        "architecture" "pattern"   "recommended"  "P2" 1
   emit_one "experience"  "项目经验教训"                     "experience"  "experience" "advisory"     "P3" 0
   emit_one "playbooks"   "操作手册"                         "playbooks"   "playbook"   "recommended"  "P3" 0
+  emit_one "recommendations" "项目级应然建议（新代码改进，非现状规范）" "recommendations" "recommendation" "advisory" "P2" 0
 
   printf '\n  }\n'
   printf '}\n'
@@ -163,5 +164,5 @@ printf '%s' "$SOURCE_HASH" > "$HASH_FILE"
 
 EXCLUDED_COUNT="$(wc -l < "$EXCLUDED_FILE" | tr -d ' ')"
 echo "Generated: $OUT"
-echo "  capabilities: rules decisions patterns components api architecture experience playbooks"
+echo "  capabilities: rules decisions patterns components api architecture experience playbooks recommendations"
 echo "  lifecycle-filtered (non-Accepted): ${EXCLUDED_COUNT}"

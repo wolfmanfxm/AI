@@ -80,7 +80,7 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
       {
         "capability": "TablePattern",
         "pattern": "DataTable + <schema表格> + SearchForm",
-        "constraints": ["pageIndex/pageSize 数字", "Element Plus 命名空间"],
+        "constraints": ["<分页参数> 数字", "Element Plus 命名空间"],
         "anti_pattern": "不要手写 el-table + el-pagination",
         "source": "patterns/table.md",
         "confidence": 92
@@ -96,7 +96,7 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
       {
         "capability": "ApiPattern",
         "pattern": "export function getXxxPageList(params): Promise<AxiosResponse<T>>",
-        "constraints": ["pageIndex/pageSize", "data.code === 0", "GET=params POST=data"],
+        "constraints": ["<分页参数>", "data.code === 0", "GET=params POST=data"],
         "anti_pattern": "不要用 export const 箭头函数 + method 小写",
         "source": "api/overview.md",
         "confidence": 90

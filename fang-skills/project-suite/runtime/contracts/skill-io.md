@@ -55,7 +55,7 @@
   "schemaVersion": "2.0.0",
   "context": {
     "knowledge": [
-      {"capability": "TablePattern", "pattern": "DataTable + <schema表格>", "constraints": ["pageIndex/pageSize 数字"], "anti_pattern": "不要手写 el-table", "source": "patterns/table.md"}
+      {"capability": "TablePattern", "pattern": "DataTable + <schema表格>", "constraints": ["<分页参数> 数字"], "anti_pattern": "不要手写 el-table", "source": "patterns/table.md"}
     ],
     "components": [{"name": "Dialog", "path": "@app/components/common/Dialog", "reuse": true}],
     "api": [{"module": "order", "functions": ["getPage"], "conventions": ["export function 风格"]}],

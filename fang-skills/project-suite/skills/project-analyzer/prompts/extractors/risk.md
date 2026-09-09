@@ -19,7 +19,7 @@
 ## Critical
 | Risk | Location | Impact | Evidence |
 |------|---------|--------|----------|
-| God Component | src/views/accountManage/orderReview/detail.vue (1200行) | 维护性 | 单文件 >1000行 |
+| God Component | <示例页面路径> (<N>行) | 维护性 | 单文件 >1000行 |
 
 ## High
 | Risk | Location | Impact | Evidence |
@@ -31,7 +31,7 @@
 | Risk | Location | Impact |
 |------|---------|--------|
 | Duplicate API | userApi.ts ≈ accountApi.ts (85%) | 冗余 |
-| Missing Tests | workspace/views/clueManage/ 0 tests | 质量 |
+| Missing Tests | <示例模块>/ 0 tests | 质量 |
 
 ## Technical Debt Score
 - Files >500行: 12

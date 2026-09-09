@@ -83,7 +83,7 @@ Delivery 读取 `instincts.yaml`：
 
 ## 项目建议（单项目应然，区别于 cross-project Instinct）
 
-> 除跨项目 Instinct 外，本阶段还产出**单项目建议** `recommendations.md`——把跨项目 Instinct 应用到「这个项目」的现状，生成项目级改进建议。与 `instincts.yaml` 的区别：
+> 本阶段产出**单项目建议** `recommendations.md`——分析完本项目后，**根据项目自身现状**（反模式、风险、技术债、统计）直接给出的改进建议 + 依据。它**不依赖跨项目 Instinct**；Instinct 是独立的跨项目产物（用于 Vault promotion），若存在可作为「依据」的佐证，但不是前置条件。
 
 | 产出 | 范围 | 性质 | 去向 |
 |------|------|------|------|
@@ -92,39 +92,41 @@ Delivery 读取 `instincts.yaml`：
 
 ### 生成逻辑
 
-对每条 `promotion_ready: true` 的 Instinct，检查本项目现状是否命中：
+从本项目的 extractor 产出（antipattern/risk/statistics）直接提炼建议：
 
 ```
-for each instinct in instincts.yaml:
-  if instinct 的 evidence（any_usage_rate / consistency / occurrences）与本项目 facts 匹配:
+for each 本项目反模式/风险/技术债:
+  若该项是「新代码可避免的」改进方向:
     生成 recommendation:
-      priority:     instinct.type（Always/Prefer/Avoid）
-      status_quo:   <本项目事实，如「存量 API 大量返回 any」>
-      recommendation: <应然，如「新代码优先类型化泛型 IResponseResultRows<T>」>
-      basis:        <instinct.id + evidence>
-      source:       <本项目知识文件路径，如 api/overview.md>
+      priority:      Always / Prefer / Avoid
+      status_quo:    <本项目事实，如「N% 代码存在 X 反模式」「存在超长单文件」>
+      recommendation: <应然，如「新代码避免 X」「新模块拆解超长文件」>
+      basis:         <本项目统计/证据，如「<知识文件> 统计 N%」>
+      instinct_ref:  <若 Knowledge Vault 有对应 Instinct 则标注佐证，否则留空>
 ```
 
-### 输出：recommendations.md
+### 输出：recommendations/ 目录
+
+每条建议一个 `.md` 文件，frontmatter 含 `type: recommendation` + `statement`（供 Knowledge Resolver 的 Hydrate 读取）：
 
 ```markdown
+<!-- .project-knowledge/recommendations/<建议-id>.md -->
 ---
 type: recommendation
-scope: project
+priority: Prefer
+statement: "<应然建议一句话，如「新代码优先类型化」>"
+summary: "<现状一句话 → 建议一句话>"
 ---
-# 项目建议（应然，非现状规范）
 
-> ⚠️ 本文档是「建议/推荐」——针对**未来新代码**的改进方向，不是对现状的准确描述。
-> 现状见 patterns/、api/、graph.json。冲突时：**新代码遵循「建议」，理解存量代码看「现状」**。
-
-| 优先级 | 现状（事实） | 建议（应然） | 依据 |
-|--------|-------------|-------------|------|
-| Prefer | 存量 API 大量返回 `Promise<AxiosResponse<any>>` | 新代码优先类型化泛型 `IResponseResultRows<T>` | instinct.avoid-any（any_usage_rate 超标） |
-| Avoid | 存在超大单文件（God Component） | 新模块避免 500+ 行单文件，拆 composition | instinct.split-god-component |
+现状：<本项目事实，如「N% 代码存在 X 反模式」>
+建议：<应然，如「新代码避免 X」>
+依据：<本项目统计/证据路径>（跨项目 <instinct-id> 可佐证）
 ```
+
+> 每条建议落一个文件（供 Compiler 索引进 `knowledge-index.json` → Resolver 分桶进 `context.recommendations[]`）。`recommendations/index.md` 聚合为人类可读表格（可选）。具体数值一律来自本项目分析结果，不写死示例数据。
 
 ### 关键约束
 
 - **`recommendations.md` 是「建议」不是「规范」**——generator 用于新代码改进，但不得当 blocking constraint（那是 rules/ 的职责）。
-- **只写「有依据」的建议**——每条 recommendation 必须能溯源到 Instinct（basis）或本项目统计（status_quo 的 source），不能凭空提建议。
+- **只写「有依据」的建议**——每条 recommendation 必须能溯源到**本项目统计/证据**（status_quo 的 source）；跨项目 Instinct 是可选的佐证，不是必需。
 - **不修改现状描述**——recommendations.md 单独存放，不混进 patterns/api/graph.json（事实与观点分层：现状描述在 patterns/api/graph，价值判断在 recommendations）。

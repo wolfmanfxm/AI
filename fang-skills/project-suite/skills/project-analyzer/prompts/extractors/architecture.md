@@ -20,8 +20,8 @@ view → composable → api → store → types
 ## Modules
 | Module | 职责 | 文件数 | 依赖 |
 |--------|------|--------|------|
-| accountManage | 账户管理 | 80 | api, stores, components |
-| orderManage | 订单管理 | 60 | api, stores |
+| <业务模块> | <模块功能> | <N> | api, stores, components |
+| <业务模块> | <模块功能> | <M> | api, stores |
 
 ## Cross-cutting
 - src/components/ ← 全局组件，被所有模块依赖

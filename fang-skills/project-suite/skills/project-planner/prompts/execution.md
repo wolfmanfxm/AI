@@ -32,15 +32,15 @@
 ```yaml
 decisions:
   - id: D-001
-    decision: "模块划分: 新建 pricingManage/"
-    selected: "pricingManage/"
+    decision: "模块划分: 新建 <目标模块>/"
+    selected: "<目标模块>/"
     ignored:
-      - { option: "扩展 approvalManage/", reason: "approvalManage 已有 133 文件(top5), 耦合风险高" }
-      - { option: "新建 billingManage/", reason: "太泛, 未来可能包含非价格功能" }
-    reason: "价格调整是独立业务域, 与审批管理职责不同"
-    evidence: ["approvalManage/ 133 files", "orderManage 60 files (独立模块)"]
+      - { option: "扩展 <已有模块>/", reason: "<已有模块> 已有 <N> 文件(top<M>), 耦合风险高" }
+      - { option: "新建 <其他模块>/", reason: "太泛, 未来可能包含非目标功能" }
+    reason: "<目标功能>是独立业务域, 与<已有功能>职责不同"
+    evidence: ["<已有模块>/ <N> files", "<其他模块> <M> files (独立模块)"]
     confidence: 0.85
-    risk: "审批流集成需确认"
+    risk: "<已有功能>集成需确认"
     owner: "architect"
 ```
 

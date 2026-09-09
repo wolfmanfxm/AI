@@ -37,16 +37,20 @@ pass_fail: pass | fail | decorate | untested
 
 > **`repeatability` 与 [cross-run-reliability.md](cross-run-reliability.md) 的区别**：cross-run 测「产出文件结构跨 run 是否稳定」（结构稳定性，看输出）；repeatability 测「naive→suite 的行为 delta 能否复现」（行为结论的可复现性，看机制是否每次都能拦住）。前者答「输出稳不稳」，后者答「机制稳不稳」。
 
-## 核心规律（round7 实证）
+## 核心规律（round8 修正，推翻 round7）
 
-**「额外动作型」规则 RED 强，能改变行为；「判断型」规则 RED 弱，是 LLM 通用能力。**
+**「额外动作型 RED 强 vs 判断型 RED 弱」的二分法已过时**——round8 实测 14 个机制（判断型 6 + 格式型 6 + 执行型 2）全部 RED 弱 = 装饰品。
 
-- 额外动作型：先读源码、真跑测试、增量修改（Read 再 Edit）、精确 file:line 溯源 → LLM 默认不做，skill 纪律才让它发生
-- 判断型：遵循模式、现状核实、够用就好、上下文驱动、对照 PLAN → LLM 通用能力覆盖，加不加 skill 没区别
+真正决定 RED 强弱的不是「动作 vs 判断」的类型，而是**「当前模型是否默认会做」**——这是模型相关的，随模型进化而变。
+
+- 当前模型默认会做（装饰品）：Read-then-Edit、file:line 引用、全状态覆盖、组件复用、跑测试、读源码、对齐项目、暴露 Gaps、逐条对照 AC…
+- round7 曾判 RED 强的「可执行」「先理解」也已沦为默认行为（round8 复测推翻）
 
 ---
 
 ## 各 Skill 机制台账
+
+> ⚠️ **证据诚实标注（round8 已补测 8 个）**：round8 补测了 6 个格式型额外动作型（组件复用、增量修改、完整性、精确引用、可操作、AC 对照）+ 2 个执行型（可执行、先理解），**全部 RED 弱 = decorate**（naive 没 skill 也做对），已降级为 ❌。这推翻了 round7 的「额外动作型 RED 强」分类——「Read-then-Edit」「file:line 引用」「全状态覆盖」「跑测试」「读源码」都已是当前模型的默认行为。剩余未补测：Evidence Score、先候选、决策可追溯、AC 驱动（大概率也 decorate）。
 
 ### project-analyzer（4 原则）
 
@@ -79,17 +83,17 @@ pass_fail: pass | fail | decorate | untested
 
 | 机制 | 类型 | RED 假设 | 验证状态 | 证据 |
 |------|------|---------|---------|------|
-| 使用项目组件（Reuse Ladder） | 额外动作 | 强 | ✅ 生效 | round5 P1：naive 原生组件，suite 项目封装组件 |
-| 增量修改（Read 再 Edit 不 overwrite） | 额外动作 | 强 | ✅ 生效 | round5 P2：diff 只含目标改动 |
-| 完整性（loading/empty/error 全状态） | 额外动作 | 强 | ✅ 生效 | round5 P3：naive 只写 happy path |
+| 使用项目组件（Reuse Ladder） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也用 PageTable/SchemaTable（RED 弱） |
+| 增量修改（Read 再 Edit 不 overwrite） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也 Read-then-Edit（RED 弱，现已是模型默认行为） |
+| 完整性（loading/empty/error 全状态） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也全三态覆盖（RED 弱） |
 | 遵循项目模式（不凭框架记忆） | 判断 | 弱 | 🟡 一致性放大器 | round10+复验：naive 复制最近模块（ad-hoc），suite 系统化遵循项目约定；项目用 any 是事实非 skill 缺陷——value=一致性非质量 |
 
 ### project-tester（4 原则）
 
 | 机制 | 类型 | RED 假设 | 验证状态 | 证据 |
 |------|------|---------|---------|------|
-| 可执行（生成后尝试运行） | 额外动作 | 强 | ✅ 生效 | round7 P4：naive 写完没跑，suite 真跑 vitest 8 passed |
-| 先理解再测试（读源码理解边界） | 额外动作 | 强 | ✅ 生效 | round7 P3：naive 凭函数名猜错行为（猜错单位/返回类型），suite 读源码全对 |
+| 可执行（生成后尝试运行） | 执行型 | 强 | ❌ 装饰品 | round8 复测：naive 也主动跑测试（21 passed，借 node_modules workaround），RED 弱 |
+| 先理解再测试（读源码理解边界） | 执行型 | 强 | ❌ 装饰品 | round8 复测：naive 也读源码、抓 0 不对称 bug（RED 弱） |
 | AC 驱动（每条 AC 至少一个用例） | 额外动作 | 强 | ✅ 生效 | round5 P1：naive 只测 happy path |
 | 项目约定优先（自动检测框架） | 判断 | 弱 | ❌ 装饰品 | round10：naive 也检测 vitest + .test.ts 命名（LLM 通用能力覆盖） |
 
@@ -97,10 +101,10 @@ pass_fail: pass | fail | decorate | untested
 
 | 机制 | 类型 | RED 假设 | 验证状态 | 证据 |
 |------|------|---------|---------|------|
-| 精确引用（每个发现 file:line） | 额外动作 | 强 | ✅ 生效 | round5 P1：naive 模糊反馈，suite 精确定位 |
-| 可操作（每个问题附修复建议） | 额外动作 | 强 | ✅ 生效 | round7 P3：naive 空话，suite 具体修复代码 |
+| 精确引用（每个发现 file:line） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也逐条 file:line，甚至挖得更细（RED 弱） |
+| 可操作（每个问题附修复建议） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也给「位置/改什么/为什么」可执行修复（RED 弱） |
 | 分级明确（五级符号 + 五轴） | 额外动作 | 中 | 🟡 部分生效 | round7 P4：naive 模糊三档，suite 精确五级+五轴 |
-| AC 对照（逐条验证） | 额外动作 | 强 | ✅ 生效 | round5 P2 |
+| AC 对照（逐条验证） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也逐条对照 AC + file:line（RED 弱） |
 | 放置正确（V7 对照 target） | 判断 | 弱 | ⚠️ 纪律强制 | round7 V7：naive 也发现错位（LLM 通用），价值是「强制每次对照」降漏报率 |
 
 ---
@@ -120,18 +124,18 @@ pass_fail: pass | fail | decorate | untested
 
 | 判定 | 数量 | 说明 |
 |------|------|------|
-| ✅ 生效（RED 强） | 15 | 额外动作型，benchmark 实证改变行为 |
+| ✅ 生效（RED 强） | 7 | 仅剩「增量分析」「Contract」「放置决议」有实测证据，其余 4 个（Evidence Score/先候选/决策可追溯/AC 驱动）仍理论分类待 Batch3 |
 | 🟡 部分/声明生效 | 2 | 分级明确（部分）、convergence（Specified，Host 解读） |
 | 🟡 一致性放大器 | 1 | 遵循项目模式——系统化遵循项目约定（value=一致性非质量，round10 实证） |
-| ⚠️ 纪律强制（RED 弱） | 4 | Knowledge First、Confidence 透明、放置正确、知识缺口入口（未单独测） |
-| ❌ 装饰品 | 3 | 够用就好、上下文驱动、项目约定优先（LLM 通用能力覆盖，RED 不成立） |
-| 未验证 | 0 | （项目约定优先已在 round10 验证） |
+| ⚠️ 纪律强制（RED 弱） | 1 | 放置正确（强制每次对照，降漏报率） |
+| ❌ 装饰品 | 14 | round8+10 实测 14 个机制全 RED 弱：判断型 6 + 格式型 6 + 执行型 2（LLM 通用能力覆盖） |
+| 未验证 | 0 | （全部 25 个机制已至少跑过 1 轮 baseline） |
 
 ## 结论
 
-**「设计好的机制」里，约 60%（15/25）真正改变了行为（额外动作型），1 个是一致性放大器（遵循项目模式，价值 = 忠实遵循项目约定），约 16%（4/25）是「纪律强制」（判断型 RED 弱），3 个是装饰品（够用就好、上下文驱动、项目约定优先），1 个声明了但 Specified 未强制（convergence）。round10 的实证结论：判断型机制里多数「naive 也做对了」（上下文驱动、项目约定优先 = 装饰品）；「遵循项目模式」是唯一有增量的判断型——它把 naive 的「复制最近模块」升级为「系统化遵循项目约定」，但价值是「一致性」不是「质量」，项目代码本身的好坏不属于 skill 的职责。**
+**round8 的实证给出了终极结论：实测 14 个机制（round10 判断型 6 + round8 格式型 6 + round8 执行型 2）全部 RED 弱 = 装饰品——naive 没 skill 也全部做对，包括 round7 曾判为「唯一强 GREEN」的「可执行」（naive 现在也会主动跑测试甚至坚持跑通）和「先理解」（naive 也会读源码抓边界 bug）。round7 的「额外动作型 vs 判断型」二分法彻底过时，连「执行型」也不再是模型不会做的动作。suite 对当前模型没有「能力增强」，价值只剩「过程质量」（结构化、可追溯、一致性、强制对照降漏报率）。剩余 7 个 ✅ 里，只有 3 个有实测证据（增量分析/Contract/放置决议），且都可能是历史模型的产物，需按当前模型复测。**
 
-这回答了元问题：**不是所有「设计好的机制」都改变行为。额外动作型改变行为，判断型是 LLM 通用能力（价值仅在降低漏报率），声明型必须验证消费端否则是「改了没生效」。**
+这回答了元问题：**不是所有「设计好的机制」都改变行为——round8 实证 14/14 机制装饰品。机制是否改变行为是「模型相关的」，不是机制的内在属性；suite 的价值 = 过程质量（结构化/可追溯/一致性），不是能力增强。声明型必须验证消费端否则「改了没生效」。**
 
 ---
 
@@ -145,7 +149,8 @@ pass_fail: pass | fail | decorate | untested
 - **Native baseline**：凭 `parseAmount` 函数名猜「解析金额为元」，发明不存在的 options，漏掉「分单位/NaN/thousand 字符串」三个真实边界
 - **Suite behavior**：读源码后覆盖 NaN、分单位、thousand 字符串全部边界
 - **Evidence**：round7 N7-PT-tester-P3（native 猜错 + suite 全对）
-- **Pass/Fail**：✅ pass（RED 成立，额外动作型）
+- **Repeatability**：round8 复测推翻——naive 也读源码抓边界（`0→''` 不对称 bug）
+- **Pass/Fail**：❌ decorate（round8 复测：RED 不成立，naive 也读源码；round7 结论是旧模型产物）
 
 ### 机制：可执行（tester 原则4）
 
@@ -153,7 +158,8 @@ pass_fail: pass | fail | decorate | untested
 - **Native baseline**：写完测试，未运行（「写完即可」自然行为）
 - **Suite behavior**：`npx vitest run` 实际运行，8 passed
 - **Evidence**：round7 N7-PT-tester-P4
-- **Pass/Fail**：✅ pass（RED 成立，额外动作型）
+- **Repeatability**：round8 复测推翻——naive 也主动跑测试（21 passed，借 workaround）
+- **Pass/Fail**：❌ decorate（round8 复测：RED 不成立，naive 也跑测试；round7 结论是旧模型产物）
 
 ### 机制：现状核实先行（architect 原则3）
 
@@ -161,7 +167,7 @@ pass_fail: pass | fail | decorate | untested
 - **Native baseline**：把「客户列表」当全新功能设计（不知道 customerCompany/customerIndividual 已存在）
 - **Suite behavior**：先 Code Audit 发现已实现 → 标记 [已实现] → 复用
 - **Evidence**：round7 N7-PT-architect-P4（native 凭空设计 vs suite 先核实）
-- **Pass/Fail**：✅ pass（RED 成立，额外动作型）
+- **Pass/Fail**：⚠️ 待复测（round7 结论；round8 的 14/14 decorate pattern 提示可能也装饰品，但未直接重测）
 
 ### 机制：够用就好（architect 原则4）
 
@@ -208,4 +214,31 @@ pass_fail: pass | fail | decorate | untested
 - **Repeatability**：1/1（与「与 generator 遵循项目模式同类」的预期一致）
 - **Pass/Fail**：❌ decorate（RED 弱，naive 也检测到 vitest + 正确命名；价值仅「系统化读约定」非「从无到有」）
 
-> 其余 17 个机制未逐条跑 baseline，状态见上表（多数有 round 证据但未按六段格式固化）。后续新机制验证时，一律填六段格式。
+### 机制：知识缺口入口（analyzer 何时触发）
+
+- **Hypothesis**：无 skill 时 LLM 重跑全量 10-Extractor 分析，不识别已有知识库（浪费 token）
+- **Native baseline**：naive 跳过全量重扫，但从源码独立复现验证（17 次读取 package.json/config/源码样本），抓到 KB 一处 drift（max-old-space-size 4096→8192）
+- **Suite behavior**：suite 跳过全量重扫，直接复用 KB（9 次读取 KB 文件），未抓到 drift
+- **Evidence**：round10 N10-analyzer-P3
+- **Repeatability**：1/1
+- **Pass/Fail**：❌ decorate（RED 弱，naive 也跳过重扫）；⚠️ 优化点：skill「skip→Reuse」是盲信复用漏 drift，naive「skip+从源码复现」能抓 drift——建议加「跳过全量但仍抽查源码验证 KB 未漂移」中间路径
+
+### 机制：Knowledge First（planner 原则2）
+
+- **Hypothesis**：无 skill 时 LLM 忽略已有资产，把已存在的东西又规划一遍
+- **Native baseline**：naive 扫 6 份 KB + 6 份源码，全程 REUSE/EXTEND/CREATE，发现「用户管理已存在」+ 僵尸组件 RoleSelector（0 引用）
+- **Suite behavior**：suite 扫 10 份 KB + Code Audit，REUSE/EXTEND/CREATE，产出完整 9 模块 Contract
+- **Evidence**：round10 N10-planner-P2
+- **Repeatability**：1/1
+- **Pass/Fail**：❌ decorate（RED 弱，naive 也扫描复用；价值仅「结构化 REUSE/EXTEND/CREATE 格式」，行为本身 LLM 通用）
+
+### 机制：Confidence 透明（planner 原则4）
+
+- **Hypothesis**：无 skill 时 LLM 硬编计划（信息不足也产出看似完整的 PLAN）
+- **Native baseline**：naive 主动暴露 7 个 Gaps + confidence 25 + 明确「没有硬编」
+- **Suite behavior**：suite 同样 7 Gaps + confidence 25 + 拒绝完整 PLAN（Goal+Scope+Gap List 格式 + 置信度公式）
+- **Evidence**：round10 N10-planner-P3
+- **Repeatability**：1/1；与 round5「naive 硬编」矛盾——效应不稳定
+- **Pass/Fail**：❌ decorate（RED 弱，naive 也暴露 Gaps；价值仅「Goal+Scope+Gap List 固定格式 + 置信度公式」非「从无到有」）
+
+> 其余 14 个机制未逐条跑 baseline，状态见上表（多数有 round 证据但未按六段格式固化）。后续新机制验证时，一律填六段格式。

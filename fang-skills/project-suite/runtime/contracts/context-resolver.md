@@ -27,7 +27,7 @@ After:   Task → 按 type 分桶 → 全量 constraints + Top-K knowledge/guida
 {
   "context": {
     "rules": [
-      { "rule": "form-component-standard", "type": "rule", "constraint": "所有表单必须用 FormWrapper", "blocking": true }
+      { "rule": "form-component-standard", "type": "rule", "constraint": "所有表单必须用 <统一表单封装>", "blocking": true }
     ],
     "knowledge": [
       { "capability": "patterns", "source": "patterns/table.md", "enforcement": "recommended" }

@@ -29,8 +29,8 @@
 ## workspace/views/
 | Dir | 职责 |
 |-----|------|
-| accountManage/ | 账户管理 |
-| orderManage/ | 订单管理 |
+| <业务模块>/ | <模块功能> |
+| <业务模块>/ | <模块功能> |
 ```
 
 ## Evidence

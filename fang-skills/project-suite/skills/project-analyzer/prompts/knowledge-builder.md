@@ -61,8 +61,8 @@ context-package.json，Generator 不再读文件正文：
 ```yaml
 ---
 id: patterns-table
-statement: "列表页用 PageTable 包裹 + SchemaTable 声明式列配置渲染"
-constraints: "分页 pageIndex/pageSize 数字；Element Plus 命名空间 el-mp"
+statement: "列表页用 <统一表格> 包裹 + <schema表格> 声明式列配置渲染"
+constraints: "分页 <分页参数> 数字；Element Plus 命名空间 <组件库前缀>"
 anti_pattern: "不要手写 el-table + el-pagination"
 tags: "table, list, search, workspace"
 ---

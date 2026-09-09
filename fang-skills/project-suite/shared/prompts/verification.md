@@ -36,7 +36,7 @@
 - [ ] 表单使用 <统一表单封装>（非原生表单），弹窗使用 <统一弹窗>
 - [ ] API 使用 `export function` + `Promise<AxiosResponse<T>>`
 - [ ] 错误提示使用 `ElMessage.error(data?.msg || '默认提示')`
-- [ ] 分页使用 `pageIndex`/`pageSize`（数字）
+- [ ] 分页使用项目约定的 `<分页参数>`（数字）
 
 ### Reviewer
 

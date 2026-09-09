@@ -20,25 +20,25 @@
 ## God Object
 | File | Lines | Issue |
 |------|-------|-------|
-| workspace/utils/format.ts | 3200 | Utils 膨胀：混入格式/校验/转换 |
-| src/views/accountManage/orderReview/detail.vue | 1200 | 页面过大 |
+| <示例 utils 文件> | 3200 | Utils 膨胀：混入格式/校验/转换 |
+| <示例页面> | 1200 | 页面过大 |
 
 ## any 滥用
 | File | any Count | % |
 |------|----------|-----|
-| workspace/api/legacy.ts | 23 | 15% |
-| workspace/views/oldModule/index.vue | 18 | 10% |
+| <示例 API 文件> | 23 | 15% |
+| <示例组件> | 18 | 10% |
 
 ## 硬编码
 | Location | Value | Should Be |
 |----------|-------|-----------|
-| workspace/api/config.ts:5 | `http://10.0.0.1:8080` | env variable |
-| workspace/views/form.vue:42 | `10000` | config constant |
+| <示例配置文件>:5 | `<示例内网地址>` | env variable |
+| <示例表单>:42 | `<示例魔数>` | config constant |
 
 ## Dead Code
 | Location | Lines | Description |
 |----------|-------|-------------|
-| workspace/views/oldModule/deprecated.vue | 200 | 整文件注释掉 |
+| <示例废弃文件> | 200 | 整文件注释掉 |
 ```
 
 ## Evidence

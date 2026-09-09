@@ -18,11 +18,11 @@
   "session_id": "20260804-153000",
   "skill": "project-planner",
   "context": {
-    "goal": "价格调整审批",
+    "goal": "<目标功能>审批",
     "user_feedback": ["范围确认通过", "增加撤销审批功能"],
-    "assumptions": ["假设审批流程为两级", "假设价格T+1生效"]
+    "assumptions": ["假设审批流程为两级", "假设<目标功能>在<时间规则>生效"]
   },
-  "discoveries": ["发现已有 <审批流模块> 可复用"],
+  "discoveries": ["发现已有 <已有功能>模块 可复用"],
   "open_questions": ["审批撤回是否需要通知申请人？"]
 }
 ```
@@ -73,7 +73,7 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
     }
   },
   "cross_project_insights": [
-    "某项目的 <审批流模块> 可复用到其他审批场景",
+    "某项目的 <已有功能>模块 可复用到其他审批场景",
     "cms 模式的 json-driven 表单比手写更灵活"
   ]
 }
@@ -87,14 +87,14 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
 {
   "id": "D-20260804-001",
   "skill": "project-architect",
-  "decision": "新价格调整模块放在 pricingManage/ 而非扩展 approvalManage/",
-  "context": "approvalManage 已有 133 文件，排名 top 5；价格调整是独立业务域",
+  "decision": "新<目标功能>模块放在 <目标模块>/ 而非扩展 <已有模块>/",
+  "context": "<已有模块> 已有 <N> 文件，排名 top <M>；<目标功能>是独立业务域",
   "alternatives": [
-    { "option": "扩展 approvalManage", "rejected_because": "模块过大，耦合增加" },
-    { "option": "新建 billingManage", "rejected_because": "太泛，未来可能包含非价格功能" }
+    { "option": "扩展 <已有模块>", "rejected_because": "模块过大，耦合增加" },
+    { "option": "新建 <其他模块>", "rejected_because": "太泛，未来可能包含非目标功能" }
   ],
-  "chosen": "新建 pricingManage/",
-  "consequences": { "new_module": true, "reuse": ["<审批流模块>"], "risk": "审批流集成需确认" },
+  "chosen": "新建 <目标模块>/",
+  "consequences": { "new_module": true, "reuse": ["<已有功能>模块"], "risk": "<已有功能>集成需确认" },
   "timestamp": "2026-08-04T15:30:00Z",
   "status": "accepted",
   "revisited_at": null

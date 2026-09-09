@@ -24,7 +24,7 @@
 
 | 术语 | 英文 | 定义 | 出现位置 | 频率 |
 |------|------|------|---------|------|
-| 用户 | User | 系统登录用户 | types/user.ts, views/userManage/ | 高 |
+| 用户 | User | 系统登录用户 | <类型文件>, <业务模块>/ | 高 |
 | 订单 | Order | 交易订单 | types/order.ts, api/order.ts | 高 |
 | 账户 | Account | 资金账户 | types/account.ts | 中 |
 | 角色 | Role | 权限角色 | types/role.ts, views/roleManage/ | 中 |

@@ -11,7 +11,7 @@
    {
      "plan": "PLAN-<feature>.md",
      "context": {
-       "rules": [ { "rule": "form-component-standard", "type": "rule", "constraint": "所有表单必须用 FormWrapper + FormFields", "blocking": true } ],
+       "rules": [ { "rule": "form-component-standard", "type": "rule", "constraint": "所有表单必须用 <统一表单封装> + <字段组件>", "blocking": true } ],
        "knowledge": [ { "capability": "patterns", "source": "patterns/table.md", "enforcement": "recommended" } ],
        "guidance": [ { "type": "experience", "source": "experience/xxx.md", "enforcement": "advisory" } ]
      }
