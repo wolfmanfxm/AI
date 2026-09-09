@@ -172,7 +172,7 @@ confidence = 100
 
 **放置决议（target）— 每个 Task 必填：**
 
-> Reuse 正确 ≠ 放置正确。round5 暴露：需求「客户管理」被错误放置到 `baseData/personalInfo`，而非 `customerManage`——复用判定对了，但 module/domain 归属错了。所以每个 Task 显式产出放置决议：
+> Reuse 正确 ≠ 放置正确：复用判定对了，但 module/domain 归属可能错（如「客户管理」误放到「人员信息」而非「客户」模块）。所以每个 Task 显式产出放置决议：
 
 ```
 target: { module, domain, placement, confidence, evidence }

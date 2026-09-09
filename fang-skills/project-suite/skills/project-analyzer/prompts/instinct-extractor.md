@@ -99,7 +99,7 @@ for each instinct in instincts.yaml:
   if instinct 的 evidence（any_usage_rate / consistency / occurrences）与本项目 facts 匹配:
     生成 recommendation:
       priority:     instinct.type（Always/Prefer/Avoid）
-      status_quo:   <本项目事实，如「96.2% API 函数返回 any」>
+      status_quo:   <本项目事实，如「存量 API 大量返回 any」>
       recommendation: <应然，如「新代码优先类型化泛型 IResponseResultRows<T>」>
       basis:        <instinct.id + evidence>
       source:       <本项目知识文件路径，如 api/overview.md>
@@ -119,8 +119,8 @@ scope: project
 
 | 优先级 | 现状（事实） | 建议（应然） | 依据 |
 |--------|-------------|-------------|------|
-| Prefer | 96.2% API 函数返回 `Promise<AxiosResponse<any>>` | 新代码优先类型化泛型 `IResponseResultRows<T>` | instinct.avoid-any（本项目 96.2% 远超 3%-8% 标准） |
-| Avoid | 存在 1684 行 God Component | 新模块避免 500+ 行单文件，拆 composition | instinct.split-god-component |
+| Prefer | 存量 API 大量返回 `Promise<AxiosResponse<any>>` | 新代码优先类型化泛型 `IResponseResultRows<T>` | instinct.avoid-any（any_usage_rate 超标） |
+| Avoid | 存在超大单文件（God Component） | 新模块避免 500+ 行单文件，拆 composition | instinct.split-god-component |
 ```
 
 ### 关键约束
