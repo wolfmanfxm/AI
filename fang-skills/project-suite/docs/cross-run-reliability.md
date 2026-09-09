@@ -2,7 +2,7 @@
 
 > 同一 Skill 在相同输入下多次运行的稳定性度量。yao-meta-skill Governed 模式要求。
 >
-> **边界**：本文件测「产出文件结构跨 run 是否稳定」（结构稳定性）。**「naive→suite 的行为 delta 能否复现」的 `repeatability` 维度，见 [mechanism-verification-ledger.md](../../project-suite-eval/mechanism-verification-ledger.md)**——前者答「输出稳不稳」，后者答「机制稳不稳」。
+> **边界**：本文件测「产出文件结构跨 run 是否稳定」（结构稳定性）。**「naive→suite 的行为 delta 能否复现」的 `repeatability` 维度，见 [eval-contract.md](eval-contract.md) 的 ledger 契约**——前者答「输出稳不稳」，后者答「机制稳不稳」。
 
 ## 可靠性维度
 

@@ -98,9 +98,13 @@ for (const name of readdirSync(SKILLS_DIR).sort()) {
 
 // ── 从 produces/consumes 推导 Capability DAG ────────────────────
 // B 依赖 A 的能力 ⇔ B.consumes ∩ A.produces ≠ ∅（能力依赖，非强制执行顺序）
+// advisory 能力（如 Recommendation）是「建议」，不构成硬依赖边：不出现在 dependsOn，
+// 在 dependency_graph 中单独列为 needs_advisory，缺失不阻塞下游。
+const ADVISORY_CAPABILITIES = new Set(['Recommendation']);
 function dependsOn(s) {
+  const required = s.consumes.filter(c => !ADVISORY_CAPABILITIES.has(c));
   return skills
-    .filter(o => o.id !== s.id && s.consumes.some(c => o.produces.includes(c)))
+    .filter(o => o.id !== s.id && required.some(c => o.produces.includes(c)))
     .map(o => o.id);
 }
 
@@ -166,6 +170,7 @@ capability_types:
   Recommendation:   # .project-knowledge/recommendations.md
     description: 项目级应然建议（新代码改进方向，非现状规范；现状见 KnowledgeBase/Graph）
     format: [.md]
+    advisory: true  # 建议类能力：不构成硬依赖边，dependency_graph 归入 needs_advisory，缺失不阻塞
   KnowledgeIndex:   # knowledge-index.json
     description: Capability→文件映射，Skill 按能力标签而非文件路径查询知识
     format: [.json]
@@ -352,10 +357,14 @@ function genCapabilityRouting() {
   lines.push('  strategy: [exact_intent, fuzzy_top3, availability_sort, full_list]');
   lines.push('');
   lines.push('# 能力依赖图（从 produces/consumes 推导，Capability DAG，非强制执行顺序）');
+  lines.push('# needs = 必需能力（硬依赖边）；needs_advisory = 建议能力（advisory，不构成依赖边、缺失不阻塞）');
   lines.push('dependency_graph:');
   for (const s of orderedSkills) {
     const cap = CAPABILITY_NAMES[s.id] || s.id;
-    lines.push(`  ${cap}: { provides: [${s.produces.join(', ')}], needs: [${s.consumes.join(', ')}] }`);
+    const needs = s.consumes.filter(c => !ADVISORY_CAPABILITIES.has(c));
+    const needsAdvisory = s.consumes.filter(c => ADVISORY_CAPABILITIES.has(c));
+    const advisoryPart = needsAdvisory.length > 0 ? `, needs_advisory: [${needsAdvisory.join(', ')}]` : '';
+    lines.push(`  ${cap}: { provides: [${s.produces.join(', ')}], needs: [${needs.join(', ')}]${advisoryPart} }`);
   }
   return lines.join('\n') + '\n';
 }

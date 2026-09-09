@@ -16,7 +16,7 @@
 
 ## 一个 pressure test 的结构
 
-每个反例场景回答四个问题（存于 `project-suite-eval/benchmark/pressure-tests/<skill>.yaml`，**不在 skill 目录内**——测试验证数据与 skill 本身能力无关，遵循「评估证据与治理契约分离」原则，见 benchmarks.md）：
+每个反例场景回答四个问题（存于外部 eval 仓库 `benchmark/pressure-tests/<skill>.yaml`，**不在 skill 目录内**——测试验证数据与 skill 本身能力无关，遵循「评估证据与治理契约分离」原则，见 [eval-contract.md](eval-contract.md)）：
 
 | 字段 | 含义 |
 |------|------|
@@ -27,7 +27,7 @@
 
 ## 三层工件与统一词汇
 
-> 行为评估是三层流水线，各层字段名不同但指向同一件事。**判定结论的唯一入口是 [mechanism-verification-ledger.md](../../project-suite-eval/mechanism-verification-ledger.md)**（评估证据归 project-suite-eval，见「评估证据与治理契约分离」）——本文件的 `naive_failure` / `assertion` 是「设计时预测」，ledger 的 `native_baseline` / `pass_fail` 是「运行时记录」。
+> 行为评估是三层流水线，各层字段名不同但指向同一件事。**判定结论的唯一入口是 ledger**（`mechanism-verification-ledger.md`，位于外部 eval 仓库，字段与位置见 [eval-contract.md](eval-contract.md)）——本文件的 `naive_failure` / `assertion` 是「设计时预测」，ledger 的 `native_baseline` / `pass_fail` 是「运行时记录」。
 
 | 层 | 文件 | 字段 | 含义 |
 |----|------|------|------|

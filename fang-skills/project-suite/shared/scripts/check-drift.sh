@@ -11,6 +11,8 @@
 # Usage: bash shared/scripts/check-drift.sh
 
 set -euo pipefail
+# 内部错误（set -e 下未保护的命令返回非 0）→ exit 2，与「发现 drift」exit 1、「无 drift」exit 0 区分。
+trap 'echo -e "\033[31m  ❌ Internal checker error — 未保护命令在 set -e 下返回非 0\033[0m" >&2; exit 2' ERR
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SUITE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SKILLS_DIR="$SUITE_ROOT/skills"
@@ -58,14 +60,15 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 
   # Drift 3: prompt and reference links — do they resolve?
   dead_links=0
-  for link in $(grep -ohP '\[.*?\]\(\.\..*?\.md\)' "$md" 2>/dev/null || true); do
-    path=$(echo "$link" | grep -oP '(?<=\().*(?=\))')
+  # while read -r 逐行读：link label 可能含空格（如 [Complexity Gate](...)），for..in $(..) 会按空白拆散导致误报死链。
+  while IFS= read -r link; do
+    path=$(echo "$link" | sed -E 's/^\[[^]]*\]\(//; s/\)$//')
     # Resolve relative to skill dir
     abs_path="$skill_dir/$path"
     if [ ! -f "$abs_path" ]; then
       dead_links=$((dead_links+1))
     fi
-  done
+  done < <(grep -ohE '\[[^]]*\]\(\.\.[^)]*\.md\)' "$md" 2>/dev/null || true)
   if [ "$dead_links" -gt 0 ]; then
     yellow "  ⚠️  ${dead_links} dead link(s) in SKILL.md"
     DRIFT_COUNT=$((DRIFT_COUNT+1))
@@ -76,7 +79,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # Drift 4: stages count — does it match the template expectations?
-  stages=$(grep "stages:" "$yaml" | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' | wc -l | tr -d ' ')
+  stages=$(grep "stages:" "$yaml" | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' | wc -l | tr -d ' ' || true)
   min_stages=3; max_stages=7
   if [ "$stages" -ge "$min_stages" ] && [ "$stages" -le "$max_stages" ]; then
     green "  ✅ Stage count: ${stages} (${min_stages}-${max_stages})"
@@ -87,7 +90,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # Drift 5: interface.outputs covered by produces?
-  outputs=$(grep -A20 "^interface:" "$yaml" | grep "name:" | head -10 | wc -l | tr -d ' ' || echo "0")
+  outputs=$(grep -A20 "^interface:" "$yaml" | grep "name:" | head -10 | wc -l | tr -d ' ' || true)
   # Just check that outputs > 0 if produces is non-empty
   if [ -n "$produces" ] && [ "$outputs" -gt 0 ]; then
     green "  ✅ interface.outputs: ${outputs} output(s) match produces"

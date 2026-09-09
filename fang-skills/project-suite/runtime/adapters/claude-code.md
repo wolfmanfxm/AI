@@ -63,4 +63,4 @@ Claude Code 对 stage_progression / convergence / checkpoint 都是 advisory（�
 
 - 契约：[host-capability.md](../contracts/host-capability.md)
 - 可移植脚本：[command-guard.sh](../../shared/scripts/command-guard.sh)
-- Host adapter 脚本：`project-suite-eval/hooks/command-guard-hook.sh`（外部 eval 仓库）
+- Host adapter 脚本：`command-guard-hook.sh`（外部 eval 仓库，见 [eval-contract.md](../../docs/eval-contract.md)）

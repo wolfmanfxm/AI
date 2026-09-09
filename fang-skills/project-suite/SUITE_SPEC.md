@@ -143,8 +143,12 @@ Skill 独立迭代版本号时，必须声明对上游 schema 的最低版本要
 
 ```
 KnowledgeBase | KnowledgeIndex | Context | State | Graph | Plan | Architecture | Code | Test | Review |
-RefactoredCode | Documentation | Release | PipelinePlan
+RefactoredCode | Documentation | Release | PipelinePlan | Recommendation
 ```
+
+> **advisory 能力**（当前仅 `Recommendation`）：建议类能力，`capability_types` 中标注 `advisory: true`。
+> 在 Capability DAG 中不构成硬依赖边——`dependency_graph` 里归入 `needs_advisory`（而非 `needs`），缺失不阻塞下游。
+> 语义：KnowledgeBase/Context/Graph 是「没有就无法正确工作」的必需能力；Recommendation 是「有则更好」的建议能力。
 
 ---
 

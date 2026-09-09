@@ -13,6 +13,7 @@ capability_types:
   Recommendation:   # .project-knowledge/recommendations.md
     description: 项目级应然建议（新代码改进方向，非现状规范；现状见 KnowledgeBase/Graph）
     format: [.md]
+    advisory: true  # 建议类能力：不构成硬依赖边，dependency_graph 归入 needs_advisory，缺失不阻塞
   KnowledgeIndex:   # knowledge-index.json
     description: Capability→文件映射，Skill 按能力标签而非文件路径查询知识
     format: [.json]

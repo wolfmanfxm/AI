@@ -86,11 +86,12 @@ matching:
   strategy: [exact_intent, fuzzy_top3, availability_sort, full_list]
 
 # 能力依赖图（从 produces/consumes 推导，Capability DAG，非强制执行顺序）
+# needs = 必需能力（硬依赖边）；needs_advisory = 建议能力（advisory，不构成依赖边、缺失不阻塞）
 dependency_graph:
   ProjectAnalysis: { provides: [KnowledgeBase, Context, Graph, Recommendation], needs: [] }
-  Planning: { provides: [Plan], needs: [KnowledgeBase, Context, Graph, Recommendation] }
+  Planning: { provides: [Plan], needs: [KnowledgeBase, Context, Graph], needs_advisory: [Recommendation] }
   ArchitectureDesign: { provides: [Architecture], needs: [KnowledgeBase, Plan, Context, Graph] }
-  CodeGeneration: { provides: [Code], needs: [KnowledgeBase, Plan, Architecture, Context, Graph, Recommendation] }
+  CodeGeneration: { provides: [Code], needs: [KnowledgeBase, Plan, Architecture, Context, Graph], needs_advisory: [Recommendation] }
   Testing: { provides: [Test], needs: [Code, Plan, KnowledgeBase, Context] }
   CodeReview: { provides: [Review], needs: [Code, Plan, KnowledgeBase, Architecture, Test] }
   Documentation: { provides: [Documentation], needs: [Code, Review, KnowledgeBase, Context] }

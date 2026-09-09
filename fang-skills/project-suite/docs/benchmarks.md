@@ -3,7 +3,7 @@
 > 每个 Skill 的"好产出"标准。不测语义质量，测结构契约。
 > yao-meta-skill Governed 模式要求。
 >
-> **边界**：本文件只测「结构契约」（文件/章节/confidence/contract/fixture）。**「这个 Skill 是否真的改变了 Agent 行为」的行为评估，见 [mechanism-verification-ledger.md](../../project-suite-eval/mechanism-verification-ledger.md)**——结构契约与行为 eval 是两个正交维度，判定结论以 ledger 为准。
+> **边界**：本文件只测「结构契约」（文件/章节/confidence/contract/fixture）。**「这个 Skill 是否真的改变了 Agent 行为」的行为评估，见 [eval-contract.md](eval-contract.md)**——结构契约与行为 eval 是两个正交维度，判定结论以 ledger 为准。
 
 ## 基准维度
 
@@ -150,4 +150,4 @@ expected:
 
 ## 基准执行器
 
-> 基准工具已移至 `project-suite-eval/benchmark/`（评估证据与治理契约分离）。
+> 基准工具已移至外部 eval 仓库 `benchmark/`（评估证据与治理契约分离，结构与获取见 [eval-contract.md](eval-contract.md)）。

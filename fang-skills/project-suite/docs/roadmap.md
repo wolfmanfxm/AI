@@ -61,7 +61,7 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 
 > 已完成：Protocol Contract 一致性（check-consistency.sh）、Host Capability Contract、Exit Criteria→Evidence→Convergence、description 去「产出/行为句」收口（discoverability 归 description、contract 归 skill.yaml produces）。
 >
-> **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark round）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。
+> **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark round）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。契约见 [eval-contract.md](eval-contract.md)。
 
 ### P2 — Knowledge Consumption
 

@@ -136,22 +136,35 @@ confidence = 100
 
 ### Step 6: Task Breakdown — 可独立验证的实现切片（Implementation Slice）
 
-**核心单位是「切片」，不是「任务」。** 一个 Task = 一个垂直切片：完成后用户/Tester 能独立看到一个可观察行为，而不是一个技术层或一个 CRUD 操作。
+**Task 单位选择（二级）：默认 Vertical Slice，例外 Horizontal Task。**
+
+1. **默认：Vertical Slice** —— 一个 Task 贯穿 DB/API/UI 到一个可观察行为，完成后用户/Tester 能独立 demo/verify，而不是一个技术层或一个 CRUD 操作。
+2. **例外：Horizontal Task（合法）** —— 改动属于 infrastructure / migration / shared foundation（数据库迁移、全局类型升级、权限模型重构、公共组件重构、缓存层替换、路由重构）时，天然横切多个 slice，无法切成独立可 demo 的单位。此时**显式声明**即可，不是反模式：
+
+   ```
+   task_type: horizontal
+   reason: <foundation | migration | shared-refactor>   # 为何无法切成独立可 demo 的 vertical slice
+   blocks: [T-xxx, T-xxx]                                # 哪些后续 Task 依赖这个前置改造
+   verification: <完成判据 — 因无独立可 demo 行为，用「编译通过 / 迁移脚本 dry-run / 契约不变量」替代>
+   ```
+
+   不声明 reason/blocks 的横切 Task 仍视为拆解失败。
 
 **粒度控制：** 每个 Task 0.5-2 人天。超过 → 继续拆。含"和"字 → 考虑拆。
 
-**Slice Test（每个 Task 必答）：**
+**Slice Test（每个 Vertical Task 必答）：**
 
 > 「完成这个 Task 后，我能独立 demo / verify 什么行为？」
-> 答不出 → 大概率是 horizontal slice（按层/按操作横切）→ 重新拆。
+> 答不出 → 若不属 infrastructure/migration/foundation，则是没声明 reason 的横向切法 → 重新拆为 vertical，或显式升级为 Horizontal Task。
 >
 > ❌ 新增 customer API
 > ✅ 创建客户后，客户列表能显示刚创建的客户，刷新后仍存在（贯穿 api 模块 + 组件 + 页面）
+> ✅ 前置 Horizontal Task：全局 User 类型从 string 升级为 number（reason: foundation, blocks: [T-003, T-005], verification: 全量编译通过 + 类型检查零错误）
 
 **Preflight（切切片前，仅发现结构性改动时触发）：**
 
 > 是否存在会导致后续所有 Task 都无法独立保持绿色的结构性改动？（如全局 User 类型改造、公共组件重构）
-> 有 → 产出 1 个前置重构 Task（标 `prerequisite`，后续 Task 依赖它），不新建 PREF/CONTRACT 体系。
+> 有 → 产出 1 个 Horizontal Task（标 `task_type: horizontal` + `reason: foundation`，后续 Task 依赖它），不新建 PREF/CONTRACT 体系。
 
 **切片边界选择（二级，仅用于选 slice 的切分维度）：**
 
@@ -161,12 +174,12 @@ confidence = 100
 | 流程类 | 按步骤：Step1 → Step2 | 每步需有可观察结果，不是「API 步」→「UI 步」 |
 | 数据驱动 | 按实体：User / Order / Product | 每个实体切片贯穿「创建→展示→验证」，不是实体层 |
 
-**❌ 禁止的横向切法：**
+**❌ 禁止的横向切法（未声明 reason 的）：**
 
 | 反例 | 为什么错 |
 |------|---------|
-| 按操作拆：Create / Read / Update / Delete 各一个 Task | Create 无法脱离 Read/List 独立 demo |
-| 按层拆：API / 数据 / UI 各一个 Task | 单层不是可观察行为，拼接时才见真容 |
+| 按操作拆：Create / Read / Update / Delete 各一个 Task | Create 无法脱离 Read/List 独立 demo，且不属 foundation/migration |
+| 按层拆：API / 数据 / UI 各一个 Task | 单层不是可观察行为，拼接时才见真容，且不属 shared-refactor |
 
 **Decision ↔ Task 绑定：** 每个 Task 标注依赖的 Decision ID。Architect 必须先 resolve，Generator 才能开始。
 
@@ -221,10 +234,11 @@ B 完全独立？                 → 无依赖
 
 1. **base-state**：当前代码是否已经满足？已满足 → 不是有效 AC，删掉或改写。
 2. **owner**：哪个 Task 的完成会让它变真？（AC 必须能回溯到一个 Task）
-3. **falsify**：什么可观察证据会证明它失败 / 通过？（例：base commit 上测试失败 → 该 Task 完成后通过）
+3. **falsify**：什么可观察证据会证明它失败 / 通过？证据形式不限于「测试失败」，可以是 test failure / missing behavior / wrong output / wrong URL / wrong state / metric violation / security finding。（例：base commit 上测试失败 → 该 Task 完成后通过）
 
 > ❌ AC: Customer API 存在（HEAD 上可能已有，base-state 已满足 → 无效）
 > ✅ AC: POST 不存在的 customer 成功 → GET 列表能返回该 customer → 测试在 base commit 失败、本 Task 完成后通过
+> ✅ AC（metric 型）: 重构后首屏 LCP 从 3.2s 降到 ≤1.5s → falsify = baseline metric vs changed metric（无天然 failing test）
 
 → 产出：`# Acceptance Criteria`
 
@@ -383,12 +397,14 @@ B 完全独立？                 → 无依赖
 ### Task 详情
 
 #### T-001: {任务名}
+- **task_type:** vertical（默认）/ horizontal
 - **文件:** `path/to/file.ext` [新] / [修改] / [已存在-扩展]
 - **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / domain model artifact]}
 - **依赖:** - / D-001（Architect 先 resolve）
 - **satisfies:** R-001（追溯 requirement）
-- **slice_goal:** [一句话 — 完成后可独立 demo 的用户可见行为]
-- **demo:** [可观察路径 — 例：创建客户 → 列表立即出现 → 刷新后仍存在]
+- **slice_goal:** [一句话 — 完成后可独立 demo 的用户可见行为；horizontal Task 无此项，改填 reason]
+- **demo:** [可观察路径 — 例：创建客户 → 列表立即出现 → 刷新后仍存在；horizontal Task 无此项，改填 verification]
+- **reason / blocks / verification:** [仅 horizontal Task：为何无法切成 vertical / 后续依赖哪些 Task / 完成判据（编译通过 · dry-run · 契约不变量）]
 - **操作:** [具体实现指令 — Generator 可直接执行]
 - **验证:** [可验证命令/grep/URL]
 - **完成标准:** [可测量的验收条件]
@@ -494,4 +510,4 @@ T-002 ──→ T-004(标签 slice) [需 D-002]
 | T-003 | 编辑文章并切换草稿/发布状态后可见 | T-002→ | L/2d | P1 | - |
 | T-004 | 给文章打标签后详情页展示该标签 | T-002→ | M/1.5d | P1 | D-002 |
 
-> 每个 slice 贯穿 DB/API/UI 到一个可观察行为——不再出现「DB / API / 前端」分层的 Task。
+> 默认每个 slice 贯穿 DB/API/UI 到一个可观察行为；infrastructure/migration/foundation 类改动用 Horizontal Task（声明 reason/blocks/verification）——不再出现「无声明」的 DB / API / 前端分层 Task。
