@@ -2,11 +2,10 @@
 name: project-architect
 metadata: skill.yaml
 description: >
-  架构决策、技术选型、模块设计、API 契约设计。使用对比矩阵做技术选型，输出 ADR 格式的架构决策记录。
+  架构决策、技术选型、模块设计、API 契约设计：使用对比矩阵做技术选型，输出 ADR 架构决策记录。
   触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、
   怎么设计、选什么技术、模块怎么划分、接口怎么定义、design architecture、tech stack、
   system design、API design。
-  产出：ARCHITECTURE.md（ADR 决策记录 + 模块图 + 选型理由 + API 契约）。
 ---
 
 # Architect

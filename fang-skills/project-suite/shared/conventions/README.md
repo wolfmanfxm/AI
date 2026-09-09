@@ -18,7 +18,7 @@
 ---
 name: skill-name
 description: >
-  一行或多行描述。包含 触发场景 和 产出。触发词见 references/trigger-words.md。
+  一行或多行描述。包含 触发场景（触发词）。产出契约见 skill.yaml produces。
 ---
 ```
 

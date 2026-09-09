@@ -26,6 +26,7 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
    - decision → scope=project（blocking）→ rules；scope=task（advisory）→ guidance
    - experience / playbook → guidance
    - pattern / component / api → knowledge
+   - recommendation → recommendations（应然建议，非 blocking；新代码改进方向，非现状规范）
 
 2. 候选集过滤（candidates：Planner # Reuse Analysis 传入的 source/capability/tag/basename）
    - rules（blocking constraints）：恒全量，不受 candidates / Top-K 影响
@@ -42,6 +43,7 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
    context.rules[]     = 全量 blocking 约束（type=rule/decision）
    context.knowledge[] = 预消化 pattern（P2）
    context.guidance[]  = experience/playbooks（P3）
+   context.recommendations[] = 应然建议（type=recommendation，新代码改进，非 blocking）
 ```
 
 > **结构事实不走 Resolver**：component/api/module 的存在性、依赖链、影响半径由 Planner/Architect/Generator
@@ -152,6 +154,8 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
      → 按 a.conventions 生成 API 调用
 5. for (r of context.rules):
      → if r.blocking → 必须遵守，否则报错
+6. for (rec of context.recommendations):
+     → 新代码遵循 rec.recommendation（改进）；理解存量代码看 rec.status_quo（现状）
 ```
 
 ### 与 knowledge-list.json（已废弃）的对比

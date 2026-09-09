@@ -163,6 +163,9 @@ capability_types:
   KnowledgeBase:    # .project-knowledge/ + context.json
     description: 项目结构化知识（架构/组件/API/模式/编码约定），含生命周期状态
     format: [.md, .json]
+  Recommendation:   # .project-knowledge/recommendations.md
+    description: 项目级应然建议（新代码改进方向，非现状规范；现状见 KnowledgeBase/Graph）
+    format: [.md]
   KnowledgeIndex:   # knowledge-index.json
     description: Capability→文件映射，Skill 按能力标签而非文件路径查询知识
     format: [.json]

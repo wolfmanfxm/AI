@@ -57,9 +57,11 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 
 ### P0 — Protocol Integrity（协议完整性）
 
-- [ ] Benchmark 验证 Protocol 行为（pressure test 的 RED 假设：额外动作型 vs 判断型）
+- [x] 行为评估收敛：统一词汇（三层工件：pressure-tests 定义 → results 运行 → ledger 判定），五段格式升级为六段（加 `repeatability`）
 
-> 已完成：Protocol Contract 一致性（check-consistency.sh）、Host Capability Contract、Exit Criteria→Evidence→Convergence。
+> 已完成：Protocol Contract 一致性（check-consistency.sh）、Host Capability Contract、Exit Criteria→Evidence→Convergence、description 去「产出/行为句」收口（discoverability 归 description、contract 归 skill.yaml produces）。
+>
+> **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark round）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。
 
 ### P2 — Knowledge Consumption
 

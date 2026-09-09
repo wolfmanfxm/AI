@@ -79,7 +79,7 @@ User Input ──→ architect ──→ Architecture (ADR)
 | G3: boundary.md ≥3 反例 | ✅ | 内嵌在 SKILL.md 或 boundary.md |
 | G4: CHECKPOINT ≥1 | ✅ | 每 stage prompts 含 CHECKPOINT |
 | G5: 职责边界表 | ✅ | ✅/❌ 表在 boundary.md |
-| G6: description 含触发词 | ✅ | 全部含触发词+产出 |
+| G6: description 含触发词 | ✅ | 全部含触发词（产出见 skill.yaml produces） |
 | G7: capabilities.yaml 注册 | ✅ | 10/10 已注册 |
 | G8: 完成后 next-step | ✅ | 10/10 |
 | G9: boundary.md 失败兜底 | ✅ | 10/10 |

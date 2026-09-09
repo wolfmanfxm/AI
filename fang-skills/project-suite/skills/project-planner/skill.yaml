@@ -11,7 +11,7 @@ depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [adaptive-interview, completeness-check, plan-generation]
 requires: []
 produces: [Plan]
-consumes: [KnowledgeBase, Context, Graph]
+consumes: [KnowledgeBase, Context, Graph, Recommendation]
 
 boundary: 只做计划不写代码，发现问题记录在风险矩阵不直接修改
 last_reviewed: "2026-08-04"

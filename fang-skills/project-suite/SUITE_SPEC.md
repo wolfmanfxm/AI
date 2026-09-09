@@ -78,8 +78,8 @@ skills/<skill-name>/
 ---
 name: <kebab-case>          # 必须与目录名一致
 metadata: skill.yaml        # 引用统一元数据
-description: >              # 做什么 + 何时用 + 触发词 + 产出，≤1024 字符
-  触发词: ... 产出: ...
+description: >              # 做什么 + 触发词（discoverability），≤1024 字符；产出契约见 skill.yaml produces
+  触发词: ...
 ---
 ```
 
@@ -215,7 +215,7 @@ RefactoredCode | Documentation | Release | PipelinePlan
 | G3 | boundary.md **或** SKILL.md 内嵌反例 ≥3 条 | 🔴 | 搜索 `❌` 计数（两处之和） |
 | G4 | 至少 1 个 `CHECKPOINT`（SKILL.md 或 prompts/） | 🔴 | 搜索 `CHECKPOINT` |
 | G5 | 职责边界表 ≥3 行 ✅/❌ | 🔴 | 搜索 `✅ 本阶段职责` |
-| G6 | frontmatter 含 `description` + 触发词 + 产出 | 🔴 | YAML 解析 |
+| G6 | frontmatter 含 `description` + 触发词（产出契约在 skill.yaml produces） | 🔴 | YAML 解析 |
 | G7 | capabilities.yaml 中已注册 | 🟡 | grep skill id |
 | G8 | `完成后` next-step hint 存在 | 🟡 | 搜索 |
 | G9 | boundary.md 含失败兜底 | 🟡 | 搜索 |

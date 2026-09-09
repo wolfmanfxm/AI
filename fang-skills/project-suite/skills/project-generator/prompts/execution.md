@@ -42,7 +42,8 @@
 - `findProducers(<当前模块>)` → 了解已有上游，复用
 
 ### 4. 套用模式生成
-- 遵循 context-package.json 的 knowledge[]（pattern）中的编码规范
+- 遵循 context-package.json 的 knowledge[]（pattern）中的编码规范（现状 = 一致性）
+- 遵循 context-package.json 的 recommendations[]（应然建议）——新代码优先类型化/拆解等改进方向
 - 查 graph.json（findNode component）→ 已有组件直接 import，不重新生成
 - 匹配项目约定：缩进/引号/命名/import 顺序
 

@@ -22,6 +22,7 @@ SKILLS_DIR="$SUITE_ROOT/skills"
 type_to_cap() {
   case "$1" in
     knowledge)        echo KnowledgeBase ;;
+    recommendation)   echo Recommendation ;;
     context)          echo Context ;;
     graph)            echo Graph ;;
     planning)         echo Plan ;;
@@ -37,7 +38,7 @@ type_to_cap() {
 }
 
 # 合法 type：13 artifact type + 1 知识注入标记（state/request 无 Capability，仅作类型）
-VALID_TYPES="knowledge context graph planning design implementation test review refactored-code documentation release state request context-package"
+VALID_TYPES="knowledge recommendation context graph planning design implementation test review refactored-code documentation release state request context-package"
 
 # 非 skill 的 source（外部输入，不查 produces）
 NON_SKILL_SOURCES="user git knowledge-resolver knowledge-compiler runtime ALL"

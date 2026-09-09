@@ -2,11 +2,9 @@
 name: project-releaser
 metadata: skill.yaml
 description: >
-  发布管理：semver 版本号推荐（基于 conventional commits）、changelog 自动合成
-  （git log + PR + REVIEW.md）、发布前检查清单（测试/文档/breaking change/回滚方案）。
+  发布管理：semver 版本号推荐（基于 conventional commits）、changelog 自动合成（git log + PR + REVIEW.md）、发布前检查清单。
   触发词：发布、上线、发版、release、changelog、版本号、发布检查、
   ship、deploy、version bump、publish、准备发布。
-  产出：CHANGELOG.md + RELEASE-CHECKLIST.md + 版本号建议。
 ---
 
 # Releaser

@@ -119,12 +119,12 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G6: frontmatter has description + trigger words（多行 YAML，取 frontmatter 完整内容）
+  # G6: frontmatter description 含触发词（discovery 面）；产出契约在 skill.yaml produces（G2 已查），不塞进 description
   desc=$(awk '/^---/{f++} f==1' "$skill_dir/SKILL.md" 2>/dev/null | sed -n '/description:/,$p' | tr '\n' ' ')
-  if echo "$desc" | grep -q "触发词\|trigger" && echo "$desc" | grep -q "产出"; then
-    green "  G6 PASS: description has trigger+output"
+  if echo "$desc" | grep -q "触发词\|trigger"; then
+    green "  G6 PASS: description has trigger words"
   else
-    yellow "  G6 WARN: description missing trigger or output keywords"
+    yellow "  G6 WARN: description missing trigger words"
     WARNINGS=$((WARNINGS+1))
   fi
 

@@ -25,6 +25,18 @@
 | `skill_mechanism` | 哪条规则阻止了这个错误（GREEN 的机制） |
 | `assertion` | 怎么判定 pass / fail |
 
+## 三层工件与统一词汇
+
+> 行为评估是三层流水线，各层字段名不同但指向同一件事。**判定结论的唯一入口是 [mechanism-verification-ledger.md](../../project-suite-eval/mechanism-verification-ledger.md)**（评估证据归 project-suite-eval，见「评估证据与治理契约分离」）——本文件的 `naive_failure` / `assertion` 是「设计时预测」，ledger 的 `native_baseline` / `pass_fail` 是「运行时记录」。
+
+| 层 | 文件 | 字段 | 含义 |
+|----|------|------|------|
+| 设计（预测） | `pressure-tests/<skill>.yaml` | `scenario` / `naive_failure` / `skill_mechanism` / `assertion` | 反例场景 + 预测 naive 会怎么错 + 哪条规则拦住 + 怎么判 |
+| 运行（观察） | `results/*.yaml` | `native:` / `suite:` 块 | naive vs suite 真实跑出的产出对比 |
+| 记录（判定） | `mechanism-verification-ledger.md` | `hypothesis` / `native_baseline` / `suite_behavior` / `evidence` / `repeatability` / `pass_fail` | 机制是否改变行为 + 可复现性 |
+
+> `naive_failure`（预测）与 `native_baseline`（观察）是同一件事的「事前/事后」两态，不强行合并命名——但**判断有效性的结论只写在 ledger**，pressure-tests 只做场景定义。
+
 ## 运行方式（三阶段对比）
 
 1. **Baseline**：不加载 Skill，跑 `scenario` → 记录 `naive_failure` 是否发生。

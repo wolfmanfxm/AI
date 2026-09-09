@@ -2,11 +2,9 @@
 name: project-refactorer
 metadata: skill.yaml
 description: >
-  改善代码结构不改变外部行为：提取函数/组件、简化条件逻辑、移除死代码、语义化重命名、
-  拆分过大模块。每次重构必须安全可逆，有测试跑测试，无测试先加表征测试。
+  改善代码结构不改变外部行为：提取函数/组件、简化条件逻辑、移除死代码、语义化重命名、拆分过大模块。
   触发词：重构、优化结构、提取公共、简化代码、消除重复、拆分模块、重命名、优化这段代码、迁移、
   refactor、clean up、extract method、simplify、reduce complexity、migrate。
-  产出：重构后代码 + REFACTOR.md（变更记录 + 改善指标 + 验证结果）。
 ---
 
 # Refactorer

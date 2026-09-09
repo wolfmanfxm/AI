@@ -3,10 +3,8 @@ name: project-documenter
 metadata: skill.yaml
 description: >
   生成和维护项目文档：API 文档（从代码注释提取）、README、ADR、Changelog、组件文档。
-  自动匹配项目已有文档风格，所有内容基于代码事实不编造。
   触发词：生成文档、写文档、补文档、API 文档、README、更新文档、补全文档、
   generate docs、write documentation、update README、api docs、组件文档。
-  产出：文档文件（.md），含 Evidence Header。API/组件文档同步到 Knowledge Vault。
 ---
 
 # Documenter

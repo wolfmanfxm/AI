@@ -78,3 +78,53 @@ Phase 6 (Classifier) → Phase 6.5 (Instinct Extraction) → Delivery
 Delivery 读取 `instincts.yaml`：
 - `promotion_ready: true` → Reviewer 确认 → Promotion 到 Knowledge Vault
 - `promotion_ready: false` → 保留为 personal_candidate，等待更多项目验证
+
+---
+
+## 项目建议（单项目应然，区别于 cross-project Instinct）
+
+> 除跨项目 Instinct 外，本阶段还产出**单项目建议** `recommendations.md`——把跨项目 Instinct 应用到「这个项目」的现状，生成项目级改进建议。与 `instincts.yaml` 的区别：
+
+| 产出 | 范围 | 性质 | 去向 |
+|------|------|------|------|
+| `instincts.yaml` | 跨项目 | 反复出现的规律（价值判断） | Promotion → Knowledge Vault |
+| `recommendations.md` | 单项目 | 本项目现状 → 应然建议 | 留 `.project-knowledge/`，供本项目 generator/planner 消费 |
+
+### 生成逻辑
+
+对每条 `promotion_ready: true` 的 Instinct，检查本项目现状是否命中：
+
+```
+for each instinct in instincts.yaml:
+  if instinct 的 evidence（any_usage_rate / consistency / occurrences）与本项目 facts 匹配:
+    生成 recommendation:
+      priority:     instinct.type（Always/Prefer/Avoid）
+      status_quo:   <本项目事实，如「96.2% API 函数返回 any」>
+      recommendation: <应然，如「新代码优先类型化泛型 IResponseResultRows<T>」>
+      basis:        <instinct.id + evidence>
+      source:       <本项目知识文件路径，如 api/overview.md>
+```
+
+### 输出：recommendations.md
+
+```markdown
+---
+type: recommendation
+scope: project
+---
+# 项目建议（应然，非现状规范）
+
+> ⚠️ 本文档是「建议/推荐」——针对**未来新代码**的改进方向，不是对现状的准确描述。
+> 现状见 patterns/、api/、graph.json。冲突时：**新代码遵循「建议」，理解存量代码看「现状」**。
+
+| 优先级 | 现状（事实） | 建议（应然） | 依据 |
+|--------|-------------|-------------|------|
+| Prefer | 96.2% API 函数返回 `Promise<AxiosResponse<any>>` | 新代码优先类型化泛型 `IResponseResultRows<T>` | instinct.avoid-any（本项目 96.2% 远超 3%-8% 标准） |
+| Avoid | 存在 1684 行 God Component | 新模块避免 500+ 行单文件，拆 composition | instinct.split-god-component |
+```
+
+### 关键约束
+
+- **`recommendations.md` 是「建议」不是「规范」**——generator 用于新代码改进，但不得当 blocking constraint（那是 rules/ 的职责）。
+- **只写「有依据」的建议**——每条 recommendation 必须能溯源到 Instinct（basis）或本项目统计（status_quo 的 source），不能凭空提建议。
+- **不修改现状描述**——recommendations.md 单独存放，不混进 patterns/api/graph.json（事实与观点分层：现状描述在 patterns/api/graph，价值判断在 recommendations）。

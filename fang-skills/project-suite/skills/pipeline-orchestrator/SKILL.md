@@ -2,10 +2,8 @@
 name: pipeline-orchestrator
 metadata: skill.yaml
 description: >
-  跨 Skill Pipeline 编排协议（Pipeline Protocol + Decision Boundary，非执行引擎）。
-  读取 registry 建议 pipeline 路径，在决策边界处交给用户确认，传递上下文，处理失败。
+  跨 Skill Pipeline 编排协议（Pipeline Protocol + Decision Boundary，非执行引擎）：读取 registry 建议 pipeline 路径，在决策边界处交给用户确认。
   触发词：全流程、一键执行、自动编排、pipeline、完整链路、端到端、从分析到发布、自动化开发、full pipeline、orchestrate、end-to-end、auto sdlc、run all、complete workflow。
-  产出：pipeline-state.json + pipeline-report.md。
 ---
 
 # Pipeline Orchestrator

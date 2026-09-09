@@ -2,11 +2,9 @@
 name: project-tester
 metadata: skill.yaml
 description: >
-  生成和执行测试：单元测试、组件测试、集成测试。自动检测项目测试框架，
-  遵循现有测试风格，生成 Given-When-Then 结构的测试用例。
+  生成和执行测试：单元测试、组件测试、集成测试（自动检测项目测试框架，生成 Given-When-Then 结构用例）。
   触发词：写测试、测试用例、单元测试、集成测试、组件测试、测试覆盖、
   跑测试、加测试、write tests、test cases、unit test、test coverage、add test、generate test。
-  产出：测试文件（按项目测试框架）+ TEST-REPORT.md。
 ---
 
 # Tester

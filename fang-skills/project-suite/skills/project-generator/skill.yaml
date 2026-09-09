@@ -11,7 +11,7 @@ depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-generation, pattern-matching]
 requires: []
 produces: [Code]
-consumes: [KnowledgeBase, Plan, Architecture, Context, Graph]
+consumes: [KnowledgeBase, Plan, Architecture, Context, Graph, Recommendation]
 
 boundary: 只写代码不做设计，缺少上游产物时提示先执行 planner/architect
 last_reviewed: "2026-08-04"

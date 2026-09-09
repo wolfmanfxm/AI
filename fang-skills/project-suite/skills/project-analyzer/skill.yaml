@@ -10,7 +10,7 @@ verification: { mode: candidate-verify-accept }
 depth_profiles: { simple: minimal, medium: standard, complex: full }
 capabilities: [code-analysis, knowledge-extraction, candidate-verification]
 requires: [general-purpose agent]
-produces: [KnowledgeBase, Context, Graph]
+produces: [KnowledgeBase, Context, Graph, Recommendation]
 consumes: []
 boundary: 只分析项目生成知识文件，不修改源码
 last_reviewed: "2026-08-04"
@@ -35,6 +35,7 @@ interface:
     - { name: context.json, type: context, confidence_range: "85-95", description: 标准化项目上下文 }
     - { name: graph.json, type: graph, confidence_range: "75-90", description: 模块依赖图谱 }
     - { name: statistics.json, type: state, confidence_range: "90-95", description: 项目统计数据 }
+    - { name: recommendations.md, type: recommendation, confidence_range: "80-95", description: 项目级应然建议（现状→建议，含依据溯源） }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
     - { condition: 源码不可读, severity: FATAL, recovery: 终止分析 }

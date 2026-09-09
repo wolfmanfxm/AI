@@ -2,11 +2,9 @@
 name: project-reviewer
 metadata: skill.yaml
 description: >
-  对代码变更进行五轴审查：正确性、安全性、可读性、架构、性能。问题分级（BLOCKER/HIGH/MEDIUM/LOW）
-  附带精确的 file:line 引用和可操作的修复建议。
+  对代码变更进行五轴审查：正确性、安全性、可读性、架构、性能，问题分级（BLOCKER/HIGH/MEDIUM/LOW），附精确 file:line 引用与可操作修复建议。
   触发词：代码审查、review、检查代码、审查 PR、代码质量、code review、security review、
   audit code、审查、帮我看看这段代码、这个 PR 怎么样。
-  产出：REVIEW.md（分级问题列表 + 正向反馈 + 审查结论）。
 ---
 
 # Reviewer

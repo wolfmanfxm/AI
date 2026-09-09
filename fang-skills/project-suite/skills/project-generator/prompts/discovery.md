@@ -4,12 +4,14 @@
 
 ## Actions
 
-0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 context-package.json → 拿 rules[]/knowledge[]/guidance[]
+0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 context-package.json → 拿 rules[]/knowledge[]/guidance[]/recommendations[]
    - **Fallback（Knowledge Context unavailable）**：若 `context-package.json` 缺失 → 兜底直读 `.project-knowledge/rules/`、`decisions/`（project-scope，非 `ARCHITECTURE-*`）、`experience/`、`playbooks/` 全部文件，逐条记录为本次生成的硬约束。`context-package.json` 已存在且含 rules/guidance 时**禁止**重复扫描这些目录（避免双路径 + context 重复）。
 
 1. **Load blocking rules** — context-package.json 的 rules[]（type=rule + project-scope decision）→ 生成时必须遵守，违反即错。
 
 2. **Load applicable patterns/components/API** — context-package.json 的 knowledge[] → 套用模式。
+
+2.5. **Load recommendations** — context-package.json 的 recommendations[]（type=recommendation）→ 应然建议（新代码改进方向），**非 blocking**。现状 facts 见 knowledge[]/rules[]；两者冲突时，**新代码遵循「建议」，理解存量代码看「现状」**。
 
 3. **Reuse Check**（不搜索代码库，先查结构化知识）→ [Reuse Ladder](../../../shared/primitives/reuse-check.md)：
    - `findNode("component", <目标>)` → **完全覆盖 → `[REUSE]` 零改动**（已有组件已覆盖，不新建冗余组件）

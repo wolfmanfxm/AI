@@ -2,6 +2,8 @@
 
 > 每个 Skill 的"好产出"标准。不测语义质量，测结构契约。
 > yao-meta-skill Governed 模式要求。
+>
+> **边界**：本文件只测「结构契约」（文件/章节/confidence/contract/fixture）。**「这个 Skill 是否真的改变了 Agent 行为」的行为评估，见 [mechanism-verification-ledger.md](../../project-suite-eval/mechanism-verification-ledger.md)**——结构契约与行为 eval 是两个正交维度，判定结论以 ledger 为准。
 
 ## 基准维度
 
@@ -31,6 +33,7 @@ expected:
     - statistics.json               # valid JSON
     - context.json                  # valid JSON, required fields present
     - graph.json                    # valid JSON, nodes > 0
+    - recommendations.md            # 存在即可（现状→建议+依据；无跨项目 Instinct 时标注「暂无建议」）
   confidence: 70-95
   stages_completed: [discovery, execution, delivery, validation]
 ```
