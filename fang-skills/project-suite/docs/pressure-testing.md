@@ -25,6 +25,9 @@
 | `skill_mechanism` | 哪条规则阻止了这个错误（GREEN 的机制） |
 | `assertion` | 怎么判定 pass / fail |
 
+> **命名约定**：文件名默认是 skill 名（`<skill>.yaml`）。**suite 级场景**（不隶属单个 skill，
+> 如跨 skill 路由歧义）用 `cross-skill-routing.yaml`，其 `skill:` 字段写 `cross-skill`。
+
 ## 三层工件与统一词汇
 
 > 行为评估是三层流水线，各层字段名不同但指向同一件事。**判定结论的唯一入口是 ledger**（`mechanism-verification-ledger.md`，位于外部 eval 仓库，字段与位置见 [eval-contract.md](eval-contract.md)）——本文件的 `naive_failure` / `assertion` 是「设计时预测」，ledger 的 `native_baseline` / `pass_fail` 是「运行时记录」。

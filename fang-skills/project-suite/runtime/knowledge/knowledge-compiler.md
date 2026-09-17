@@ -1,4 +1,4 @@
-# Knowledge Compiler v1.0.0
+# Knowledge Compiler v1.1.0
 
 > 汇总、分类、索引知识。**不是 analyzer**——analyzer 从代码发现结构事实（→ `graph.json`）。
 > Compiler 扫描 **authored knowledge**（`.project-knowledge/` 下的 .md 文件），打上统一元数据，生成 `knowledge-index.json`。
@@ -32,7 +32,13 @@ Compiler 扫描 `.project-knowledge/` 下 8 个目录的 .md 文件（**不含 `
 
 ## 输出
 
-`.project-knowledge/knowledge-index.json`（capability-keyed + 每文件 Knowledge Metadata）
+| 产物 | 性质 | 内容 |
+|------|------|------|
+| `.project-knowledge/knowledge-index.json` | **契约产物**（被 Resolver 消费） | capability-keyed + 每文件 Knowledge Metadata |
+| `.project-knowledge/knowledge-index.hash` | **编译器内部状态**（无外部 Consumer） | change-detection 摘要（编译器身份 + 每源路径与内容摘要折叠而成） |
+
+> `knowledge-index.hash` 不是知识产物，是 change-detection 的判定输入（见下节）。
+> **只存最终摘要，不存逐源清单**——逐源事实等出现真实消费方时再抽成正式产物（当前无 Consumer，不预建）。
 
 ## 元数据映射（默认，可被文件 frontmatter 覆盖）
 
@@ -61,9 +67,21 @@ Compiler 扫描 `.project-knowledge/` 下 8 个目录的 .md 文件（**不含 `
 
 ## 触发时机（change-detection）
 
-1. **每次任务开始前**：检查 `.project-knowledge/` 下 8 个目录的 .md 是否有变化：
-   - 有变化 → 重扫 .md（不重跑 analyzer）
-   - 无变化 → 直接复用已有 index
+1. **每次任务开始前**：比对「当前状态」与 `.project-knowledge/knowledge-index.hash` 记录的状态：
+   - 不一致 → 重扫 .md（不重跑 analyzer）
+   - 一致 → 直接复用已有 index
+
+**摘要 = 编译器身份 + 每源 `<路径, 内容摘要>`，折叠成一个 shasum**：
+
+| 纳入摘要的项 | 覆盖的场景 |
+|-------------|-----------|
+| 编译器身份（`knowledge-compiler/<schemaVersion>`） | schemaVersion 变更时旧 index 不会被误判为「无变化」而沿用 |
+| 每个源文件的**路径** + 内容摘要 | 内容变化；**重命名（内容不变）也触发重扫**，避免 index 的 source 指向已不存在的路径 |
+| `runtime/knowledge.json` | lifecycle status 变化（Candidate→Accepted 晋升无需改 .md 也能触发重扫） |
+
+> ⚠️ **边界（勿扩张）**：`.hash` 只承载「当前 index 是否要重扫」这一个判定，只存最终摘要。
+> 不落逐源清单、不塞配置 / resolver / routing / consumer 状态——那会把它变成第二个 metadata registry。
+> 逐源事实等出现真实消费方时再抽成正式产物（当前无 Consumer，不预建）。
 
 > 用户改一条 rule 后，**不需要重跑 analyzer，也不需要跑 documenter**。Compiler 检测到 `rules/` 变化 → 重扫 → 更新 index。
 > `graph.json` 变化**不触发** Compiler（它不是 Resolver 输入；结构事实由各 Skill 经 graph-query 直接读，每次任务即时查询）。
@@ -89,7 +107,7 @@ Compiler 读 `runtime/knowledge.json`（analyzer 产出），对 **analyzer 产�
 
 - `rules/decisions/experience/playbooks` 是用户手写的权威约束，**恒入 index**，不受 lifecycle 过滤。
 - `runtime/knowledge.json` 缺失 → 排除清单为空 → 不过滤（bootstrap 向后兼容，不丢未分类文件）。
-- lifecycle status 变化会纳入 change-detection hash：`Candidate → Accepted` 晋升无需改 .md 也能触发重扫。
+- lifecycle status 变化会纳入 change-detection 状态：`Candidate → Accepted` 晋升无需改 .md 也能触发重扫。
 
 > 这兑现了 [knowledge-lifecycle.md](../state/schemas/knowledge-lifecycle.md) 里「index 只列 Accepted」的声明，
 > 但**只对 analyzer 产出的目录生效**——用户手写的 rules/decisions 不受 lifecycle 门控（它们是 born-accepted 的权威约束）。

@@ -4,16 +4,43 @@
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Skills evaluated | 10 |
-| Total CN triggers | 94 |
-| Total EN triggers | 52 |
-| CN overlaps (>1 skill) | 0 |
-| EN overlaps (>1 skill) | 0 |
-| Skills with no triggers | 0 |
-| Skills with frontmatter drift | 0 |
+| Metric | Severity | Value |
+|--------|----------|-------|
+| Skills evaluated | — | 10 |
+| Total CN triggers | — | 94 |
+| Total EN triggers | — | 52 |
+| CN overlaps (>1 skill) | ⛔ 硬冲突 | 0 |
+| EN overlaps (>1 skill) | ⛔ 硬冲突 | 0 |
+| CN 跨 skill 子串包含 | 🔍 候选 | 3 |
+| CN↔EN 交叉 | 🔍 候选 | 1 |
+| Skills with no triggers | ❌ 缺陷 | 0 |
+| Skills with frontmatter drift | ❌ 缺陷 | 0 |
 | Avg CN triggers/skill | 9.4 |
+
+## 🔍 候选：字符串包含（**非冲突**，需人工/行为确认）
+
+> ⚠️ **字符串包含 ≠ 路由冲突**。精确 overlap 才是硬冲突——它意味着同一句话被两个 skill
+> 声明；而包含关系里，短语本身往往是长词 skill 的 intent（如「发布」属 releaser、
+> 「从分析到发布」属 orchestrator，是两个不同 intent）。本段只列候选，供人工判断。
+> 行为层判定见 `../benchmark/pressure-tests/cross-skill-routing.yaml`——那才是真结论来源。
+
+### CN 跨 Skill 子串包含
+
+短触发词被长触发词包含但分属不同 skill：
+
+| 短触发词 | 所属 Skill | 被包含于 | 所属 Skill |
+|---------|-----------|---------|-----------|
+| 发布 | project-releaser | 从分析到发布 | pipeline-orchestrator |
+| 开发 | project-generator | 自动化开发 | pipeline-orchestrator |
+| 开发 | project-generator | 开发计划 | project-planner |
+
+### CN↔EN 交叉
+
+同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词：
+
+| CN 触发词 | 所属 Skill | EN 触发词 | 所属 Skill |
+|----------|-----------|----------|-----------|
+| changelog | project-releaser | change | project-generator |
 
 ## Per-Skill Trigger Count
 

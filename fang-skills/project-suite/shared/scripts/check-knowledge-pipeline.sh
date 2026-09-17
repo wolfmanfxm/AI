@@ -12,6 +12,7 @@
 # 额外覆盖：
 #   - lifecycle 过滤：Candidate 的 analyzer 产出文件不进 index；用户手写 rules 恒入
 #   - change-detection：knowledge.json 的 status 变化（Candidate→Accepted）触发重扫
+#   - change-detection：重命名（内容不变）也触发重扫（路径参与摘要）；编译器身份变化也触发重扫
 #
 # Usage: bash shared/scripts/check-knowledge-pipeline.sh
 # Exit:  0 = 闭环通过；1 = 有断言失败
@@ -185,6 +186,53 @@ if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null; then
   fi
 else
   fail "change-detection: compiler 运行失败（exit=$?）"
+fi
+
+echo ""
+echo "=== 4. change-detection：重命名与编译器身份都触发重扫 ==="
+
+# 4a: 无变化 → 复用
+out="$(bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" 2>&1 || true)"
+case "$out" in
+  *"No change"*) pass "4a 源无变化 → 复用已有 index" ;;
+  *)             fail "4a 源无变化时应输出 'No change'（判定键失效）" ;;
+esac
+
+# 4b: 仅重命名（内容一字不改）→ 必须重扫，且 index 的 source 跟随更新
+#     旧实现把全部源内容拼成一个 hash，路径不参与 → 重命名不触发重扫，index 的 source 指向不存在路径
+mv "$FIXTURE/patterns/table.md" "$FIXTURE/patterns/table-renamed.md"
+if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null; then
+  if node -e '
+    const fs=require("fs");
+    const idx=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+    const srcs=((idx.capabilities.patterns||{}).files||[]).map(f=>f.source);
+    const errs=[];
+    if (!srcs.includes("patterns/table-renamed.md")) errs.push("重命名后的 source 未进 index");
+    if (srcs.includes("patterns/table.md")) errs.push("旧 source 仍在 index（重命名未触发重扫）");
+    if (errs.length){ console.error(errs.join("\n")); process.exit(1); }
+    console.log("重命名触发重扫，source 已跟随");
+  ' "$INDEX"; then
+    pass "4b 重命名（内容不变）触发重扫，index source 跟随更新"
+  else
+    fail "4b 断言失败（见上）"
+  fi
+else
+  fail "4b compiler 运行失败（exit=$?）"
+fi
+
+# 4c: 编译器身份参与判定 —— 用「改过 SCHEMA_VERSION 的编译器副本」模拟版本升级
+#     身份不参与的话，schemaVersion 变更后旧 index 会被误判为「无变化」而沿用（AFC 项目实测过这种漂移）
+#     注意：本步会让 fixture 的 .hash 变成副本写入的值，故必须是 section 4 的最后一步
+PATCHED="$FIXTURE/knowledge-compiler-stale.sh"
+sed 's|^SCHEMA_VERSION=".*"|SCHEMA_VERSION="0.0.0-stale"|' "$SCRIPT_DIR/knowledge-compiler.sh" > "$PATCHED"
+if ! grep -q '^SCHEMA_VERSION="0.0.0-stale"' "$PATCHED"; then
+  fail "4c 无法在编译器副本中改写 SCHEMA_VERSION（脚本常量被改名？）"
+else
+  out="$(bash "$PATCHED" "$FIXTURE" 2>&1 || true)"
+  case "$out" in
+    *"No change"*) fail "4c 编译器身份变化时应重扫，实际判定为「无变化」" ;;
+    *)             pass "4c 编译器身份（schemaVersion）变化触发重扫" ;;
+  esac
 fi
 
 echo ""

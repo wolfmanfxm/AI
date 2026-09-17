@@ -117,6 +117,12 @@ pass_fail: pass | fail | decorate | untested
 | convergence 统一协议 | 声明（Decision Protocol） | 🟡 Specified（Host 解读，非强制） | round6 M1b：产出 sufficient→handoff；「handoff 真交接」靠 Host 解读，非 Suite 强制 |
 | knowledge-list → context-package | 声明 | ✅ 生效 | 静态收口 + benchmark 复验 |
 | Reuse Check primitive | 额外动作 | ✅ 生效 | round5：结构化 REUSE/EXTEND/CREATE 裁决 |
+| 跨 Skill 路由准确（措辞 → 正确 skill） | 声明 | ⚠️ 未验证（仅静态） | trigger-eval 新增「子串包含 / CN↔EN 交叉」检查，实测 3 组包含 + 1 组交叉；行为未跑，场景见 `benchmark/pressure-tests/cross-skill-routing.yaml` |
+
+> ⚠️ **2026-09-17 追加（未跑 baseline，不改变上表结论）**：verifier V2 追加证据要求 ——
+> REUSE 裁决必须附 `命中` + `依据`（无证据 = V2 未通过），并明确「V2 = REUSE 且证据成立 →
+> **零改动**是合法产出」。场景见 `benchmark/pressure-tests/project-generator.yaml` **P5**。
+> Reuse Check primitive 本身的状态（✅ round5）不变；**该追加项标 untested**，需按六段格式复测。
 
 ---
 
@@ -129,7 +135,7 @@ pass_fail: pass | fail | decorate | untested
 | 🟡 一致性放大器 | 1 | 遵循项目模式——系统化遵循项目约定（value=一致性非质量，round10 实证） |
 | ⚠️ 纪律强制（RED 弱） | 1 | 放置正确（强制每次对照，降漏报率） |
 | ❌ 装饰品 | 14 | round8+10 实测 14 个机制全 RED 弱：判断型 6 + 格式型 6 + 执行型 2（LLM 通用能力覆盖） |
-| 未验证 | 0 | （全部 25 个机制已至少跑过 1 轮 baseline） |
+| 未验证 | 1 | 跨 Skill 路由准确（新增，仅有静态证据；其余 25 个机制已至少跑过 1 轮 baseline） |
 
 ## 结论
 
@@ -240,5 +246,26 @@ pass_fail: pass | fail | decorate | untested
 - **Evidence**：round10 N10-planner-P3
 - **Repeatability**：1/1；与 round5「naive 硬编」矛盾——效应不稳定
 - **Pass/Fail**：❌ decorate（RED 弱，naive 也暴露 Gaps；价值仅「Goal+Scope+Gap List 固定格式 + 置信度公式」非「从无到有」）
+
+### 机制：跨 Skill 路由准确（suite 级）
+
+- **Hypothesis**：无 suite 时，用户措辞会落到错误的 skill——「改」类超宽动词（generator 的
+  「修改/调整/改」）会吃掉本属 reviewer/architect/planner 的诉求，用户要的是「先出结论/先出计划」，
+  拿到的却是直接动代码。
+- **Native baseline**：未跑（需按 `benchmark/pressure-tests/cross-skill-routing.yaml` 的 R1–R7
+  真实发 prompt，观察落到哪个 skill）
+- **Suite behavior**：未跑
+- **Evidence**：静态——trigger-eval 新增「CN 跨 skill 子串包含」「CN↔EN 交叉」两条检查，实测
+  3 组包含（发布⊂从分析到发布、开发⊂自动化开发、开发⊂开发计划）+ 1 组交叉（change ⊂ changelog）。
+  这 4 组是**精确比对看不见**的冲突：旧 trigger-eval 报 `overlaps = 0` 是构造使然，不是健康证明。
+- **Repeatability**：未测
+- **Pass/Fail**：untested —— 静态证据只证明「声明层存在冲突」，不证明「行为层真的路由错」；
+  没有 baseline 不填 pass/fail。
+
+> ⚠️ 与 round8 结论的关系：本机制属**声明型**，而 round8 已实证「判断型/格式型/执行型」全线
+> RED 弱。声明型机制在 suite 里的历史规律是**必须验证消费端**（见上表 context_contract 一项：
+> round5「改声明没消费」→ 修消费端 → round6 复验）。路由的消费端是 Host 的 frontmatter 匹配，
+> 不由 suite 强制——因此本项很可能落到 `🟡 Specified（Host 解读，非强制）`。
+> 先跑 baseline 再定论，不预设结论。
 
 > 其余 14 个机制未逐条跑 baseline，状态见上表（多数有 round 证据但未按六段格式固化）。后续新机制验证时，一律填六段格式。

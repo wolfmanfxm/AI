@@ -1,0 +1,93 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+#
+# skill: suite 级（跨 skill 路由），不隶属单个 skill。
+# 与其余 pressure-test 的区别：它们测「某 skill 内的行为是否改变」，本文件测
+# 「用户措辞是否落到了正确的 skill」——即路由歧义（cross-skill trigger confusion）。
+#
+# 场景来源：trigger-eval.mjs 的静态检查只能抓到「字面重复 / 子串包含 / CN↔EN 交叉」，
+# 抓不到「语义相邻但字面无关」的措辞（如「改」类超宽动词吃掉本属 reviewer 的任务）。
+# 本文件覆盖后者，必须靠真实跑 prompt 观察路由结果。
+skill: cross-skill
+
+tests:
+  - id: R1
+    name: 分析诉求落到 analyzer 而非 generator
+    scenario: >
+      分析这个项目并告诉我哪里应该修改。
+    naive_failure: >
+      措辞里同时含「分析」（analyzer 触发词「分析项目」）与「修改」（generator 触发词
+      「修改」）。若按表层措辞匹配，会落到 generator——直接去改代码，而用户要的是先出分析结论。
+    skill_mechanism: capability-routing 的 ProjectAnalysis intent（分析项目/代码分析）优先于 CodeGeneration
+    assertion: >
+      路由到 project-analyzer（产出分析结论）；不得路由到 project-generator。
+      「哪里应该修改」是分析结论的一部分，不构成生成/修改代码的诉求。
+
+  - id: R2
+    name: 设计诉求落到 architect 而非 generator
+    scenario: >
+      帮我判断这个模块应该怎么设计。
+    naive_failure: >
+      「帮我判断…怎么设计」没有出现「架构设计/技术选型」等 architect 的显式触发词，
+      朴素匹配可能落到 generator（「实现/搭建」语义相邻）或 analyzer（「判断」语义相邻）。
+    skill_mechanism: ArchitectureDesign capability（怎么设计/模块怎么划分）
+    assertion: >
+      路由到 project-architect；不得落到 project-generator（未要求写代码）或
+      project-analyzer（未要求分析现状）。
+
+  - id: R3
+    name: 拆解诉求落到 planner 而非 generator
+    scenario: >
+      帮我拆解需求和任务。
+    naive_failure: >
+      「拆解需求和任务」不含 planner 的显式触发词「任务拆解」（词序不同），且「开发/任务」
+      与 generator 的 CodeGeneration 语义相邻，朴素匹配可能落到 generator 直接动手写。
+    skill_mechanism: capability-routing 的 Planning intent（任务拆解/需求分析/分解任务）
+    assertion: >
+      路由到 project-planner（产出执行契约）；不得落到 project-generator。
+
+  - id: R4
+    name: 检查诉求落到 reviewer 而非 analyzer
+    scenario: >
+      帮我检查这段实现有没有问题。
+    naive_failure: >
+      「检查」与 analyzer 的「代码分析」语义相邻；若落到 analyzer，会去产出项目知识库，
+      而不是对这段实现出分级问题清单。
+    skill_mechanism: capability-routing 的 CodeReview intent（检查代码/帮我看看这段代码）
+    assertion: >
+      路由到 project-reviewer（产出分级问题 + file:line）；不得落到 project-analyzer。
+
+  - id: R5
+    name: 开发计划落到 planner 而非 generator（子串包含实证）
+    scenario: >
+      帮我做个开发计划。
+    naive_failure: >
+      trigger-eval 静态检查实测：generator 的「开发」子串包含于 planner 的「开发计划」。
+      精确比对看不到这组冲突，表层措辞匹配会让「开发」先命中 generator，
+      直接开始写代码而不是先出计划。
+    skill_mechanism: capability-routing 的精确 Intent 匹配（exact_intent 优先于 fuzzy_top3）
+    assertion: >
+      路由到 project-planner（「开发计划」是 planner 的 exact intent）；
+      不得落到 project-generator。
+
+  - id: R6
+    name: 全链路诉求落到 orchestrator 而非 releaser（子串包含实证）
+    scenario: >
+      从分析到发布帮我跑一遍。
+    naive_failure: >
+      trigger-eval 静态检查实测：releaser 的「发布」子串包含于 orchestrator 的「从分析到发布」。
+      「发布」先命中 releaser 会只做发版，漏掉「从分析」这一段的全链路意图。
+    skill_mechanism: capability-routing 的 PipelineOrchestration（完整链路/从分析到发布）
+    assertion: >
+      路由到 pipeline-orchestrator（先查复用，需求已覆盖则直接结束）；
+      不得只落到 project-releaser。
+
+  - id: R7
+    name: changelog 诉求落到 releaser 而非 generator（CN↔EN 交叉实证）
+    scenario: >
+      更新一下 changelog。
+    naive_failure: >
+      trigger-eval 静态检查实测：generator 的英文触发词「change」子串包含于 releaser 的
+      中文触发词「changelog」。按语言无关的表层匹配，「change」会命中 generator 去改代码。
+    skill_mechanism: capability-routing 的 Release intent（changelog/版本号）
+    assertion: >
+      路由到 project-releaser（更新 CHANGELOG）；不得落到 project-generator。

@@ -101,3 +101,26 @@ User Input ──→ architect ──→ Architecture (ADR)
 | telemetry | ✅ `shared/scripts/collect-metrics.sh` (local aggregation) |
 | cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 10/10 `skill-policy.yaml` reliability |
 | drift detection | ⚠️ `missing evidence` |
+
+## Skill 准入（这张表何时该变长）
+
+> 本文档的 Atlas 表**默认不变**。新增一行 = 新建一个 skill，是 ADR 级别的作者决策，不是每次分析都要走的流程。
+> 完整判据与成本见 [ADR-005](decisions/ADR-005-skill-admission.md)。
+
+准入五问，**全部为「是」**才考虑新建（任一为「否」→ 留在知识层）：
+
+| # | 判据 | 为「否」时 |
+|---|------|-----------|
+| A1 | 有用户会用一句话直接要求它，且不落进任何现有 capability 的 intent 集 | 扩展现有 skill |
+| A2 | 有明确的「不做」，且与现有 `boundary.md` 不重叠 | 合并而非新建 |
+| A3 | 存在独立的输入/输出边界，且有独立消费场景（下游 Skill **或用户直接消费**） | 加一个 stage/prompt |
+| A4 | 有稳定、可识别的独立用户意图，值得拥有独立可发现入口（判**入口价值**，不判调用频率） | 并入现有 intent 集 |
+| A5 | 能被独立验证（有可判定的 assertion） | 留在知识层——无法验证的能力进不了压力测试 |
+
+> A3 / A4 的措辞是刻意这么写的：按「必须有下游 skill 消费」会否决现役的 releaser/refactorer
+> （实测它们的产物在 `needs` 里无下游消费者）；按「必须高频」则会否决 releaser/refactorer/documenter，
+> 且在 skill 存在前无法测量。详见 [ADR-005](decisions/ADR-005-skill-admission.md)。
+
+**成本**：新增一行要同步 `skill.yaml` / `skill-ir.yaml` / `compatibility.yaml` / `scheduler.yaml` /
+`skill-policy.yaml` + 重新生成 registry，并由 [check-consistency.sh](../shared/scripts/check-consistency.sh)
+L3 / L3.5 硬校验（非警告）。

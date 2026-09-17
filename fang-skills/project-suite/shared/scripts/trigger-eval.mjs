@@ -57,6 +57,31 @@ function main() {
   const overlapsEN = [...triggersEN].filter(([, v]) => v.length > 1);
   const missing = Object.entries(skills).filter(([, d]) => !d.cn.length && !d.en.length).map(([k]) => k);
 
+  // 跨 skill 子串包含：A 的触发词包含 B 的触发词（精确相等已由 overlaps 覆盖，这里抓
+  // 「开发」⊂「开发计划」这类精确比对看不见的冲突——用户说「做个开发计划」时两者都命中）
+  const containment = new Map();
+  for (const [longer, namesA] of triggersCN) {
+    for (const [shorter, namesB] of triggersCN) {
+      if (longer === shorter || !longer.includes(shorter)) continue;
+      for (const a of namesA) for (const b of namesB) {
+        if (a === b) continue;
+        containment.set(`${shorter}|${b}|${longer}|${a}`, { shorter, shorterSkill: b, longer, longerSkill: a });
+      }
+    }
+  }
+
+  // CN↔EN 交叉：同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词
+  const crossLang = new Map();
+  for (const [cn, namesA] of triggersCN) {
+    for (const [en, namesB] of triggersEN) {
+      if (!(cn === en || cn.includes(en) || en.includes(cn))) continue;
+      for (const a of namesA) for (const b of namesB) {
+        if (a === b) continue;
+        crossLang.set(`${cn}|${a}|${en}|${b}`, { cn, cnSkill: a, en, enSkill: b });
+      }
+    }
+  }
+
   // 触发词 frontmatter 同步检查：skill.yaml 有但 SKILL.md frontmatter 缺（Claude Code 按 frontmatter 路由，会漏）
   const drift = [];
   for (const [name, d] of Object.entries(skills)) {
@@ -76,15 +101,17 @@ function main() {
   lines.push('');
   const totalCN = Object.values(skills).reduce((s, d) => s + d.cn.length, 0);
   const totalEN = Object.values(skills).reduce((s, d) => s + d.en.length, 0);
-  lines.push('| Metric | Value |');
-  lines.push('|--------|-------|');
-  lines.push(`| Skills evaluated | ${Object.keys(skills).length} |`);
-  lines.push(`| Total CN triggers | ${totalCN} |`);
-  lines.push(`| Total EN triggers | ${totalEN} |`);
-  lines.push(`| CN overlaps (>1 skill) | ${overlapsCN.length} |`);
-  lines.push(`| EN overlaps (>1 skill) | ${overlapsEN.length} |`);
-  lines.push(`| Skills with no triggers | ${missing.length} |`);
-  lines.push(`| Skills with frontmatter drift | ${drift.length} |`);
+  lines.push('| Metric | Severity | Value |');
+  lines.push('|--------|----------|-------|');
+  lines.push(`| Skills evaluated | — | ${Object.keys(skills).length} |`);
+  lines.push(`| Total CN triggers | — | ${totalCN} |`);
+  lines.push(`| Total EN triggers | — | ${totalEN} |`);
+  lines.push(`| CN overlaps (>1 skill) | ⛔ 硬冲突 | ${overlapsCN.length} |`);
+  lines.push(`| EN overlaps (>1 skill) | ⛔ 硬冲突 | ${overlapsEN.length} |`);
+  lines.push(`| CN 跨 skill 子串包含 | 🔍 候选 | ${containment.size} |`);
+  lines.push(`| CN↔EN 交叉 | 🔍 候选 | ${crossLang.size} |`);
+  lines.push(`| Skills with no triggers | ❌ 缺陷 | ${missing.length} |`);
+  lines.push(`| Skills with frontmatter drift | ❌ 缺陷 | ${drift.length} |`);
   lines.push(`| Avg CN triggers/skill | ${(totalCN / Math.max(Object.keys(skills).length, 1)).toFixed(1)} |`);
   lines.push('');
 
@@ -102,6 +129,39 @@ function main() {
     lines.push('| Trigger | Skills |');
     lines.push('|---------|--------|');
     for (const [t, names] of overlapsEN) lines.push(`| ${t} | ${names.join(', ')} |`);
+    lines.push('');
+  }
+  if (containment.size || crossLang.size) {
+    lines.push('## 🔍 候选：字符串包含（**非冲突**，需人工/行为确认）');
+    lines.push('');
+    lines.push('> ⚠️ **字符串包含 ≠ 路由冲突**。精确 overlap 才是硬冲突——它意味着同一句话被两个 skill');
+    lines.push('> 声明；而包含关系里，短语本身往往是长词 skill 的 intent（如「发布」属 releaser、');
+    lines.push('> 「从分析到发布」属 orchestrator，是两个不同 intent）。本段只列候选，供人工判断。');
+    lines.push('> 行为层判定见 `../benchmark/pressure-tests/cross-skill-routing.yaml`——那才是真结论来源。');
+    lines.push('');
+  }
+  if (containment.size) {
+    lines.push('### CN 跨 Skill 子串包含');
+    lines.push('');
+    lines.push('短触发词被长触发词包含但分属不同 skill：');
+    lines.push('');
+    lines.push('| 短触发词 | 所属 Skill | 被包含于 | 所属 Skill |');
+    lines.push('|---------|-----------|---------|-----------|');
+    for (const c of containment.values()) {
+      lines.push(`| ${c.shorter} | ${c.shorterSkill} | ${c.longer} | ${c.longerSkill} |`);
+    }
+    lines.push('');
+  }
+  if (crossLang.size) {
+    lines.push('### CN↔EN 交叉');
+    lines.push('');
+    lines.push('同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词：');
+    lines.push('');
+    lines.push('| CN 触发词 | 所属 Skill | EN 触发词 | 所属 Skill |');
+    lines.push('|----------|-----------|----------|-----------|');
+    for (const c of crossLang.values()) {
+      lines.push(`| ${c.cn} | ${c.cnSkill} | ${c.en} | ${c.enSkill} |`);
+    }
     lines.push('');
   }
   if (missing.length) {
@@ -129,11 +189,17 @@ function main() {
   writeFileSync(REPORT_PATH, lines.join('\n'));
 
   console.log(`Report written to: ${REPORT_PATH}`);
-  if (overlapsCN.length) console.log(`⚠️  ${overlapsCN.length} CN trigger overlaps found`);
-  if (overlapsEN.length) console.log(`⚠️  ${overlapsEN.length} EN trigger overlaps found`);
+  if (overlapsCN.length) console.log(`⛔ ${overlapsCN.length} CN trigger overlaps found（同一触发词被多个 skill 声明）`);
+  if (overlapsEN.length) console.log(`⛔ ${overlapsEN.length} EN trigger overlaps found（同一触发词被多个 skill 声明）`);
   if (missing.length) console.log(`❌ ${missing.length} skills missing triggers`);
   if (drift.length) console.log(`❌ ${drift.length} skills have frontmatter trigger drift`);
-  if (!overlapsCN.length && !overlapsEN.length && !missing.length && !drift.length) console.log('✅ All triggers clean — no overlaps, no missing, no drift');
+  // 候选（字符串包含）不参与 clean 判定——字符串包含 ≠ 路由冲突，它只是待确认线索
+  if (containment.size || crossLang.size) {
+    console.log(`🔍 ${containment.size + crossLang.size} 个跨 skill 触发词候选（字符串包含，非冲突）——行为判定需跑 cross-skill-routing pressure test`);
+  }
+  if (!overlapsCN.length && !overlapsEN.length && !missing.length && !drift.length) {
+    console.log('✅ All triggers clean — no hard conflicts, no missing, no drift');
+  }
 }
 
 main();

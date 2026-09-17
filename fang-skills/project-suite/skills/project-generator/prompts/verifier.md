@@ -7,7 +7,7 @@
 | # | Check | Method | On Failure |
 |---|-------|--------|------------|
 | V1 | Import 可达 | 所有 import 路径指向存在的文件/模块 | 修正路径或标注 TODO |
-| V2 | 组件复用 | 走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)：Existing→REUSE / Similar→EXTEND / 不同→CREATE；graph.json 中不存在同功能组件 | 替换为 import 已有组件（需求已覆盖 → 零改动） |
+| V2 | 组件复用 | 走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)：Existing→REUSE / Similar→EXTEND / 不同→CREATE；graph.json 中不存在同功能组件。**裁决必须附证据**——reuse-check 输出格式的 `命中` + `依据`（catalog.md 条目 / graph.json 节点 / grep 命中）；只写 REUSE/EXTEND/CREATE 而无证据 = 未做复用检查 | 替换为 import 已有组件（需求已覆盖 → 零改动）；无证据的裁决视为 V2 未通过 |
 | V3 | 模式一致 | 代码风格与 patterns 知识（Context Resolver 注入） 一致 | 修正为符合模式 |
 | V4 | 类型完整 | 无 `any` 滥用，接口定义完整 | 从 types/ 导入或定义 |
 | V5 | 状态覆盖 | loading/empty/error 三态均有处理 | 补全缺失状态 |
@@ -19,6 +19,7 @@
 | 条件 | 判定 |
 |------|------|
 | V1-V7 全部通过 | ✅ Accepted → 写入文件 |
+| V2 = REUSE（需求已被现有组件完整覆盖，证据成立） | ✅ Accepted → **零改动**（不写文件）。交付报告记录 `D[复用裁决]: REUSE` + 命中 + 依据；**不为「跑完流程」而造代码** |
 | V1 失败(import 不存在) | ❌ Rejected → 修正路径 |
 | V2 失败(重复组件) | ❌ Rejected → 替换为 import |
 | V7 失败(命名不一致) | ⚠️ Accepted + 修正命名（Customer vs CustomerInfo 混用） |

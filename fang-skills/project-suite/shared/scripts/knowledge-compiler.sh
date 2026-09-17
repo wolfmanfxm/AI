@@ -1,5 +1,5 @@
 #!/bin/bash
-# Knowledge Compiler v1.0.0
+# Knowledge Compiler v1.1.0
 #
 # 汇总、分类、索引知识。扫描全部知识源，打上统一 Knowledge Metadata，生成 knowledge-index.json。
 #
@@ -11,7 +11,10 @@
 #     读 runtime/knowledge.json，排除 status 明确为「非 Accepted」的 source
 #
 # Usage: bash shared/scripts/knowledge-compiler.sh [project-knowledge-dir]
+#         project-knowledge-dir 默认 .project-knowledge（相对 cwd）——产物一律写在这个目录内，
+#         不写项目根目录
 # Output: <dir>/knowledge-index.json
+#         <dir>/knowledge-index.hash（change-detection 摘要：编译器身份 + 每源路径与内容摘要折叠而成）
 
 set -euo pipefail
 
@@ -20,6 +23,9 @@ mkdir -p "$KNOWLEDGE_DIR"
 OUT="${KNOWLEDGE_DIR}/knowledge-index.json"
 GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 STATUS_FILE="${KNOWLEDGE_DIR}/runtime/knowledge.json"
+GENERATED_BY="knowledge-compiler"
+SCHEMA_VERSION="1.1.0"
+COMPILER_ID="${GENERATED_BY}/${SCHEMA_VERSION}"
 
 # --- 自校验（先于任何写盘）：rules/decisions 必须有 constraint，缺失则 exit 1，绝不落盘 invalid index/hash ---
 MISSING_CONSTRAINT=0
@@ -36,10 +42,29 @@ fi
 echo "✅ 所有 rules/decisions 均含 constraint"
 
 # --- change-detection：源文件无变化则复用 index，不重扫（改 rule 不重跑 analyzer） ---
-# 注意：knowledge.json 的 lifecycle status 变化也纳入 hash —— 否则 status 变了但 .md 没变时
-#       index 会沿用旧结果，Candidate→Accepted 的晋升无法反映到 index。
+# 摘要 = 编译器身份 + 每源 `<路径, 内容摘要>`，折叠成一个 shasum 后存入 .hash。三项都要参与：
+#   1. 路径参与 → 重命名（内容不变）也触发重扫，避免 index 的 source 指向已不存在的路径
+#   2. 编译器身份参与 → schemaVersion 变更时旧 index 不会被误判为「无变化」而沿用
+#   3. knowledge.json 参与 → lifecycle status 变化（Candidate→Accepted）也触发重扫
+# ⚠️ 边界（勿扩张）：本文件只承载「当前 index 是否要重扫」这一个判定，只存最终摘要。
+#    不落逐源清单、不塞配置/resolver/routing/consumer 状态——那会把它变成第二个 metadata registry。
+#    逐源事实等出现真实消费方时再抽成正式产物（当前无 Consumer，不预建）。
 HASH_FILE="${KNOWLEDGE_DIR}/knowledge-index.hash"
-SOURCE_HASH="$( ( find "$KNOWLEDGE_DIR" -name "*.md" -not -name "index.md" -type f 2>/dev/null | sort | xargs cat 2>/dev/null; [ -f "$STATUS_FILE" ] && cat "$STATUS_FILE" 2>/dev/null ) | shasum -a 256 | cut -d' ' -f1 )"
+SOURCE_HASH="$(
+  {
+    printf 'compiler: %s\n' "$COMPILER_ID"
+    cd "$KNOWLEDGE_DIR" || exit 1
+    # 单次批量 shasum —— 逐源单独调用 shasum 会让热路径慢 33x（101 源实测 4.7s vs 0.2s）
+    # -print0/-z/-0 保证空格等特殊字符不被分词；空输入必须先挡掉——
+    # xargs 无输入会以无参运行 shasum，此时 shasum 会去读 stdin（交互场景下挂住）
+    MD_COUNT="$(find . -name "*.md" -not -name "index.md" -type f 2>/dev/null | wc -l | tr -d ' ')"
+    if [ "$MD_COUNT" -gt 0 ]; then
+      find . -name "*.md" -not -name "index.md" -type f -print0 2>/dev/null | LC_ALL=C sort -z |
+        xargs -0 shasum -a 256
+    fi
+    if [ -f runtime/knowledge.json ]; then shasum -a 256 runtime/knowledge.json; fi
+  } | shasum -a 256 | cut -d' ' -f1
+)"
 
 if [ -f "$OUT" ] && [ -f "$HASH_FILE" ] && [ "$(cat "$HASH_FILE")" = "$SOURCE_HASH" ]; then
   echo "No change — reuse $OUT"
@@ -140,8 +165,8 @@ emit_one() {
 
 {
   printf '{\n'
-  printf '  "schemaVersion": "1.1.0",\n'
-  printf '  "generatedBy": "knowledge-compiler",\n'
+  printf '  "schemaVersion": "%s",\n' "$SCHEMA_VERSION"
+  printf '  "generatedBy": "%s",\n' "$GENERATED_BY"
   printf '  "generatedAt": "%s",\n' "$GENERATED_AT"
   printf '  "capabilities": {\n'
 

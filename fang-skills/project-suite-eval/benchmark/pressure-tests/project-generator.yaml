@@ -43,3 +43,18 @@ tests:
       request 封装路径、参数命名、响应结构约定，生成的代码与项目其他 API 模块风格不符。
     skill_mechanism: 核心原则 1「遵循项目模式」——从 .project-knowledge/ 提取写法，不凭记忆
     assertion: 生成的 API 模块 import 项目 request 封装，参数/响应命名对齐项目现有约定，而非框架默认。
+
+  - id: P5
+    name: 需求已被完整覆盖时零改动而非硬造代码
+    scenario: >
+      给用户列表页加一个按姓名搜索的输入框。项目已有统一的搜索区封装组件，且该页面
+      已接入搜索 + 分页（记录在 .project-knowledge/components/catalog.md 与 graph.json）。
+    naive_failure: >
+      朴素 Agent 默认「任务 = 要产出代码」——需求已被现有组件完整覆盖时仍新建/改写文件，
+      产出与现有组件语义重复的近重复件；或为了让 diff 非空而做任务未要求的额外改动。
+    skill_mechanism: >
+      Reuse Check primitive 的 REUSE 阶梯（零改动）+ verifier V2「裁决必须附证据」——
+      「需求已满足 = 满足」，零改动是正确产出而非「没干活」
+    assertion: >
+      产出 D[复用裁决]: REUSE，且带 命中（已有组件/页面）+ 依据（catalog.md 条目或 graph.json 节点）；
+      文件变更为 0（或仅 import 已有组件）。未新建近重复组件，未做任务未要求的额外改动。
