@@ -157,14 +157,6 @@ directories:
     human_readable: true
     compiler_enforced: []
 
-  domain:
-    path: domain/
-    producer: project-analyzer
-    ownership: generated
-    indexed_by_compiler: false   # 由 Resolver/Generator 直读，不经 index（见 runtime/contracts/domain-model.md）
-    human_readable: true
-    compiler_enforced: []
-
   proposals:
     path: proposals/
     producer: project-planner     # PLAN-*.md；见 artifact-types.yaml 的 planning 类型

@@ -1,5 +1,12 @@
 # Quality Gates Configuration v1.0.0
-# Confidence-driven 质量门禁。Confidence 不只是显示，而是控制流程。
+# **维度门禁**：knowledge / coverage / safety / release / decisions / findings —— 每类门槛不同，
+# 故按 skill 分别声明。
+#
+# ⚠️ 本文件**不持有 confidence 阈值**（conf 三档 = PASS/REVIEW/BLOCK 的唯一权威是
+#    runtime/config/rules.yaml 的 `gate:`，见 ADR-003）。
+#    2026-09-18 移除了此处 9 个 skill 的 `confidence: warn_below/block_below` —— 它们与
+#    rules.yaml 的 `requires_review_below`/`blocks_downstream_below` 是同一事实的两个值，
+#    且 rules.yaml 的注释里留着「对齐 gates.yaml block_below」这类**手工同步痕迹**。
 
 version: "1.0.0"
 
@@ -12,66 +19,41 @@ global:
 # 每个 Skill 的独立门禁阈值
 skills:
   project-analyzer:
-    confidence:
-      warn_below: 70           # < 70 建议重跑
-      block_below: 40           # < 40 阻断下游
     knowledge:
-      auto_accept_threshold: 90 # ≥ 90 自动标记为 accepted
+      suggest_accept_threshold: 90 # ≥ 90 **建议** Reviewer 优先验证——
+                                     # ⚠️ 不是自动晋升：Candidate→Accepted 由 Reviewer/Architect
+                                     #    判定（见 runtime/state/schemas/knowledge-lifecycle.md）。
+                                     #    2026-09-18 由 auto_accept_threshold 改名——
+                                     #    原名声称「自动标记为 accepted」，与 lifecycle 直接冲突。
       suggest_review_below: 70  # < 70 建议 Reviewer 验证
 
   project-planner:
-    confidence:
-      warn_below: 70
-      block_below: 40           # PLAN.md confidence < 40 → 阻断 architect
     decisions:
       require_resolved: false   # 不强制所有 Decision 在 planner 阶段 resolve
 
   project-architect:
-    confidence:
-      warn_below: 70
-      block_below: 50
     decisions:
       min_coverage: 100         # 必须 100% resolve PLAN.md 的 Decision
 
   project-generator:
-    confidence:
-      warn_below: 70
-      block_below: 50
     knowledge:
       require_accepted: true    # 只读 accepted 状态的知识
 
   project-tester:
-    confidence:
-      warn_below: 70
-      block_below: 40
     coverage:
       ac_coverage_min: 100      # Acceptance Criteria 测试覆盖率 >= 100%
 
   project-reviewer:
-    confidence:
-      warn_below: 70
-      block_below: 50
     findings:
       block_on: [BLOCKER]       # 有 BLOCKER 级问题 → 阻断 releaser
       warn_on: [HIGH]
 
   project-refactorer:
-    confidence:
-      warn_below: 70
-      block_below: 50
     safety:
       require_tests: true       # 必须有测试保护
       block_on_test_failure: true
 
-  project-documenter:
-    confidence:
-      warn_below: 70
-      block_below: 40
-
   project-releaser:
-    confidence:
-      warn_below: 70
-      block_below: 50
     release:
       require_review: true      # 必须 REVIEW.md 通过
       block_on_breaking_change: ask  # ask | block | warn

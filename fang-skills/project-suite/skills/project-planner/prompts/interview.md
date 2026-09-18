@@ -85,56 +85,20 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 - 是否需要邮箱验证？（留给 Architect 决策）
 ```
 
-## Domain-Aware Questioning（活 Domain Model）
+## Domain-Aware Questioning — **未实现，已摘除（2026-09-18）**
 
-Interview 不只是一次性提问，而是**读写项目 Domain Model**。
-
-### domain/vocabulary.yaml 结构（v2 三分模型）
-
-`.project-knowledge/domain/vocabulary.yaml`（Analyzer 提取 + Interview 维护），三分：`entities` / `actions` / `artifacts`（详见 [Domain Model](../../../runtime/contracts/domain-model.md)）：
-
-```yaml
-entities:   # 领域实体（名词）
-  - id: order
-    name: "订单"
-    status: confirmed
-
-actions:    # 领域动作（动词）
-  - id: refund
-    name: "退款"
-    status: confirmed
-
-artifacts:  # 领域产物（实体×动作 → 页面/API 命名）
-  - id: orderRefundRecord
-    name: "订单退款记录"
-    composed_of: { entity: order, action: refund, artifact_kind: record }
-    naming: "orderRefundRecord"
-    status: confirmed
-```
-
-### Interview 三步读写
-
-```
-1. 读：提问前查 domain/vocabulary.yaml → 已有定义不重问，用项目语言提问
-2. 查：发现假设与已有定义冲突 → 标 ⚠️ Domain conflict，追问澄清
-3. 写：确认新术语/关系 → 写入 vocabulary.yaml（status: confirmed）
-```
-
-### 冲突示例
-
-```
-Planner 假设 "User = 任意登录者"
-  ↓ 读 domain model
-发现: "User = 系统注册用户" (status: confirmed)
-  ↓
-⚠️ Domain conflict:
-  Existing:  User = 系统注册用户
-  Current:   User = 任意登录者
-  Need:      "这里的 User 指哪个？"
-```
-
-→ [Glossary Extractor](../../project-analyzer/prompts/extractors/glossary.md)
-→ [Domain Model](../../../runtime/contracts/domain-model.md)
+> 本节此前定义 Interview 读写 `domain/vocabulary.yaml`（相对 `.project-knowledge/`；活 Domain Model，v2 三分模型）。
+> **摘除原因**：Analyzer 的 `runtime/registry/extractor-registry.yaml` 里**没有 domain extractor**——
+> 也就是说 `vocabulary.yaml` **没有任何 Producer**，「读」这一步永远读不到东西。
+> 它属于「先建一个 declaration area，再慢慢想 Consumer」，正是 SUITE_SPEC §0.1 与
+> eval-contract 的 ablation 义务要挡的形态。
+>
+> **恢复条件**：Producer（domain extractor）+ Consumer + Verify **一次性闭环**后，再进入正式契约
+> （届时需同时恢复 `knowledge-directories.yaml` 里对应的目录条目）。原始设计见
+> [docs/archive/domain-model.md](../../../docs/archive/domain-model.md)。
+>
+> 术语一致性目前由 **Glossary** 覆盖，未受影响：
+> → [Glossary Extractor](../../project-analyzer/prompts/extractors/glossary.md)
 
 ## Decision → Promotion 分流
 

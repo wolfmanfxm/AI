@@ -40,10 +40,20 @@ type_to_cap() {
   esac
 }
 
-# 合法 type：runtime/artifacts/artifact-types.yaml 的 types + 1 知识注入标记 context-package
-# （state/request 无对应 Capability，仅作类型；context-package 是 Interface 层专用标记，见 ADR-004）
-# 注：本列表是上面那份 SSOT 的副本——增删 artifact type 时两处都要改，否则本门禁与 SSOT 打架。
-VALID_TYPES="knowledge recommendation context graph planning design implementation test review refactored-code documentation release state request context-package"
+# 合法 type：**从 SSOT 解析**，不再手抄副本
+# （2026-09-18 修：此前这里是 artifact-types.yaml 的一份手抄副本，脚本注释里自己写着
+#  「增删 artifact type 时两处都要改」——那正是本仓库反复在剿的「新建 SSOT 又复制一份」。）
+ARTIFACT_TYPES_FILE="$SUITE_ROOT/runtime/artifacts/artifact-types.yaml"
+VALID_TYPES="$(sed -n '/^types:/,/^[a-z]/p' "$ARTIFACT_TYPES_FILE" 2>/dev/null \
+               | grep -oE '^  [a-z][a-z-]*:' | tr -d ' :' | tr '\n' ' ' || true)"
+# context-package 不是 artifact type，是 Interface 层专用标记（见 ADR-004），故单独补上。
+VALID_TYPES="${VALID_TYPES}context-package"
+# 解析失败必须响亮失败：VALID_TYPES 只剩标记时，下面每条 type 都会判非法 → 全部报红（不静默放行）
+case " $VALID_TYPES " in
+  *" knowledge "*) : ;;
+  *) red "  ❌ 无法从 $ARTIFACT_TYPES_FILE 解析出 types（SSOT 结构变了？）—— 本门禁失效，拒绝给出结论"
+     exit 1 ;;
+esac
 
 # 非 skill 的 source（外部输入，不查 produces）
 NON_SKILL_SOURCES="user git knowledge-resolver knowledge-compiler runtime ALL"

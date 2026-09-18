@@ -6,7 +6,7 @@ description: "分析软件项目并生成可复用的项目知识库：Multi-Ext
 boundary: "只分析项目生成知识文件，不修改源码"
 produces: [KnowledgeBase,Context,Graph,Recommendation]
 consumes: []
-stages: [discovery, execution, delivery, validation]
+stages: [discovery, execution, validation, delivery]
 verification: { checks: 7, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 6, source: prompts/execution.md }

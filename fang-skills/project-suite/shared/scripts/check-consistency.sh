@@ -71,6 +71,22 @@ grab_stages() {
   fi
 }
 
+# workflow-library 指派表：skill → 期望 stages（**有序**）
+# 补于 2026-09-18：此前只查了「SKILL.md 表行集合 == interface.stages」，
+# 于是 analyzer 的 skill.yaml 写成 [discovery, execution, delivery, validation]（先交付后验证），
+# 与 skill-ir 自洽、与 SKILL.md 表也自洽，唯独与 workflow-library 的 standard 流程矛盾
+# ——**局部 SSOT 正确，跨 Producer/Consumer 契约错误**，全部检查放行。
+WL_MAP="$(node -e '
+  const fs = require("fs");
+  const t = fs.readFileSync(process.argv[1], "utf8");
+  const blocks = [...t.matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:|\Z)/gm)];
+  for (const [, name, body] of blocks) {
+    const s = body.match(/stages:\s*\[([^\]]*)\]/), u = body.match(/used_by:\s*\[([^\]]*)\]/);
+    if (!s || !u) continue;
+    for (const sk of u[1].split(",").map(x => x.trim()).filter(Boolean))
+      console.log(sk + " " + s[1].split(",").map(x => x.trim()).filter(Boolean).join(" "));
+  }' "$SUITE_ROOT/runtime/registry/workflow-library.yaml" 2>/dev/null || true)"
+
 for skill_dir in "$SKILLS_DIR"/*/; do
   skill=$(basename "$skill_dir")
   sy="$skill_dir/skill.yaml"
@@ -109,6 +125,15 @@ for skill_dir in "$SKILLS_DIR"/*/; do
                 | tr -d ' ' | grep -v '^$' | sort -u | tr '\n' ' ' || true)
   [ "$md_stages" != "$yaml_stages" ] && \
     mismatches="$mismatches SKILL.md表行≠stages（表:[${md_stages:-空}] stages:[${yaml_stages:-空}]）"
+
+  # skill.yaml 的 stages 必须**有序等于** workflow-library 指派给它的 stages
+  exp_stages="$(printf '%s\n' "$WL_MAP" | awk -v s="$skill" '$1==s { $1=""; sub(/^ /,""); print }')"
+  if [ -n "$exp_stages" ]; then
+    own_stages="$(grep "stages:" "$sy" 2>/dev/null | grep -o '\[.*\]' | tr -d '[]' | tr ',' ' ' \
+                  | tr -s ' ' | sed 's/^ *//;s/ *$//' || true)"
+    [ "$own_stages" != "$exp_stages" ] && \
+      mismatches="$mismatches stages≠workflow-library（自身:[$own_stages] 指派:[$exp_stages]）"
+  fi
 
   if [ -n "$mismatches" ]; then
     red "  ❌ $skill: skill-ir 与 skill.yaml 不一致 —$mismatches"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Knowledge Query Tool — DEPRECATED
+# Knowledge Query Tool — DEPRECATED · **已归档到 docs/archive/（2026-09-18）**
 #
 # ⚠️ 已废弃。本工具原设计为查询 `.project-knowledge/knowledge-graph.yaml`，
 #    但该文件从未被任何 Producer 产出（真实产物是 graph.json + knowledge-index.json），
@@ -27,4 +27,6 @@ graph.json + knowledge-index.json），所以这条查询路径没有闭环。
   - 知识检索（rules/decisions/patterns/experience/playbooks）→ knowledge-resolver.sh
     （读 .project-knowledge/knowledge-index.json → context-package.json）
 MSG
+# 2026-09-18：与 check-decay.sh 同批归档——恒 exit 1 的存根留在 shared/scripts/，
+#   会让「跑了全套脚本」的清单永远带红灯，磨掉红灯的信号价值。
 exit 1

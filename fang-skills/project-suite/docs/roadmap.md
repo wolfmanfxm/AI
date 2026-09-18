@@ -76,6 +76,31 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 > · 新增门禁：`check-consistency` 断言 **SKILL.md 表行集合 == `interface.stages`**；`check-conformance` **G19 Verification Reachability**；`check-e2e-smoke` **§6 沿 `interface.stages` 走查**。<br>
 > · 行为级证据（含**负对照 ablation**）见 eval 仓 `benchmark/pressure-tests/verification-reachability.yaml`（VR1–VR3）——**设计态、尚未运行**。
 >
+> **2026-09-18 · 外部评审 13 条的处置（全部核实后执行）**：<br>
+> · **③ analyzer stages 顺序**：`[discovery, execution, delivery, validation]` → `[discovery, execution, validation, delivery]`，
+>   与 `workflow-library.yaml` 的 standard 流程对齐；**并补上缺口检查**——此前只查「SKILL.md 表行 == `interface.stages`」，
+>   漏了「`stages` == workflow-library 指派值」，故 §analyzer 的错误**跨文件也不报**。<br>
+> · **① Recommendation 链**：resolver 加 `recommendation` 分支 + 独立桶、schema 补 `context.recommendations` 与
+>   `recommendationEntry`、`check-knowledge-pipeline` 与 `check-e2e-smoke` 各补**消费端**断言。
+>   此前只测到 index（Producer 侧），recommendation 被静默塞进 `knowledge` 桶且无人报错。<br>
+> · **④ gates.yaml 双权威**：删除 9 个 skill 的 `confidence: warn_below/block_below`——conf 三档唯一权威是
+>   `rules.yaml` 的 `gate:`（**这本就是 ADR-003 的规定**，gates.yaml 里的那一段是回退）。<br>
+> · **⑤ `auto_accept_threshold` → `suggest_accept_threshold`**：原名声称「自动标记为 accepted」，与
+>   `knowledge-lifecycle.md`「Candidate 不是自动升级」直接冲突。<br>
+> · **⑦ `VALID_TYPES` 手抄副本**：改为**运行时从 `artifact-types.yaml` 解析**（不引入生成器，少一处新鲜度断言）；
+>   解析失败时**响亮失败**而非静默放行。<br>
+> · **② Domain Model**：按方案 B 摘除——契约移除 `domain/` 条目、planner `interview.md` 移除 Domain-Aware Questioning
+>   一节、analyzer 产出树同步、`domain-model.md` 归档到 `docs/archive/`。理由：**有 Contract、有 Consumer、没有 Producer**
+>   （extractor-registry 里无 domain extractor），属 §0.1 要挡的形态。<br>
+> · **⑩ 恒红存根归档**：`check-decay.sh` **与 `knowledge-query.sh`**（同为 DEPRECATED + 恒 `exit 1` + 无调用方）
+>   移入 `docs/archive/`，3 处引用同步更新。留在 `shared/scripts/` 只会磨掉红灯的信号价值。<br>
+> · **⑥ context-package 的「两个 Producer」**：核实后**不是双产出**——planner 只是**触发** resolver
+>   （`delivery.md:8`「调用 knowledge-resolver.sh 生成」），故移除 planner 的 output 声明。
+>   **连带抓出一个真缺口**：planner 的 prompts 读 `context-package.json` 却从未在 `inputs` 里声明——已补
+>   （e2e §3 抓到的）。<br>
+> · **仍待定**：`context.components/api/artifacts` **无人填充**（resolver 里 0 次 push，planner 也无填充指令），
+>   而 schema 注释声称「由 Planner 经 graph-query 填充」——需确认是设计未落地还是注释过时。
+
 > **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark round）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。契约见 [eval-contract.md](eval-contract.md)。
 
 ### P2 — Knowledge Consumption
@@ -226,7 +251,7 @@ var=$(grep -c X f 2>/dev/null || echo 0)     # ❌
 
 ### G3 — 检查脚本的长期红灯
 
-- `check-decay.sh` — 已废弃，但仍留在 `shared/scripts/` 且恒 exit 1
+- ~~`check-decay.sh`~~ — **已归档到 `docs/archive/`**（2026-09-18）
 - `check-reliability.sh` — 需要快照参数，无参数即 exit 1
 
 要修：要么接进某个入口并给参数，要么明确标注废弃/移入 `docs/archive/`。**长期红灯会让整条检查链失去信号价值。**

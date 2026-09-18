@@ -62,7 +62,7 @@ echo "【2】Knowledge Chain：compiler → resolver → context-package"
 echo "----------------------------------------"
 FIXTURE="$(mktemp -d "${TMPDIR:-/tmp}/e2e-fixture.XXXXXX")"
 trap 'rm -rf "$FIXTURE"' EXIT
-mkdir -p "$FIXTURE/rules" "$FIXTURE/patterns" "$FIXTURE/decisions" "$FIXTURE/runtime"
+mkdir -p "$FIXTURE/rules" "$FIXTURE/patterns" "$FIXTURE/decisions" "$FIXTURE/recommendations" "$FIXTURE/runtime"
 
 cat > "$FIXTURE/rules/form-standard.md" <<'EOF'
 ---
@@ -83,6 +83,12 @@ scope: task
 constraint: 本次用 baseService 前缀
 ---
 # API 决策
+EOF
+cat > "$FIXTURE/recommendations/use-composable.md" <<'EOF'
+---
+statement: 新代码优先抽 composable，而不是复制模板
+---
+# 建议
 EOF
 echo '{"files":{"patterns/table.md":{"status":"Accepted","occurrences":3}}}' > "$FIXTURE/runtime/knowledge.json"
 
@@ -123,13 +129,18 @@ node -e '
   const ctx = pkg.context || {};
   for (const k of (schema.properties.context.required || [])) if (!(k in ctx)) errs.push("missing context." + k);
   // 三个分桶必须是数组（schema.properties.context.properties 声明了它们）
-  for (const b of ["rules", "knowledge", "guidance"]) {
+  for (const b of ["rules", "knowledge", "guidance", "recommendations"]) {
     if (!(b in ctx)) { errs.push("missing context." + b); continue; }
     if (!Array.isArray(ctx[b])) errs.push("context." + b + " 应为数组");
   }
   // 分桶内容正确：rule 进 rules，pattern 进 knowledge
   if (!(ctx.rules || []).some(e => e.source === "rules/form-standard.md")) errs.push("rule 未进 rules 桶");
   if (!(ctx.knowledge || []).some(e => e.source === "patterns/table.md")) errs.push("pattern 未进 knowledge 桶");
+  // Recommendation 端到端（2026-09-18 补）：Producer(analyzer) → index → resolver → context.recommendations[]
+  if (!(ctx.recommendations || []).some(e => e.source === "recommendations/use-composable.md"))
+    errs.push("recommendation 未走通端到端（应出现在 context.recommendations）");
+  if ((ctx.knowledge || []).some(e => e.source === "recommendations/use-composable.md"))
+    errs.push("recommendation 被错误塞进 knowledge 桶（应独立成桶）");
   if (errs.length) { console.error(errs.join("\n")); process.exit(1); }
   console.log("context-package.json 符合 schema 结构 + 分桶正确");
 ' "$PKG" "$SCHEMA" \

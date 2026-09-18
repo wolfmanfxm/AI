@@ -34,6 +34,8 @@
 
 ## 历史（已废弃）
 
-- `knowledge-query.sh` / `check-decay.sh`（旧 CLI，查询从未产出的 `knowledge-graph.yaml`）
+- `knowledge-query.sh` —— **已归档到 [docs/archive/](../../docs/archive/knowledge-query.sh)**（2026-09-18，同 check-decay.sh）
+- `check-decay.sh` —— **已归档到 [docs/archive/](../../docs/archive/check-decay.sh)**（2026-09-18）。
+  它是恒 `exit 1` 的存根，留在 `shared/scripts/` 会让「全套检查」永远带一个红灯，磨掉红灯信号。
   已废弃，见脚本头部说明。
 - `knowledge-list.json`（v1 文件路径清单）已废弃，被 `context-package.json` 取代。

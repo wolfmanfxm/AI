@@ -165,6 +165,15 @@ if bash "$SCRIPT_DIR/knowledge-resolver.sh" "$FIXTURE" >/dev/null; then
     if (know.includes("patterns/upload.md")) errs.push("patterns/upload.md(Candidate) 不应进入 context-package");
     const ruleSrc=(ctx.rules||[]).map(e=>e.source);
     if (!ruleSrc.includes("rules/form-standard.md")) errs.push("rules/form-standard.md 应进入 context.rules");
+    // ⚠️ recommendation 的**消费端**断言（2026-09-18 补）：
+    //    此前本文件只断言「recommendation 进了 knowledge-index.json」（Producer 侧），
+    //    没有断言「它进了 context.recommendations[]」（Consumer 侧）——于是 resolver 缺分支、
+    //    schema 缺字段、recommendation 被塞进 knowledge 桶，全程无人报错。
+    const recSrc=(ctx.recommendations||[]).map(e=>e.source);
+    if (!recSrc.includes("recommendations/use-composable.md"))
+      errs.push("recommendations/use-composable.md 应进入 context.recommendations");
+    if (know.includes("recommendations/use-composable.md"))
+      errs.push("recommendation 被错误塞进 knowledge 桶（应独立成桶）");
     if (errs.length){ console.error(errs.join("\n")); process.exit(1); }
     console.log("context-package 结构合法 + 分桶正确");
   ' "$PKG"; then

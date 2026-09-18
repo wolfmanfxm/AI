@@ -42,4 +42,4 @@ interface:
     - { condition: 子agent超时或返回空, severity: DEGRADED, recovery: 重试一次,仍失败标注FAILED并主流程补写 }
     - { condition: Knowledge Vault路径不可达, severity: DEGRADED, recovery: 跳过Vault同步,标注⚠️ }
     - { condition: 无package.json, severity: BLOCKED, recovery: AskUserQuestion手动指定框架 }
-  stages: [discovery, execution, delivery, validation]
+  stages: [discovery, execution, validation, delivery]

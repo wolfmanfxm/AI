@@ -68,6 +68,6 @@
 | Knowledge Resolver | 取出当前任务需要的知识 | `context-package.json` |
 | Knowledge Health Producer（未来） | 判断知识可信度（decay） | `.lifecycle/health.json` |
 
-> 旧 `check-decay.sh` 已废弃（依赖从未产出的 `knowledge-graph.yaml`）；
+> 旧 `check-decay.sh` 已废弃并**归档到 `docs/archive/`**（依赖从未产出的 `knowledge-graph.yaml`）；
 > 旧 `runtime/mechanisms/decay.md` 已删除（它描述了一个从未实现的「Decay Engine」，与当前 planned 状态冲突）。
 > 本能力待有可靠 Producer 后再落地。

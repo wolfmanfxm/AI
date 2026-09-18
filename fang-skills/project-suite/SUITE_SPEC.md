@@ -15,7 +15,7 @@
 | **编排权威** | `runtime/registry/workflow-library.yaml` | workflow 编排（pipeline 定义） | 手工 |
 | **编排权威** | `runtime/config/profiles.yaml` | profile（任务复杂度 → skill 激活范围 + auto_advance） | 手工 |
 | **门禁权威** | `runtime/config/rules.yaml` | gate（conf pass/review/block 阈值）+ 执行前置条件 | 手工 |
-| **门禁权威** | `runtime/config/gates.yaml` | 维度门禁（knowledge auto_accept / coverage / safety / release） | 手工 |
+| **门禁权威** | `runtime/config/gates.yaml` | **维度**门禁（knowledge / coverage / safety / release / decisions / findings）——**不含 conf 阈值** | 手工 |
 | **执行策略** | `runtime/config/skill-policy.yaml` | rollback / recovery / reliability / stage_config | 手工 |
 | **派生（勿手改）** | `runtime/registry/*.yaml`（4 份：skills.generated / skill-catalog / capabilities / capability-routing） | 从 skill.yaml 生成 | `generate-registry.mjs` |
 

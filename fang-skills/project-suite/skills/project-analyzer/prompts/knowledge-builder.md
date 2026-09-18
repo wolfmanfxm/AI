@@ -104,7 +104,7 @@
 ├── decisions/               ← 入 index；文件必需 constraint:
 ├── observations/            ← 人读（不入 index）：risks.md / antipatterns.md
 ├── proposals/  reports/     ← 任务产物落点（不入 index）
-├── candidates/  domain/     ← 候选暂存 / 领域词汇（不入 index）
+├── candidates/              ← 候选暂存（不入 index）
 ├── statistics.json
 └── context.json
 ```

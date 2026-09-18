@@ -8,6 +8,8 @@
 #   - constraints（rules + project-scope decisions）：恒全量，不参与 Top-K，不被 pattern 挤掉
 #   - knowledge（patterns/components/api）：P2，受 candidates + Top-K 约束
 #   - guidance（experience/playbooks + task-scope decisions）：P3/advisory，受 candidates + Top-K 约束
+#   - recommendations（项目级应然建议，recommendations/）：advisory，与 knowledge 分开——
+#     knowledge 说「现状是什么」，recommendations 说「新代码该往哪走」
 #   - hydrate：读命中 source 的 frontmatter（constraint/statement/summary）→ 注入 pattern/constraints
 #
 # 候选集（#3）：Planner 的 # Reuse Analysis 产出命中的 source 路径 / capability 名 / tag / basename，

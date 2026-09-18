@@ -60,7 +60,7 @@ skills:
     boundary: "只分析项目生成知识文件，不修改源码"
     last_reviewed: "2026-08-04"
     review_cadence_days: 90
-    stages: [discovery, execution, delivery, validation]
+    stages: [discovery, execution, validation, delivery]
     triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
     triggers_en: [analyze codebase, scan project, project refresh]
     context_contract:
@@ -83,7 +83,7 @@ skills:
         - { condition: 子agent超时或返回空, severity: DEGRADED, recovery: 重试一次,仍失败标注FAILED并主流程补写 }
         - { condition: Knowledge Vault路径不可达, severity: DEGRADED, recovery: 跳过Vault同步,标注⚠️ }
         - { condition: 无package.json, severity: BLOCKED, recovery: AskUserQuestion手动指定框架 }
-      stages: [discovery, execution, delivery, validation]
+      stages: [discovery, execution, validation, delivery]
   project-planner:
     version: "1.3.0"
     mode: Production
@@ -111,10 +111,10 @@ skills:
         - { name: user-request, type: request, required: true, source: user, fixture: false, description: 用户需求/任务描述 }
         - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }
         - { name: knowledge-index.json, type: state, required: true, source: knowledge-compiler, fixture: true, description: capability→文件映射 }
+        - { name: context-package.json, type: context-package, required: false, source: knowledge-resolver, fixture: true, description: "预消化知识包——prompts/discovery.md 读它的 rules[]/knowledge[]/guidance[]；本 skill 的 delivery 阶段触发 Resolver 生成（触发者 ≠ 产出者）" }
         - { name: graph.json, type: graph, required: false, source: project-analyzer, fixture: true, description: 模块依赖关系 }
       outputs:
         - { name: PLAN-<feature>.md, type: planning, confidence_range: "70-95", depends_on_inputs: [context.json, knowledge-index.json] }
-        - { name: context-package.json, type: context-package, confidence_range: "70-95", description: 预消化知识包, Generator直接消费 }
         - { name: target, type: planning, confidence_range: "70-95", description: "每个 Task 的放置决议: module/domain/placement/confidence/evidence（Reuse 正确≠放置正确）" }
       side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:

@@ -1,3 +1,17 @@
+> ⚠️ **已归档（2026-09-18）——本模型当前无 Producer，未进入正式契约。**
+>
+> 摘除原因：`runtime/registry/extractor-registry.yaml` 的 10 个 extractor 里**没有 domain**，
+> 而本文件描述的 `.project-knowledge/domain/vocabulary.yaml` 需要它来产出。
+> 结果是有 Contract、有 Consumer（planner 的 Interview 曾读写它）、**没有 Producer**。
+>
+> 摘除动作：`knowledge-directories.yaml` 移除 `domain/` 条目 · planner `interview.md` 移除
+> Domain-Aware Questioning 一节 · analyzer 产出结构树移除 `domain/`。
+> 恢复条件：**Producer + Consumer + Verify 一次性闭环**后再进入契约。
+>
+> 下面保留原始内容，供将来恢复时参照——**它描述的是设计意图，不是当前能力**。
+
+---
+
 # Domain Model v2.0
 
 > 活的项目领域模型。Analyzer 提取 Candidate，Interview 确认，成为项目共同语言。

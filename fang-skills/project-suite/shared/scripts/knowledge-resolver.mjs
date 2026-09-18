@@ -95,6 +95,11 @@ const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
 const rules = [];
 const knowledge = [];
 const guidance = [];
+// 项目级应然建议（新代码改进方向，非现状规范）——独立桶。
+// 2026-09-18 修：此前**没有这个桶也没有分支**，recommendation 落进下面的 `else` → 被塞进 knowledge 桶，
+// 于是「Analyzer → recommendations/ → index → resolver → context.recommendations[] → Planner/Generator」
+// 这条链在最后两段断开（schema 里也从未定义过 context.recommendations）。
+const recommendations = [];
 
 for (const [capName, cap] of Object.entries(index.capabilities || {})) {
   for (const fe of cap.files || []) {
@@ -156,6 +161,21 @@ for (const [capName, cap] of Object.entries(index.capabilities || {})) {
         confidence: conf,
         tags,
       });
+    } else if (typ === 'recommendation') {
+      // 项目级应然建议：与 knowledge 桶的区别是「现状 vs 应然」，故独立成桶，不混入 knowledge
+      if (!isCandidate(capName, source, tags)) continue;
+      const { statement, constraints } = hydrateStatement(source);
+      recommendations.push({
+        capability: capName,
+        type: typ,
+        source,
+        enforcement,
+        priority,
+        statement,
+        constraints,
+        confidence: conf,
+        tags,
+      });
     } else {
       // pattern / component / api
       if (!isCandidate(capName, source, tags)) continue;
@@ -209,7 +229,7 @@ const pkg = {
   schemaVersion: '2.1.0',
   generatedBy: 'knowledge-resolver',
   generatedAt,
-  context: { rules, knowledge, guidance },
+  context: { rules, knowledge, guidance, recommendations },
 };
 
 fs.writeFileSync(outPath, JSON.stringify(pkg, null, 2));
