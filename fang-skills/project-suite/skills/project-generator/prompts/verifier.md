@@ -4,15 +4,10 @@
 
 ## Checks
 
-| # | Check | Method | On Failure |
-|---|-------|--------|------------|
-| V1 | Import 可达 | 所有 import 路径指向存在的文件/模块 | 修正路径或标注 TODO |
-| V2 | 组件复用 | 走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)：Existing→REUSE / Similar→EXTEND / 不同→CREATE；graph.json 中不存在同功能组件。**裁决必须附证据**——reuse-check 输出格式的 `命中` + `依据`（catalog.md 条目 / graph.json 节点 / grep 命中）；只写 REUSE/EXTEND/CREATE 而无证据 = 未做复用检查 | 替换为 import 已有组件（需求已覆盖 → 零改动）；无证据的裁决视为 V2 未通过 |
-| V3 | 模式一致 | 代码风格与 patterns 知识（Context Resolver 注入） 一致 | 修正为符合模式 |
-| V4 | 类型完整 | 无 `any` 滥用，接口定义完整 | 从 types/ 导入或定义 |
-| V5 | 状态覆盖 | loading/empty/error 三态均有处理 | 补全缺失状态 |
-| V6 | 非重复 | graph.json 中无同名节点 | 标记 `[DUPLICATE]` |
-| V7 | Domain 命名一致 | 代码中的类名/变量名与 vocabulary.yaml 的 confirmed 术语一致；**页面/API 命名须匹配 `artifacts` 的 `naming` 前缀**（如「订单退款记录」→ `orderRefundRecord`，而非泛化的 RefundRecord）。先查 artifact 是否已存在，不存在再查 entity×action 组合是否合法 | ⚠️ 命名与 domain 术语不一致 → 修正命名 |
+> **检查项的唯一权威是 [validation.md](validation.md) 的 `## Checks` 表**——本文件不再重复维护一份。
+> （2026-09-18 收敛：此前两个文件各有一张高度重复的检查表，改一处必忘另一处。）
+>
+> 本文件的职责是定义**验证对象与判定规则**，不是定义检查项。
 
 ## 判定
 

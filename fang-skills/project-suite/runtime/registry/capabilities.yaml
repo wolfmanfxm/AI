@@ -44,10 +44,10 @@ capability_types:
   RefactoredCode:   # 源码文件（重构后）
     description: 重构后代码（行为不变）+ REFACTOR.md
     format: [.ts, .js, .md]
-  Documentation:    # API/组件/Changelog 文档
+  Documentation:    # API/组件 文档（不含 Changelog——后者属 Release）
     description: 结构化技术文档
     format: [.md]
-  Release:          # CHANGELOG.md + RELEASE-CHECKLIST.md
+  Release:          # .project-knowledge/reports/CHANGELOG.md + RELEASE-CHECKLIST.md
     description: 发布产物
     format: [.md]
   PipelinePlan: # pipeline-state.json + pipeline-report.md（编排建议，非执行）

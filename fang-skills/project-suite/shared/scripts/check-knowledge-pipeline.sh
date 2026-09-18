@@ -13,6 +13,7 @@
 #   - lifecycle 过滤：Candidate 的 analyzer 产出文件不进 index；用户手写 rules 恒入
 #   - change-detection：knowledge.json 的 status 变化（Candidate→Accepted）触发重扫
 #   - change-detection：重命名（内容不变）也触发重扫（路径参与摘要）；编译器身份变化也触发重扫
+#   - 契约守卫：rules/decisions 缺 constraint 必须硬失败 + 补齐后恢复（真实项目断链的回归锁）
 #
 # Usage: bash shared/scripts/check-knowledge-pipeline.sh
 # Exit:  0 = 闭环通过；1 = 有断言失败
@@ -30,9 +31,13 @@ fail() { red   "  ❌ $1"; FAIL=$((FAIL+1)); }
 FIXTURE="$(mktemp -d "${TMPDIR:-/tmp}/kc-fixture.XXXXXX")"
 trap 'rm -rf "$FIXTURE"' EXIT
 
+# ⚠️ 必须与契约的 KD_INDEXED（9 个 indexed 目录）**逐一对应**——此前漏了 `recommendations`，
+#    于是 compiler 的 `emit_one "recommendations" …` 从未被本闭环测试执行过：
+#    该桶若写错（能力名/类型/优先级），测试照样全绿（2026-09-18 补）。
 mkdir -p "$FIXTURE/rules" "$FIXTURE/decisions" "$FIXTURE/patterns" \
          "$FIXTURE/components" "$FIXTURE/api" "$FIXTURE/architecture" \
-         "$FIXTURE/experience" "$FIXTURE/playbooks" "$FIXTURE/runtime"
+         "$FIXTURE/experience" "$FIXTURE/playbooks" "$FIXTURE/recommendations" \
+         "$FIXTURE/runtime"
 
 # --- fixture：用户手写（rules/decisions）+ analyzer 产出（patterns/components/api/architecture） ---
 cat > "$FIXTURE/rules/form-standard.md" <<'EOF'
@@ -95,6 +100,13 @@ cat > "$FIXTURE/playbooks/runbook.md" <<'EOF'
 # 手册
 EOF
 
+cat > "$FIXTURE/recommendations/use-composable.md" <<'EOF'
+---
+statement: 新代码优先抽 composable，而不是复制模板
+---
+# 建议
+EOF
+
 cat > "$FIXTURE/runtime/knowledge.json" <<'EOF'
 {"files":{
   "patterns/table.md":{"status":"Accepted","occurrences":3},
@@ -121,6 +133,9 @@ if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null; then
     if (pats.some(f=>f.source==="patterns/upload.md")) errs.push("patterns/upload.md(Candidate) 不应入 index");
     const rules=(idx.capabilities.rules||{}).files||[];
     if (!rules.some(f=>f.source==="rules/form-standard.md")) errs.push("rules/form-standard.md 应恒入 index（用户手写）");
+    // recommendations 桶此前 fixture 里根本没建目录 → 该 emit_one 从未被执行过（2026-09-18 补）
+    const recs=(idx.capabilities.recommendations||{}).files||[];
+    if (!recs.some(f=>f.source==="recommendations/use-composable.md")) errs.push("recommendations/use-composable.md 未进 index");
     if (errs.length){ console.error(errs.join("\n")); process.exit(1); }
     console.log("index 结构合法 + Candidate 被过滤 + rules 恒入");
   ' "$INDEX"; then
@@ -234,6 +249,87 @@ else
     *)             pass "4c 编译器身份（schemaVersion）变化触发重扫" ;;
   esac
 fi
+
+echo ""
+echo "=== 5. 契约守卫：rules/decisions 缺 constraint 必须硬失败 ==="
+
+# 本用例是真实项目断链的回归锁。
+# 实测（round11）：真实项目的 rules/decisions 常缺 constraint（人工产出 / analyzer 产出都可能漏），
+# 编译器 exit 1 → 不生成 knowledge-index.json → 整条知识链中断；而旧 fixture 恰好带着 constraint，
+# 于是「测试全绿、真实项目全挂」。此处锁定守卫必须存在，防止退化为静默产出不完整 index。
+GUARD_FILE="$FIXTURE/rules/no-constraint-probe.md"
+cat > "$GUARD_FILE" <<'EOF'
+---
+id: rules-no-constraint-probe
+generatedBy: manual
+lifecycle: confirmed
+confidence: 90
+---
+# 无 constraint 的规则（探针）
+EOF
+
+out="$(bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" 2>&1 || true)"
+case "$out" in
+  *"缺少 constraint"*no-constraint-probe*)
+    pass "5a 缺 constraint 的 rule → 编译器拒绝生成 index 且点名文件（守卫有效）" ;;
+  *)
+    fail "5a 缺 constraint 的 rule 未被拒绝/未点名文件（守卫失效，会静默产出不完整 index）" ;;
+esac
+
+cat > "$GUARD_FILE" <<'EOF'
+---
+id: rules-no-constraint-probe
+generatedBy: manual
+lifecycle: confirmed
+confidence: 90
+constraint: "探针约束（补齐后应可编译）"
+---
+# 补齐 constraint 的规则（探针）
+EOF
+
+if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null 2>&1; then
+  pass "5b 补齐 constraint 后恢复正常编译（契约可被 Producer 满足）"
+else
+  fail "5b 补齐 constraint 后仍编译失败（Producer 无法满足该契约）"
+fi
+rm -f "$GUARD_FILE"
+
+# 5c: 字段写在 frontmatter 后段（超过第 15 行）也必须被读到
+#     实测（round13）：真实项目的 decisions 文件 `sources:` 列了多条，补齐的 constraint 落到第 17/19/24 行；
+#     旧实现用 `sed -n '1,15p'` 硬窗口读字段 → **写了但读不到** → 「补齐成功」与「拒绝生成 index」同时成立，
+#     链路依旧断着而两边日志都正常。frontmatter 没有行数上限，这里锁住「无硬窗口」。
+LONG_FM="$FIXTURE/rules/long-frontmatter-probe.md"
+{
+  echo '---'
+  echo 'id: rules-long-frontmatter-probe'
+  echo 'generatedBy: manual'
+  echo 'generatedAt: 2026-09-17T00:00:00Z'
+  echo 'last_scan: 2026-09-17T00:00:00Z'
+  echo 'lifecycle: confirmed'
+  echo 'confidence: 95'
+  echo 'sources:'
+  for i in 1 2 3 4 5 6 7 8 9 10; do echo "  - probe/source-$i.ts"; done
+  echo 'constraint: "长 frontmatter 探针约束（必须能被读到）"'
+  echo '---'
+  echo '# 长 frontmatter 探针'
+} > "$LONG_FM"
+PROBE_LINE="$(grep -n '^constraint:' "$LONG_FM" | cut -d: -f1)"
+
+if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null 2>&1; then
+  if node -e '
+    const fs=require("fs");
+    const idx=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+    const srcs=((idx.capabilities.rules||{}).files||[]).map(f=>f.source);
+    process.exit(srcs.includes("rules/long-frontmatter-probe.md") ? 0 : 1);
+  ' "$INDEX"; then
+    pass "5c frontmatter 字段位于第 ${PROBE_LINE} 行仍被读到（无 15 行硬窗口）"
+  else
+    fail "5c 编译器未报错但探针未进 index（字段读了、文件没索引？）"
+  fi
+else
+  fail "5c frontmatter 字段位于第 ${PROBE_LINE} 行未被读到 —— 硬窗口 bug 回归（字段写了但读不到）"
+fi
+rm -f "$LONG_FM"
 
 echo ""
 echo "========================================"

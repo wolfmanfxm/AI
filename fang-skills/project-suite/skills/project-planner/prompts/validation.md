@@ -12,6 +12,8 @@
 | V4 | Decision→Task 绑定 | 每个 Decision 已标注影响哪些 Task | 补充映射 |
 | V5 | 估时合理 | 单任务 ≤8h，总估时 ≤ 可用工时 | 标注风险 |
 | V6 | Decision 语义合法 | 每个 D-XX 是选择题/问句而非 Task（不含实现动词），且足够具体 | 反例改写为 Task 或降级为 Gap |
+| V7 | 复用准确 | Reuse Analysis 引用的组件/API 真实存在 | 修正引用 |
+| V8 | Context 一致 | 引用的 context.json 字段与项目一致 | 修正引用 |
 
 ## QA Agent
 

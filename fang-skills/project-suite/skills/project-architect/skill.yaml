@@ -23,7 +23,7 @@ triggers_en: [design architecture, tech stack, system design, API design]
 context_contract:
   must_read: [context.json, PLAN.md]
   query: [architecture, components, api]
-  neednt_read: [observations/, reports/]
+  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
 
 interface:
   inputs:

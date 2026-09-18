@@ -23,7 +23,7 @@ triggers_en: [break down tasks, plan sprint, estimate effort, create dev plan]
 context_contract:
   must_read: [context.json]
   query: [architecture, components]
-  neednt_read: [observations/, reports/]
+  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
 
 interface:
   inputs:

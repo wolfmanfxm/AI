@@ -96,30 +96,27 @@ fields:
 
 # ═══ Gate Decision Tree ═══
 # Skill 启动时的 context 校验流程（可编程）
+#
+# 每个分支二选一：
+#   next:   <状态名>   转到下一个状态继续判定
+#   action: <终态动作> 终态（BLOCK / PASS / DEGRADE），可带 message / fallback / fix
 
 gate:
   check_context_exists:
-    exists:    → check_required
-    missing:   → try_extract_from_knowledge
+    exists:  { next: check_required }
+    missing: { next: try_extract_from_knowledge }
 
   check_required:
-    all_present:  → check_important
-    any_missing:  → action: BLOCK
-                    message: "🔴 context.json 缺少 REQUIRED: {fields}"
-                    fix: "运行 /project-analyzer"
+    all_present: { next: check_important }
+    any_missing: { action: BLOCK, message: "🔴 context.json 缺少 REQUIRED: {fields}", fix: "运行 /project-analyzer" }
 
   check_important:
-    all_present:  → action: PASS
-    any_missing:  → action: DEGRADE
-                    message: "🟡 context.json 缺少: {fields}"
-                    fallback: "使用默认值 {fallbacks}"
-                    fix: "建议运行 /project-analyzer"
+    all_present: { action: PASS }
+    any_missing: { action: DEGRADE, message: "🟡 context.json 缺少: {fields}", fallback: "使用默认值 {fallbacks}", fix: "建议运行 /project-analyzer" }
 
   try_extract_from_knowledge:
-    success:  → action: DEGRADE
-                message: "⚠️ 从 .project-knowledge/ 推断 context"
-    failure:  → if_skill_is_generator: BLOCK
-                else: DEGRADE
+    success: { action: DEGRADE, message: "⚠️ 从 .project-knowledge/ 推断 context" }
+    failure: { if_skill_is_generator: BLOCK, else: DEGRADE }
 
 # ═══ Merge Rules ═══
 # 当多个 source 提供同一字段时的处理

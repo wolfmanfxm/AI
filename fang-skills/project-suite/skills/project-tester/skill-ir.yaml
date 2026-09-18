@@ -7,7 +7,7 @@ boundary: "只写测试不修被测代码，测试失败记录报告不修改源
 produces: [Test]
 consumes: [Code,Plan,KnowledgeBase,Context]
 stages: [discovery, execution, validation]
-verification: { checks: 4, source: prompts/verifier.md }
+verification: { checks: 5, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 15, source: prompts/execution.md }
 failure_conditions: { modes: 4, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }

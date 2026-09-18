@@ -22,7 +22,7 @@ triggers_en: [refactor, clean up, extract method, simplify, reduce complexity, m
 context_contract:
   must_read: [context.json]
   query: [patterns, components]
-  neednt_read: [observations/, reports/]
+  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
 
 interface:
   inputs:
@@ -32,7 +32,7 @@ interface:
   outputs:
     - { name: 重构后代码, type: refactored-code, confidence_range: "75-90", description: 行为不变+指标改善 }
     - { name: REFACTOR.md, type: refactored-code, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
-  side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
+  side_effects: { writes_state: true, writes_knowledge: true, modifies_code: true, writes_timeline: true }
   failure_modes:
     - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
     - { condition: 重构后测试变红, severity: FATAL, recovery: Edit 反向回滚,记录REFACTOR.md失败原因 }

@@ -2,15 +2,16 @@
 name: project-documenter
 metadata: skill.yaml
 description: >
-  生成和维护项目文档：API 文档（从代码注释提取）、README、ADR、Changelog、组件文档。
+  生成和维护项目文档：API 文档（从代码注释提取）、README、ADR、组件文档。
   触发词：生成文档、写文档、补文档、API 文档、README、更新文档、补全文档、
   generate docs、write documentation、update README、api docs、组件文档。
+  不含 Changelog——发版相关的 Changelog 归 project-releaser（见 boundary）。
 ---
 
 # Documenter
 
 > 代码 + 上下文 → 结构化、可溯源、风格一致的技术文档
-> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -33,8 +34,7 @@ description: >
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) + [prompts/verifier.md](prompts/verifier.md) | @template: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 ## 职责边界

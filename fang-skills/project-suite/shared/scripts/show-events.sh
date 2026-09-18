@@ -55,7 +55,8 @@ total=$(wc -l < "$EVENTS_FILE" | tr -d ' ')
 echo "  Total events: $total"
 
 for e in StageStarted StageCompleted StageFailed ArtifactGenerated GateTriggered CheckpointReached; do
-  count=$(grep -c "\"event\":\"$e\"" "$EVENTS_FILE" 2>/dev/null || echo 0)
+  # `|| echo 0` 会在零匹配时补成两行 `0\n0`（grep -c 已打印过一个 0）→ 显示成乱码（2026-09-18 修）
+  count=$(grep -c "\"event\":\"$e\"" "$EVENTS_FILE" 2>/dev/null || true); count=${count:-0}
   echo "  $e: $count"
 done
 

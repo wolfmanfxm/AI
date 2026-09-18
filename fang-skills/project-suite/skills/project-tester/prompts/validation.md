@@ -25,6 +25,15 @@
 - 测试文件（按项目测试框架与命名约定）
 - `.project-knowledge/reports/TEST-REPORT.md`（覆盖率摘要 + AC 对照表 + QA findings + 失败分析）
 
+## Verification（独立验证子流程，**非 Stage**）
+
+本阶段在 Exit 前加载 [verifier.md](verifier.md)，以 fresh context 执行独立验证（不参与本阶段产出）。
+
+> 依据 `skill.yaml` 的 `verification: { mode: direct-verify }` → 见
+> [workflow-protocol · Verification Contract](../../../workflow-protocol/SKILL.md)。
+> ⚠️ 上方 `## Checks` 表与本 skill 的 `verifier.md` 检查项**当前内容高度重叠**——两份必须同步改，
+> 尚未收敛为单一来源（见 roadmap 已知缺口）。
+
 ## Exit
 
 无 CRITICAL 发现（所有 AC 已覆盖，测试可执行，未篡改源码）

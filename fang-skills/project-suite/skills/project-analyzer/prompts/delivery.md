@@ -15,7 +15,8 @@
 
 ```bash
 rsync -av --exclude='proposals/' --exclude='reports/REVIEW-*' \
-  --exclude='reports/CHANGELOG-*' --exclude='decisions/ARCHITECTURE-*' \
+  --exclude='reports/CHANGELOG.md' --exclude='reports/RELEASE-CHECKLIST.md' \
+  --exclude='decisions/ARCHITECTURE-*' \
   --exclude='candidates/' \
   .project-knowledge/ "{vaultPath}/Projects/{project}/"
 ```

@@ -4,10 +4,37 @@
 # Spec Kit Analyze 思想的 project-suite 实现。
 #
 # Usage: bash shared/scripts/check-artifacts.sh <project-knowledge-dir>
-# Exit: 0=consistent, 1=warnings, 2=drift detected
+# Exit: 0=consistent, 1=发现 issue, 2=参数不是 .project-knowledge 目录
+#
+# ⚠️ 参数守卫（2026-09-18 加）：本脚本把报告**写在参数目录内**。若误传项目根
+#    （check-approval-audit.sh 的约定就是传项目根，两脚本约定不同），报告会落到项目根，
+#    违反「生成产物一律进 .project-knowledge/」。故先校验参数，不合格直接拒绝。
 
 set -uo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SUITE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 KNOWLEDGE_DIR="${1:-.project-knowledge}"
+
+case "$KNOWLEDGE_DIR" in
+  *.project-knowledge|project-knowledge) : ;;
+  *)
+    echo "❌ 参数应为 .project-knowledge 目录，收到：$KNOWLEDGE_DIR" >&2
+    echo "   本脚本会在参数目录内写 artifact-consistency-report.md——传错会把产物落到项目根。" >&2
+    echo "   Usage: bash shared/scripts/check-artifacts.sh <project-knowledge-dir>" >&2
+    exit 2
+    ;;
+esac
+
+# 计数统一走这里，不要写 `$(grep -c X f || echo 0)`：
+# grep -c 在「文件存在但零匹配」时打印 0 且 exit 1，`|| echo 0` 再补一个 → 变量成两行 `0\n0`
+# → `[ "$var" -lt 2 ]` 报整数错误并**静默走 else**，于是「术语完全没出现」（最强的漂移信号）反而不报警。
+# 另外多文件时 `grep -c` 会输出 `文件名:计数` 多行，故这里先 cat 再数。
+count_in() {   # $1=模式 $2...=文件
+  local pat="$1"; shift
+  local n
+  n=$(cat "$@" 2>/dev/null | grep -c "$pat" || true)
+  printf '%s' "${n:-0}"
+}
 
 # 目录不存在 → SKIP（工具默认前提未满足，不是 drift）
 if [ ! -d "$KNOWLEDGE_DIR" ]; then
@@ -22,50 +49,68 @@ echo "# Artifact Consistency Report" > "$REPORT"
 echo "> $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$REPORT"
 echo "" >> "$REPORT"
 
-# 1. Spec → Plan: spec 中的 requirement 是否在 plan 中有对应？
-echo "## 1. Spec → Plan" >> "$REPORT"
-if [ -f "$KNOWLEDGE_DIR/proposals/PLAN-"*.md ] 2>/dev/null; then
-  # Check: Spec mentions "avatar" → Plan must have corresponding task
-  spec_terms=$(grep -oE "上传|upload|avatar|头像" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | sort -u || true)
+# 1. Plan 内部术语覆盖：Scope 提到的术语是否在 Tasks 中有落地
+# ⚠️ 原实现标为「Spec → Plan」，但**只读了 PLAN 一个文件**——没有任何 spec 输入，等于拿 PLAN 和自己比。
+#    本 suite 也没有 spec artifact，所以改为如实描述：查 PLAN 内部 Scope→Tasks 的术语覆盖（2026-09-18）。
+echo "## 1. Plan 内部术语覆盖（Scope → Tasks）" >> "$REPORT"
+if compgen -G "$KNOWLEDGE_DIR/proposals/PLAN-*.md" > /dev/null 2>&1; then
+  spec_terms=$(cat "$KNOWLEDGE_DIR"/proposals/PLAN-*.md 2>/dev/null | grep -oE "上传|upload|avatar|头像" | sort -u || true)
+  sec1_issues=0
   for term in $spec_terms; do
-    plan_has=$(grep -c "$term" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null || echo 0)
+    plan_has=$(count_in "$term" "$KNOWLEDGE_DIR"/proposals/PLAN-*.md)
     if [ "$plan_has" -lt 2 ]; then
-      echo "- ⚠️ Spec mentions '$term' but Plan lacks corresponding task" >> "$REPORT"
-      ((ISSUES++))
+      echo "- ⚠️ PLAN 提到 '$term' 但 Tasks 段未见对应落地（全文命中 $plan_has 次，< 2）" >> "$REPORT"
+      sec1_issues=$((sec1_issues + 1))
+      ISSUES=$((ISSUES + 1))
     fi
   done
-  [ "$ISSUES" -eq 0 ] && echo "✅ All spec requirements mapped to plan" >> "$REPORT"
+  [ "$sec1_issues" -eq 0 ] && echo "✅ Scope 术语均在 PLAN 内有对应（无孤立术语）" >> "$REPORT"
+else
+  echo "ℹ️  无 PLAN，跳过" >> "$REPORT"
 fi
 echo "" >> "$REPORT"
 
 # 2. Plan → Architecture: plan decisions → architecture decisions
 echo "## 2. Plan → Architecture" >> "$REPORT"
-if [ -f "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-"*.md ] 2>/dev/null; then
-  plan_decisions=$(grep -c "Decision\|decision\|决策" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null || echo 0)
-  arch_decisions=$(grep -c "###\|Decision\|ADR" "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-"*.md 2>/dev/null || echo 0)
-  if [ "$arch_decisions" -ge "$plan_decisions" ] 2>/dev/null; then
-    echo "✅ Architecture covers all plan decisions ($arch_decisions ≥ $plan_decisions)" >> "$REPORT"
+if compgen -G "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-*.md" > /dev/null 2>&1; then
+  plan_decisions=$(count_in "Decision\|decision\|决策" "$KNOWLEDGE_DIR"/proposals/PLAN-*.md)
+  arch_decisions=$(count_in "###\|Decision\|ADR" "$KNOWLEDGE_DIR"/decisions/ARCHITECTURE-*.md)
+  if [ "$arch_decisions" -ge "$plan_decisions" ]; then
+    echo "✅ Architecture 覆盖 plan decisions（$arch_decisions ≥ $plan_decisions）" >> "$REPORT"
   else
-    echo "- ⚠️ Plan has $plan_decisions decisions but Architecture only covers $arch_decisions" >> "$REPORT"
-    ((ISSUES++))
+    echo "- ⚠️ Plan 有 $plan_decisions 处 decisions，Architecture 仅覆盖 $arch_decisions" >> "$REPORT"
+    ISSUES=$((ISSUES + 1))
   fi
 fi
 echo "" >> "$REPORT"
 
-# 3. Architecture → Tasks: component decisions → implementation tasks
-echo "## 3. Architecture → Tasks" >> "$REPORT"
-arch_components=$(grep -c "component\|Component\|模块\|module" "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-"*.md 2>/dev/null || echo 0)
-echo "  Architecture defines $arch_components components (verify tasks cover them)" >> "$REPORT"
+# 3. Architecture 规模（信息项，**不做断言**）
+# ⚠️ 原实现在此假装检查「tasks 是否覆盖 components」——代码里没有比对，只有一句 echo 说
+#    "verify tasks cover them"，既无数也无论断。改为如实标注为信息项（2026-09-18）。
+echo "## 3. Architecture 规模（信息项，非断言）" >> "$REPORT"
+if compgen -G "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-*.md" > /dev/null 2>&1; then
+  arch_components=$(count_in "component\|Component\|模块\|module" "$KNOWLEDGE_DIR"/decisions/ARCHITECTURE-*.md)
+  echo "  ℹ️  Architecture 提及 $arch_components 处组件/模块（本脚本**不判断** tasks 是否覆盖——无可靠映射，需人工或 V8 语义复核）" >> "$REPORT"
+fi
 echo "" >> "$REPORT"
 
 # 4. Principle Compliance: do plan/architecture respect project principles?
 echo "## 4. Principle Compliance" >> "$REPORT"
-if [ -f "$KNOWLEDGE_DIR/../runtime/contracts/project-principles.schema.yaml" ] 2>/dev/null; then
-  principles=$(grep -c "principle\." "$KNOWLEDGE_DIR/../runtime/contracts/project-principles.schema.yaml" 2>/dev/null || echo 0)
-  echo "  Project has $principles active principles" >> "$REPORT"
+# ⚠️ 原路径是 `$KNOWLEDGE_DIR/../runtime/contracts/...` = **项目根目录**的 runtime/，
+#    真实项目里没有这个文件 → 本节**永不执行**（静默跳过）。这里应为**套件自身**的 runtime/（2026-09-18 修）。
+PRINCIPLES="$SUITE_ROOT/runtime/contracts/project-principles.schema.yaml"
+if [ -f "$PRINCIPLES" ]; then
+  principles=$(count_in "principle\." "$PRINCIPLES")
+  echo "  套件声明 $principles 条 principle" >> "$REPORT"
   # Check if PLAN mentions principles
-  plan_principles=$(grep -c "principle\|Principle\|原则" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null || echo 0)
-  [ "$plan_principles" -gt 0 ] && echo "  ✅ Plan references $plan_principles principles" >> "$REPORT" || echo "  ⚠️ Plan does not reference project principles" >> "$REPORT"
+  plan_principles=$(count_in "principle\|Principle\|原则" "$KNOWLEDGE_DIR"/proposals/PLAN-*.md)
+  if [ "$plan_principles" -gt 0 ]; then
+    echo "  ✅ Plan references $plan_principles principles" >> "$REPORT"
+  else
+    echo "  ⚠️ Plan does not reference project principles" >> "$REPORT"
+  fi
+else
+  echo "  ℹ️  未找到 $PRINCIPLES，跳过" >> "$REPORT"
 fi
 
 echo "" >> "$REPORT"
@@ -73,7 +118,7 @@ echo "## 5. ID Traceability（Decision-traceable）" >> "$REPORT"
 echo "" >> "$REPORT"
 
 # 5a. 提取 Requirement 定义（R-xxx: 列表项）与 Task 的 satisfies 引用（区分定义 vs 引用，避免空转）
-if [ -f "$KNOWLEDGE_DIR/proposals/PLAN-"*.md ] 2>/dev/null; then
+if compgen -G "$KNOWLEDGE_DIR/proposals/PLAN-*.md" > /dev/null 2>&1; then
   orphan_ids=0
   # 定义：R-xxx: 形式（Scope In 列表项）；引用：satisfies: R-xxx
   defined_reqs=$(grep -oE "R-[0-9]{3}:" "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null | grep -oE "R-[0-9]{3}" | sort -u || true)
@@ -128,7 +173,7 @@ fi
 
 echo "" >> "$REPORT"
 echo "## 6. Decision 语义（粗筛：① 是否误写成实现动作 ② 是否缺选择题语义）" >> "$REPORT"
-if [ -f "$KNOWLEDGE_DIR/proposals/PLAN-"*.md ] 2>/dev/null; then
+if compgen -G "$KNOWLEDGE_DIR/proposals/PLAN-*.md" > /dev/null 2>&1; then
   # 只取 # Decision 段（到下一个 # 标题为止），避免误扫 Task 表的 Decision Deps 列
   decision_lines=$(awk '/^# Decision/{f=1;next} /^# /{f=0} f' "$KNOWLEDGE_DIR/proposals/PLAN-"*.md 2>/dev/null || true)
 
@@ -161,7 +206,10 @@ echo "" >> "$REPORT"
 echo "## Summary" >> "$REPORT"
 echo "| Check | Status |" >> "$REPORT"
 echo "|-------|--------|" >> "$REPORT"
-echo "| Spec → Plan | $([ "$ISSUES" -eq 0 ] && echo '✅' || echo "⚠️ $ISSUES issues") |" >> "$REPORT"
+# ⚠️ 原先这一行标签是「Spec → Plan」，值却取**全局** ISSUES（含 §2/§4/§5/§6 的 issue），
+#    即标签与数值不是一回事。改为如实分列（2026-09-18）。
+echo "| 全部检查（合计） | $([ "$ISSUES" -eq 0 ] && echo '✅ 无 issue' || echo "⚠️ $ISSUES issue(s)") |" >> "$REPORT"
+echo "| 其中 §5 ID 孤立引用 | $([ "${orphan_ids:-0}" -eq 0 ] && echo '✅' || echo "⚠️ ${orphan_ids}") |" >> "$REPORT"
 
 echo "Report: $REPORT"
 [ "$ISSUES" -gt 0 ] && exit 1 || exit 0

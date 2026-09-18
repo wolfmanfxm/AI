@@ -35,6 +35,32 @@ sources:
 | `lifecycle` | 生命周期状态：`draft` / `confirmed` / `deprecated`（与 [../../../shared/templates/evidence-header.md](../../../shared/templates/evidence-header.md) 一致）| 是 |
 | `confidence` | 置信度，见下方分级 | 是 |
 | `sources` | 证据源文件列表 | 是 |
+| `constraint` | 一句可执行的硬约束。**仅 `rules/` 与 `decisions/` 下必需**——这些目录的 Producer 是人（见下「固定产出结构」注），但 Compiler 对其**硬校验**：缺 `constraint` 即 `exit 1`，不生成 `knowledge-index.json`，整条知识链中断 | rules/decisions 是，其余不需要 |
+| `statement` | 一句可被直接注入的 convention/pattern 摘要。**仅 `patterns/` `components/` `api/` 下必需** | patterns/components/api 是，其余不需要 |
+
+### `statement` —— patterns / components / api 必需
+
+Resolver hydrate 时**直接抽 `statement` 注入** `context-package.json`，Generator 因此不必读文件正文。
+缺了它**不报错**，Resolver 静默退化为「`# 标题` + `##` 节标题」拼接——仍能用，但注入精度下降。
+
+```yaml
+---
+id: patterns-table
+generatedBy: analyzer
+generatedAt: <ISO-8601-timestamp>
+last_scan: <ISO-8601-timestamp>
+lifecycle: confirmed
+confidence: 95
+statement: "列表页用 <统一表格> 包裹 + <schema表格> 声明式列配置渲染"
+sources:
+  - <source-file-path>
+---
+```
+
+> ⚠️ **这是 Producer 侧要求，Compiler 不硬校验**。实测真实项目合规率 **0/12**——若纳入编译器硬校验，
+> 会让所有真实项目编译失败。`required_frontmatter`（该写）与 `compiler_enforced`（该拦）的区别见
+> [shared/schemas/knowledge-directories.yaml](../../../shared/schemas/knowledge-directories.yaml)。
+> 另见 [knowledge-builder.md](knowledge-builder.md) 的 `.md frontmatter` 节。
 
 **confidence 分级**：
 
@@ -45,6 +71,10 @@ sources:
 | 50-69 | 人工标注 | 人工补充的经验 |
 
 ## 固定产出结构
+
+> ⚠️ **目录集合的单一权威是 [`shared/schemas/knowledge-directories.yaml`](../../../shared/schemas/knowledge-directories.yaml)**——
+> producer / consumer / ownership / 是否进 index / 必需 frontmatter 全在那里定义。本节的树是从它派生的视图，
+> **不得在此新增目录**（`check-io-connectivity.sh` 不变量 I2 会断言：本文件与 knowledge-builder 的写入目录必须已在契约中声明）。
 
 ```
 .project-knowledge/
@@ -60,8 +90,8 @@ sources:
 ├── api/                         # API
 ├── patterns/                    # 模式（UI + 编码 + 可复用模式）
 ├── observations/                # 观察数据
-├── proposals/                   # 候选规范
-├── reports/                     # 报告（含 changelog）
+├── proposals/                   # 任务规划产物（PLAN-*.md，project-planner 产出）
+├── reports/                     # 任务产物（REVIEW / TEST-REPORT / REFACTOR / CHANGELOG / RELEASE-CHECKLIST）
 │
 ├── rules/                       # 人工
 ├── experience/                  # 人工

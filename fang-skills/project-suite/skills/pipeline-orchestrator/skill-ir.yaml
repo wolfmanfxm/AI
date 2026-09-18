@@ -5,9 +5,9 @@ mode: Production
 description: "跨 Skill Pipeline 编排协议（Pipeline Protocol + Decision Boundary，非执行引擎）：读取 registry 建议 pipeline 路径，在决策边界处交给用户确认。 触发词：全流程、一键执行、自动编排、pipeline、完整链路、端到端、从分析到发布、自动化开发、full pipeline、orchestrate、end-to-end、auto sdlc、run all、complete workflow。"
 boundary: "编排跨 Skill pipeline 建议（供 Host 参考），不替代任何单个 Skill 的功能"
 produces: [PipelinePlan]
-consumes: [KnowledgeBase,Plan,Architecture,Code,Test,Review,Documentation,Release]
+consumes: []
 stages: [discovery, orchestrate, validation, delivery]
-verification: { checks: 0, source: prompts/verifier.md }
+verification: { checks: 4, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 0, source: prompts/execution.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }

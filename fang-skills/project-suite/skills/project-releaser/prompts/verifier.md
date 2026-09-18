@@ -4,12 +4,10 @@
 
 ## Checks
 
-| # | Check | Method | On Failure |
-|---|-------|--------|------------|
-| V1 | Semver 合规 | 版本号符合 conventional commits | 修正 |
-| V2 | Breaking Change | 每个 BREAKING 有迁移步骤 | 补全 |
-| V3 | 回滚方案 | CHECKLIST 含 git revert 命令 | 补全 |
-| V4 | Changelog 完整 | Added/Changed/Fixed/Deprecated/Removed | 补全遗漏 |
+> **检查项的唯一权威是 [validation.md](validation.md) 的 `## Checks` 表**——本文件不再重复维护一份。
+> （2026-09-18 收敛：此前两个文件各有一张高度重复的检查表，改一处必忘另一处。）
+>
+> 本文件的职责是定义**验证对象与判定规则**，不是定义检查项。
 
 ## 判定
 

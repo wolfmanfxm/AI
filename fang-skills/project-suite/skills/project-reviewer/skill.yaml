@@ -22,7 +22,7 @@ triggers_en: [code review, security review, audit code]
 context_contract:
   must_read: [context.json, PLAN.md, ARCHITECTURE.md]
   query: []
-  neednt_read: [observations/]
+  neednt_read: [.project-knowledge/observations/]
 
 interface:
   inputs:

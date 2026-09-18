@@ -157,6 +157,52 @@ else
 fi
 
 echo ""
+# ── 6. Verification Reachability：按 Host 的真实路径走一遍 ─────────
+# 与 check-conformance G19 的区别：G19 是「grep 提示词文件里有没有引用」；
+# 本步**按 Host 实际使用的 `interface.stages` 逐阶段加载 prompt**，断言验证子流程
+# 确实落在这条路径上。前者证明「有引用」，后者证明「沿声明路径走能得到它」。
+#
+# ⚠️ 这仍是 **wiring 级**，不是行为级：它证明不了「verifier 真的拦住了坏产出」。
+#    行为级证据属 eval 仓（见 docs/eval-contract.md），见 benchmark/pressure-tests/verification-reachability.yaml。
+echo "【6】Verification Reachability：沿 interface.stages 走一遍"
+echo "----------------------------------------"
+node -e '
+  const fs = require("fs"), path = require("path");
+  const root = process.argv[1];
+  const errs = [];
+  let checked = 0;
+  for (const name of fs.readdirSync(root).filter(d => fs.statSync(path.join(root,d)).isDirectory())) {
+    const dir = path.join(root, name);
+    const y = path.join(dir, "skill.yaml");
+    if (!fs.existsSync(y)) continue;
+    const yml = fs.readFileSync(y, "utf8");
+    const mode = (yml.match(/verification:\s*\{\s*mode:\s*([a-z-]+)/) || [])[1] || "";
+    if (!["direct-verify","candidate-verify-accept","none"].includes(mode))
+      { errs.push(`${name}: verification.mode 非法或缺失 ("${mode}")`); continue; }
+    if (mode === "none") continue;
+
+    // 沿 Host 的路径：interface.stages → prompts/<stage>.md
+    const stages = ((yml.match(/stages:\s*\[([^\]]*)\]/) || [])[1] || "")
+      .split(",").map(s => s.trim()).filter(Boolean);
+    const loaded = stages.map(s => path.join(dir, "prompts", s + ".md")).filter(fs.existsSync);
+    const refsVerifier = f => /\]\([^)]*verifier\.md\)/.test(fs.readFileSync(f, "utf8"));
+
+    const vfile = path.join(dir, "prompts", "verifier.md");
+    if (!fs.existsSync(vfile)) { errs.push(`${name} (${mode}): 缺 prompts/verifier.md`); continue; }
+
+    const ok = mode === "direct-verify"
+      ? loaded.some(f => f.endsWith("validation.md") && refsVerifier(f))
+      : loaded.some(f => f.endsWith("execution.md") && refsVerifier(f));
+    if (!ok) errs.push(`${name} (${mode}): 沿 stages 走一遍，没有任何阶段 prompt 引用 verifier.md`);
+    checked++;
+  }
+  if (errs.length) { console.error(errs.join("\n")); process.exit(1); }
+  console.log(`沿 interface.stages 走查通过：${checked} 个需验证的 skill，验证子流程均可达`);
+' "$SUITE_ROOT/skills" \
+  && pass "Verification Reachability：沿 interface.stages 走查，验证子流程均可达" \
+  || fail "Verification Reachability：有 skill 的验证子流程在声明路径上不可达（见上）"
+
+echo ""
 echo "========================================"
 echo " Summary: Pass=$PASS  Fail=$FAIL"
 echo "========================================"

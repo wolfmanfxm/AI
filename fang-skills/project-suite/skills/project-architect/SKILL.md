@@ -6,6 +6,7 @@ description: >
   触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、
   怎么设计、选什么技术、模块怎么划分、接口怎么定义、design architecture、tech stack、
   system design、API design。
+  不用于：普通任务拆解、直接实现代码。
 ---
 
 # Architect
@@ -63,8 +64,7 @@ description: >
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @template: code-audit |
 | Graph Analysis | [prompts/graph-analysis.md](prompts/graph-analysis.md) | @template: graph-analysis |
-| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Execution | [prompts/execution.md](prompts/execution.md) + [prompts/verifier.md](prompts/verifier.md) | @template: execution |
 | Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 

@@ -34,8 +34,9 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
 rsync 命令：
 ```bash
 rsync -av --include='*/' --include='*.md' --include='*.json' --include='*.yaml' \
-  --exclude='proposals/' --exclude='reports/REVIEW-*' --exclude='reports/CHANGELOG-*' \
+  --exclude='proposals/' --exclude='reports/REVIEW-*' --exclude='reports/CHANGELOG.md' \
   --exclude='reports/TEST-REPORT.md' --exclude='reports/REFACTOR.md' \
+  --exclude='reports/RELEASE-CHECKLIST.md' \
   --exclude='decisions/ARCHITECTURE-*' --exclude='candidates/' \
   .project-knowledge/ "{vaultPath}/Projects/{project}/"
 ```
@@ -67,7 +68,8 @@ Promotion 条件（Reviewer 判断）：
 |------|------|
 | proposals/PLAN-*.md | 一次性任务规划 |
 | reports/REVIEW-*.md | 一次性代码审查 |
-| reports/CHANGELOG-*.md | 一次性变更日志 |
+| reports/CHANGELOG.md | 变更日志（发布产物，随仓库走） |
+| reports/RELEASE-CHECKLIST.md | 发布检查清单（单次发布） |
 | reports/TEST-REPORT.md | 一次性测试报告 |
 | reports/REFACTOR.md | 一次性重构记录 |
 | decisions/ARCHITECTURE-<feature>.md | 单功能架构决策 |

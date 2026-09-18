@@ -11,6 +11,8 @@
 | V3 | 模式一致性 | 代码风格与 patterns 知识（Context Resolver 注入） 一致 | 修正为符合模式 |
 | V4 | TS 类型完整 | 无 `any` 滥用（除非上游是 `any`） | 从 types/ 导入或定义接口 |
 | V5 | 全状态覆盖 | loading/empty/error 状态都有处理 | 补全缺失状态 |
+| V6 | 非重复 | graph.json 中无同名节点 | 标记 `[DUPLICATE]` |
+| V7 | Domain 命名一致 | 代码中的类名/变量名与 vocabulary.yaml 的 confirmed 术语一致；**页面/API 命名须匹配 `artifacts` 的 `naming` 前缀**（如「订单退款记录」→ `orderRefundRecord`，而非泛化的 RefundRecord）。先查 artifact 是否已存在，不存在再查 entity×action 组合是否合法 | ⚠️ 命名与 domain 术语不一致 → 修正命名 |
 
 ## QA Agent
 

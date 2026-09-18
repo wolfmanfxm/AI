@@ -2,12 +2,12 @@
 id: project-architect
 version: "1.3.0"
 mode: Production
-description: "架构决策、技术选型、模块设计、API 契约设计：使用对比矩阵做技术选型，输出 ADR 架构决策记录。 触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、 怎么设计、选什么技术、模块怎么划分、接口怎么定义、design architecture、tech stack、 system design、API design。"
+description: "架构决策、技术选型、模块设计、API 契约设计：使用对比矩阵做技术选型，输出 ADR 架构决策记录。 触发词：架构设计、技术选型、模块设计、系统设计、数据库设计、API 设计、架构评审、 怎么设计、选什么技术、模块怎么划分、接口怎么定义、design architecture、tech stack、 system design、API design。 不用于：普通任务拆解、直接实现代码。"
 boundary: "只做设计不写代码，发现不符记录在 ARCHITECTURE.md 不直接修改"
 produces: [Architecture]
 consumes: [KnowledgeBase,Plan,Context,Graph]
 stages: [discovery, code-audit, graph-analysis, execution, validation, delivery]
-verification: { checks: 13, source: prompts/verifier.md }
+verification: { checks: 11, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 4, source: prompts/execution.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }

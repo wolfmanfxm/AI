@@ -6,7 +6,7 @@
 |-------------|-----------|
 | 版本号 bump 建议、changelog 合成 | 执行 `npm publish` / `git push --tags` |
 | 发布前检查清单、回滚方案 | 直接操作远程仓库 |
-| 输出 CHANGELOG.md + RELEASE-CHECKLIST.md | 修改业务代码 |
+| 输出 `.project-knowledge/reports/` 下的 CHANGELOG.md + RELEASE-CHECKLIST.md | 修改业务代码 |
 
 ## 反例黑名单
 

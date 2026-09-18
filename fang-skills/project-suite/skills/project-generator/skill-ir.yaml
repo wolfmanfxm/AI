@@ -2,12 +2,12 @@
 id: project-generator
 version: "1.3.0"
 mode: Production
-description: "根据需求和项目规范生成生产级代码：组件、页面、API 模块、工具函数、类型定义（技术栈由 context + project-knowledge 决定，不预设框架）。 触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、修改、调整、修复、 删除、改、搭建、implement、create component、build feature、generate code、write a、modify、 fix、delete、change、update、build、开发、编写、添加。"
+description: "根据需求和项目规范生成生产级代码：组件、页面、API 模块、工具函数、类型定义（技术栈由 context + project-knowledge 决定，不预设框架）。 触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、修改、调整、修复、 删除、改、搭建、implement、create component、build feature、generate code、write a、modify、 fix、delete、change、update、build、编写、添加。 不用于：任务拆解、架构选型、代码审查、纯重构。"
 boundary: "只写代码不做设计，缺少上游产物时提示先执行 planner/architect"
 produces: [Code]
 consumes: [KnowledgeBase,Plan,Architecture,Context,Graph,Recommendation]
 stages: [discovery, execution, validation]
-verification: { checks: 12, source: prompts/verifier.md }
+verification: { checks: 7, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
 exit_criteria: { conditions: 23, source: prompts/execution.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }

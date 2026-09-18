@@ -140,8 +140,8 @@ input:
   fixture: [git log, state.json]
 expected:
   files:
-    - CHANGELOG.md                 # Added/Changed/Fixed/Deprecated/Removed 分类
-    - RELEASE-CHECKLIST.md         # 含回滚方案
+    - .project-knowledge/reports/CHANGELOG.md           # Added/Changed/Fixed/Deprecated/Removed 分类
+    - .project-knowledge/reports/RELEASE-CHECKLIST.md   # 含回滚方案
   semver_compliant: true           # 版本号符合 conventional commits
   breaking_change_migration: true  # 每个 BREAKING 有迁移步骤
   full_chain_confidence: "≥70"     # 全链路检查

@@ -71,13 +71,24 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     green "  G3 PASS: ${total_anti} anti-patterns (boundary:${anti_count} + SKILL:${skill_anti}) ≥3"
   else
     # Check for waiver
-    if grep -q "waivers:" "$skill_dir/skill.yaml" 2>/dev/null && grep -q "G3" "$skill_dir/skill.yaml" 2>/dev/null; then
+    # ⚠️ 原判定 `grep -q "waivers:" && grep -q "G3"` 近乎恒真：每个 skill.yaml 都有 `waivers:` 键
+    #    （哪怕是空列表 `waivers: []`），且文件里**任何位置**出现 "G3"（注释、TODO、别处说明）都算数。
+    #    实测：`# TODO(G3): anti-patterns pending` + `waivers: []` → 直接输出
+    #    「✅ G3 WAIVED: 0 anti-patterns, waiver active (no expiry)」（2026-09-18 修）。
+    #    现在必须有 **G3 的豁免条目**（`gate: G3`）才认。
+    if grep -q "gate: G3" "$skill_dir/skill.yaml" 2>/dev/null; then
       # Extract expires date from inline waiver: { gate: G3, reason: "...", expires: "YYYY-MM-DD", ... }
       expires=$(grep "gate: G3" "$skill_dir/skill.yaml" 2>/dev/null | grep -o 'expires: "[^"]*"' | grep -o '"[^"]*"' | tr -d '"' || echo "")
       if [ -n "$expires" ]; then
-        expires_epoch=$(date -j -f "%Y-%m-%d" "$expires" +%s 2>/dev/null || true)
+        # 原实现只有 BSD 的 `date -j`（darwin 专有）。非 darwin 上解析必失败 → 空值在
+        # `[ "$now" -lt "$expires_epoch" ]` 里被当 0 → **有效豁免一律被报成「已过期」**。
+        # 这里补 GNU `date -d` 回退，并把「解析不出来」明确判为无法确认（不计作有效豁免）。
+        expires_epoch=$(date -j -f "%Y-%m-%d" "$expires" +%s 2>/dev/null || date -d "$expires" +%s 2>/dev/null || true)
         now_epoch=$(date +%s)
-        if [ "$now_epoch" -lt "$expires_epoch" ]; then
+        if [ -z "$expires_epoch" ]; then
+          yellow "  G3 WAIVER 无法判定：expires='$expires' 解析失败——按未获豁免处理，only ${total_anti} anti-patterns"
+          WARNINGS=$((WARNINGS+1))
+        elif [ "$now_epoch" -lt "$expires_epoch" ]; then
           green "  G3 WAIVED: only ${total_anti} anti-patterns, waiver active until $expires"
         else
           yellow "  G3 WAIVER EXPIRED: expired $expires, only ${total_anti} anti-patterns"
@@ -112,10 +123,15 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # G5: 职责边界表 with ✅/❌
-  if grep -q "✅" "$skill_dir/references/boundary.md"; then
-    green "  G5 PASS: boundary table found"
+  # ⚠️ 原实现只 `grep -q "✅"`——注释写的是「职责边界表 with ✅/❌」，实际不查 ❌、不查是否表格、
+  #    也不查表头。任何含一个 ✅ 字符的文档都算通过（2026-09-18 修）。
+  if [ -f "$skill_dir/references/boundary.md" ] \
+     && grep -q "✅" "$skill_dir/references/boundary.md" \
+     && grep -q "❌" "$skill_dir/references/boundary.md" \
+     && grep -qE '^\|[-: ]+\|' "$skill_dir/references/boundary.md"; then
+    green "  G5 PASS: boundary table found（含 ✅/❌ 两列 + 表格分隔行）"
   else
-    yellow "  G5 WARN: no ✅/❌ boundary table in boundary.md"
+    yellow "  G5 WARN: no ✅/❌ boundary table in boundary.md（需同时含 ✅、❌ 与表格分隔行）"
     WARNINGS=$((WARNINGS+1))
   fi
 
@@ -161,7 +177,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # G11: prompts/ 至少 1 个文件
-  prompt_count=$(find "$skill_dir/prompts" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+  # ⚠️ `|| true` 不可省：`set -euo pipefail` 下，目录不存在时 find 返回非 0 → 整条管道失败
+  #    → 脚本**静默中止**，后续所有门禁与 Summary 都不执行，而退出码 1 与「查出 warnings」不可区分。
+  #    实测（2026-09-18）：删掉某个 skill.yaml 的 stages 行即可复现同样的中途死亡。
+  prompt_count=$(find "$skill_dir/prompts" -name "*.md" 2>/dev/null | wc -l | tr -d ' ' || true); prompt_count=${prompt_count:-0}
   if [ "$prompt_count" -ge 1 ]; then
     green "  G11 PASS: prompts/ has ${prompt_count} file(s)"
   else
@@ -170,7 +189,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # G12: references/ 至少 2 个文件
-  ref_count=$(find "$skill_dir/references" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+  ref_count=$(find "$skill_dir/references" -name "*.md" 2>/dev/null | wc -l | tr -d ' ' || true); ref_count=${ref_count:-0}
   if [ "$ref_count" -ge 2 ]; then
     green "  G12 PASS: references/ has ${ref_count} file(s)"
   else
@@ -179,7 +198,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # G13: Stage prompts exist for each declared stage
-  stages=$(grep "stages:" "$skill_dir/skill.yaml" 2>/dev/null | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' | tr -d ' ' | sed 's/^ *//')
+  stages=$(grep "stages:" "$skill_dir/skill.yaml" 2>/dev/null | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' | tr -d ' ' | sed 's/^ *//' || true)
   stage_count=0
   missing_stages=()
   for stage in $stages; do
@@ -189,7 +208,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       missing_stages+=("$stage")
     fi
   done
-  if [ ${#missing_stages[@]} -eq 0 ]; then
+  # ⚠️ 空集保护（2026-09-18）：stages 解析不到时，下面循环 0 次 → missing_stages 为空 →
+  #    原实现会打印「✅ G13 PASS: 0/0 stage prompts exist」——**永真的空集判定**。
+  #    「没有 stages 可查」与「所有 stages 都齐」必须区分。
+  if [ -z "$stages" ]; then
+    yellow "  G13 WARN: 读不到 stages 声明（skill.yaml 缺 stages 或格式不符）——**无法判定**，不是「全部存在」"
+    WARNINGS=$((WARNINGS+1))
+  elif [ ${#missing_stages[@]} -eq 0 ]; then
     green "  G13 PASS: ${stage_count}/${stage_count} stage prompts exist"
   else
     yellow "  G13 WARN: missing prompts: ${missing_stages[*]}"
@@ -204,8 +229,14 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       template_count=$((template_count + pc))
     fi
   done
-  if [ "$template_count" -ge "$stage_count" ]; then
-    green "  G14 PASS: ${template_count} @template declarations in prompts"
+  # ⚠️ 同上：stage_count=0 时 `template_count >= 0` 恒真 → 永真 PASS。另注：本门禁比的是
+  #    **prompts/ 全目录的 @template 总数** vs 阶段数（弱代理），不是「每个 stage prompt 各有 @template」——
+  #    文案已如实写「in prompts」，但不要据此认为逐阶段都覆盖了。
+  if [ "$stage_count" -eq 0 ]; then
+    yellow "  G14 WARN: 无已声明的 stage（见 G13）——**无法判定**，不是「全部覆盖」"
+    WARNINGS=$((WARNINGS+1))
+  elif [ "$template_count" -ge "$stage_count" ]; then
+    green "  G14 PASS: ${template_count} @template declarations in prompts（全目录总数 ≥ ${stage_count} 个阶段；非逐阶段核对）"
   else
     yellow "  G14 WARN: only ${template_count}/${stage_count} stages have @template"
     WARNINGS=$((WARNINGS+1))
@@ -226,6 +257,53 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     yellow "  G16 WARN: not in skill-atlas.md"
     WARNINGS=$((WARNINGS+1))
   fi
+
+  # G19: Verification Reachability —— 验证子流程在 Host 的真实执行路径上可达
+  #      契约见 workflow-protocol/SKILL.md 的「Verification Contract」。
+  #      补于 2026-09-18：此前 8 个 skill 的 prompts/verifier.md 运行时**永不被加载**
+  #      （SKILL.md 写了 Verify 阶段行，但 stages 里没有 verify、stage-templates 也没有 verify.md）。
+  #
+  #      ⚠️ 本门禁是 **grep 级**：只认 markdown 链接形态 `[verifier.md](verifier.md)`——
+  #         裸提及（说明文字里的 `verifier.md`）不算，否则一句散文就能骗过它（实测过）。
+  #         即便收紧，它仍只能证明「有引用」，不能证明「真跑了验证」。
+  #         真正证明可达的是 E2E 的行为 fixture（check-e2e-smoke.sh），本门禁不替代它。
+  vmode=$(grep -oE 'verification: *\{ *mode: *[a-z-]+' "$skill_dir/skill.yaml" 2>/dev/null | grep -oE '[a-z-]+$' || true)
+  vfile="$skill_dir/prompts/verifier.md"
+  case "$vmode" in
+    direct-verify)
+      if [ ! -f "$vfile" ]; then
+        yellow "  G19 WARN: mode=direct-verify 但缺 prompts/verifier.md"
+        WARNINGS=$((WARNINGS+1))
+      elif ! grep -q "\]\([^)]*verifier\.md\)" "$skill_dir/prompts/validation.md" 2>/dev/null; then
+        yellow "  G19 WARN: mode=direct-verify 但 validation.md 未加载 verifier.md（运行时不可达）"
+        WARNINGS=$((WARNINGS+1))
+      else
+        green "  G19 PASS: direct-verify → validation.md 加载 verifier.md"
+      fi
+      ;;
+    candidate-verify-accept)
+      if [ ! -f "$vfile" ]; then
+        yellow "  G19 WARN: mode=candidate-verify-accept 但缺 prompts/verifier.md"
+        WARNINGS=$((WARNINGS+1))
+      elif ! grep -q "\]\([^)]*verifier\.md\)" "$skill_dir/prompts/execution.md" 2>/dev/null; then
+        yellow "  G19 WARN: mode=candidate-verify-accept 但 execution.md 未加载 verifier.md（运行时不可达）"
+        WARNINGS=$((WARNINGS+1))
+      else
+        green "  G19 PASS: candidate-verify-accept → execution.md 加载 verifier.md"
+      fi
+      ;;
+    none)
+      green "  G19 PASS: mode=none（不要求 verifier.md）"
+      ;;
+    "")
+      yellow "  G19 WARN: skill.yaml 未声明 verification.mode（取值只能 direct-verify / candidate-verify-accept / none）"
+      WARNINGS=$((WARNINGS+1))
+      ;;
+    *)
+      yellow "  G19 WARN: 未知 verification.mode='$vmode'（取值只能 direct-verify / candidate-verify-accept / none）"
+      WARNINGS=$((WARNINGS+1))
+      ;;
+  esac
 
   echo ""
 done
@@ -280,7 +358,7 @@ if [ -f "$scheduler_file" ]; then
   fi
 
   # G18b: priority 唯一
-  priority_dupes=$(grep -oE "priority: [0-9]+" "$scheduler_file" | grep -oE "[0-9]+" | sort | uniq -d)
+  priority_dupes=$(grep -oE "priority: [0-9]+" "$scheduler_file" 2>/dev/null | grep -oE "[0-9]+" | sort | uniq -d || true)
   if [ -z "$priority_dupes" ]; then
     green "  G18b PASS: priority values unique"
   else
@@ -289,7 +367,7 @@ if [ -f "$scheduler_file" ]; then
   fi
 
   # G18c: decision_order 唯一
-  order_dupes=$(grep -oE "decision_order: [0-9]+" "$scheduler_file" | grep -oE "[0-9]+" | sort | uniq -d)
+  order_dupes=$(grep -oE "decision_order: [0-9]+" "$scheduler_file" 2>/dev/null | grep -oE "[0-9]+" | sort | uniq -d || true)
   if [ -z "$order_dupes" ]; then
     green "  G18c PASS: decision_order values unique"
   else
@@ -299,6 +377,51 @@ if [ -f "$scheduler_file" ]; then
 else
   red "  G18 FAIL: scheduler.yaml missing"
   ERRORS=$((ERRORS+1))
+fi
+
+echo ""
+
+# ── G20: Prompt Reachability（SUITE_SPEC §0.1 的机器强制）──────────────
+# 原则：「任何声明存在的行为，都必须能沿 Host 的真实执行路径找到入口」。
+# 本门禁是它的**通用形式**——G19 只查 verifier 这一个特例，G20 查**全部** prompts/*.md：
+# 每个提示词必须能沿「SKILL.md / 默认 Prompt(main.md) / stage prompts」的引用链传递可达。
+# 只被静态工具提到、或完全没人引用的提示词 = 写了但永远不会被加载。
+#
+# ⚠️ 入口集合依据 SUITE_SPEC.md §1 的目录契约：`main.md` 是「默认 Prompt」。
+echo "========================================"
+echo " G20 Prompt Reachability（提示词可达性）"
+echo "========================================"
+if node -e '
+  const fs=require("fs"),path=require("path");
+  const root=path.resolve(process.argv[1]);
+  let any=false;
+  for(const name of fs.readdirSync(root)){
+    const dir=path.join(root,name);
+    if(!fs.statSync(dir).isDirectory()) continue;
+    const ymlP=path.join(dir,"skill.yaml");
+    if(!fs.existsSync(ymlP)) continue;
+    const yml=fs.readFileSync(ymlP,"utf8");
+    const stages=((yml.match(/stages:\s*\[([^\]]*)\]/)||[])[1]||"").split(",").map(s=>s.trim()).filter(Boolean);
+    const pdir=path.join(dir,"prompts");
+    if(!fs.existsSync(pdir)) continue;
+    const all=fs.readdirSync(pdir).filter(f=>f.endsWith(".md"));
+    // 入口：SKILL.md + 默认 Prompt main.md + 各 stage prompt
+    const seeds=[path.join(dir,"SKILL.md"),path.join(pdir,"main.md"),
+                 ...stages.map(s=>path.join(pdir,s+".md"))].filter(f=>fs.existsSync(f)).map(f=>path.resolve(f));
+    const seen=new Set(), stack=[...seeds];
+    const links=f=>{ try{ return [...fs.readFileSync(f,"utf8").matchAll(/\]\(([^)#]+\.md)\)/g)]
+                       .map(m=>path.resolve(path.dirname(f),m[1])); }catch{return[]} };
+    while(stack.length){ const f=stack.pop(); if(seen.has(f)) continue; seen.add(f);
+      for(const l of links(f)) if(!seen.has(l)) stack.push(l); }
+    const orphans=all.map(f=>path.resolve(pdir,f)).filter(f=>!seen.has(f));
+    if(orphans.length){ any=true; console.log("  " + name + ": " + orphans.map(o=>path.basename(o)).join(", ")); }
+  }
+  process.exit(any?1:0);
+' "$SKILLS_DIR" 2>&1; then
+  green "  G20 PASS: 所有 prompts/*.md 均可沿引用链传递可达"
+else
+  yellow "  G20 WARN: 存在不可达的提示词（写了但永远不会被加载，见上）"
+  WARNINGS=$((WARNINGS+1))
 fi
 
 echo ""

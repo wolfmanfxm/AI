@@ -6,7 +6,7 @@
 
 0. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：查询已有 decisions/risks → 检查是否有未 resolve 的决策影响发布
 1. 读 `git log` → 解析 conventional commits（feat/fix/refactor/docs/breaking change）
-2. 读 `CHANGELOG.md`（若存在）→ 确定追加或新建
+2. 读 `.project-knowledge/reports/CHANGELOG.md`（若存在）→ 确定追加或新建
 3. 读 `REVIEW.md`（若存在）→ 确认审查状态
 4. CHECKPOINT — 展示 commit 解析结果 + 现有 CHANGELOG + 审查状态
 

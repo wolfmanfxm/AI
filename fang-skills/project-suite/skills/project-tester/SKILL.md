@@ -10,7 +10,7 @@ description: >
 # Tester
 
 > 代码 + Acceptance Criteria → 测试策略 → 生成 → 执行 → 报告
-> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -33,8 +33,7 @@ description: >
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) + [prompts/verifier.md](prompts/verifier.md) | @template: validation |
 
 ## 职责边界
 

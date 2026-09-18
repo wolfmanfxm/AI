@@ -10,6 +10,7 @@
 # Usage: bash shared/scripts/check-consistency.sh
 #
 # 覆盖层：
+#   L0  YAML 可解析                  标准 parser 前置门禁（文本/regex 校验抓不到语法错误）
 #   L1  skill.yaml ↔ skill-ir        字段一致性（id/version/produces/consumes/stages）
 #   L2  skill.yaml ↔ registry        漂移检测（复用 generate-registry.mjs --check）
 #   L3  skill.yaml ↔ compatibility   版本号 + skill 集合一致性
@@ -32,6 +33,25 @@ echo " Consistency Check（声明链一致性）"
 echo "========================================"
 echo ""
 
+# ── L0: YAML 可解析（前置） ────────────────────────────────
+echo "【L0】YAML 可解析（标准 parser）"
+echo "----------------------------------------"
+# ⚠️ 不要只吞退出码：check-yaml.sh 在**宿主无 YAML parser 时主动 `exit 0`** 并打印
+#    「这是跳过，不是通过——门禁未生效」。父脚本 `>/dev/null 2>&1` 把该提示吞掉、只看 exit code
+#    → 一个文件都没解析也打印「✅ 所有 .yaml 可被标准 parser 解析」（2026-09-18 修）。
+YAML_OUT="$(bash "$SUITE_ROOT/shared/scripts/check-yaml.sh" 2>&1)"; YAML_RC=$?
+if [ "$YAML_RC" -ne 0 ]; then
+  red "  ❌ 有 .yaml 无法解析（运行 bash shared/scripts/check-yaml.sh 看清单）"
+  FAIL=$((FAIL+1))
+elif printf '%s' "$YAML_OUT" | grep -q "门禁未生效"; then
+  yellow "  ⚠️ L0 跳过：宿主无 YAML 解析器，**没有一个文件被解析**——不是「全部可解析」"
+  WARN=$((WARN+1))
+else
+  green "  ✅ 所有 .yaml 可被标准 parser 解析"
+  PASS=$((PASS+1))
+fi
+
+echo ""
 # ── L1: skill.yaml ↔ skill-ir ──────────────────────────────
 echo "【L1】skill.yaml ↔ skill-ir 字段一致性"
 echo "----------------------------------------"
@@ -73,6 +93,23 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   sb=$(grab_stages "$si" "top")
   [ "$sa" != "$sb" ] && mismatches="$mismatches stages($sa≠$sb)"
 
+  # SKILL.md 的 name: 必须 == 目录名（== skill.yaml id:）
+  # 补于 2026-09-18 变异测试：把 name 改成 `project-relaser-TYPO`，一致性/合规/连通/漂移**四个检查全绿放行**。
+  # 而 name 正是 Host 注册 skill 用的标识——改名会让它以错误身份被路由，其余声明却完全自洽。
+  md_name=$(grep -m1 "^name:" "$skill_dir/SKILL.md" 2>/dev/null | sed 's/^name: *//' || true)
+  [ "$md_name" != "$skill" ] && mismatches="$mismatches SKILL.md.name($md_name≠$skill)"
+
+  # SKILL.md 工作流表行集合 == skill.yaml interface.stages
+  # 补于 2026-09-18：此前 8 个 SKILL.md 的表里有 `Verify` 行，而 10/10 的 stages 都不含 verify、
+  # stage-templates/ 也没有 verify.md —— Host 按 `for each stage in interface.stages` 推进时，
+  # 这些 verifier.md **运行时永不被加载**。这条断言把「表行 ≠ stages」永久挡住。
+  md_stages=$(grep -oE '^\| [A-Z][A-Za-z -]* \| \[prompts/' "$skill_dir/SKILL.md" 2>/dev/null \
+              | sed 's/^| *//;s/ *|.*//' | tr 'A-Z' 'a-z' | tr ' ' '-' | sort -u | tr '\n' ' ' || true)
+  yaml_stages=$(grep "stages:" "$sy" 2>/dev/null | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' \
+                | tr -d ' ' | grep -v '^$' | sort -u | tr '\n' ' ' || true)
+  [ "$md_stages" != "$yaml_stages" ] && \
+    mismatches="$mismatches SKILL.md表行≠stages（表:[${md_stages:-空}] stages:[${yaml_stages:-空}]）"
+
   if [ -n "$mismatches" ]; then
     red "  ❌ $skill: skill-ir 与 skill.yaml 不一致 —$mismatches"
     FAIL=$((FAIL+1))
@@ -81,6 +118,19 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     PASS=$((PASS+1))
   fi
 done
+
+# L1 补：整文件新鲜度。上面的字段比对只覆盖 id/version/produces/consumes/stages——
+# verification.checks / exit_criteria / failure_conditions / description / boundary 漂移查不到。
+# 实证（2026-09-17）：analyzer 的 verifier.md 加了 Verify 6，skill-ir 仍写着旧的 checks: 9，
+# 全仓绿灯放行了很久，直到手工重跑生成器才发现。故此处做整文件逐字节比对。
+if bash "$SCRIPT_DIR/generate-skill-ir.sh" --check >/dev/null 2>&1; then
+  green "  ✅ skill-ir 全字段新鲜（含 verification / exit_criteria / description）"
+  PASS=$((PASS+1))
+else
+  red "  ❌ skill-ir 存在字段漂移（上面逐字段比对覆盖不到的那些）"
+  red "     → 运行 bash shared/scripts/generate-skill-ir.sh"
+  FAIL=$((FAIL+1))
+fi
 
 echo ""
 # ── L2: skill.yaml ↔ registry ──────────────────────────────

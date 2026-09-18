@@ -4,15 +4,10 @@
 
 ## Checks
 
-| # | Check | Method | On Failure |
-|---|-------|--------|------------|
-| V1 | file:line 有效 | 每个 finding 的路径+行号对应文件存在 | 修正引用 |
-| V2 | 分级合理 | BLOCKER 有明确阻断理由 | 调整分级 |
-| V3 | 五轴覆盖 | 每轴至少 1 条记录 | 补全未覆盖轴 |
-| V4 | AC 对照 | AC 表逐条 ✅/❌/⚠️ | 补全遗漏 |
-| V5 | 修复可操作 | 每个 finding 的修复建议具体可执行 | 标注 `[VAGUE]` |
-| V6 | Domain Terminology Drift | 代码中同一概念是否用了多个词（Customer/CustomerInfo/Client 混用），对照 vocabulary.yaml；**页面/API 命名是否偏离 artifacts 的 naming 前缀**（「退款记录」用了泛化 RefundRecord 而非 vocabulary 的 orderRefundRecord） | 报 `Domain Terminology Drift`，标注统一术语 |
-| V7 | Placement Correctness | **Plan 的 target 决议（module/domain/placement）与实际修改/新建路径是否一致**——Planner 判断正确但 Generator 未遵循时，最终落错目录（如 Plan target 是 `<目标模块>` 但代码落在 `<错误模块>`）。对照 PLAN.md 每个 Task 的「放置决议」字段 vs 实际 diff 文件路径 | 报 `Placement Mismatch`，标注 Plan target vs 实际路径，阻断（视为 BLOCKER，因为落错目录难回退） |
+> **检查项的唯一权威是 [validation.md](validation.md) 的 `## Checks` 表**——本文件不再重复维护一份。
+> （2026-09-18 收敛：此前两个文件各有一张高度重复的检查表，改一处必忘另一处。）
+>
+> 本文件的职责是定义**验证对象与判定规则**，不是定义检查项。
 
 ## 判定
 

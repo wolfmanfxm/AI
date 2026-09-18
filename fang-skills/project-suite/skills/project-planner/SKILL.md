@@ -5,6 +5,7 @@ description: >
   Project Planning Engine — 把模糊需求收敛成整个 Suite 都能消费的执行契约（不是 Task Planner）。
   触发词：任务拆解、开发计划、需求分析、排期、估算工作量、分解任务、sprint 规划、
   break down tasks、plan sprint、estimate effort、create dev plan、任务规划。
+  不用于：直接写代码、架构选型。
 ---
 
 # Project Planning Engine
@@ -31,15 +32,13 @@ description: >
 
 | Stage | Prompt | 模板 |
 |-------|--------|------|
-| Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
-| Interview | [prompts/interview.md](prompts/interview.md) | 需求模糊时启用 |
+| Discovery | [prompts/discovery.md](prompts/discovery.md)（需求模糊时启用 [prompts/interview.md](prompts/interview.md)） | @template: discovery |
 | Code Audit | [prompts/code-audit.md](prompts/code-audit.md) | @template: code-audit |
-| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Execution | [prompts/execution.md](prompts/execution.md) + [prompts/verifier.md](prompts/verifier.md) | @template: execution |
 | Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
-> 9-Step Pipeline（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→AC）与深度（standard=Goal/Scope/Reuse/Tasks/AC，full=9 模块+Interview+Verify）详见 [task-breakdown.md](prompts/task-breakdown.md)。
+> 9-Step Pipeline（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→AC）与深度（standard=Goal/Scope/Reuse/Tasks/AC，full=9 模块 + Interview + Execution 内 Verify 子流程）详见 [task-breakdown.md](prompts/task-breakdown.md)。
 
 ## 职责边界
 

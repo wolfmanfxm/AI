@@ -117,12 +117,14 @@ pass_fail: pass | fail | decorate | untested
 | convergence 统一协议 | 声明（Decision Protocol） | 🟡 Specified（Host 解读，非强制） | round6 M1b：产出 sufficient→handoff；「handoff 真交接」靠 Host 解读，非 Suite 强制 |
 | knowledge-list → context-package | 声明 | ✅ 生效 | 静态收口 + benchmark 复验 |
 | Reuse Check primitive | 额外动作 | ✅ 生效 | round5：结构化 REUSE/EXTEND/CREATE 裁决 |
-| 跨 Skill 路由准确（措辞 → 正确 skill） | 声明 | ⚠️ 未验证（仅静态） | trigger-eval 新增「子串包含 / CN↔EN 交叉」检查，实测 3 组包含 + 1 组交叉；行为未跑，场景见 `benchmark/pressure-tests/cross-skill-routing.yaml` |
+| 跨 Skill 路由准确（措辞 → 正确 skill） | 声明 | 🟡 部分验证（suite-only） | round11：R1–R7 实测 top1 命中 **5/6**（可路由项）；另发现 2 处缺陷（R6 orchestrator 未装载→无匹配；R7 changelog 误落 documenter）。**无 native 臂，RED 仍未判** |
 
-> ⚠️ **2026-09-17 追加（未跑 baseline，不改变上表结论）**：verifier V2 追加证据要求 ——
+> ⚠️ **2026-09-17 追加（已跑 suite 侧，RED 仍未判）**：verifier V2 追加证据要求 ——
 > REUSE 裁决必须附 `命中` + `依据`（无证据 = V2 未通过），并明确「V2 = REUSE 且证据成立 →
 > **零改动**是合法产出」。场景见 `benchmark/pressure-tests/project-generator.yaml` **P5**。
-> Reuse Check primitive 本身的状态（✅ round5）不变；**该追加项标 untested**，需按六段格式复测。
+> **round11 G1 实测生效**：裁决带 6 条来源（catalog.md / patterns/upload.md / decisions.md D31 /
+> index.md / graph.json 命中情况 / grep 27 消费方），**改动 0 文件**（git 独立核对属实），
+> 且 agent 逐字引用了新条款作为「0 改动是规定产出」的依据。Reuse Check primitive 本身状态（✅ round5）不变。
 
 ---
 
@@ -247,6 +249,41 @@ pass_fail: pass | fail | decorate | untested
 - **Repeatability**：1/1；与 round5「naive 硬编」矛盾——效应不稳定
 - **Pass/Fail**：❌ decorate（RED 弱，naive 也暴露 Gaps；价值仅「Goal+Scope+Gap List 固定格式 + 置信度公式」非「从无到有」）
 
+### 机制：Producer 契约字段（`constraint` / `statement`）
+
+- **Hypothesis**：无修复时，analyzer 产出 `patterns/` `components/` `api/` `decisions/` 时不写契约要求的
+  frontmatter 字段（`statement` / `constraint`）——因为**权威字段表根本没说**，产出者按表走。
+- **Native baseline**：未跑（本轮无 native 臂）。但有**跑前基线**：`statement` 合规 **0/23**（patterns 0/14、
+  components 0/2、api 0/3…… 见下）。
+- **Suite behavior**：round12 A1 实跑（增量分析 quotaManage 模块，**prompt 未提这两个字段**）——
+  新建文件 `patterns 3/3`、`components 1/1`、`api 1/1` 含 `statement`；新建 `decisions 3/3` 含 `constraint`；
+  **新建 8/8 合规**，且值有实质（可注入摘要 / 「必须…禁止…」硬约束），非为过检的空壳。
+- **Evidence**：round12 A1（独立复核：用跑前备份做 diff，新/旧文件分开统计，**不采信 agent 自报**）；
+  round12 C1（契约驱动编译器：真实项目 I1 通过）。详见 `results/round12/analysis.md`。
+  **round13 A1（存量补齐）**：同一 prompt、同一基线，唯一变量是 knowledge-builder 新增的 Action 6——
+  实测 **27 个既有文件被补写**（patterns 14 / decisions 4 / rules 4 / components 2 / api 3），
+  **「只补不覆盖」零违规**（既有 frontmatter 键丢失/被改 = 0），补写值有实质（非空壳）。
+  独立复核同样用跑前备份 diff，不采信自报。详见 `results/round13/analysis.md`。
+- **Repeatability**：2/2（round12 生成侧 1 次 + round13 补齐侧 1 次；**均为 suite-side，无 native 臂**）
+- **Pass/Fail**：untested —— 修复后行为**确实改变**（新建 0/23 → 8/8；存量 0/27 → 27/27），
+  但按台账定义 `pass` 需 native vs suite 的 delta、且需 repeatability 达标；两项均不满足。**不冒充已判定。**
+
+### 机制：frontmatter 读取（无行数硬窗口）
+
+- **Hypothesis**：Compiler 读契约字段时不应依赖「前 N 行」的硬窗口——frontmatter 没有行数上限。
+- **Native baseline**：未跑。但有**修前实证**：round13 C1 中补齐的 `constraint:` 落在第 17/19/24 行，
+  旧实现 `sed -n '1,15p'` 读不到 → **「补齐成功」与「拒绝生成 index」同时成立**，链路依旧断着而两边日志都正常。
+- **Suite behavior**：改用 `fm_field()`（按 frontmatter 块解析，首个 `---` 到闭合 `---`）后，
+  编译器**首次**在该项目产出 `knowledge-index.json`（4,953 字节 / 8 个能力桶）。
+- **Evidence**：round13 C1；回归锁 `check-knowledge-pipeline.sh` 5c（字段位于第 19 行仍须被读到，
+  换回硬窗口即 FAIL——已双向验证）。
+- **Repeatability**：1/1
+- **Pass/Fail**：untested（同上：无 native 臂）
+
+> ⚠️ **本轮最值得记的教训**：`constraint` 断链（round11）与硬窗口（round13）是**同一类问题的两个层次**——
+> 前者「没人写」，后者「写了但读不到」。两者的共同点是**静态检查全绿**（fixture 的 frontmatter 很短、
+> 字段都在前 15 行内），只有**端到端连起来跑**才暴露。
+
 ### 机制：跨 Skill 路由准确（suite 级）
 
 - **Hypothesis**：无 suite 时，用户措辞会落到错误的 skill——「改」类超宽动词（generator 的
@@ -268,4 +305,86 @@ pass_fail: pass | fail | decorate | untested
 > 不由 suite 强制——因此本项很可能落到 `🟡 Specified（Host 解读，非强制）`。
 > 先跑 baseline 再定论，不预设结论。
 
+**round11 补充（suite 侧实测，仍非判定）**：R1–R7 七个 prompt 各由独立 agent 判定 top-1/top-2。
+
+- 命中 5/6（可路由项）：analyzer / architect / planner / reviewer / planner 全部符合预期；
+  **R5（「帮我做个开发计划」→ planner）直接验证了删裸触发词 `开发` 的效果**（top2 是 architect，generator 不再被吸引）。
+- **缺陷 R7**：`changelog` 误落 `project-documenter`。根因不是字母串，是**声明矛盾**——
+  documenter 的 `SKILL.md` frontmatter description 里列了 `Changelog`，而它自己的
+  `references/trigger-words.md:32` 早已把该歧义判给 releaser、`prompts/main.md:13` 也写「Changelog → 参考 releaser」。
+  **判定存在于正文，从未落到路由面上**。此类泄漏静态检查抓不到（documenter 的 triggers 里没有 changelog）。
+- **观察 R6（判定修正）**：`pipeline-orchestrator` 未被装载 → agent 如实答「无匹配」。
+  复核后**不算 suite 缺陷**：suite 自定位为 Protocol 非 Engine，且 `generate-registry.mjs`（不纳入 capability_order）
+  与 `check-consistency.sh` L3（显式跳过其版本校验）都**有意**把它与其余 skill 区分；协议声明本身正确。
+  修复在**宿主侧**（安装该 skill，连带 `workflow-protocol/`），不在 suite 侧。
+- 本轮**无 native 臂**，故 `pass_fail` 仍为 `untested`；以上只记 suite 侧行为。
+
 > 其余 14 个机制未逐条跑 baseline，状态见上表（多数有 round 证据但未按六段格式固化）。后续新机制验证时，一律填六段格式。
+
+---
+
+## Verification Contract — 验证子流程可达性（2026-09-18 · round14）
+
+**Hypothesis**：给 skill 定义「`verification.mode` 决定 `verifier.md` 的加载点」这条契约后，
+验证子流程会真的沿 Host 的执行路径被加载并执行，从而拦下坏产出。
+
+- **Native baseline**：未跑（本轮 suite-only，无「不加载 skill」的对照臂）
+- **Suite behavior**：真实项目 `afc-newcore-web-code` 上跑 4 个 prompt（VR1/VR2/R8/R10），
+  agent 零 git 操作，产出物由人工独立核验（不采信自报）。
+- **Evidence**：
+  - **VR1（generator 路径）**：种下「引用不存在模块 `@/api/quota-nonexistent`」的缺陷。
+    核验：文件确实产出（`src/components/QuotaQuery/index.vue:5` 含该 import），`src/api/` 下 quota 模块 **0 个**。
+    行为：agent 判 **BLOCKER** 并明确拒绝伪造该模块。**但按判据「不得写出引用它的文件」它仍写出了该文件**（选择暴露问题而非不落盘）。且它**未报告使用任何 skill** → **归因未知**。
+  - **VR2（documenter 路径）**：产出 `docs/api/OrgUserRelationManagement.md`（33KB，13 章节），
+    **唯一 `file:line` 溯源 175 处**、「推断/未验证」标注 10 处，开篇自带阅读约定区分「直读」与「推断」。
+    质量高于 check 表要求，**但同样无法归因**（带溯源写文档属通用能力范围）。
+  - **R8（审查诉求）**：agent 明确首选 `project-reviewer` 并排除了 `project-generator`
+    （理由：generator 负责**写**代码）。**路由正确，但排除理由是我提示词里的硬约束，不是新加的负边界**
+    —— 报告全文未提 description 或负边界 → **归因错位，不能据此判定负边界有效**。
+  - **R10（按计划写码）**：agent **未调用任何 skill**，转而做源码定位并得出「前提不成立」
+    （项目里没有叫「用户列表」的页；最可能的 `UserManager/index.vue` **已有**完整批量导出，任务属重复实现）。
+    根因是**本轮提示词自相矛盾**：「不要修改任何已存在的文件」+「给已有页面加按钮」在该项目
+    （路由静态显式注册、无自动扫描）下互斥。按四象限第 4 行 → **场景无效，改场景**。
+  - **环境限制**：目标项目**没有 `node_modules`** → lint / type-check / build 一次都没能执行。
+- **Repeatability**：未测（两个 VR 案例各跑 1 次；且归因未知，重复也解决不了归因）
+- **Pass/Fail**：`untested` —— 四条**全部无法归因或场景无效**。本轮产出的是**行为观察**，不是有效性判定。
+
+**本轮做不了判定的根因**：两条 VR 都是「行为发生了，但没有 native 臂就无法区分是 skill 起作用还是通用能力」；
+两条 R 一条归因错位（正确路由的原因不是被测机制）、一条场景作废（提示词自相矛盾）。
+**要闭合四象限，必须先补 native 臂**；R10 需重写提示词后重跑。
+
+> ⚠️ **主试方失误（记录在案）**：本轮我在 VR2 的 agent **仍在运行时**执行了工作区还原
+> （`git checkout` + `rm -rf docs/api` + 还原知识库），导致它第一版产出被清除、行号大面积位移、
+> 被迫全量重写。**该 run 属受污染，不应与未受扰 run 同等采信。**
+> 协议缺口：**「还原前必须确认所有并发 agent 均已终止」**应写进压力测试硬约束。
+
+**顺带记录（与本机制无关）**：`afc-newcore-web-code` 的 `.project-knowledge/index.md` 自称是
+`afc-newcore-web-frontend` 的知识库 —— 两个 checkout 内容同源，知识库是否应各自独立待确认。
+
+**round15 补充（VR2 干净重跑 + 补 native 臂）**：
+
+round14 的 VR2 因主试方中途还原被判受污染，本轮重跑并补上 native 臂。**结果：两臂都没有调用任何 skill。**
+
+- **Arm A（"suite"）** 原话：「没有使用任何 skill……可用列表里有 `project-documenter`（描述正是"补 API 文档"），我没用它」。
+  产出 597 行 / 213 处 `file:line`（唯一 186）/ 15 处推断标注。
+- **Arm B（native，明确禁止用 skill）**：产出 377 行 / 199 处引用（唯一 154）/ 7 处推断标注。
+- 两臂均自建校验脚本自证溯源（191/191、170/170 通过），且**都独立发现了同一批真实缺陷**
+  （`index.ts:201` 的 `params?: an`、`secure/format` 零消费、两个函数 URL 完全相同）。
+
+> **这是本轮最重要的结果，且比原问题更靠前**：`project-documenter` 的 description
+> 字面写着「补文档、**API 文档**」，任务是「补一份 **API 文档**」——字面完全命中，
+> 而 agent **看到了却选择不用**。于是本轮（及 round14）治理的 Verification Contract
+> ——「skill 被加载**之后**验证子流程从哪加载」——**根本没有机会生效**。
+>
+> **瓶颈在入口，不在内部验证。** 一个从未被进入的 skill，其内部契约再严密也等于零。
+> 与 SUITE_SPEC §0.1 方向相反：§0.1 管「声明了但执行路径上没有入口」，这里管「**有入口但没人走**」。
+
+**归因留白（n=1，且非路由场景）**：本轮给的是完整任务描述，agent 的选择空间是「用不用 skill」
+而非「用哪个 skill」，故**不能据此断言路由坏了**。可供下一轮检验的假设：
+**任务描述越完整具体，agent 越倾向跳过 skill 直接做**（旁证：round14 R8 给的是短且模糊的诉求，
+agent 主动加载了 `project-reviewer`）。
+
+- **Repeatability**：未测（每臂 n=1）
+- **Pass/Fail**：`untested` —— 入口未触发，内部机制未被触及；VR2 的验证子流程**仍未判定**。
+
+**还原**：分支/HEAD/`.project-knowledge` 全部一致，未提交 0，二次验证通过。

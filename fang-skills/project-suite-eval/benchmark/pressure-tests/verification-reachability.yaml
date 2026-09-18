@@ -1,0 +1,56 @@
+# 压力测试：验证子流程是否真的在 Host 执行路径上、且真的拦得住东西。
+#
+# skill: suite 级（跨 skill），不隶属单个 skill。
+#
+# 背景（2026-09-18 实测）：8 个 SKILL.md 在工作流表里写了 `Verify` 阶段行，而 10/10 的
+# skill.yaml `stages` 都不含 verify、stage-templates/ 也没有 verify.md —— 按
+# `for each stage in interface.stages` 推进时，这些 verifier.md **运行时永不被加载**。
+# 该断链已修（见 workflow-protocol 的 Verification Contract），并加了静态门禁
+# （check-conformance G19 + check-e2e-smoke §6）。
+#
+# ⚠️ 但静态门禁只能证明「有引用」，证明不了「真跑了验证、真拦住了」。本文件补行为级证据。
+# ⚠️ 本文件为**设计态，尚未运行**。跑完才可写结论，不得先行声称有效。
+
+skill: cross-skill
+
+tests:
+  - id: VR1
+    name: 生成结果含不可达 import → verifier 必须拦下，不得写入坏文件
+    scenario: >
+      让 project-generator 生成一个引用了项目里不存在的模块路径的组件。
+    naive_failure: >
+      不加载 skill 时，Agent 直接把组件文件写出来，不做 import 可达性检查 →
+      坏代码落地，直到运行时才暴露。
+    skill_mechanism: >
+      generator 的 verification.mode = candidate-verify-accept →
+      execution.md 的 Phase 2 加载 verifier.md；verifier 的 V1「Import 可达」
+      判定表明确写着「V1 失败（import 不存在）→ ❌ Rejected → 修正路径」。
+    assertion: >
+      交付报告中出现该 Candidate 的 Rejected（或修正后重新验证）；
+      **不得**存在引用了不存在模块的已写入文件。
+
+  - id: VR2
+    name: 文档含源码中不存在的断言 → verifier 必须拦下或标注
+    scenario: >
+      让 project-documenter 给一个模块写 API 文档，其中一条断言在源码里找不到对应实现。
+    naive_failure: >
+      不加载 skill 时直接成文，无溯源检查 → 编造内容作为事实进入文档，下游被误导。
+    skill_mechanism: >
+      documenter 的 verification.mode = direct-verify →
+      validation.md 加载 verifier.md；verifier 按 validation.md 的 V3「无编造：所有断言在源码中有对应」独立复核。
+    assertion: >
+      该断言被标注 `[推断]` 或删除；不得以事实语气写入文档正文。
+
+  - id: VR3
+    name: 负对照（ablation）——去掉 verifier 加载后，坏产出是否还能被拦下
+    scenario: >
+      与 VR1 同场景，但人为移除 execution.md 中的 verifier.md 加载链接。
+    naive_failure: >
+      —（这是反证场景，不适用「朴素失败」一栏）
+    skill_mechanism: >
+      负对照用于回答四象限的第 3 行：**「naive 不失败 / suite 通过 → 规则是装饰品」**。
+      若去掉加载后坏产出仍被拦住，说明拦住它的是别的机制（如人工评审、其他检查），
+      那么 verifier.md 这条链就不是承重环节，其价值需重新评估。
+    assertion: >
+      去掉加载后**应当**观察到「坏产出未被拦下」。
+      若仍被拦下 → 记录为「verifier 非承重」，并按 eval-contract 的 ablation 义务重新评估该机制。

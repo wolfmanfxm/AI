@@ -1,105 +1,65 @@
-# Skill Atlas v0.8
+# Skill Atlas
 
-> project-suite 全技能地图 — 每个 Skill 的 stage/template/capability/I/O 全景。
-> 由 workflow-protocol 解释，供 Dispatcher 和自动化工具消费。
+> **本页是人类导航页，不是契约。** 权威定义在 `skills/*/skill.yaml`；机器可读视图由
+> `shared/scripts/generate-registry.mjs` 生成为 `runtime/registry/skills.generated.yaml`
+> 与 `capability-routing.yaml`。
+>
+> ⚠️ **本页不复制** stages / produces / consumes / dependencies / templates —— 旧版此页重复了这些字段，
+> 结果与 skill.yaml 漂移（漏掉 analyzer/generator 的 `Recommendation`、documenter 的 `Context`，
+> 且质量门计数停在 G12 而实际已有 G18）。要查 I/O 与依赖，看 skill.yaml 或生成的 registry。
 
 ## Atlas
 
-| # | Skill | Stages | Templates | Produces | Consumes | Dependencies |
-|---|-------|--------|-----------|----------|----------|-------------|
-| 1 | [analyzer](../skills/project-analyzer/SKILL.md) | discovery, execution, delivery, validation | discovery, execution, delivery, validation | KnowledgeBase, Context, Graph | — | — |
-| 2 | [planner](../skills/project-planner/SKILL.md) | discovery, code-audit, execution, validation, delivery | discovery, code-audit, execution, validation, delivery | Plan | KnowledgeBase, Context, Graph | analyzer |
-| 3 | [architect](../skills/project-architect/SKILL.md) | discovery, code-audit, graph-analysis, execution, validation, delivery | discovery, code-audit, graph-analysis, execution, validation, delivery | Architecture | KnowledgeBase, Plan, Context, Graph | planner |
-| 4 | [generator](../skills/project-generator/SKILL.md) | discovery, execution, validation | discovery, execution, validation | Code | KnowledgeBase, Plan, Architecture, Context, Graph | architect |
-| 5 | [tester](../skills/project-tester/SKILL.md) | discovery, execution, validation | discovery, execution, validation | Test | Code, Plan, KnowledgeBase, Context | generator |
-| 6 | [reviewer](../skills/project-reviewer/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Review | Code, Plan, KnowledgeBase, Architecture, Test | tester |
-| 7 | [refactorer](../skills/project-refactorer/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | RefactoredCode | Code, KnowledgeBase, Test, Review | reviewer |
-| 8 | [documenter](../skills/project-documenter/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Documentation | Code, Review, KnowledgeBase | reviewer |
-| 9 | [releaser](../skills/project-releaser/SKILL.md) | discovery, execution, validation, delivery | discovery, execution, validation, delivery | Release | Documentation, Review, Test | documenter |
-| 10 | [orchestrator](../skills/pipeline-orchestrator/SKILL.md) | discovery, orchestrate, validation, delivery | discovery, execution, validation, delivery | PipelinePlan | KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release | releaser |
+后三列是 `skill.yaml` 的 `description` / `boundary` 的人类摘要；**如有出入以 skill.yaml 为准**。
 
-## Stage × Skill Matrix
+| # | Skill | 职责 | 适用场景 | 边界 |
+|---|-------|------|---------|------|
+| 1 | [analyzer](../skills/project-analyzer/SKILL.md) | 分析项目结构、组件、API、模式，生成结构化知识库 | 首次接入项目；知识库过期需刷新；只想了解现状、不改代码 | 只分析并生成知识文件，不修改源码 |
+| 2 | [planner](../skills/project-planner/SKILL.md) | 需求收敛 → 完整性检查 → 自适应访谈 → 9 模块执行契约 | 需求模糊需先拆解；任务较大，想先出计划再动手 | 只做计划不写代码，发现问题记录在风险矩阵 |
+| 3 | [architect](../skills/project-architect/SKILL.md) | 技术选型 + 模块设计 + API 契约，ADR 格式决策记录 | 需要选型对比；模块/接口边界设计；架构评审 | 只做设计不写代码，不符记录在 ARCHITECTURE.md |
+| 4 | [generator](../skills/project-generator/SKILL.md) | 按项目规范生成生产级代码，Execute → Verify | 实现功能；新增页面/组件/API；修改既有代码 | 只写代码不做设计，缺上游产物时提示先跑 planner/architect |
+| 5 | [tester](../skills/project-tester/SKILL.md) | AC 驱动测试生成 + 执行，自动检测测试框架 | 补测试；验证实现是否满足验收标准 | 只写测试不修被测代码，失败记录报告 |
+| 6 | [reviewer](../skills/project-reviewer/SKILL.md) | 五轴审查，BLOCKER → PRAISE 分级 | 合并前审查；怀疑有 bug / 安全问题 | 只审查不修代码，问题带 file:line + 修复方案 |
+| 7 | [refactorer](../skills/project-refactorer/SKILL.md) | 安全重构，行为不变，指标量化 | 结构难维护需重构；消除重复；迁移 | 只改善结构不改行为，没测试保护不重构 |
+| 8 | [documenter](../skills/project-documenter/SKILL.md) | 代码 → 可溯源技术文档，自动匹配风格 | 补 API/组件文档；生成或更新 README | 只生成文档不改代码 |
+| 9 | [releaser](../skills/project-releaser/SKILL.md) | 版本 bump + Changelog + 发布检查 | 准备发版；写 Changelog；发布前检查 | 只检查与推荐，不执行发布命令（不 npm publish / git push --tags） |
+| 10 | [orchestrator](../skills/pipeline-orchestrator/SKILL.md) | 跨 Skill Pipeline 编排（协议 + 决策边界，非执行引擎） | 想端到端跑一遍；不确定该按什么顺序调 skill | 只出编排建议（供 Host 参考），不替代任何单个 Skill |
 
-| Stage | analyzer | planner | architect | generator | tester | reviewer | refactorer | documenter | releaser |
-|-------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **discovery** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **code-audit** | — | ✅ | ✅ | — | — | — | — | — | — |
-| **graph-analysis** | — | — | ✅ | — | — | — | — | — | — |
-| **execution** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **validation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **delivery** | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ | ✅ |
+## I/O 与依赖
 
-## Template Usage
+见 `skills/<name>/skill.yaml` 的 `produces` / `consumes` / `interface`，或生成的：
 
-| Template | Used By | Load Count |
-|----------|---------|------------|
-| **discovery** | All 10 skills | 10 |
-| **execution** | 9 skills（orchestrator 用 orchestrate） | 9 |
-| **validation** | All 10 skills | 10 |
-| **delivery** | analyzer, planner, architect, reviewer, refactorer, documenter, releaser | 7 |
-| **code-audit** | planner, architect | 2 |
-| **graph-analysis** | architect | 1 |
+| 想看什么 | 看哪 |
+|---|---|
+| stages / 失败模式 / interface | `runtime/registry/skills.generated.yaml` |
+| 能力依赖图（`needs` / `needs_advisory`） | `runtime/registry/capability-routing.yaml` 的 `dependency_graph` |
+| 产物类型（数据流视角） | `runtime/artifacts/artifact-types.yaml` |
+| 调度顺序 / 策略 | `runtime/config/scheduler.yaml` / `skill-policy.yaml` |
 
-## I/O Flow
+## 质量门与治理就绪
 
-```
-ProjectRoot ──→ analyzer ──→ KnowledgeBase/Context/Graph
-                                  │
-                    ┌─────────────┘
-                    ▼
-                  planner ──→ Plan (9-module Contract)
-                    │
-                    ▼
-User Input ──→ architect ──→ Architecture (ADR)
-                    │
-                    ▼
-                generator ──→ Code
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-      tester ──→ Test        reviewer ──→ Review
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-        ┌───────────┴───────────┐
-        ▼                       ▼
-    refactorer ──→ Code     documenter ──→ Docs
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-                releaser ──→ Release
-```
+> 门定义与 pass/fail **以脚本为准**——本页不复制度量数值（旧版把 G1–G12 抄在这里，实际已有 G18）。
 
-## Quality Gates
-
-| Gate | 10/10? | Note |
-|------|------|------|
-| G1: SKILL.md ≤120 lines | ✅ | 58-66 |
-| G2: skill.yaml 完整 | ✅ | 含 interface + stages（Runtime Policy 在 skill-policy.yaml） |
-| G3: boundary.md ≥3 反例 | ✅ | 内嵌在 SKILL.md 或 boundary.md |
-| G4: CHECKPOINT ≥1 | ✅ | 每 stage prompts 含 CHECKPOINT |
-| G5: 职责边界表 | ✅ | ✅/❌ 表在 boundary.md |
-| G6: description 含触发词 | ✅ | 全部含触发词（产出见 skill.yaml produces） |
-| G7: capabilities.yaml 注册 | ✅ | 10/10 已注册 |
-| G8: 完成后 next-step | ✅ | 10/10 |
-| G9: boundary.md 失败兜底 | ✅ | 10/10 |
-| G10: Stage prompts | ✅ | 37 个文件 |
-| G11: @template 声明 | ✅ | 每 stage prompt 含 @template |
-| G12: skill-policy.yaml rollback | ✅ | 10/10 |
-
-## Governed Readiness
+| 检查 | 入口 |
+|------|------|
+| 结构门 G1–G18 | `shared/scripts/check-conformance.sh` |
+| 声明链一致性（skill.yaml ↔ skill-ir ↔ registry ↔ compatibility） | `shared/scripts/check-consistency.sh` |
+| 知识链闭环（compiler → index → resolver → package） | `shared/scripts/check-knowledge-pipeline.sh` |
+| YAML 可解析 | `shared/scripts/check-yaml.sh` |
+| 产物写入路径 / 契约 | `shared/scripts/check-artifacts.sh` |
+| E2E 主链 wiring | `shared/scripts/check-e2e-smoke.sh` |
 
 | Requirement | Status |
 |-------------|--------|
 | owner | ✅ `project-suite` |
-| review cadence | ✅ 90-day, last_reviewed 已写入 10/10 skill.yaml |
+| review cadence | ✅ 90-day，`last_reviewed` 已写入 10/10 `skill.yaml` |
 | input_files (file-backed fixture) | ✅ 10/10 skills `interface.inputs[].fixture` |
-| output contract | ✅ skill.yaml interface.outputs |
-| rollback boundary | ✅ skill-policy.yaml rollback (10/10) |
-| trust report | ✅ `reports/trust-report.md` (90/100) |
-| output_quality_scorecard | ✅ `reports/output-quality-scorecard.md` |
-| telemetry | ✅ `shared/scripts/collect-metrics.sh` (local aggregation) |
-| cross-run reliability | ✅ `docs/cross-run-reliability.md` + `check-reliability.sh` + 10/10 `skill-policy.yaml` reliability |
+| output contract | ✅ `skill.yaml` `interface.outputs` |
+| rollback boundary | ✅ `skill-policy.yaml` rollback（10/10） |
+| trust report | ✅ 见 [eval-contract.md](eval-contract.md)——报告在外部 eval 仓库，不在 suite 内 |
+| output_quality_scorecard | ✅ [../reports/output-quality-scorecard.md](../reports/output-quality-scorecard.md) |
+| telemetry | ✅ `shared/scripts/collect-metrics.sh`（local aggregation） |
+| cross-run reliability | ✅ [cross-run-reliability.md](cross-run-reliability.md) + `check-reliability.sh` + 10/10 `skill-policy.yaml` reliability |
 | drift detection | ⚠️ `missing evidence` |
 
 ## Skill 准入（这张表何时该变长）

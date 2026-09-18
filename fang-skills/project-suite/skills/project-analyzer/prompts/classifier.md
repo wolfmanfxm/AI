@@ -7,7 +7,7 @@
 
 | Level | 含义 | 同步到 | 示例 |
 |-------|------|--------|------|
-| **`none`** | 一次性任务产物 | 仅 `.project-knowledge/`，归档 | PLAN-*.md, REVIEW-*.md, CHANGELOG-*.md, TEST-REPORT.md, REFACTOR.md, ARCHITECTURE-<feature>.md |
+| **`none`** | 一次性任务产物 | 仅 `.project-knowledge/`，归档 | PLAN-*.md, REVIEW-*.md, CHANGELOG.md, RELEASE-CHECKLIST.md, TEST-REPORT.md, REFACTOR.md, ARCHITECTURE-<feature>.md |
 | **`project`** | 长期项目知识 | → `Knowledge Vault/Projects/{project}/` | architecture/overview.md, components/catalog.md, patterns/repository.md, conventions/naming.md, glossary.md, principles.md, risks.md, rules/, experience/ |
 | **`personal`** | 跨项目通用 | → `Knowledge Vault/Knowledge/` | 通用 Pattern（如 "Form Design with Schema Validation"）、通用 Playbook（如 "Microservice Migration Pattern"） |
 
@@ -18,7 +18,7 @@
 | 匹配 | Promotion | 原因 |
 |-------|----------|------|
 | `proposals/PLAN-*.md` | `none` | 一次性任务规划 |
-| `reports/REVIEW-*.md` `CHANGELOG-*.md` `TEST-REPORT.md` `REFACTOR.md` | `none` | 一次性任务产出 |
+| `reports/REVIEW-*.md` `CHANGELOG.md` `RELEASE-CHECKLIST.md` `TEST-REPORT.md` `REFACTOR.md` | `none` | 一次性任务产出 |
 | `decisions/ARCHITECTURE-<feature>.md` | `none` | 单功能架构决策 |
 | `candidates/` | `none` | 中间产物 |
 | `architecture/` `components/` `api/` | `project` | 项目结构知识 |

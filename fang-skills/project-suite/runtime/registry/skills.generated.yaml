@@ -8,6 +8,43 @@ version: "3.0.0"
 generated: true
 
 skills:
+  pipeline-orchestrator:
+    version: "1.0.0"
+    mode: Production
+    owner: project-suite
+    category: orchestration
+    description: "跨Skill Pipeline编排（Pipeline Protocol + Decision Boundary，非执行引擎）"
+    capabilities: [pipeline-coordination, checkpoint, resume]
+    complexity: {min: high, max: high}
+    cost: low
+    requires: []
+    produces: [PipelinePlan]
+    consumes: []
+    boundary: "编排跨 Skill pipeline 建议（供 Host 参考），不替代任何单个 Skill 的功能"
+    last_reviewed: "2026-08-04"
+    review_cadence_days: 90
+    stages: [discovery, orchestrate, validation, delivery]
+    triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
+    triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
+    context_contract:
+      must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml, state.json]
+      query: []
+      neednt_read: []
+    interface:
+      inputs:
+        - { name: capabilities.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: Skill 能力注册中心 }
+        - { name: workflow-library.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: 预定义 pipeline 模式 }
+        - { name: state.json, type: state, required: false, source: runtime, fixture: true, description: 项目当前状态 }
+        - { name: 用户目标描述, type: context, required: true, source: user, fixture: false, description: 用户想达成的目标 }
+      outputs:
+        - { name: pipeline-state.json, type: state, confidence_range: "80-95", description: Pipeline 执行状态 }
+        - { name: pipeline-report.md, type: state, confidence_range: "80-95", description: Pipeline 执行报告 }
+      side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+      failure_modes:
+        - { condition: 下游 Skill 不存在或未安装, severity: BLOCKED, recovery: 提示安装缺失的 Skill }
+        - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
+        - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
+      stages: [discovery, orchestrate, validation, delivery]
   project-analyzer:
     version: "1.3.1"
     mode: Production
@@ -68,7 +105,7 @@ skills:
     context_contract:
       must_read: [context.json]
       query: [architecture, components]
-      neednt_read: [observations/, reports/]
+      neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
     interface:
       inputs:
         - { name: user-request, type: request, required: true, source: user, fixture: false, description: 用户需求/任务描述 }
@@ -106,7 +143,7 @@ skills:
     context_contract:
       must_read: [context.json, PLAN.md]
       query: [architecture, components, api]
-      neednt_read: [observations/, reports/]
+      neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
     interface:
       inputs:
         - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }
@@ -136,12 +173,12 @@ skills:
     last_reviewed: "2026-08-04"
     review_cadence_days: 90
     stages: [discovery, execution, validation]
-    triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 开发, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
+    triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
     triggers_en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]
     context_contract:
       must_read: [context-package.json, PLAN.md, context.json, ARCHITECTURE.md]
       query: []
-      neednt_read: [observations/, reports/]
+      neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
     interface:
       inputs:
         - { name: context-package.json, type: context-package, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }
@@ -177,7 +214,7 @@ skills:
     context_contract:
       must_read: [context.json, PLAN.md]
       query: [patterns]
-      neednt_read: [observations/, reports/]
+      neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
     interface:
       inputs:
         - { name: 被测代码, type: implementation, required: true, source: user, fixture: false, description: 待测试的源文件或变更列表 }
@@ -185,7 +222,7 @@ skills:
       outputs:
         - { name: "*.test.ts/*.spec.ts", type: test, confidence_range: "70-90", description: Given-When-Then结构测试用例 }
         - { name: TEST-REPORT.md, type: test, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
-      side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+      side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 检测不到测试框架, severity: DEGRADED, recovery: 默认jest风格,标注⚠️ }
         - { condition: 被测代码不可读或不存在, severity: FATAL, recovery: 拒绝执行 }
@@ -213,7 +250,7 @@ skills:
     context_contract:
       must_read: [context.json, PLAN.md, ARCHITECTURE.md]
       query: []
-      neednt_read: [observations/]
+      neednt_read: [.project-knowledge/observations/]
     interface:
       inputs:
         - { name: 变更代码, type: implementation, required: true, source: project-generator, fixture: false, description: 待审查的diff/文件列表 }
@@ -251,7 +288,7 @@ skills:
     context_contract:
       must_read: [context.json]
       query: [api, architecture]
-      neednt_read: [observations/]
+      neednt_read: [.project-knowledge/observations/]
     interface:
       inputs:
         - { name: 源码文件, type: implementation, required: true, source: user, fixture: false, description: 待文档化的源文件 }
@@ -265,9 +302,9 @@ skills:
       failure_modes:
         - { condition: 源文件不可读或不存在, severity: FATAL, recovery: 拒绝执行 }
         - { condition: JSDoc注释缺失或不完整, severity: DEGRADED, recovery: "从类型推断,标注[推断]" }
-        - { condition: 文档已存在, severity: DEGRADED, recovery: 增量更新,不覆盖人工章节 }
+        - { condition: 文档已存在, severity: DEGRADED, recovery: "增量更新,不覆盖人工章节" }
         - { condition: 无风格参考, severity: DEGRADED, recovery: 默认模板 }
-        - { condition: 文档内容冲突, severity: DEGRADED, recovery: 标记[CONFLICT] }
+        - { condition: 文档内容冲突, severity: DEGRADED, recovery: "标记[CONFLICT]" }
       stages: [discovery, execution, validation, delivery]
   project-refactorer:
     version: "1.3.0"
@@ -290,7 +327,7 @@ skills:
     context_contract:
       must_read: [context.json]
       query: [patterns, components]
-      neednt_read: [observations/, reports/]
+      neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
     interface:
       inputs:
         - { name: 待重构代码, type: implementation, required: true, source: user, fixture: false, description: 待重构的源文件 }
@@ -299,7 +336,7 @@ skills:
       outputs:
         - { name: 重构后代码, type: refactored-code, confidence_range: "75-90", description: 行为不变+指标改善 }
         - { name: REFACTOR.md, type: refactored-code, confidence_range: "75-90", description: 变更清单+Before/After指标+验证结果 }
-      side_effects: { writes_state: true, writes_knowledge: false, modifies_code: true, writes_timeline: true }
+      side_effects: { writes_state: true, writes_knowledge: true, modifies_code: true, writes_timeline: true }
       failure_modes:
         - { condition: 无测试覆盖, severity: DEGRADED, recovery: 先写表征测试,缩小重构范围到纯提取/重命名 }
         - { condition: 重构后测试变红, severity: FATAL, recovery: Edit 反向回滚,记录REFACTOR.md失败原因 }
@@ -336,46 +373,9 @@ skills:
         - { name: CHANGELOG.md, type: release, confidence_range: "80-90", description: 按版本分组变更记录 }
         - { name: RELEASE-CHECKLIST.md, type: release, confidence_range: "80-90", description: 发布前逐项检查结果 }
         - { name: 版本号推荐, type: release, confidence_range: "85-95", description: semver版本号+推荐理由 }
-      side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
+      side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
       failure_modes:
         - { condition: 全链路confidence<40, severity: FATAL, recovery: 拒绝生成发布产物 }
         - { condition: breaking change无迁移说明, severity: BLOCKED, recovery: 生成迁移步骤,AskUserQuestion确认 }
         - { condition: review缺失, severity: DEGRADED, recovery: 标注"⚠️未审查" }
       stages: [discovery, execution, validation, delivery]
-  pipeline-orchestrator:
-    version: "1.0.0"
-    mode: Production
-    owner: project-suite
-    category: orchestration
-    description: "跨Skill Pipeline编排（Pipeline Protocol + Decision Boundary，非执行引擎）"
-    capabilities: [pipeline-coordination, checkpoint, resume]
-    complexity: {min: high, max: high}
-    cost: low
-    requires: []
-    produces: [PipelinePlan]
-    consumes: [KnowledgeBase, Plan, Architecture, Code, Test, Review, Documentation, Release]
-    boundary: "编排跨 Skill pipeline 建议（供 Host 参考），不替代任何单个 Skill 的功能"
-    last_reviewed: "2026-08-04"
-    review_cadence_days: 90
-    stages: [discovery, orchestrate, validation, delivery]
-    triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
-    triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
-    context_contract:
-      must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml, state.json]
-      query: []
-      neednt_read: []
-    interface:
-      inputs:
-        - { name: capabilities.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: Skill 能力注册中心 }
-        - { name: workflow-library.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: 预定义 pipeline 模式 }
-        - { name: state.json, type: state, required: false, source: runtime, fixture: true, description: 项目当前状态 }
-        - { name: 用户目标描述, type: context, required: true, source: user, fixture: false, description: 用户想达成的目标 }
-      outputs:
-        - { name: pipeline-state.json, type: state, confidence_range: "80-95", description: Pipeline 执行状态 }
-        - { name: pipeline-report.md, type: state, confidence_range: "80-95", description: Pipeline 执行报告 }
-      side_effects: { writes_state: true, writes_knowledge: false, modifies_code: false, writes_timeline: true }
-      failure_modes:
-        - { condition: 下游 Skill 不存在或未安装, severity: BLOCKED, recovery: 提示安装缺失的 Skill }
-        - { condition: 上游产出缺失(如无 context.json), severity: DEGRADED, recovery: 标注缺失,提示先执行上游 }
-        - { condition: 中间 Skill 执行失败, severity: DEGRADED, recovery: 记录失败,询问跳过/重试/终止 }
-      stages: [discovery, orchestrate, validation, delivery]

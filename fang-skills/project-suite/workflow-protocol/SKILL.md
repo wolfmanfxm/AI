@@ -55,6 +55,44 @@ stages:
 | [code-audit](references/stage-templates/code-audit.md) | planner, architect |
 | [graph-analysis](references/stage-templates/graph-analysis.md) | architect |
 
+## Verification Contract（验证子流程，**非 Stage**）
+
+> **Verify 不是 Stage。** 它是被某个 Stage 显式加载的**验证子流程**，不参与 stage progression。
+> 因此三条硬约束：`stages` 里**不得**出现 `verify`；`stage-templates/` **不得**新增 `verify.md`；
+> SKILL.md 工作流表**不得**出现 `Verify` 行（表行集合必须等于 `interface.stages`，见上方核心机制第 2 条）。
+
+**检查项的唯一权威是各 skill 的 `prompts/validation.md`**（`## Checks` 表）。`prompts/verifier.md`
+**不重复维护一份检查表**——它只定义**验证对象**（Candidate / 阶段产出）与**判定规则**，检查时引用同一张表。
+（2026-09-18 收敛：此前 8/9 个 skill 的两个文件各有一份高度重复的检查表，改一处必忘另一处。）
+
+`skill.yaml` 的 `verification.mode` 决定 `prompts/verifier.md` 的**加载点**（取值只有这三个）：
+
+| mode | 含义 | 加载规则 |
+|------|------|---------|
+| `direct-verify` | 产出即终态，验证在 Validation 阶段做 | `verifier.md` **必须存在**；`validation.md` **必须加载**它 |
+| `candidate-verify-accept` | 产出先成为 Candidate，验证通过才 Accept | `verifier.md` **必须存在**；Candidate 所在 Stage（通常 `execution.md`）**必须加载**它；且 verifier 必须在 Candidate 被 Accept / 下游消费**之前**完成 |
+| `none` | 本 Skill 不产出需要独立验证的业务产物（如纯编排型） | `verifier.md` 可选；**不得**被要求 |
+
+```
+direct-verify                      candidate-verify-accept
+  Execution                          Execution ─┬─ Candidate produced
+      ↓                                       ├─ Verifier
+  Validation                                  └─ Accepted / Rejected / Adjusted
+   ├─ validation.md                               ↓
+   └─ verifier.md   ← 加载点                  Validation
+      ↓                                          ↓
+  Delivery                                   Delivery
+```
+
+> ⚠️ **为什么必须写死这条**：2026-09-18 实测——8 个 SKILL.md 在工作流表里写了 `Verify` 行，
+> 而 **10/10** 的 `skill.yaml` 的 `stages` 都不含 `verify`、`stage-templates/` 也没有 `verify.md`。
+> Host 按下面的 `for each stage in interface.stages` 推进 → 这 8 个 `prompts/verifier.md`
+> **运行时永不被加载**。这是「声明存在、但执行路径上找不到入口」的断链，与 `constraint` 字段
+> 写了却读不到、`verification.mode` 声明了却零消费者属同一族。
+>
+> **通用原则**：任何「声明存在的行为」，都必须能沿 Host 的真实执行路径找到入口；
+> 仅有文件、配置、计数、静态 ✅ 都不算可执行。
+
 ## Execution Guidance（阶段推进协议）
 
 > **Host 按 Workflow Protocol 推进阶段** — Suite 定义阶段契约和推进规则，Host（Agent）决定实际如何执行。

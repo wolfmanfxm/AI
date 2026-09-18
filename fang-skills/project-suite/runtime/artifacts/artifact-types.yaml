@@ -45,11 +45,19 @@ types:
     producer: project-analyzer
     consumers: [project-planner, project-architect, project-generator, project-reviewer]
 
+  recommendation:
+    description: 项目级应然建议（新代码改进方向，依据本项目统计/证据；**非现状规范**，advisory 不阻塞）
+    schema: skills/project-analyzer/prompts/instinct-extractor.md
+    schema_version: "1.0.0"
+    location: .project-knowledge/recommendations/<建议-id>.md
+    producer: project-analyzer
+    consumers: [project-planner, project-generator]   # 经 context-package 的 guidance 桶注入
+
   planning:
     description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance），含每个 Task 的 placement/target 放置决议
     schema: skills/project-planner/prompts/task-breakdown.md
     schema_version: "1.0.0"
-    location: proposals/PLAN-*.md
+    location: .project-knowledge/proposals/PLAN-*.md
     producer: project-planner
     consumers: [project-architect, project-generator, project-reviewer, project-tester]
 
@@ -57,7 +65,7 @@ types:
     description: 架构决策记录（ADR 格式）— 技术选型/模块设计/API 契约
     schema: skills/project-architect/SKILL.md
     schema_version: "1.0.0"
-    location: decisions/ARCHITECTURE-*.md
+    location: .project-knowledge/decisions/ARCHITECTURE-*.md
     producer: project-architect
     consumers: [project-generator, project-reviewer]
 
@@ -90,16 +98,16 @@ types:
     consumers: [project-reviewer, project-tester]
 
   documentation:
-    description: API/组件/Changelog 文档（.md + Evidence Header）
+    description: API/组件/README/ADR 文档（.md + Evidence Header）——不含 Changelog，后者属 release 产物
     schema_version: "1.0.0"
-    location: api/ | components/ | CHANGELOG.md
+    location: .project-knowledge/api/ | .project-knowledge/components/
     producer: project-documenter
     consumers: [project-releaser]
 
   release:
     description: 发布产物（版本建议 + Changelog + 检查清单）
     schema_version: "1.0.0"
-    location: CHANGELOG.md + RELEASE-CHECKLIST.md
+    location: .project-knowledge/reports/CHANGELOG.md + .project-knowledge/reports/RELEASE-CHECKLIST.md
     producer: project-releaser
     consumers: []
 
@@ -107,7 +115,7 @@ types:
     description: 项目持久化状态（执行历史 + 知识生命周期 + 置信度追踪）
     schema: runtime/state/state.md
     schema_version: "1.0.0"
-    location: .project-knowledge/runtime/state.json + knowledge.json
+    location: .project-knowledge/runtime/state.json + .project-knowledge/runtime/knowledge.json
     producer: null
     consumers: [all]
 
@@ -123,12 +131,12 @@ types:
 
 mapping:
   project-analyzer:
-    produces: [knowledge, context, graph]
+    produces: [knowledge, context, graph, recommendation]
     consumes: [implementation]
 
   project-planner:
     produces: [planning]
-    consumes: [request, knowledge, context, graph]
+    consumes: [request, knowledge, context, graph, recommendation]
 
   project-architect:
     produces: [design]
@@ -136,7 +144,7 @@ mapping:
 
   project-generator:
     produces: [implementation]
-    consumes: [knowledge, context, graph, planning, design]
+    consumes: [knowledge, context, graph, planning, design, recommendation]
 
   project-tester:
     produces: [test]

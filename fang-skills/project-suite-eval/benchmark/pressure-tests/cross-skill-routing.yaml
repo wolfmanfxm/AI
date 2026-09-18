@@ -91,3 +91,77 @@ tests:
     skill_mechanism: capability-routing 的 Release intent（changelog/版本号）
     assertion: >
       路由到 project-releaser（更新 CHANGELOG）；不得落到 project-generator。
+
+  # ── R8–R11：负边界（description 的「不用于：…」行）专项 ──────────────────
+  #
+  # 背景：R1–R7 测的都是「表层措辞匹配会落到错的 skill」。但根因之一从没被测过——
+  # generator 的触发词表极宽（添加/修改/调整/改/修复/删除），几乎任何任务都含其中一个，
+  # 于是它天然是「兜底吸铁石」。2026-09-18 给 4 个高冲突 skill 的 description 各加了一行
+  # 负边界（`不用于：…`），本组测的**就是那一行**是否真的改变路由。
+  #
+  # ⚠️ 本组为**设计态，尚未运行**。负边界是路由行为变更，静态检查判不了——
+  #    必须按 pressure-test 协议真跑 prompt 观察落点，结论才写进 ledger。
+  #    在此之前不得声称这 4 条负边界「有效」。
+
+  - id: R8
+    name: 审查诉求落到 reviewer 而非 generator（负边界「不用于：代码审查」）
+    scenario: >
+      这段代码写得不太好，帮我看看该怎么改。
+    naive_failure: >
+      措辞含「改」——generator 的显式触发词。表层匹配会让 generator 直接动手改代码，
+      但用户要的是先出分级问题清单（改什么、为什么），不是一份已经改好的 diff。
+    skill_mechanism: >
+      generator description 的负边界行「不用于：任务拆解、架构选型、代码审查、纯重构」
+    assertion: >
+      路由到 project-reviewer（产出分级问题 + file:line）；
+      不得落到 project-generator——「该怎么改」是审查结论，不构成改代码的诉求。
+
+  - id: R9
+    name: 纯重构诉求落到 refactorer 而非 generator（负边界「不用于：纯重构」）
+    scenario: >
+      把这段逻辑调整一下，行为别变，就是重复的部分抽出来。
+    naive_failure: >
+      措辞同时含 generator 的「调整」与「改」两个显式触发词，且不含 refactorer 的
+      显式触发词「重构」。表层匹配会落到 generator 去改代码。
+    skill_mechanism: >
+      generator description 的负边界行（「不用于：…纯重构」）+
+      refactorer 的 Refactoring intent（行为不变/抽出来/消除重复）
+    assertion: >
+      路由到 project-refactorer（产出 REFACTOR.md + 重构后代码，行为不变）；
+      不得落到 project-generator。
+
+  - id: R10
+    name: 按计划写码诉求落到 generator 而非 planner（负边界「不用于：直接写代码」）
+    scenario: >
+      按这份计划直接开始写代码吧。
+    naive_failure: >
+      措辞含 planner 的显式触发词「计划」。表层匹配会落到 planner 再出一份执行契约——
+      但计划已经存在，用户要的是落地实现，落 planner 是空转一轮。
+    skill_mechanism: >
+      planner description 的负边界行「不用于：直接写代码、架构选型」
+    assertion: >
+      路由到 project-generator（按已有 PLAN 生成代码）；不得落到 project-planner。
+
+  - id: R11
+    name: 任务拆解诉求落到 planner 而非 architect（负边界「不用于：普通任务拆解」）
+    scenario: >
+      设计一下这次要分几步做。
+    naive_failure: >
+      措辞含 architect 的显式触发词「设计」。表层匹配会落到 architect 出一份技术选型/
+      模块设计 ADR——但用户问的是**执行步骤**，不是技术方案。
+    skill_mechanism: >
+      architect description 的负边界行「不用于：普通任务拆解、直接实现代码」
+    assertion: >
+      路由到 project-planner（产出执行契约）；不得落到 project-architect。
+
+  - id: R12
+    name: 普通开发诉求落到 generator 而非 analyzer（负边界「不用于：已有知识覆盖的普通开发任务」）
+    scenario: >
+      照项目现有规范再做一个列表页。
+    naive_failure: >
+      措辞含 analyzer 的显式触发词「项目」与「规范」（触发词表里有「项目规范」「编码规范」）。
+      表层匹配可能落到 analyzer 去重扫项目、重出知识库——而知识库已覆盖，这是空转。
+    skill_mechanism: >
+      analyzer description 的负边界行「不用于：已有知识覆盖且无明显漂移的普通开发任务」
+    assertion: >
+      路由到 project-generator（照既有 patterns 生成页面）；不得落到 project-analyzer。

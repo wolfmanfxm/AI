@@ -13,6 +13,9 @@
 | V3 | AC 逐条对照 | AC 表逐条 ✅/❌/⚠️，无遗漏 | 补全遗漏 AC |
 | V4 | 分级合理 | BLOCKER 有明确阻断理由（不为空且不泛泛），无 LOW 误标 BLOCKER | 调整分级 |
 | V5 | Scope 边界 | 标注超出 PLAN.md `# Scope` 的变更项 | 补充 `[SCOPE CREEP]` |
+| V6 | 修复可操作 | 每个 finding 的修复建议具体可执行 | 标注 `[VAGUE]` |
+| V7 | Domain Terminology Drift | 代码中同一概念是否用了多个词（Customer/CustomerInfo/Client 混用），对照 vocabulary.yaml；**页面/API 命名是否偏离 artifacts 的 naming 前缀**（「退款记录」用了泛化 RefundRecord 而非 vocabulary 的 orderRefundRecord） | 报 `Domain Terminology Drift`，标注统一术语 |
+| V8 | Placement Correctness | **Plan 的 target 决议（module/domain/placement）与实际修改/新建路径是否一致**——Planner 判断正确但 Generator 未遵循时，最终落错目录（如 Plan target 是 `<目标模块>` 但代码落在 `<错误模块>`）。对照 PLAN.md 每个 Task 的「放置决议」字段 vs 实际 diff 文件路径 | 报 `Placement Mismatch`，标注 Plan target vs 实际路径，阻断（视为 BLOCKER，因为落错目录难回退） |
 
 ## QA Agent
 

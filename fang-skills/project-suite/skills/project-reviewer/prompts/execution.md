@@ -49,6 +49,15 @@
 
 🔴 CHECKPOINT — 展示审查摘要（BLOCKER/HIGH/MEDIUM/LOW/PRAISE 计数）
 
+## Verification（Candidate 验证子流程，**非 Stage**）
+
+本阶段的产出先作为 **Candidate**，在 Exit 前加载 [verifier.md](verifier.md)，以 fresh context 执行独立验证；
+只有 verifier 判为 **Accepted** 的 Candidate 才能进入 `validation` 阶段或被下游消费。
+
+> 依据 `skill.yaml` 的 `verification: { mode: candidate-verify-accept }` → 见
+> [workflow-protocol · Verification Contract](../../../workflow-protocol/SKILL.md)。
+> ⚠️ verify **不是** stage：它不参与 stage progression，也不出现在 `interface.stages` 里。
+
 ## Exit
 
 - 所有变更文件审查完成

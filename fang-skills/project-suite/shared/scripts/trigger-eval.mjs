@@ -70,11 +70,19 @@ function main() {
     }
   }
 
-  // CN↔EN 交叉：同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词
+  // CN↔EN 交叉：同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词。
+  // ⚠️ 英文侧用【词边界】而非裸子串——英文里 change 与 changelog 是不同的 intent，
+  //    裸 includes 会把它们误判成交叉（中文无词边界，故中文侧仍用子串）。
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const enContains = (haystack, needle) => {
+    const before = /^\w/.test(needle) ? '\\b' : '';
+    const after = /\w$/.test(needle) ? '\\b' : '';
+    return new RegExp(`${before}${escapeRe(needle)}${after}`).test(haystack);
+  };
   const crossLang = new Map();
   for (const [cn, namesA] of triggersCN) {
     for (const [en, namesB] of triggersEN) {
-      if (!(cn === en || cn.includes(en) || en.includes(cn))) continue;
+      if (!(cn === en || enContains(cn, en) || enContains(en, cn))) continue;
       for (const a of namesA) for (const b of namesB) {
         if (a === b) continue;
         crossLang.set(`${cn}|${a}|${en}|${b}`, { cn, cnSkill: a, en, enSkill: b });

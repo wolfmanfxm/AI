@@ -11,6 +11,12 @@
 | V3 | 现状核实准确 | `[已实现]` 标注的模块路径实际存在 | 修正标注 |
 | V4 | API 契约可实施 | 每个 endpoint 有 method/path/request/response | 补全缺失字段 |
 | V5 | 模块耦合合理 | 跨层依赖（view→infrastructure）已标注原因 | 标注架构风险 |
+| V6 | ADR 四段完整 | 问题→候选方案→选择→理由 不缺 | 返回补全 |
+| V7 | 决策成本门 | low-impact（可逆/局部/单模块）→ 1 方案 + reason 即可；high-impact（不可逆/跨模块/影响下游）→ ≥2 方案 + ≥3 维度 | 🟡 补全或标注原因 |
+| V8 | 方案自洽 | 技术选型、模块设计、API 间无矛盾 | 🟡 标注矛盾 |
+| V9 | 分差有理 | 对比矩阵分差 <10% 时有充分说明 | 🟡 标注风险 |
+| V10 | Graph 一致 | 设计引用的模块/API 在 graph.json 中存在；新增模块前先走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)（可扩展已有模块就不新建） | 修正引用 |
+| V11 | Domain 一致 | 设计引入的术语与 vocabulary.yaml 的 confirmed 术语一致；**新增页面/API 的 artifact 命名须匹配 artifacts 的 naming 前缀**（或由 entity×action 组合合法派生） | ⚠️ Domain conflict：现有定义 ≠ 新假设 → 阻断，追问澄清 |
 
 ## QA Agent
 

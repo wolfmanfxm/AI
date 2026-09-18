@@ -41,6 +41,31 @@
 > 例：analyzer 的顶层 `consumes: []`（无上游依赖）与 `artifact-types.yaml` 的 `consumes: [implementation]`（输入类型）是**两个不同事实**，不矛盾、不要统一。详见 [ADR-004](docs/decisions/ADR-004-four-layer-io-boundaries.md)。
 > 语义一致性由 `shared/scripts/check-io-connectivity.sh` 验证——只查「能接通」（type 合法、source→produces 断链、output 有对应 Capability），不查「完全相等」。
 
+### 0.1 Runtime Reachability（可执行性契约）
+
+> **任何「声明存在的行为」，都必须能沿 Host 的真实执行路径找到入口；仅有文件、配置、计数、静态 ✅ 都不算可执行。**
+
+**逆命题同样成立**：只被静态工具消费、**不被运行时消费**的声明，要么给它运行时入口，要么删掉。
+
+**为什么把它抬成一等原则**：2026-09-18 一轮排查挖出的问题**全是这一条的实例**——
+
+| 实例 | 表面状态 | 实际 |
+|------|---------|------|
+| `constraint` 字段（round11/13） | 字段写了、diff 能验证 | 编译器前 15 行硬窗口 → 字段在后段则**读不到** |
+| `verification.mode`（10/10 skill.yaml） | 声明齐全、取值一致 | **零消费者**：无 schema、无脚本读它 |
+| 幽灵 Verify 阶段（8/10） | SKILL.md 写了 `Verify` 行、`verifier.md` 存在 | 不在 `interface.stages` 的路径上 → **运行时永不被加载** |
+| `artifact-types.location` | 每类产物都有落点声明 | **零脚本解析**；漂移只能靠人眼 |
+| `check-drift` Drift 1/2/5 | 打印 ✅ | **没有任何比对**（假检查） |
+
+它们各自看起来都「已完成」——**文件在、配置在、计数对、检查绿**——但没有一条能沿 Host 的路径走到。
+
+**落地三要求**：
+1. **新增声明/机制时，必须能回答「Host 在哪一步读它」**；答不上来 → 不进核心（与 [eval-contract.md](docs/eval-contract.md) 的 ablation 义务配套）。
+2. **断言必须能失败**：写完检查后要构造一个应被拦下的输入，确认它真的红——不能失败的断言 = 假 ✅。
+3. **派生物必须有 `--check`**：`generate-registry.mjs` / `generate-skill-ir.sh` / `knowledge-directories.generated.sh` 缺漂移检测时，陈旧不可见。
+
+**它不解决什么（如实标注）**：本原则是**治理约定**，无机器强制。上面每条实例的修复都附带了具体断言（G19 / E2E §6 / 新 Drift 2 等），但「Host 是否真的执行」最终仍属 Host 能力（见 [host-capability.md](runtime/contracts/host-capability.md)）——Suite 不假装有强制力。
+
 ---
 
 ## 1. 目录结构契约

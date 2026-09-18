@@ -23,10 +23,12 @@ TODAY=$(date +%Y-%m-%d)
 
 # 1. Execution history from state.json
 if [ -f "$STATE_FILE" ]; then
-  total_executions=$(grep -c '"skill"' "$STATE_FILE" 2>/dev/null || echo 0)
-  completed=$(grep -c '"status": "completed"' "$STATE_FILE" 2>/dev/null || echo 0)
-  partial=$(grep -c '"status": "partial"' "$STATE_FILE" 2>/dev/null || echo 0)
-  blocked_count=$(grep -c '"BLOCK' "$STATE_FILE" 2>/dev/null || echo 0)
+  # ⚠️ 不要写 `$(grep -c X f || echo 0)`：零匹配时 grep 已打印 0 且 exit 1，`|| echo 0` 再补一个
+  #    → 变量成两行 `0\n0` → 指标数字报错/失真（2026-09-18 修）
+  total_executions=$(grep -c '"skill"' "$STATE_FILE" 2>/dev/null || true); total_executions=${total_executions:-0}
+  completed=$(grep -c '"status": "completed"' "$STATE_FILE" 2>/dev/null || true); completed=${completed:-0}
+  partial=$(grep -c '"status": "partial"' "$STATE_FILE" 2>/dev/null || true); partial=${partial:-0}
+  blocked_count=$(grep -c '"BLOCK' "$STATE_FILE" 2>/dev/null || true); blocked_count=${blocked_count:-0}
 
   # Avg confidence (extract numbers, average)
   confidences=$(grep -o '"confidence": [0-9]*' "$STATE_FILE" 2>/dev/null | grep -o '[0-9]*' || echo "")
@@ -46,7 +48,7 @@ fi
 
 # 2. Timeline metrics
 if [ -f "$TIMELINE_FILE" ]; then
-  total_timeline_entries=$(grep -c '"startedAt"' "$TIMELINE_FILE" 2>/dev/null || echo 0)
+  total_timeline_entries=$(grep -c '"startedAt"' "$TIMELINE_FILE" 2>/dev/null || true); total_timeline_entries=${total_timeline_entries:-0}
 
   # Extract durations (finishedAt - startedAt in seconds, if both present)
   durations=$(node -e '

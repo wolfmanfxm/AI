@@ -1,0 +1,190 @@
+# Knowledge Directory Contract v1.0.0
+#
+# `.project-knowledge/` 一级知识目录的**单一权威**：哪些目录存在、谁生产、谁消费、谁维护。
+#
+# 为什么单独一份（而不是塞进 artifact-types.yaml）：
+#   artifact-types.yaml 回答「这个产物是什么**类型**」（数据流路由，跨 skill 通用）；
+#   本文件回答「知识目录有哪些、谁写谁读谁维护」（知识模型契约，只关于 .project-knowledge/）。
+#   两个问题不同层，混在一份表里会重演「四层词汇混读」的老问题（见 ADR-004）。
+#
+# ⚠️ 本文件是 SSOT。以下三处**不得各自维护目录名单**，必须从本文件派生：
+#   - knowledge-compiler.sh 的扫描列表（经 generate-knowledge-dirs.mjs 生成 shell 片段）
+#   - project-analyzer 的 output-format.md / knowledge-builder.md（引用本文件，不另列）
+#   - check-io-connectivity.sh 的一致性断言
+#
+# 背景：2026-09-17（round11）实测发现 Producer 与 Consumer 的目录集合不一致——
+#   analyzer 写 observations/ conventions/ 等，compiler 从不索引；decisions/ 规格写「人工」而实际是 analyzer 产出。
+#   本契约即为消除这类漂移而建立。
+
+version: "1.0.1"
+
+# 字段说明
+#   path                 目录路径（相对 .project-knowledge/）
+#   producer             谁写入。与 artifact-types.yaml 的 producer **同义**——取真实产出者名
+#                        （project-analyzer | project-planner | project-architect | … | human），
+#                        多个产出者用逗号分隔。不要写成 analyzer/human 二值：
+#                        planner/reviewer 等既非 analyzer 也非 human，二值枚举会迫使它们被误标。
+#   ownership            维护归属：generated（工具产出，可被重扫覆盖）| manual（人工维护，重扫不覆盖）
+#   indexed_by_compiler  是否进 knowledge-index.json（→ 经 context-package 注入下游 skill）
+#   human_readable       是否为人读产物（与 indexed_by_compiler 至少有一为 true，否则即「死产出」）
+#   required_frontmatter Producer **应当**写入的 frontmatter 字段（规范要求，见 knowledge-builder.md）
+#   compiler_enforced    其中 Compiler **硬校验**的子集（缺失即 exit 1、拒绝生成 index）
+#
+#   ⚠️ 为什么两者要分开：round11 实测——patterns/components/api 的 `statement` 在真实项目合规率 **0/12**。
+#      把 `statement` 纳入 compiler_enforced 会让**每个真实项目都编译失败**，比现状更糟。
+#      因此：Producer 该写 ≠ Consumer 该拦。差距本身是要被记录的事实，不是要被硬拦的错误。
+#
+# 路径写法约定（**人读，无机器强制**）：
+#   指向知识目录的路径**一律写全 `.project-knowledge/` 前缀**。
+#
+#   ⚠️ 机器**只能**校验带前缀的写法（I2/4.4）。裸写（`CHANGELOG.md` 不带目录、或 `proposals/PLAN-*.md`
+#      只写目录名）机器无法判断它是知识产物还是项目文件——**这类只能靠人工评审**。实证：
+#      2026-09-17 releaser 的 CHANGELOG 漂到项目根目录（违反「生成产物必须进 .project-knowledge/」），
+#      全仓检查绿灯放行，4.4 也抓不到；是人工评审发现的。写路径时请不要省前缀。
+#
+# 不变量：
+#   I1  compiler 实际扫描的目录集合 == { indexed_by_compiler: true }（双向相等，防「手写第二份名单」）
+#       → 由 knowledge-compiler.sh **运行时**强制（不一致即 exit 1）
+#   I2  规格里声明的写入目录 ⊆ 本文件声明的目录（防产出未声明的目录）。两个覆盖面：
+#       4.2 = analyzer 的 Coverage Gate 表；4.4 = **全部** skill 规格里 `.project-knowledge/<seg>/`
+#       形式的显式路径（扫描面 skills/ runtime/ workflow-protocol/ shared/）。
+#       → 由 check-io-connectivity.sh【4】断言
+#   I3  每个目录 indexed_by_compiler ∨ human_readable（防「有 producer、无 consumer」的死产出）
+#       → 由 check-io-connectivity.sh【4】断言，并断言「生成片段与契约同步」（防本文件改了消费方没跟上）
+#   I4  本文件 required_frontmatter 里的每个字段，必须已在 analyzer 的 output-format.md 字段表中声明
+#       → 由 check-io-connectivity.sh【4】断言。成因实证：knowledge-builder 说 statement 必写，
+#         而权威字段表没列它 → 产出者按字段表走 → 真实项目合规率 0/12。
+
+directories:
+
+  # ── 进 knowledge-index 的目录（compiler 扫描）──────────────────
+
+  rules:
+    path: rules/
+    producer: human
+    ownership: manual
+    indexed_by_compiler: true
+    human_readable: true
+    required_frontmatter: [constraint]
+    compiler_enforced: [constraint]
+
+  decisions:
+    path: decisions/
+    producer: human, project-architect, project-analyzer
+    # 三方都会写：human 手写 ADR；architect 写 decisions/ARCHITECTURE-*.md（artifact-types.yaml 的 design 类型）；
+    # analyzer 重扫与存量补齐（round11 实测）。多个产出者不影响 ownership——decisions/ 仍是人工维护，
+    # 重扫不得覆盖（这与「谁写」是两个问题）。
+    ownership: manual
+    indexed_by_compiler: true
+    human_readable: true
+    required_frontmatter: [constraint]
+    compiler_enforced: [constraint]
+
+  patterns:
+    path: patterns/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: true
+    human_readable: true
+    required_frontmatter: [statement]
+    compiler_enforced: []
+
+  components:
+    path: components/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: true
+    human_readable: true
+    required_frontmatter: [statement]
+    compiler_enforced: []
+
+  api:
+    path: api/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: true
+    human_readable: true
+    required_frontmatter: [statement]
+    compiler_enforced: []
+
+  architecture:
+    path: architecture/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: true
+    human_readable: true
+    compiler_enforced: []
+
+  experience:
+    path: experience/
+    producer: human
+    ownership: manual
+    indexed_by_compiler: true
+    human_readable: true
+    compiler_enforced: []
+
+  playbooks:
+    path: playbooks/
+    producer: human
+    ownership: manual
+    indexed_by_compiler: true
+    human_readable: true
+    compiler_enforced: []
+
+  recommendations:
+    path: recommendations/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: true
+    human_readable: true
+    compiler_enforced: []
+
+  # ── 不进 index、但仍是正式产出（人读 / 暂存 / 下游直读）──────────
+
+  observations:
+    path: observations/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: false   # 刻意不索引：它是 graph.json 中 antipattern/risk 节点的「人读镜像」
+    human_readable: true         # 机器链路经 graph.json 走，本目录给人看
+    compiler_enforced: []
+
+  conventions:
+    path: conventions/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: false
+    human_readable: true
+    compiler_enforced: []
+
+  domain:
+    path: domain/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: false   # 由 Resolver/Generator 直读，不经 index（见 runtime/contracts/domain-model.md）
+    human_readable: true
+    compiler_enforced: []
+
+  proposals:
+    path: proposals/
+    producer: project-planner     # PLAN-*.md；见 artifact-types.yaml 的 planning 类型
+    ownership: generated
+    indexed_by_compiler: false   # 任务产物落点（PLAN-*.md），不是长期知识
+    human_readable: true
+    compiler_enforced: []
+
+  reports:
+    path: reports/
+    producer: project-tester, project-reviewer, project-refactorer   # REVIEW/TEST-REPORT/REFACTOR
+    ownership: generated
+    indexed_by_compiler: false   # 任务产物落点（REVIEW/TEST-REPORT/REFACTOR），不是长期知识
+    human_readable: true
+    compiler_enforced: []
+
+  candidates:
+    path: candidates/
+    producer: project-analyzer
+    ownership: generated
+    indexed_by_compiler: false   # 刻意不索引：Candidate 生命周期未验证，见 knowledge-lifecycle.md
+    human_readable: true         # Reviewer 在晋升流程中读取
+    compiler_enforced: []

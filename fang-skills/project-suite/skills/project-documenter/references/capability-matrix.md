@@ -7,7 +7,7 @@
 ✓ API 文档生成（从代码提取接口定义）
 ✓ README 编写/更新
 ✓ 架构决策记录（ADR）
-✓ Changelog 生成（从 git log + PR）
+✗ Changelog 生成 —— 归 releaser（release 产物的一部分）
 ✓ 组件文档（Props/Events/Slots 表格）
 
 ### 不做

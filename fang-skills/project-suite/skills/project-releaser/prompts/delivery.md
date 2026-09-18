@@ -4,10 +4,10 @@
 
 ## Actions
 
-写入：
+写入 `.project-knowledge/reports/` 下（**不在项目根目录**）：
 1. `CHANGELOG.md` — 按版本分组（Added/Changed/Fixed/Deprecated/Removed）
 2. `RELEASE-CHECKLIST.md` — 逐项检查结果 + 回滚方案
-3. 版本号推荐 — semver 版本号 + 推荐理由
+3. 版本号推荐 — semver 版本号 + 推荐理由（呈现在报告里，不单独落文件）
 
 **不执行** `npm publish` / `git push --tags` — 这些由人工执行。
 

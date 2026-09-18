@@ -10,7 +10,7 @@ description: >
 # Refactorer
 
 > 代码 → 识别坏味道 → 安全重构 → 验证 → REFACTOR.md
-> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -34,8 +34,7 @@ description: >
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) + [prompts/verifier.md](prompts/verifier.md) | @template: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 
 ## 职责边界

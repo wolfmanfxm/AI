@@ -27,19 +27,72 @@ GENERATED_BY="knowledge-compiler"
 SCHEMA_VERSION="1.1.0"
 COMPILER_ID="${GENERATED_BY}/${SCHEMA_VERSION}"
 
-# --- 自校验（先于任何写盘）：rules/decisions 必须有 constraint，缺失则 exit 1，绝不落盘 invalid index/hash ---
-MISSING_CONSTRAINT=0
-for f in $(find "$KNOWLEDGE_DIR/rules" "$KNOWLEDGE_DIR/decisions" -name "*.md" -not -name "index.md" -type f 2>/dev/null | sort); do
-  if ! sed -n '1,15p' "$f" | grep -q '^constraint:'; then
-    echo "❌ 缺少 constraint: ${f#"$KNOWLEDGE_DIR"/}"
-    MISSING_CONSTRAINT=$((MISSING_CONSTRAINT + 1))
-  fi
-done
-if [ "$MISSING_CONSTRAINT" -gt 0 ]; then
-  echo "❌ ${MISSING_CONSTRAINT} 个 rules/decisions 缺少 constraint 字段（REQUIRED，拒绝生成 index）"
+# --- 契约加载（SSOT: shared/schemas/knowledge-directories.yaml，经生成器落成 shell 片段）---
+# 目录集合与「硬校验哪些 frontmatter 字段」都来自契约，本脚本不再自持一份名单。
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+KD_FRAGMENT="$SCRIPT_DIR/knowledge-directories.generated.sh"
+if [ ! -f "$KD_FRAGMENT" ]; then
+  echo "❌ 缺少 $KD_FRAGMENT —— 运行 node shared/scripts/generate-knowledge-dirs.mjs"
   exit 1
 fi
-echo "✅ 所有 rules/decisions 均含 constraint"
+# shellcheck source=/dev/null
+. "$KD_FRAGMENT"
+
+# 取 frontmatter（首个 `---` 到下一个 `---` 之间）里的顶层字段行；无 frontmatter 或字段缺失则输出空。
+#
+# ⚠️ 为什么不能用 `sed -n '1,15p' | grep`：frontmatter 没有行数上限。实测真实项目里
+#    `sources:` 列了多条就足以把后写的字段推到第 17/19/24 行——字段**写了但读不到**，
+#    于是「补齐成功」与「编译器仍拒绝生成 index」同时成立（round13 实证）。
+fm_field() {
+  awk -v key="$2" '
+    NR == 1 { if ($0 ~ /^---[[:space:]]*$/) { infm = 1; next } else { exit } }
+    infm && /^---[[:space:]]*$/ { exit }
+    infm && index($0, key ":") == 1 { print; exit }
+  ' "$1" 2>/dev/null || true
+}
+
+# --- 契约不变量 I1：本脚本扫描的目录必须**恰好等于**契约里 indexed_by_compiler: true 的集合 ---
+# 防「手写第二份名单」：改契约或改 emit_one 都必须让两边同时更新，否则此处硬失败。
+SCANNED="$(grep -oE 'emit_one "[a-z]+"' "$0" 2>/dev/null | sed 's/emit_one //;s/"//g' | tr '\n' ' ' | sed 's/ *$//' || true)"
+if [ "$SCANNED" != "$KD_INDEXED" ]; then
+  echo "❌ 扫描列表与契约不一致（不变量 I1）"
+  echo "   本脚本: ${SCANNED:-<空>}"
+  echo "   契约  : $KD_INDEXED"
+  echo "   → 二者必须一致，契约见 shared/schemas/knowledge-directories.yaml"
+  exit 1
+fi
+
+# --- 自校验（先于任何写盘）：契约要求 Compiler 硬校验的字段，缺失则 exit 1，绝不落盘 invalid index/hash ---
+MISSING=0
+for pair in $KD_ENFORCED; do
+  kd_dir="${pair%%:*}"; kd_field="${pair##*:}"
+  for f in $(find "$KNOWLEDGE_DIR/$kd_dir" -name "*.md" -not -name "index.md" -type f 2>/dev/null | sort); do
+    if [ -z "$(fm_field "$f" "$kd_field")" ]; then
+      echo "❌ 缺少 $kd_field: ${f#"$KNOWLEDGE_DIR"/}"
+      MISSING=$((MISSING + 1))
+    fi
+  done
+done
+if [ "$MISSING" -gt 0 ]; then
+  echo "❌ ${MISSING} 个文件缺少契约要求硬校验的 frontmatter 字段（KD_ENFORCED=\"$KD_ENFORCED\"），拒绝生成 index"
+  echo "   契约: shared/schemas/knowledge-directories.yaml 的 compiler_enforced"
+  echo "   字段写法: shared/templates/evidence-header.md"
+  exit 1
+fi
+echo "✅ 契约硬校验字段齐全（$KD_ENFORCED）"
+
+# 派生值可见性：存量补齐写的是 analyzer 从正文派生的值，不是人工确认的值——
+# 它们会成为 blocking 约束注入下游，所以必须在**消费点**可见，不能静默。
+KD_DERIVED=0
+for pair in $KD_ENFORCED; do
+  kd_dir="${pair%%:*}"; kd_field="${pair##*:}"
+  n=$( { grep -rl "^${kd_field}_source:[[:space:]]*derived-from-body" "$KNOWLEDGE_DIR/$kd_dir" --include='*.md' 2>/dev/null || true; } | wc -l | tr -d ' ')
+  KD_DERIVED=$((KD_DERIVED + n))
+done
+if [ "$KD_DERIVED" -gt 0 ]; then
+  echo "⚠️ ${KD_DERIVED} 个文件的契约字段是 analyzer 从正文**派生**的（未经人工确认，见 *_source: derived-from-body）"
+  echo "   → 这些值会以 blocking 约束注入下游；建议人工复核，确认后移除 *_source 标记"
+fi
 
 # --- change-detection：源文件无变化则复用 index，不重扫（改 rule 不重跑 analyzer） ---
 # 摘要 = 编译器身份 + 每源 `<路径, 内容摘要>`，折叠成一个 shasum 后存入 .hash。三项都要参与：
@@ -97,7 +150,7 @@ node -e '
 detect_scope() {
   # 决策 scope：优先 frontmatter `scope:`，否则按文件名约定（ARCHITECTURE-* → task，其余 → project）
   local f="$1" s
-  s="$(sed -n '1,15p' "$f" | grep -m1 '^scope:' | sed 's/^scope:[[:space:]]*//' | tr -d '[:space:]"' 2>/dev/null || true)"
+  s="$(fm_field "$f" scope | sed 's/^scope:[[:space:]]*//' | tr -d '[:space:]"' 2>/dev/null || true)"
   if [ -z "$s" ]; then
     case "$(basename "$f")" in
       ARCHITECTURE-*) s="task" ;;

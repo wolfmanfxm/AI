@@ -34,8 +34,7 @@ description: >
 | Stage | Prompt | 模板 |
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
-| Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
+| Execution | [prompts/execution.md](prompts/execution.md) + [prompts/verifier.md](prompts/verifier.md) | @template: execution |
 | Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
 | Delivery | [prompts/delivery.md](prompts/delivery.md) | @template: delivery |
 

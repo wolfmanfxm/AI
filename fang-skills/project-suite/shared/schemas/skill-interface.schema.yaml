@@ -38,8 +38,10 @@ fields:
     type: object
     properties:
       writes_state: boolean       # 是否写入 .project-knowledge/runtime/state.json
-      writes_knowledge: boolean   # 是否写入 .project-knowledge/
-      modifies_code: boolean      # 是否修改项目源码
+      writes_knowledge: boolean   # 是否写入 .project-knowledge/（**任何**写，含 reports/ 等任务产物落点）
+      modifies_code: boolean      # 是否**改动既有**项目源码。新增文件不算——
+                                  # tester 新增 *.test.ts 记 false、refactorer 改写既有源码记 true。
+                                  # 若 Host 需要「是否在源码树内产生文件」这个更强的语义，另加字段，不要复用本字段。
       writes_timeline: boolean    # 是否追加 timeline.json
 
   failure_modes:

@@ -5,13 +5,14 @@ description: >
   根据需求和项目规范生成生产级代码：组件、页面、API 模块、工具函数、类型定义（技术栈由 context + project-knowledge 决定，不预设框架）。
   触发词：写一个、实现、创建组件、新增页面、开发这个功能、生成代码、帮我写、修改、调整、修复、
   删除、改、搭建、implement、create component、build feature、generate code、write a、modify、
-  fix、delete、change、update、build、开发、编写、添加。
+  fix、delete、change、update、build、编写、添加。
+  不用于：任务拆解、架构选型、代码审查、纯重构。
 ---
 
 # Generator
 
 > 需求 + 项目知识 → 生产级代码
-> Execute → Verify | 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
+> 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则
 
@@ -35,10 +36,9 @@ description: >
 |-------|--------|------|
 | Discovery | [prompts/discovery.md](prompts/discovery.md) | @template: discovery |
 | Execution | [prompts/execution.md](prompts/execution.md) | @template: execution |
-| Verify | [prompts/verifier.md](prompts/verifier.md) | @template: validation |
-| Validation | [prompts/validation.md](prompts/validation.md) | @template: validation |
+| Validation | [prompts/validation.md](prompts/validation.md) + [prompts/verifier.md](prompts/verifier.md) | @template: validation |
 
-> 深度（`depth_profiles`，见 skill.yaml）：**minimal**=跳过 Validation（Discovery → Execution → Verify）；**standard/full**=4 段全走。单文件小改的独立复验是浪费。
+> 深度（`depth_profiles`，见 skill.yaml）：**minimal**=跳过 Validation 阶段（Discovery → Execution；verifier 挂在 Validation 上，一并跳过）；**standard/full**=4 段全走。单文件小改的独立复验是浪费。
 
 ## 职责边界
 

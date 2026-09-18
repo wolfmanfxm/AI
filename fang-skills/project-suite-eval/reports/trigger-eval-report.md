@@ -7,15 +7,15 @@
 | Metric | Severity | Value |
 |--------|----------|-------|
 | Skills evaluated | — | 10 |
-| Total CN triggers | — | 94 |
+| Total CN triggers | — | 93 |
 | Total EN triggers | — | 52 |
 | CN overlaps (>1 skill) | ⛔ 硬冲突 | 0 |
 | EN overlaps (>1 skill) | ⛔ 硬冲突 | 0 |
-| CN 跨 skill 子串包含 | 🔍 候选 | 3 |
-| CN↔EN 交叉 | 🔍 候选 | 1 |
+| CN 跨 skill 子串包含 | 🔍 候选 | 1 |
+| CN↔EN 交叉 | 🔍 候选 | 0 |
 | Skills with no triggers | ❌ 缺陷 | 0 |
 | Skills with frontmatter drift | ❌ 缺陷 | 0 |
-| Avg CN triggers/skill | 9.4 |
+| Avg CN triggers/skill | 9.3 |
 
 ## 🔍 候选：字符串包含（**非冲突**，需人工/行为确认）
 
@@ -31,16 +31,6 @@
 | 短触发词 | 所属 Skill | 被包含于 | 所属 Skill |
 |---------|-----------|---------|-----------|
 | 发布 | project-releaser | 从分析到发布 | pipeline-orchestrator |
-| 开发 | project-generator | 自动化开发 | pipeline-orchestrator |
-| 开发 | project-generator | 开发计划 | project-planner |
-
-### CN↔EN 交叉
-
-同一串（或互相包含）同时是某 skill 的中文触发词与另一 skill 的英文触发词：
-
-| CN 触发词 | 所属 Skill | EN 触发词 | 所属 Skill |
-|----------|-----------|----------|-----------|
-| changelog | project-releaser | change | project-generator |
 
 ## Per-Skill Trigger Count
 
@@ -50,7 +40,7 @@
 | project-analyzer | 9 | 3 |
 | project-architect | 11 | 4 |
 | project-documenter | 8 | 4 |
-| project-generator | 16 | 11 |
+| project-generator | 15 | 11 |
 | project-planner | 8 | 4 |
 | project-refactorer | 9 | 6 |
 | project-releaser | 9 | 5 |
