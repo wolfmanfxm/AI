@@ -2,6 +2,9 @@
 #
 # 所有可用 Stage 类型的注册中心。Host 据此验证 Skill 声明的 stages 是否合法。
 # 每个 stage 定义标准 I/O 契约 + 适用条件。
+#
+# 消费者：Host（运行时校验）；`shared/scripts/check-conformance.sh` G21（静态校验
+# 「skill 声明的 stage ⊆ 本文件」+「每个 stage 都有 contracts」）。
 
 version: "1.0.0"
 
@@ -15,7 +18,7 @@ stages:
     exit_condition: scope_confirmed + user_approved
     checkpoint: true
     template: stage-templates/discovery.md
-    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
+    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser, orchestrator]
 
   execution:
     description: 核心业务逻辑执行
@@ -27,6 +30,16 @@ stages:
     template: stage-templates/execution.md
     used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
 
+  orchestrate:
+    description: 跨 Skill Pipeline 编排建议 — 按 pipeline 定义逐 Skill 推进，在 Decision Boundary 暂停
+    standard_input: [pipeline_definition, upstream_outputs]
+    standard_output: [pipeline-state.json, pipeline-report.md]
+    entry_condition: pipeline_selected + upstream_ready
+    exit_condition: pipeline_completed | user_terminated
+    checkpoint: true  # Decision Boundary 即本 stage 的 checkpoint（skill-policy.yaml orchestrate.checkpoint=true）
+    template: stage-templates/execution.md  # 无独立模板：prompts/orchestrate.md 声明 @template: execution
+    used_by: [orchestrator]
+
   validation:
     description: 产出质量独立验证
     standard_input: [execution_outputs]
@@ -35,7 +48,7 @@ stages:
     exit_condition: no_critical_findings
     checkpoint: false
     template: stage-templates/validation.md
-    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser]
+    used_by: [analyzer, generator, planner, architect, reviewer, tester, refactorer, documenter, releaser, orchestrator]
 
   delivery:
     description: 最终产出写入与同步
@@ -45,7 +58,7 @@ stages:
     exit_condition: all_files_written + manifest_completed
     checkpoint: false
     template: stage-templates/delivery.md
-    used_by: [analyzer, planner, architect, reviewer, refactorer, documenter, releaser]
+    used_by: [analyzer, planner, architect, reviewer, refactorer, documenter, releaser, orchestrator]
 
   code-audit:
     description: 现状探查 — 标注已有实现状态
@@ -75,6 +88,9 @@ contracts:
   execution:
     consumes: [discovery_output, project_source]
     produces: [skill_specific_outputs]
+  orchestrate:
+    consumes: [pipeline_definition, upstream_outputs]
+    produces: [pipeline-state.json, pipeline-report.md]
   validation:
     consumes: [execution_outputs]
     produces: [validation-report.md]

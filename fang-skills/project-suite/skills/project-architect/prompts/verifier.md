@@ -13,11 +13,13 @@
 
 | 条件 | 判定 |
 |------|------|
-| V1-V8 全部通过 | ✅ Accepted |
-| V1 失败(ADR 不完整) | ❌ Rejected |
-| V5 失败(方案自相矛盾) | ❌ Rejected |
-| V8 失败(domain 冲突) | ❌ Rejected — 与 confirmed domain 术语冲突，需澄清 |
-| V3-V7 部分失败 | 🟡 Accepted + adjusted confidence |
+| V1-V11 全部通过 | ✅ Accepted |
+| V1-V4 / V6 失败(ADR 决策链或对比矩阵不完整) | ❌ Rejected → 返回 Execution 补全 |
+| V10 失败(Graph 引用不存在) | ❌ Rejected → 修正引用 |
+| V11 失败(术语冲突) | ❌ Rejected — 与 `architecture/glossary.md` 的术语/`naming` 前缀冲突，需澄清 |
+| V7-V9 部分失败 | 🟡 Accepted + adjusted confidence |
+
+> 判定口径与 [validation.md](validation.md) 的 `On Failure` 列一一对应：V1-V4/V6/V10 为硬失败，V7-V9 为 🟡，V11 为阻断。
 
 ## Evidence Format
 

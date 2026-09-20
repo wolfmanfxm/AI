@@ -27,7 +27,6 @@ Project Suite 包含 9 个 skill。最简单的组织方式是把它们串成链
 
 ### 正向
 - **skill 可替换**。只要新 skill 的 interface 声明相同的 produces/consumes，就可以无缝替换，不需要改任何下游 skill。
-- **context 可裁剪**。每个 skill 通过 context_contract 只加载自己需要的知识（见 skill.yaml `context_contract` 字段），避免无限膨胀。
 - **并行化自然产生**。scheduler 不需要知道 skill 的执行顺序，只需要知道哪些 Capability 类型已就绪。
 
 ### 负向
@@ -52,6 +51,6 @@ Project Suite 包含 9 个 skill。最简单的组织方式是把它们串成链
 
 ## Related
 - [context.md](../../runtime/context/context.md) — Context Protocol 定义
-- [context-priority.md](../../runtime/context/context-priority.md) — REQUIRED/IMPORTANT/OPTIONAL 分级
+- [context-resolution.md](../../runtime/context/context-resolution.md) — context.json 与代码不一致时的裁决规则
 - [orchestration.md](../../runtime/protocols/orchestration.md) — 基于 Capability 的编排规则
 - [capabilities.yaml](../../runtime/registry/capabilities.yaml) — Capability 类型定义和 skill 注册

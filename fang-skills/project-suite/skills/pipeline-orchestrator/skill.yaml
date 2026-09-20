@@ -23,11 +23,6 @@ waivers:
 triggers_cn: [全流程, 一键执行, 自动编排, pipeline, 完整链路, 端到端, 从分析到发布, 自动化开发]
 triggers_en: [full pipeline, orchestrate, end-to-end, auto sdlc, run all, complete workflow]
 
-context_contract:
-  must_read: [capabilities.yaml, workflow-library.yaml, skills.generated.yaml, state.json]
-  query: []
-  neednt_read: []
-
 interface:
   inputs:
     - { name: capabilities.yaml, type: state, required: true, source: runtime/registry, fixture: true, description: Skill 能力注册中心 }

@@ -155,7 +155,9 @@ Plan: "新增收货地址 CRUD 页面" → Resolver 输出：
 5. for (r of context.rules):
      → if r.blocking → 必须遵守，否则报错
 6. for (rec of context.recommendations):
-     → 新代码遵循 rec.recommendation（改进）；理解存量代码看 rec.status_quo（现状）
+     → 新代码遵循 rec.statement（改进方向，恒 advisory）
+     → 存量代码的**现状**不在本桶——看 context.knowledge[] 的 pattern（recommendations 只描述应然，
+       不描述现状；现状的权威是 KnowledgeBase / Graph，见 capabilities.yaml 的 Recommendation 说明）
 ```
 
 ### 与 knowledge-list.json（已废弃）的对比

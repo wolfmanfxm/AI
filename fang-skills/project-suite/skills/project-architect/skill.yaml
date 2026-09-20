@@ -20,11 +20,6 @@ review_cadence_days: 90
 triggers_cn: [架构设计, 技术选型, 模块设计, 系统设计, 数据库设计, API 设计, 架构评审, 怎么设计, 选什么技术, 模块怎么划分, 接口怎么定义]
 triggers_en: [design architecture, tech stack, system design, API design]
 
-context_contract:
-  must_read: [context.json, PLAN.md]
-  query: [architecture, components, api]
-  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
-
 interface:
   inputs:
     - { name: context.json, type: context, required: true, source: project-analyzer, fixture: true, description: 技术栈/路径别名/约定 }

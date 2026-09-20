@@ -192,10 +192,6 @@ execution:
 # 跨 Skill 的全局规则
 
 cross_skill:
-  context_loading:
-    description: 所有 Skill 的上下文加载统一按 context_contract 执行
-    priority: context-priority.yaml
-
   confidence_flow:
     description: confidence 沿 DAG 向下传播，下游取上游最低值作为基数
     upstream_min_becomes: downstream_base

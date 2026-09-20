@@ -1,3 +1,18 @@
+# ⚠️ 已归档（2026-09-18）——纯参考，无消费者。
+#
+# Historical/reference schema; runtime validation uses skill.yaml + generated IR.
+#
+# 实测：check-conformance.sh / check-drift.sh 都不引用本文件——skill.yaml 从未被任何 schema 校验过。
+# 且本文件只描述 interface: 块，而 context_contract / verification / triggers_* 等顶层字段根本没有
+# schema（见 roadmap G1）。
+#
+# 为什么不给它补一个消费者：当前已有三处权威载体（skill.yaml 本身、生成的 skill-ir.yaml、registry），
+# 再引入 schema 校验会变成第二套 interface authority。按 SUITE_SPEC §0.1 的逆命题——
+# 「只被静态工具消费、不被运行时消费的声明，要么给它运行时入口，要么删掉」——此处选择归档。
+#
+# 若将来真要做 schema 校验，需同时给出 Host 侧消费者与失败用例，而不是只为「schema 有人读」而补。
+
+
 # Skill Interface Standard v1.2.0
 #
 # 所有 skill 的标准化接口定义（intrinsic 部分）。

@@ -44,8 +44,33 @@
 ### 0.1 Runtime Reachability（可执行性契约）
 
 > **任何「声明存在的行为」，都必须能沿 Host 的真实执行路径找到入口；仅有文件、配置、计数、静态 ✅ 都不算可执行。**
+>
+> **且：光有入口不够——至少要有一个失败用例能证明它真的被执行了。**
+> 「检查器打印 ✅」只证明它没报错，不证明它有判别力；**能接通的说接通、接不通的也必须报错**，
+> 才算执行过。故每条新增断言都要求配一个「应被拦下」的 fixture（例：`check-io-connectivity.sh`
+> 文件尾的自检段——用断链/合法两个 fixture 双向证明自己有判别力）。
 
 **逆命题同样成立**：只被静态工具消费、**不被运行时消费**的声明，要么给它运行时入口，要么删掉。
+
+**退役契约的落点规则（2026-09-20 补）**：
+
+> Retired Contract may exist in history/archive, but **MUST NOT** be referenced by any
+> executable path, active schema, active configuration, generated artifact, or Host execution instruction.
+
+即：**退役声明只允许落在历史区**——`docs/roadmap.md`、`docs/archive/`、ADR 的历史/迁移说明、git 历史。
+**出现在下列任一位置即算失败**：`skills/*/skill.yaml`、`skills/*/SKILL.md`、`shared/scripts/`、
+`*.generated.*`、`runtime/config/`、active schema、Host 执行指令（prompt / stage-template / adapter）、
+`runtime/context/` 的 active 文件。
+
+**为什么单列一条**：它比「零消费者」更严。零消费者只能证明**删了不会坏**，证明不了
+**它没有在暗示自己仍然存在**。2026-09-20 清退「Context Engine 契约」族（字段块 + 引擎规格，见
+[roadmap G1.1](docs/roadmap.md)）时，关键词扫描早已全绿，逐类语义复查仍揪出三处复述旧语义——
+本规范 §3.1 的一处字段墓碑、`check-yaml.sh` 注释里的文件名、以及归档 `.md` **正文仍是现在时执行语态**
+（"所有 Skill 统一按此栈加载上下文" / "缺失任一项 → 下游 skill BLOCK，拒绝执行"）。
+**故清场验收必须做两遍：先按精确关键词 grep 定位，再逐条读命中处是不是仍在描述当前行为。**
+（本条规则自身即不写退役名，以保证「活跃文件命中数 = 0」这条不变式无需自我豁免。）
+搜精确关键词，**不要搜 `context`**——`runtime/context/` 里的 `context.md` / `context-resolution.md`
+是**活的 Context Protocol**（描述产物及其 LLM 处置规则），与要清退的 Context **Engine** 是两回事。
 
 **为什么把它抬成一等原则**：2026-09-18 一轮排查挖出的问题**全是这一条的实例**——
 
@@ -140,26 +165,24 @@ owner: project-suite        # 固定
 produces: [<Capability>+]   # 产出的能力类型（Capability Requirement 的供给侧）
 consumes: [<Capability>*]   # 消费的能力类型（Capability Requirement 的需求侧，依赖由它推导）
 requires: [<resource>*]     # 运行前提（agent 类型/外部依赖）
-context_contract:           # 🔴 Context 裁剪（减少 context 膨胀）
-  must_read: [<path>*]      #  必须加载，缺失则 DEGRADED
-  should_read: [<path>*]    #  有则加载，无则跳过
-  neednt_read: [<path>*]    #  明确不需要加载
 boundary: <string>          # 一行职责边界
 ```
 
 > 已移除字段（ADR-003）：`priority`（→ scheduler.yaml skill_order）、`depends_on`/`parallel_with`（→ produces/consumes 推导的 Capability DAG）。skill 不声明「依赖哪个 skill」，只声明「需要什么能力」——依赖关系由 produces/consumes 推导。
-```
 
-### 3.2 版本兼容声明（🟡 IMPORTANT）
+### 3.2 版本兼容声明（→ suite 级，不在 skill.yaml）
 
-```yaml
-compatibility:
-  context_schema: ">=1.0.0"   # 所需 context.json schema 最低版本
-  state_schema: ">=1.0.0"     # 所需 state.json schema 最低版本
-  suite: ">=0.7.0"            # 所需 suite 最低版本
-```
+> **2026-09-20 修正**：本节此前要求**每个 skill** 声明 `compatibility:` 块（🟡 IMPORTANT + 「必须声明」），
+> 与 [ADR-003](docs/decisions/ADR-003-skill-contract-vs-orchestration.md) 的权威映射表**直接冲突**——
+> ADR-003 白纸黑字：「版本兼容约束 → `compatibility.yaml` 的 `matrix`，**不是** skill.yaml」。
+> 实测该块 **0/10 声明**，且 G1–G17 无一项覆盖它，于是「10 个 skill 全部不遵守 MUST」全仓绿灯。
+>
+> 现已删去 skill 级要求，**兼容性单一承载于 `runtime/registry/compatibility.yaml`**（含 `current` 版本登记
+> 与 `matrix` 兼容矩阵，由 `check-consistency.sh` 的 L3 真实消费）；
+> suite 级最低要求见 `suite-manifest.yaml` 的 `compatibility:` 块。
+> **不为「让规范和 skill.yaml 一致」去补 10 份声明**——那是新增一份无消费者的权威。
 
-Skill 独立迭代版本号时，必须声明对上游 schema 的最低版本要求。
+
 上游 schema 变更（如 context.json 新增 REQUIRED 字段）→ 下游 skill 的 `context_schema` 版本跟进。
 
 ### 3.3 Capability 类型枚举（🔴 REQUIRED，不可自定义）

@@ -19,11 +19,6 @@ review_cadence_days: 90
 triggers_cn: [写测试, 测试用例, 单元测试, 集成测试, 组件测试, 测试覆盖, 跑测试, 加测试]
 triggers_en: [write tests, test cases, unit test, test coverage, add test, generate test]
 
-context_contract:
-  must_read: [context.json, PLAN.md]
-  query: [patterns]
-  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
-
 interface:
   inputs:
     - { name: 被测代码, type: implementation, required: true, source: user, fixture: false, description: 待测试的源文件或变更列表 }

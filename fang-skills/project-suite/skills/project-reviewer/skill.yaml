@@ -19,11 +19,6 @@ review_cadence_days: 90
 triggers_cn: [代码审查, review, 检查代码, 审查 PR, 代码质量, 审查, 帮我看看这段代码, 这个 PR 怎么样]
 triggers_en: [code review, security review, audit code]
 
-context_contract:
-  must_read: [context.json, PLAN.md, ARCHITECTURE.md]
-  query: []
-  neednt_read: [.project-knowledge/observations/]
-
 interface:
   inputs:
     - { name: 变更代码, type: implementation, required: true, source: project-generator, fixture: false, description: 待审查的diff/文件列表 }

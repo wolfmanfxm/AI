@@ -21,11 +21,6 @@ waivers:
 triggers_cn: [分析项目, 代码分析, 项目审计, 扫描项目, 梳理组件, 更新项目知识, 刷新项目知识, 项目规范, 编码规范]
 triggers_en: [analyze codebase, scan project, project refresh]
 
-context_contract:
-  must_read: []
-  query: []
-  neednt_read: []
-
 interface:
   inputs:
     - { name: 项目源码, type: implementation, required: true, source: user, fixture: false, description: 工作目录 }
@@ -35,7 +30,7 @@ interface:
     - { name: context.json, type: context, confidence_range: "85-95", description: 标准化项目上下文 }
     - { name: graph.json, type: graph, confidence_range: "75-90", description: 模块依赖图谱 }
     - { name: statistics.json, type: state, confidence_range: "90-95", description: 项目统计数据 }
-    - { name: recommendations.md, type: recommendation, confidence_range: "80-95", description: 项目级应然建议（现状→建议，含依据溯源） }
+    - { name: recommendations/, type: recommendation, confidence_range: "80-95", description: 项目级应然建议（现状→建议，含依据溯源；一条建议一个文件） }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
     - { condition: 源码不可读, severity: FATAL, recovery: 终止分析 }

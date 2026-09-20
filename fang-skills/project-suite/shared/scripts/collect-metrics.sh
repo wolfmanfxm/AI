@@ -19,6 +19,24 @@ mkdir -p "$REPORT_DIR"
 REPORT="$REPORT_DIR/telemetry-report.md"
 TODAY=$(date +%Y-%m-%d)
 
+# ═══ Guard: 前置检查 RUNTIME_DIR（2026-09-20 修）═══
+#
+# 为什么需要：本脚本对**没有 .project-knowledge/runtime/ 的项目**运行时，此前会 **静默 exit 1**
+#   （stdout/stderr 全空、不留报告），根因是两个抑制器合谋——
+#   `manifest_count=$(find "$RUNTIME_DIR" … 2>/dev/null | wc -l)`：
+#   ① `2>/dev/null` 吞掉 find 的报错；② `set -o pipefail` 让 find 的 exit 1 穿透管道；
+#   最终 `set -e` 在无声中终止脚本。CI 里表现为「任务失败但无任何日志」。
+#
+# 处理原则：**响亮失败，而不是把「没有数据」伪装成「0 次执行」**——
+#   后者正是本项目一直在清理的「假绿」问题（见 docs/roadmap.md G3）。
+if [ ! -d "$RUNTIME_DIR" ]; then
+  echo "❌ collect-metrics: 未找到 $RUNTIME_DIR" >&2
+  echo "   该项目尚未执行过任何 skill，没有可采集的遥测数据。" >&2
+  echo "   当前 project-root: $(cd "$PROJECT_ROOT" 2>/dev/null && pwd || echo "$PROJECT_ROOT")" >&2
+  echo "   用法: bash shared/scripts/collect-metrics.sh <project-root>" >&2
+  exit 1
+fi
+
 # ═══ Collect data ═══
 
 # 1. Execution history from state.json
@@ -123,7 +141,7 @@ cat > "$REPORT" << EOF
 
 ## Interpretation
 
-- **Confidence trend**: avg ${avg_confidence}% — ${if [ "$avg_confidence" -ge 80 ]; then echo "healthy"; elif [ "$avg_confidence" -ge 60 ]; then echo "needs attention"; else echo "critical"; fi}
+- **Confidence trend**: avg ${avg_confidence}% — $(if [ "$avg_confidence" -ge 80 ]; then echo "healthy"; elif [ "$avg_confidence" -ge 60 ]; then echo "needs attention"; else echo "critical"; fi)
 - **Reliability**: $completed/$total_executions completed ($(( total_executions > 0 ? completed * 100 / total_executions : 0 ))%)
 - **Interruptions**: $partial partial/interrupted executions — checkpoint protocol should enable resume
 

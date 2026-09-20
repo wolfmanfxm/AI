@@ -381,6 +381,51 @@ fi
 
 echo ""
 
+# ── G21: Stage Registry Contract（stage 声明的注册闭合）──────────────────
+# stage-library.yaml 头部声明「Host 据此验证 Skill 声明的 stages 是否合法」——
+# 本门禁把这条声明接到一个真实消费者上：Skill 声明的 stage 必须已在库里注册。
+# 真实缺口（2026-09-20 发现）：pipeline-orchestrator 声明 stages [discovery, orchestrate, validation, delivery]，
+# 而库里只有 6 个 stage、**没有 orchestrate** —— 声明合法却无库可依。
+echo "========================================"
+echo " G21 Stage Registry Contract（stage 注册闭合）"
+echo "========================================"
+if node -e '
+  const fs=require("fs"),path=require("path");
+  const root=path.resolve(process.argv[1]);
+  const lib=fs.readFileSync(process.argv[2],"utf8");
+  const keyRe=/^  ([a-z][a-z0-9-]*):[ ]*$/gm;
+  const stagesPart=lib.split(/^contracts:/m)[0]||"";
+  const contractsPart=lib.split(/^contracts:/m)[1]||"";
+  const declared=new Set([...stagesPart.matchAll(keyRe)].map(m=>m[1]));
+  const contracted=new Set([...contractsPart.matchAll(keyRe)].map(m=>m[1]));
+  const errs=[];
+  // 退化保护：解析失败时不能静默通过
+  if(!declared.size) errs.push("stage-library.yaml 未解析出任何 stage —— 断言退化，契约或缩进已变");
+  if(!contracted.size) errs.push("stage-library.yaml 未解析出任何 contract —— 断言退化");
+  for(const name of fs.readdirSync(root)){
+    const dir=path.join(root,name);
+    if(!fs.statSync(dir).isDirectory()) continue;
+    const ymlP=path.join(dir,"skill.yaml");
+    if(!fs.existsSync(ymlP)) continue;
+    const yml=fs.readFileSync(ymlP,"utf8");
+    const m=yml.match(/stages:\s*\[([^\]]*)\]/);
+    if(!m) continue;
+    for(const s of m[1].split(",").map(x=>x.trim()).filter(Boolean))
+      if(!declared.has(s)) errs.push(name+" 声明 stage=" + s + "，但 stage-library.yaml 未注册该 stage");
+  }
+  for(const s of declared) if(!contracted.has(s))
+    errs.push("stage=" + s + " 在 stages: 里注册，但 contracts: 里没有对应 I/O 契约");
+  for(const e of errs) console.log("    - " + e);
+  process.exit(errs.length?1:0);
+' "$SKILLS_DIR" "$SUITE_ROOT/runtime/registry/stage-library.yaml" 2>&1; then
+  green "  G21 PASS: 所有 skill 声明的 stage 均已注册，且每个 stage 都有 I/O 契约"
+else
+  red "  G21 FAIL: stage 声明与 stage-library.yaml 不一致（见上）"
+  ERRORS=$((ERRORS+1))
+fi
+
+echo ""
+
 # ── G20: Prompt Reachability（SUITE_SPEC §0.1 的机器强制）──────────────
 # 原则：「任何声明存在的行为，都必须能沿 Host 的真实执行路径找到入口」。
 # 本门禁是它的**通用形式**——G19 只查 verifier 这一个特例，G20 查**全部** prompts/*.md：

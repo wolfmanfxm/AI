@@ -83,12 +83,12 @@ Delivery 读取 `instincts.yaml`：
 
 ## 项目建议（单项目应然，区别于 cross-project Instinct）
 
-> 本阶段产出**单项目建议** `recommendations.md`——分析完本项目后，**根据项目自身现状**（反模式、风险、技术债、统计）直接给出的改进建议 + 依据。它**不依赖跨项目 Instinct**；Instinct 是独立的跨项目产物（用于 Vault promotion），若存在可作为「依据」的佐证，但不是前置条件。
+> 本阶段产出**单项目建议** `recommendations/` 目录（一条建议一个文件）——分析完本项目后，**根据项目自身现状**（反模式、风险、技术债、统计）直接给出的改进建议 + 依据。它**不依赖跨项目 Instinct**；Instinct 是独立的跨项目产物（用于 Vault promotion），若存在可作为「依据」的佐证，但不是前置条件。
 
 | 产出 | 范围 | 性质 | 去向 |
 |------|------|------|------|
 | `instincts.yaml` | 跨项目 | 反复出现的规律（价值判断） | Promotion → Knowledge Vault |
-| `recommendations.md` | 单项目 | 本项目现状 → 应然建议 | 留 `.project-knowledge/`，供本项目 generator/planner 消费 |
+| `recommendations/` | 单项目 | 本项目现状 → 应然建议 | 留 `.project-knowledge/`，供本项目 generator/planner 消费 |
 
 ### 生成逻辑
 
@@ -99,8 +99,8 @@ for each 本项目反模式/风险/技术债:
   若该项是「新代码可避免的」改进方向:
     生成 recommendation:
       priority:      Always / Prefer / Avoid
-      status_quo:    <本项目事实，如「N% 代码存在 X 反模式」「存在超长单文件」>
-      recommendation: <应然，如「新代码避免 X」「新模块拆解超长文件」>
+      statement:     <应然，如「新代码避免 X」——即 frontmatter 的 statement>
+      summary:       <现状一句话 → 建议一句话>（现状只出现在此处与正文「现状：」，不是独立字段）
       basis:         <本项目统计/证据，如「<知识文件> 统计 N%」>
       instinct_ref:  <若 Knowledge Vault 有对应 Instinct 则标注佐证，否则留空>
 ```
@@ -127,6 +127,6 @@ summary: "<现状一句话 → 建议一句话>"
 
 ### 关键约束
 
-- **`recommendations.md` 是「建议」不是「规范」**——generator 用于新代码改进，但不得当 blocking constraint（那是 rules/ 的职责）。
-- **只写「有依据」的建议**——每条 recommendation 必须能溯源到**本项目统计/证据**（status_quo 的 source）；跨项目 Instinct 是可选的佐证，不是必需。
-- **不修改现状描述**——recommendations.md 单独存放，不混进 patterns/api/graph.json（事实与观点分层：现状描述在 patterns/api/graph，价值判断在 recommendations）。
+- **`recommendations/` 是「建议」不是「规范」**——generator 用于新代码改进，但不得当 blocking constraint（那是 rules/ 的职责）。
+- **只写「有依据」的建议**——每条 recommendation 必须能溯源到**本项目统计/证据**（`basis`，即正文「依据：」的 source）；跨项目 Instinct 是可选的佐证，不是必需。
+- **不修改现状描述**——recommendations/ 单独存放，不混进 patterns/api/graph.json（事实与观点分层：现状描述在 patterns/api/graph，价值判断在 recommendations/）。

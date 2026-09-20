@@ -46,7 +46,7 @@ function grabList(content, key) {
   if (!m) return [];
   return m[1].split(',').map(s => s.trim()).filter(Boolean);
 }
-// 提取顶层 key 的完整缩进块（到下一个顶层 key 或 EOF），用于 context_contract / interface 等嵌套结构
+// 提取顶层 key 的完整缩进块（到下一个顶层 key 或 EOF），用于 interface 等嵌套结构
 function grabBlock(content, key) {
   const lines = content.split('\n');
   const start = lines.findIndex(l => new RegExp(`^${key}:`).test(l));
@@ -91,7 +91,6 @@ for (const name of readdirSync(SKILLS_DIR).sort()) {
     stages: grabList(c, 'stages'),
     triggers_cn: grabList(c, 'triggers_cn'),
     triggers_en: grabList(c, 'triggers_en'),
-    context_contract: grabBlock(c, 'context_contract'),
     interface: grabBlock(c, 'interface'),
   });
 }
@@ -167,7 +166,7 @@ capability_types:
   KnowledgeBase:    # .project-knowledge/ + context.json
     description: 项目结构化知识（架构/组件/API/模式/编码约定），含生命周期状态
     format: [.md, .json]
-  Recommendation:   # .project-knowledge/recommendations.md
+  Recommendation:   # .project-knowledge/recommendations/
     description: 项目级应然建议（新代码改进方向，非现状规范；现状见 KnowledgeBase/Graph）
     format: [.md]
     advisory: true  # 建议类能力：不构成硬依赖边，dependency_graph 归入 needs_advisory，缺失不阻塞
@@ -270,7 +269,6 @@ function genSkillsGenerated() {
     lines.push(`    stages: [${s.stages.join(', ')}]`);
     lines.push(`    triggers_cn: [${s.triggers_cn.join(', ')}]`);
     lines.push(`    triggers_en: [${s.triggers_en.join(', ')}]`);
-    if (s.context_contract) lines.push(indent(s.context_contract, 4));
     if (s.interface) lines.push(indent(s.interface, 4));
   }
   return lines.join('\n') + '\n';
@@ -380,24 +378,24 @@ const outputs = {
 const CHECK_MODE = process.argv.includes('--check');
 
 if (CHECK_MODE) {
-  let drift = false;
+  // ⚠️ 只列**真正漂移**的文件名。此前这里硬编码列出全部 4 个（无论实际漂移几个），
+  //    逐行明明写着「capabilities.yaml — 一致」，摘要却把它一并列为漂移项——
+  //    只看摘要的人会去改 3 个本来一致的文件（2026-09-18 修）。
+  const drifted = [];
   for (const [name, content] of Object.entries(outputs)) {
     const filePath = join(REGISTRY_DIR, name);
     const existing = existsSync(filePath) ? readFileSync(filePath, 'utf8') : '';
     if (existing === content) {
       console.log(`✅ ${name} — 一致`);
     } else {
-      drift = true;
+      drifted.push(name);
       console.log(`❌ ${name} — 漂移`);
     }
   }
-  if (drift) {
+  if (drifted.length) {
     console.log('');
-    console.log('❌ Registry drift detected');
-    console.log('runtime/registry/skills.generated.yaml');
-    console.log('runtime/registry/capabilities.yaml');
-    console.log('runtime/registry/skill-catalog.yaml');
-    console.log('runtime/registry/capability-routing.yaml');
+    console.log(`❌ Registry drift detected（${drifted.length}/${Object.keys(outputs).length}）`);
+    for (const name of drifted) console.log(`runtime/registry/${name}`);
     console.log('');
     console.log('Run: node shared/scripts/generate-registry.mjs');
     process.exit(1);

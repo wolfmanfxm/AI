@@ -20,11 +20,6 @@ review_cadence_days: 90
 triggers_cn: [任务拆解, 开发计划, 需求分析, 排期, 估算工作量, 分解任务, sprint 规划, 任务规划]
 triggers_en: [break down tasks, plan sprint, estimate effort, create dev plan]
 
-context_contract:
-  must_read: [context.json]
-  query: [architecture, components]
-  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
-
 interface:
   inputs:
     - { name: user-request, type: request, required: true, source: user, fixture: false, description: 用户需求/任务描述 }

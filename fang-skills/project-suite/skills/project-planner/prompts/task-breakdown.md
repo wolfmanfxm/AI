@@ -192,10 +192,10 @@ target: { module, domain, placement, confidence, evidence }
 ```
 
 - `module` = 归属业务模块（对齐 graph.json 模块节点，不猜）
-- `domain` = 领域归属（对齐 domain model 的 entity/artifact）
+- `domain` = 领域归属（对齐 `.project-knowledge/architecture/glossary.md` 的核心术语表 entity/artifact）
 - `placement` = 具体目录路径（对齐现有同类文件的目录）
 - `confidence` = 放置置信度（< 70 时标注「放置待确认」，Generator 生成前追问）
-- `evidence` = 为何放这里（graph.json 节点 / 已有同类文件路径 / domain artifact）
+- `evidence` = 为何放这里（graph.json 节点 / 已有同类文件路径 / glossary 术语）
 
 **放错位置的代价高于放慢一步**：拿不准 module 时，宁可标 `confidence<70 + investigate`，不要自信地放错目录。
 
@@ -399,7 +399,7 @@ B 完全独立？                 → 无依赖
 #### T-001: {任务名}
 - **task_type:** vertical（默认）/ horizontal
 - **文件:** `path/to/file.ext` [新] / [修改] / [已存在-扩展]
-- **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / domain model artifact]}
+- **放置决议（target）:** {module: 所属模块, domain: 领域归属, placement: 具体目录路径, confidence: 放置置信度, evidence: [为何放这里 — graph.json 模块节点 / 已有同类文件 / glossary 术语]}
 - **依赖:** - / D-001（Architect 先 resolve）
 - **satisfies:** R-001（追溯 requirement）
 - **slice_goal:** [一句话 — 完成后可独立 demo 的用户可见行为；horizontal Task 无此项，改填 reason]

@@ -3,16 +3,25 @@
   "$id": "https://fang-skills/project-suite/runtime/contracts/context-package.schema.json",
   "title": "Context Package — Pre-digested Knowledge Bundle",
   "description": "Structured knowledge bundle that Generator consumes directly without parsing files. Replaces raw file-list approach: instead of 'read patterns/table.md and figure it out', Generator iterates knowledge[].pattern and injects.",
-
   "type": "object",
-  "required": ["schemaVersion", "generatedBy", "generatedAt", "context"],
+  "required": [
+    "schemaVersion",
+    "generatedBy",
+    "generatedAt",
+    "context"
+  ],
   "properties": {
-    "schemaVersion": { "type": "string" },
+    "schemaVersion": {
+      "type": "string"
+    },
     "generatedBy": {
       "type": "string",
       "const": "knowledge-resolver"
     },
-    "generatedAt": { "type": "string", "format": "date-time" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
     "plan": {
       "type": "string",
       "description": "Source PLAN.md path"
@@ -23,60 +32,50 @@
       "maximum": 100,
       "description": "Aggregate confidence: min of all knowledge entries + upstream artifacts"
     },
-
     "context": {
       "type": "object",
-      "required": ["knowledge"],
-      "description": "Producer 分工：rules/knowledge/guidance/recommendations 由 knowledge-resolver 产出；components/api/artifacts 由 Planner 经 graph-query（findNode）+ 上游 artifact 填充，resolver 不填。",
+      "required": [
+        "knowledge"
+      ],
+      "description": "Producer 分工：全部桶由 knowledge-resolver 产出（rules/knowledge/guidance/recommendations）。components/api/artifacts 三个桶已于 2026-09-18 移除——它们**从未有任何 Producer**（resolver 里 0 次 push、planner 无填充指令），属「设计未落地」。恢复条件：Producer + Consumer + Verify 一次性闭环（见 ROADMAP）。",
       "properties": {
-
         "knowledge": {
           "type": "array",
           "description": "Metadata pointers to relevant patterns/components/api (P2, recommended). pattern/constraints 正文在方案 B hydrate 阶段注入。",
-          "items": { "$ref": "#/$defs/knowledgeEntry" }
+          "items": {
+            "$ref": "#/$defs/knowledgeEntry"
+          }
         },
-
-        "artifacts": {
-          "type": "array",
-          "description": "Upstream Task Artifacts (PLAN/ARCHITECTURE/REVIEW) with relevant sections noted. NOTE: Knowledge Objects (context.json / graph.json / knowledge-index.json) are NOT here — they go through the Knowledge Resolver, not as raw artifacts.",
-          "items": { "$ref": "#/$defs/artifactRef" }
-        },
-
-        "components": {
-          "type": "array",
-          "description": "Existing components that should be reused (not regenerated). From graph.json lookup.",
-          "items": { "$ref": "#/$defs/componentRef" }
-        },
-
-        "api": {
-          "type": "array",
-          "description": "API modules and functions relevant to this task",
-          "items": { "$ref": "#/$defs/apiRef" }
-        },
-
         "rules": {
           "type": "array",
           "description": "Mandatory constraints (rules + project decisions). Always the full set — never dropped by Top-K.",
-          "items": { "$ref": "#/$defs/ruleEntry" }
+          "items": {
+            "$ref": "#/$defs/ruleEntry"
+          }
         },
         "guidance": {
           "type": "array",
           "description": "Advisory knowledge (experience/playbooks + task-scope decisions). Reference material, not binding.",
-          "items": { "$ref": "#/$defs/knowledgeEntry" }
+          "items": {
+            "$ref": "#/$defs/knowledgeEntry"
+          }
         },
         "recommendations": {
           "type": "array",
           "description": "项目级应然建议（新代码改进方向，非现状规范）。与 knowledge 桶的区别：knowledge 描述「现状是什么」，recommendations 描述「新代码该往哪走」。由 knowledge-resolver 从 recommendations/ 目录产出。",
-          "items": { "$ref": "#/$defs/recommendationEntry" }
+          "items": {
+            "$ref": "#/$defs/recommendationEntry"
+          }
         }
       }
     }
   },
-
   "$defs": {
     "knowledgeEntry": {
       "type": "object",
-      "required": ["source"],
+      "required": [
+        "source"
+      ],
       "description": "Metadata-only pointer（v2.1）。resolver 分桶产出 source + 元数据；pattern/constraints 正文在 hydrate 阶段（方案 B）按需注入，metadata-only 阶段可为空。",
       "properties": {
         "capability": {
@@ -85,7 +84,15 @@
         },
         "type": {
           "type": "string",
-          "enum": ["rule", "decision", "pattern", "component", "api", "experience", "playbook"],
+          "enum": [
+            "rule",
+            "decision",
+            "pattern",
+            "component",
+            "api",
+            "experience",
+            "playbook"
+          ],
           "description": "Knowledge object category（guidance 桶用）"
         },
         "source": {
@@ -94,21 +101,36 @@
         },
         "enforcement": {
           "type": "string",
-          "enum": ["blocking", "recommended", "advisory"],
+          "enum": [
+            "blocking",
+            "recommended",
+            "advisory"
+          ],
           "description": "Copied from index metadata"
         },
         "priority": {
           "type": "string",
-          "enum": ["P1", "P2", "P3"]
+          "enum": [
+            "P1",
+            "P2",
+            "P3"
+          ]
         },
         "scope": {
           "type": "string",
-          "enum": ["task", "project", "organization", "personal"],
+          "enum": [
+            "task",
+            "project",
+            "organization",
+            "personal"
+          ],
           "description": "仅 decision 使用"
         },
         "tags": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "逗号分隔的标签（Resolver 用 tag 过滤/排序）"
         },
         "pattern": {
@@ -117,7 +139,9 @@
         },
         "constraints": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "[方案 B hydrate] pattern 内的硬约束"
         },
         "anti_pattern": {
@@ -131,80 +155,40 @@
         }
       }
     },
-
-    "artifactRef": {
-      "type": "object",
-      "required": ["type", "path"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["planning", "design", "review"]
-        },
-        "path": { "type": "string" },
-        "sections": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Which sections are relevant for Generator. Example: ['Goal','Scope','Task Breakdown'] — skip 'Risk Assessment','Dependency Graph'"
-        },
-        "confidence": { "type": "integer" }
-      }
-    },
-
-    "componentRef": {
-      "type": "object",
-      "required": ["name", "path"],
-      "properties": {
-        "name": { "type": "string" },
-        "path": { "type": "string" },
-        "usage": {
-          "type": "string",
-          "description": "How to use it. Example: 'v-model:visible + #footer 插槽'"
-        },
-        "import_path": {
-          "type": "string",
-          "description": "Import path. Example: '<业务层别名>/components/common/<统一弹窗>/index.vue'"
-        },
-        "reuse": {
-          "type": "boolean",
-          "description": "true = use existing, false = reference pattern only"
-        }
-      }
-    },
-
-    "apiRef": {
-      "type": "object",
-      "required": ["module", "functions"],
-      "properties": {
-        "module": { "type": "string" },
-        "functions": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "conventions": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "API conventions to follow. Example: ['export function 风格', 'data.result === \"1\" 判断成功']"
-        },
-        "source": { "type": "string" }
-      }
-    },
-
     "ruleEntry": {
       "type": "object",
-      "required": ["rule", "constraint", "enforcement", "source"],
+      "required": [
+        "rule",
+        "constraint",
+        "enforcement",
+        "source"
+      ],
       "properties": {
-        "rule": { "type": "string" },
+        "rule": {
+          "type": "string"
+        },
         "type": {
           "type": "string",
-          "enum": ["rule", "decision"],
+          "enum": [
+            "rule",
+            "decision"
+          ],
           "default": "rule",
           "description": "rule = team coding rule; decision = project-level ADR. Both default to blocking."
         },
-        "constraint": { "type": "string" },
-        "source": { "type": "string" },
+        "constraint": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
         "enforcement": {
           "type": "string",
-          "enum": ["blocking", "recommended", "advisory"],
+          "enum": [
+            "blocking",
+            "recommended",
+            "advisory"
+          ],
           "default": "blocking",
           "description": "Source of truth, copied from index metadata."
         },
@@ -214,10 +198,11 @@
         }
       }
     },
-
     "recommendationEntry": {
       "type": "object",
-      "required": ["source"],
+      "required": [
+        "source"
+      ],
       "description": "项目级应然建议（analyzer 的 recommendations/ 目录）。与 knowledgeEntry 的区别：knowledgeEntry 描述现状，本类型描述新代码该往哪走。",
       "properties": {
         "capability": {
@@ -226,7 +211,9 @@
         },
         "type": {
           "type": "string",
-          "enum": ["recommendation"],
+          "enum": [
+            "recommendation"
+          ],
           "default": "recommendation"
         },
         "source": {
@@ -235,22 +222,36 @@
         },
         "enforcement": {
           "type": "string",
-          "enum": ["blocking", "recommended", "advisory"],
+          "enum": [
+            "blocking",
+            "recommended",
+            "advisory"
+          ],
           "description": "Copied from index metadata（recommendations 恒为 advisory）"
         },
         "priority": {
           "type": "string",
-          "enum": ["P1", "P2", "P3"]
+          "enum": [
+            "P1",
+            "P2",
+            "P3"
+          ]
         },
         "statement": {
           "type": "string",
           "description": "一句可直接注入的改进建议（对应 frontmatter 的 statement）"
         },
-        "constraints": { "type": "string" },
-        "confidence": { "type": "number" },
+        "constraints": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        },
         "tags": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

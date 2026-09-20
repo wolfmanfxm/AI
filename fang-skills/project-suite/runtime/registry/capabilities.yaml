@@ -10,7 +10,7 @@ capability_types:
   KnowledgeBase:    # .project-knowledge/ + context.json
     description: 项目结构化知识（架构/组件/API/模式/编码约定），含生命周期状态
     format: [.md, .json]
-  Recommendation:   # .project-knowledge/recommendations.md
+  Recommendation:   # .project-knowledge/recommendations/
     description: 项目级应然建议（新代码改进方向，非现状规范；现状见 KnowledgeBase/Graph）
     format: [.md]
     advisory: true  # 建议类能力：不构成硬依赖边，dependency_graph 归入 needs_advisory，缺失不阻塞

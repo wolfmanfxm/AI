@@ -52,6 +52,32 @@ else
 fi
 
 echo ""
+# ── L0.5: conf 阈值单一权威（ADR-003）──────────────────────
+# ADR-003 规定：conf 三档（PASS/REVIEW/BLOCK）的唯一权威是 rules.yaml 的 `gate:`；
+# gates.yaml 只管**维度**门禁（knowledge/coverage/safety/release/…）。
+# 2026-09-18 实测发现 gates.yaml 里**又长出了** 9 个 skill 的 `confidence: warn_below/block_below`
+# ——同一事实两个值，且 rules.yaml 里留着「对齐 gates.yaml block_below」这类手工同步痕迹。
+# 本检查防的是**回退**：自动修复很容易把已删除的第二权威再种回去。
+echo "【L0.5】conf 阈值单一权威（ADR-003：唯一权威 = rules.yaml 的 gate:）"
+echo "----------------------------------------"
+if [ -f "$SUITE_ROOT/runtime/config/gates.yaml" ]; then
+  CONF_LEAK="$(grep -nE "^[[:space:]]+(warn_below|block_below|min_confidence_for_pass|requires_review_below|blocks_downstream_below):" \
+               "$SUITE_ROOT/runtime/config/gates.yaml" 2>/dev/null || true)"
+  if [ -n "$CONF_LEAK" ]; then
+    red "  ❌ gates.yaml 出现 conf 阈值字段（ADR-003 规定唯一权威是 rules.yaml 的 gate:）："
+    printf '%s\n' "$CONF_LEAK" | sed 's/^/     /'
+    FAIL=$((FAIL+1))
+  else
+    green "  ✅ gates.yaml 不含 conf 阈值（与 ADR-003 一致）"
+    PASS=$((PASS+1))
+  fi
+else
+  yellow "  ⚠️ gates.yaml 不存在，跳过"
+  WARN=$((WARN+1))
+fi
+
+echo ""
+
 # ── L1: skill.yaml ↔ skill-ir ──────────────────────────────
 echo "【L1】skill.yaml ↔ skill-ir 字段一致性"
 echo "----------------------------------------"
@@ -99,15 +125,26 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   mismatches=""
+  # ⚠️ 空值互等不算「一致」（2026-09-18 修）：两侧都取不到值时 `"" != ""` 为假 →
+  #    该字段等于**没被检查**，却计入 ✅。字段缺失 / 块状 YAML 导致解析不出时即触发。
+  #    「比不了」必须与「比了且相等」区分开。
   for field in id version produces consumes; do
     a=$(grab_field "$sy" "$field")
     b=$(grab_field "$si" "$field")
-    [ "$a" != "$b" ] && mismatches="$mismatches $field($a≠$b)"
+    if [ -z "$a" ] || [ -z "$b" ]; then
+      mismatches="$mismatches $field(无法比对:A='$a' B='$b')"
+    elif [ "$a" != "$b" ]; then
+      mismatches="$mismatches $field($a≠$b)"
+    fi
   done
   # stages 单独处理（skill.yaml 缩进，skill-ir 顶层）
   sa=$(grab_stages "$sy" "indent")
   sb=$(grab_stages "$si" "top")
-  [ "$sa" != "$sb" ] && mismatches="$mismatches stages($sa≠$sb)"
+  if [ -z "$sa" ] || [ -z "$sb" ]; then
+    mismatches="$mismatches stages(无法比对:A='$sa' B='$sb')"
+  elif [ "$sa" != "$sb" ]; then
+    mismatches="$mismatches stages($sa≠$sb)"
+  fi
 
   # SKILL.md 的 name: 必须 == 目录名（== skill.yaml id:）
   # 补于 2026-09-18 变异测试：把 name 改成 `project-relaser-TYPO`，一致性/合规/连通/漂移**四个检查全绿放行**。
@@ -145,11 +182,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 done
 
 # L1 补：整文件新鲜度。上面的字段比对只覆盖 id/version/produces/consumes/stages——
-# verification.checks / exit_criteria / failure_conditions / description / boundary 漂移查不到。
+# verification.checks / failure_conditions / description / boundary 漂移查不到。
 # 实证（2026-09-17）：analyzer 的 verifier.md 加了 Verify 6，skill-ir 仍写着旧的 checks: 9，
 # 全仓绿灯放行了很久，直到手工重跑生成器才发现。故此处做整文件逐字节比对。
 if bash "$SCRIPT_DIR/generate-skill-ir.sh" --check >/dev/null 2>&1; then
-  green "  ✅ skill-ir 全字段新鲜（含 verification / exit_criteria / description）"
+  green "  ✅ skill-ir 全字段新鲜（含 verification / failure_conditions / description）"
   PASS=$((PASS+1))
 else
   red "  ❌ skill-ir 存在字段漂移（上面逐字段比对覆盖不到的那些）"

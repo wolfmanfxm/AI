@@ -13,7 +13,7 @@
     "generatedBy": {
       "type": "string",
       "const": "knowledge-compiler",
-      "description": "Producer: standalone runtime/knowledge/ module. Scans .md files in the 8 knowledge directories (rules/decisions/patterns/components/api/architecture/experience/playbooks). graph.json is the Resolver's structural input, NOT the Compiler's input."
+      "description": "Producer: standalone runtime/knowledge/ module. Scans .md files in the 9 knowledge directories (rules/decisions/patterns/components/api/architecture/experience/playbooks/recommendations) — 目录集合的唯一权威是 shared/schemas/knowledge-directories.yaml 的 indexed_by_compiler: true 集合。graph.json is the Resolver's structural input, NOT the Compiler's input."
     },
     "generatedAt": {
       "type": "string",
@@ -43,8 +43,8 @@
                 },
                 "type": {
                   "type": "string",
-                  "enum": ["rule", "decision", "pattern", "component", "api", "experience", "playbook"],
-                  "description": "Knowledge object category"
+                  "enum": ["rule", "decision", "pattern", "component", "api", "experience", "playbook", "recommendation"],
+                  "description": "Knowledge object category。recommendation = 项目级应然建议（来自 recommendations/ 目录），advisory，与描述现状的其余类型分层"
                 },
                 "enforcement": {
                   "type": "string",

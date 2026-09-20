@@ -16,7 +16,7 @@ description: >
 
 ## 核心原则
 
-1. **遵循项目模式** — 从 `.project-knowledge/` 提取写法，不凭记忆。分两层：**现状**（patterns/api/rules/graph → 一致性，必须匹配存量约定）与**建议**（recommendations.md → 新代码改进，优先遵循）
+1. **遵循项目模式** — 从 `.project-knowledge/` 提取写法，不凭记忆。分两层：**现状**（patterns/api/rules/graph → 一致性，必须匹配存量约定）与**建议**（recommendations/ → 新代码改进，优先遵循）
 2. **使用项目组件** — 查组件知识（Context Resolver 按 query 注入），不重复造轮子。先走 [Reuse Ladder](../../shared/primitives/reuse-check.md)：需求已覆盖 → 零改动
 3. **完整性** — loading、empty、error 全状态覆盖
 4. **增量修改** — 已存在文件先 Read 再 Edit，不 overwrite

@@ -54,5 +54,7 @@ quality_gates:
 compatibility:
   context_schema: ">=1.0.0"
   state_schema: ">=1.0.0"
-  skill_interface_schema: ">=1.2.0"  # intrinsic I/O（Runtime Policy 已移至 skill-policy.yaml）
   suite_minimum: ">=0.8.0"
+  # 2026-09-20 移除 skill_interface_schema：它指向的 shared/schemas/skill-interface.schema.yaml
+  # 已于 2026-09-18 归档到 docs/archive/（无消费者），此处成为悬空引用。
+  # skill 级兼容性不在此声明——见 runtime/registry/compatibility.yaml（唯一权威，ADR-003）。

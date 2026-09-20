@@ -10,7 +10,7 @@ description: >
 
 # Analyzer
 
-> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json + recommendations.md（现状 vs 应然建议）
+> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json + recommendations/（现状 vs 应然建议）
 > 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
 
 ## 核心原则

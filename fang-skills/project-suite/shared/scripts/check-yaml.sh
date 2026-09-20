@@ -5,7 +5,9 @@
 #
 # 为什么需要（2026-09-17 补）：既有 checker 全是文本/regex 校验，全绿也不代表 YAML 真能被解析。
 # 实测当时有 3 个文件不可解析（project-documenter/skill.yaml 的 `recovery: 标记[CONFLICT]`、
-# context-priority.yaml 的箭头 DSL，以及前者向 skills.generated.yaml 的传播）——门禁全绿却全是坏的。
+# 一份已删除的 Context Engine 规格里的箭头 DSL，以及前者向 skills.generated.yaml 的传播）——门禁全绿却全是坏的。
+# （2026-09-20 注：那份箭头 DSL 规格的可执行版本已随清场删除，.md 仅作设计史归档在 docs/archive/，
+#   见 docs/roadmap.md G1.1(c)——但**本门禁仍覆盖 docs/archive/ 的 .yaml**，故该注记保留其历史价值。）
 #
 # 解析器优先级（保持零 Node 依赖）：
 #   1. ruby -ryaml      macOS 自带

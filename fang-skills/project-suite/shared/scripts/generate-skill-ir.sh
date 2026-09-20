@@ -65,9 +65,10 @@ gen() {
     [ "$verify_checks" -eq 0 ] && EMPTY_VERIFY="$EMPTY_VERIFY $name"
   fi
 
-  # Extract exit conditions from execution.md
-  local exit_count=0
-  [ -f "$dir/prompts/execution.md" ] && exit_count=$(grep -c "^- " "$dir/prompts/execution.md" 2>/dev/null | head -1 || true); exit_count=${exit_count:-0}
+  # exit_criteria **已移除（2026-09-18）**：原 `conditions:` 数的是 execution.md 里**所有** `^- ` 行
+  # （generator 报 23，而其 `## Exit` 真实只有 4 条；Phase 2 的 V1-V6、步骤子弹全被计入）。
+  # 全仓零 Consumer（只有生成器自己写它）。没有消费者的派生字段不值得维护，而要「算准」就得写
+  # 一个 Markdown 解析器——正是 SUITE_SPEC §0.1 要挡的形态。故整个字段删除，不做「修正计数」。
 
   # Extract failure conditions from skill.yaml interface block
   # ⚠️ 不要写 `$(grep -c X f || echo 0)`：零匹配时 grep 已打印 0 且 exit 1，`|| echo 0` 再补一个
@@ -90,7 +91,6 @@ consumes: [${consumes}]
 stages: [${stages}]
 verification: { checks: ${verify_checks}, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
-exit_criteria: { conditions: ${exit_count}, source: prompts/execution.md }
 failure_conditions: { modes: ${failure_modes}, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "${last_reviewed}"
 EOF

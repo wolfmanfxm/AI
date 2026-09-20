@@ -20,6 +20,7 @@
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SUITE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 red()   { echo -e "\033[31m$1\033[0m"; }
 green() { echo -e "\033[32m$1\033[0m"; }
@@ -136,9 +137,21 @@ if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null; then
     // recommendations 桶此前 fixture 里根本没建目录 → 该 emit_one 从未被执行过（2026-09-18 补）
     const recs=(idx.capabilities.recommendations||{}).files||[];
     if (!recs.some(f=>f.source==="recommendations/use-composable.md")) errs.push("recommendations/use-composable.md 未进 index");
+
+    // 产物 vs 契约互校：index 里出现的每个 type 必须在该 schema 的 enum 内（2026-09-18 补）。
+    // 此前 recommendation 已真实进 index，而 knowledge-index.schema.json 的 enum 不含它，
+    // 无任何断言报出来——正是这类「契约没跟上产物」的静默漂移。
+    // 不引 JSON Schema 引擎，只取 enum 做集合比对（保持本套检查的轻量断言风格）。
+    const schema=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
+    const ENUM=schema.properties.capabilities.additionalProperties.properties.files.items.properties.type.enum;
+    const seen=new Set();
+    for (const c of Object.values(idx.capabilities)) for (const f of (c.files||[])) if (f.type) seen.add(f.type);
+    if (!seen.size) errs.push("index 里没有任何 type —— 断言退化，无法互校契约");
+    for (const t of seen) if (!ENUM.includes(t)) errs.push("index 出现 type=" + t + "，但 knowledge-index.schema.json 的 enum 不含它（产物 vs 契约漂移）");
+
     if (errs.length){ console.error(errs.join("\n")); process.exit(1); }
-    console.log("index 结构合法 + Candidate 被过滤 + rules 恒入");
-  ' "$INDEX"; then
+    console.log("index 结构合法 + Candidate 被过滤 + rules 恒入 + type 全覆盖于 schema enum");
+  ' "$INDEX" "$SUITE_ROOT/runtime/state/schemas/knowledge-index.schema.json"; then
     pass "compiler: index 结构合法 + lifecycle 过滤正确"
   else
     fail "compiler: index 断言失败（见上）"

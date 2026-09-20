@@ -9,6 +9,5 @@ consumes: [KnowledgeBase,Plan,Architecture,Context,Graph,Recommendation]
 stages: [discovery, execution, validation]
 verification: { checks: 7, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
-exit_criteria: { conditions: 23, source: prompts/execution.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

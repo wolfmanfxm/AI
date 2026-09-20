@@ -9,6 +9,5 @@ consumes: [Code,Review,KnowledgeBase,Context]
 stages: [discovery, execution, validation, delivery]
 verification: { checks: 6, source: prompts/validation.md }
 evidence: { format: knowledge-object.schema.json, source: graph.json }
-exit_criteria: { conditions: 8, source: prompts/execution.md }
 failure_conditions: { modes: 5, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

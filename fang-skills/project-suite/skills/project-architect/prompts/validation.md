@@ -16,7 +16,7 @@
 | V8 | 方案自洽 | 技术选型、模块设计、API 间无矛盾 | 🟡 标注矛盾 |
 | V9 | 分差有理 | 对比矩阵分差 <10% 时有充分说明 | 🟡 标注风险 |
 | V10 | Graph 一致 | 设计引用的模块/API 在 graph.json 中存在；新增模块前先走 [Reuse Ladder](../../../shared/primitives/reuse-check.md)（可扩展已有模块就不新建） | 修正引用 |
-| V11 | Domain 一致 | 设计引入的术语与 vocabulary.yaml 的 confirmed 术语一致；**新增页面/API 的 artifact 命名须匹配 artifacts 的 naming 前缀**（或由 entity×action 组合合法派生） | ⚠️ Domain conflict：现有定义 ≠ 新假设 → 阻断，追问澄清 |
+| V11 | 术语一致 | 设计引入的术语与 `.project-knowledge/architecture/glossary.md` 的核心术语表一致；**新增页面/API 的 artifact 命名须匹配其「产物 artifact」表的 `naming` 前缀**（或由 entity×action 组合合法派生） | ⚠️ 术语冲突：现有定义 ≠ 新假设 → 阻断，追问澄清 |
 
 ## QA Agent
 

@@ -19,11 +19,6 @@ review_cadence_days: 90
 triggers_cn: [重构, 优化结构, 提取公共, 简化代码, 消除重复, 拆分模块, 重命名, 优化这段代码, 迁移]
 triggers_en: [refactor, clean up, extract method, simplify, reduce complexity, migrate]
 
-context_contract:
-  must_read: [context.json]
-  query: [patterns, components]
-  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
-
 interface:
   inputs:
     - { name: 待重构代码, type: implementation, required: true, source: user, fixture: false, description: 待重构的源文件 }

@@ -19,11 +19,6 @@ review_cadence_days: 90
 triggers_cn: [生成文档, 写文档, 补文档, API 文档, README, 更新文档, 补全文档, 组件文档]
 triggers_en: [generate docs, write documentation, update README, api docs]
 
-context_contract:
-  must_read: [context.json]
-  query: [api, architecture]
-  neednt_read: [.project-knowledge/observations/]
-
 interface:
   inputs:
     - { name: 源码文件, type: implementation, required: true, source: user, fixture: false, description: 待文档化的源文件 }

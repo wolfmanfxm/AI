@@ -19,7 +19,8 @@
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SUITE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SKILLS_DIR="$SUITE_ROOT/skills"
+# IO_SKILLS_DIR 仅供**自检**用：让本脚本能对着 fixture 重跑（见文件尾「自检」段）。
+SKILLS_DIR="${IO_SKILLS_DIR:-$SUITE_ROOT/skills}"
 
 # Capability → Artifact Type（bash 3.2 兼容，用 case 而非关联数组）
 type_to_cap() {
@@ -64,6 +65,7 @@ produces_of() {
 }
 
 FAIL=0
+PASS=0
 red()   { echo -e "\033[31m$1\033[0m"; }
 green() { echo -e "\033[32m$1\033[0m"; }
 
@@ -207,6 +209,72 @@ else
 fi
 
 echo ""
+
+# ── 自检：证明本检查器**有判别力**（不只是在真仓上打印 ✅）───────────
+# 来源（2026-09-18 外部评审）：检查器的价值不在于「能接通的说接通」，而在于
+# **「接不通的确实报错」**。只在真仓上跑，无法区分「一切正常」与「检查器失效」。
+# 做法：造一个**已知断裂**的 fixture，把本脚本对着它重跑，断言它必须红。
+# ⚠️ 用 IO_SKILLS_DIR 标记「正在自检」以避免无限递归。
+if [ -z "${IO_SKILLS_DIR:-}" ]; then
+  FIXTURE_SK="$(mktemp -d "${TMPDIR:-/tmp}/io-selftest.XXXXXX")"
+  mk_producer() {   # $1=produces 列表
+    mkdir -p "$FIXTURE_SK/aa-producer"
+    cat > "$FIXTURE_SK/aa-producer/skill.yaml" <<YAML
+id: aa-producer
+version: "1.0.0"
+produces: [$1]
+interface:
+  inputs:
+    - { name: in, type: planning, required: true, source: user }
+  outputs:
+    - { name: out, type: implementation, confidence_range: "80-90" }
+YAML
+  }
+  mk_consumer() {   # $1=input 的 type
+    mkdir -p "$FIXTURE_SK/bb-consumer"
+    cat > "$FIXTURE_SK/bb-consumer/skill.yaml" <<YAML
+id: bb-consumer
+version: "1.0.0"
+produces: [Test]
+interface:
+  inputs:
+    - { name: in, type: $1, required: true, source: aa-producer }
+  outputs:
+    - { name: out, type: test, confidence_range: "70-80" }
+YAML
+  }
+
+  # ⚠️ 断言必须**精确**：本脚本对 fixture 跑时会因缺 analyzer 文件（§4）而同样 exit 非零，
+  #    只看 exit code 的自检**永远不会失败**（第一版就是如此，被探针抓出）。
+  #    故改为断言输出里**必须出现「断链」字样**，且合法 fixture 里**必须不出现**。
+  mk_producer "Code"                 # 只能给 Code
+  mk_consumer "knowledge"            # 要求 KnowledgeBase → 必然断链
+  OUT_BAD="$(IO_SKILLS_DIR="$FIXTURE_SK" bash "$0" 2>&1 || true)"
+
+  rm -rf "$FIXTURE_SK/bb-consumer"
+  mk_consumer "planning"             # 此时仍断链（aa 无 Plan）
+  rm -rf "$FIXTURE_SK"
+  FIXTURE_SK="$(mktemp -d "${TMPDIR:-/tmp}/io-selftest.XXXXXX")"
+  mk_producer "Code,Plan"            # 补上 Plan
+  mk_consumer "planning"             # 要求 Plan → 应接通
+  OUT_OK="$(IO_SKILLS_DIR="$FIXTURE_SK" bash "$0" 2>&1 || true)"
+  rm -rf "$FIXTURE_SK"
+
+  if printf '%s' "$OUT_BAD" | grep -q "断链"; then
+    if printf '%s' "$OUT_OK" | grep -q "断链"; then
+      red "  ❌ 自检失败：合法 fixture 也被判「断链」→ 检查器**误报**（判据坏了）"
+      FAIL=$((FAIL+1))
+    else
+      green "  ✅ 自检：断链 fixture 被报出、合法 fixture 不被误报（检查器双向有判别力）"
+      PASS=$((PASS+1))
+    fi
+  else
+    red "  ❌ 自检失败：故意构造的断链**未被报出** → 本检查器已丧失判别力"
+    FAIL=$((FAIL+1))
+  fi
+  echo ""
+fi
+
 if [ "$FAIL" -gt 0 ]; then
   red "❌ I/O CONNECTIVITY FAILED — $FAIL 处语义不通"
   exit 1

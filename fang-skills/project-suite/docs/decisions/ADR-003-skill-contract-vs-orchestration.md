@@ -26,7 +26,7 @@ Skill 的元数据曾被分散在 4 处手工维护：`skills/*/skill.yaml`、`r
 │  consumes produces        │     │                              │
 │  triggers complexity      │     │  workflow_ref / used_by       │
 │  cost                     │     │  gate/checkpoint/retry/recovery │
-│  stages context_contract  │     │  pipeline position            │
+│  stages                   │     │  pipeline position            │
 │                           │     │  profile 激活范围              │
 └───────────────────────────┘     └──────────────────────────────┘
 ```
@@ -35,7 +35,7 @@ Skill 的元数据曾被分散在 4 处手工维护：`skills/*/skill.yaml`、`r
 
 问一句：**「这个字段脱离 project-suite，单独拿这个 Skill 仍然成立吗？」**
 
-- **成立 → skill.yaml**（intrinsic）：description、intent、capabilities、consumes、produces、triggers、complexity、cost、stages、context_contract。
+- **成立 → skill.yaml**（intrinsic）：description、intent、capabilities、consumes、produces、triggers、complexity、cost、stages。
 - **不成立 → Runtime / Workflow**（orchestration）：workflow_ref、stage_ref、pipeline position、routing priority、checkpoint policy、profile 激活范围、gate 阈值（confidence pass/review/block）、rollback/recovery/reliability。
 
 > **冻结规则（2026-08-18 修订）**：`confidence` 与 `quality_gate` 已从 skill.yaml 移除。gate 阈值唯一权威 = `runtime/config/rules.yaml` 的 `gate`；回滚/恢复/可靠性 = `runtime/config/skill-policy.yaml`。checkpoint / retry / recovery / gate policy 不再向 skill.yaml 增长。

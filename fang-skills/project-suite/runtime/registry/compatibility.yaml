@@ -135,4 +135,4 @@ migrations:
     change: "knowledge-list.json → context-package.json"
     impact: "generator 必须升级到 >=2.0 以消费新格式"
     type: major
-    migration_guide: "generator 的 context_contract.must_read 从 knowledge-list.json 改为 context-package.json"
+    migration_guide: "generator 的 interface.inputs 从 knowledge-list.json 改为 context-package.json"

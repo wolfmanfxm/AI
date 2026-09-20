@@ -20,11 +20,6 @@ review_cadence_days: 90
 triggers_cn: [写一个, 实现, 创建组件, 新增页面, 开发这个功能, 生成代码, 帮我写, 编写, 添加, 修改, 调整, 修复, 删除, 改, 搭建]
 triggers_en: [implement, create component, build feature, generate code, write a, modify, fix, delete, change, update, build]
 
-context_contract:
-  must_read: [context-package.json, PLAN.md, context.json, ARCHITECTURE.md]
-  query: []
-  neednt_read: [.project-knowledge/observations/, .project-knowledge/reports/]
-
 interface:
   inputs:
     - { name: context-package.json, type: context-package, required: true, source: knowledge-resolver, fixture: true, description: "预消化知识包: pattern+constraints+components" }

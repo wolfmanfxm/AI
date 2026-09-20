@@ -19,11 +19,6 @@ review_cadence_days: 90
 triggers_cn: [发布, 上线, 发版, release, changelog, 版本号, 发布检查, 准备发布, 发布前检查]
 triggers_en: [release, ship, deploy, version bump, publish]
 
-context_contract:
-  must_read: [state.json]
-  query: []
-  neednt_read: []
-
 interface:
   inputs:
     - { name: git log, type: state, required: true, source: git, fixture: false, description: conventional commits历史 }
