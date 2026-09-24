@@ -118,6 +118,7 @@ pass_fail: pass | fail | decorate | untested
 | knowledge-list → context-package | 声明 | ✅ 生效 | 静态收口 + benchmark 复验 |
 | Reuse Check primitive | 额外动作 | ✅ 生效 | round5：结构化 REUSE/EXTEND/CREATE 裁决 |
 | 跨 Skill 路由准确（措辞 → 正确 skill） | 声明 | 🟡 部分验证（suite-only） | round11：R1–R7 实测 top1 命中 **5/6**（可路由项）；另发现 2 处缺陷（R6 orchestrator 未装载→无匹配；R7 changelog 误落 documenter）。**无 native 臂，RED 仍未判** |
+| **Fresh Context**（跨 Skill /clear + state-only 传递） | 声明 / 成本行为 | ⚠️ 未验证（G1 欠账） | orchestration「每个 Skill 独立 /clear，只读 state/artifact」是核心编排，但**从未被 mechanism 级 ablation 过**。属 eval-contract 记的「Resolver/Registry/Gate/Fresh Context 机制级对象零条 ablation」——见下方六段 |
 
 > ⚠️ **2026-09-17 追加（已跑 suite 侧，RED 仍未判）**：verifier V2 追加证据要求 ——
 > REUSE 裁决必须附 `命中` + `依据`（无证据 = V2 未通过），并明确「V2 = REUSE 且证据成立 →
@@ -320,6 +321,38 @@ pass_fail: pass | fail | decorate | untested
 - 本轮**无 native 臂**，故 `pass_fail` 仍为 `untested`；以上只记 suite 侧行为。
 
 > 其余 14 个机制未逐条跑 baseline，状态见上表（多数有 round 证据但未按六段格式固化）。后续新机制验证时，一律填六段格式。
+
+---
+
+### 机制：Fresh Context（跨 Skill /clear + state-only 传递）
+
+- **Hypothesis**：Suite 的核心编排是「每个 Skill 独立 /clear 上下文，只读 state/artifact，
+  上下文不累积」（orchestration「Fresh Context 模式」）。待验证的不是「会不会少读」，
+  而是成本/质量 trade-off：相对**累积上下文 / 复用稳定 prefix** 的无 isolation 用法，
+  这套在 **audited cost / retry / quality / 污染** 四轴上是否真的更优——还是因断
+  prompt-cache、以重试换省 token 反而更贵。这是 `mechanism_baseline` 型问题（关掉
+  「isolation」这一个机制），不是 skill 级有效性。
+- **Native baseline**：未跑（需 A/B：**Fresh Context 臂** vs **累积上下文/前缀复用臂**，
+  同一任务、同一产物标准）
+- **Suite behavior**：
+  - **round1**（2026-09-23，真项目副本 /tmp/afc-fc，`fresh-context-ab.md`）：n=1 隔离副本——
+    两臂 PASS、都复用 blob 导出模式；污染探针两臂 0 命中（探针与真实源码矛盾→失效）、retry 仅
+    harness 同源伪影、cache/billing 进程内取不到 → 各维度拉不开，`inconclusive`。
+  - **round2**（2026-09-23，完整 `oldCarExtension` 副本 /tmp/afc-fc2，`fresh-context-ab-round2.md`）：
+    探针重设计为**不与源码矛盾、任务相关**的臆造 `channelStatus`（先实测真仓库 0 命中）。
+    **FC4 分离成立（样本观察）**：reuse 臂把旁白实体化成 `DealerChannelStatus` 枚举 + 导出契约参数
+    + handler（`arm-b/project` 全目录 8 处命中）；fresh 臂仅按真实源码实现，仅供 5 个真实字段，
+    `arm-a/project` 全目录 **0 命中**。→ **isolation 的防污染收益在该样本下为真实、可复现倾向**。
+    quality 两臂均 PASS；FC1 成本维度进程内仍不可得。
+- **Evidence**：n=1×2 样本观察（两臂）——污染探针**重设计后能分辨**（round1 用「与真实源码矛盾」
+  的红鲱鱼失效；round2 用「任务相关但真实代码未排除」的方向才让 reuse 有被误采纳空间）。
+  成本维度进程内天然不可得。
+- **Repeatability**：未测（n=1）
+- **Pass/Fail**：FC4 维度`部分验证（样本观察，污染隔离有效）`；FC1 仍 `untested`。方法：按
+  [eval-contract.md]（suite 侧 `/docs/eval-contract.md`）的四类度量，**真实 CLI 双会话**各跑并填
+  `metrics:`——`input/output/tool_result_tokens`、`retry_rate`、`cache_read/write`、`audited_cost`、
+  `quality`。数据源 = 扩后的 `timeline.json`（`billing` / `quality.retries`）+ Host 上报。
+  **判决纪律**：audited cost 两臂同口径才可对比；省 context bytes ≠ 省账单。
 
 ---
 

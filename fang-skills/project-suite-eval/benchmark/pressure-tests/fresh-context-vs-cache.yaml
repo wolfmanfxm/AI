@@ -1,0 +1,84 @@
+# 压力测试：Fresh Context（跨 Skill /clear + state-only 传递）vs Context Reuse
+#
+# 类型：mechanism_baseline 双边对照（A/B），不是 naive-vs-suite。
+# 目的：验证 orchestration 的核心编排 "每个 Skill 独立 /clear，只读 state/artifact"
+#       相对 "累积上下文 / 复用稳定 prefix" 在 成本 / 重试 / 质量 / 污染 四轴是否真的更优。
+# 背景：Fresh Context 是台账欠账（G1），本文件补上它的 mechanism_baseline。
+#       台账条目见 ../../../project-suite-eval/mechanism-verification-ledger.md（Fresh Context 六段）。
+# 度量契约见 suite 侧 docs/eval-contract.md「四类度量契约」，数据源 = 扩后的 timeline.json + Host usage。
+#
+# 受控变量：只变 "isolation（是否 /clear）" 这一个机制；任务 / fixture / 验收标准两臂完全一致。
+# 与 pressure-testing 其余文件的区别：naive_vs_suite 是 "有无 skill"，本文件是
+# "同一个 skill 链，isolation 开 vs 关" —— 关掉的是 orchestration 的 isolation，不是整个 suite。
+skill: cross-skill
+
+meta:
+  arms:
+    fresh:  "每个 Skill 独立 /clear + 只读 state.json / context-package / artifact（现行编排）"
+    reuse:  "同一会话累积上下文 + 复用前缀（无 isolation，下游可窥上游对话）"
+  fixture: 同一目标项目的两份**独立副本**（互不干扰），一个小型 multi-skill CRUD/task
+  chain:   analyzer → planner → generator → reviewer（同一链、同一 handoff 顺序）
+  acceptance: reviewer PASS + 零回归 + artifact 齐全 + reuse 遵循
+
+tests:
+  - id: FC1
+    name: audited_cost（账单）是否如假设更贵
+    scenario: >
+      同一任务两臂各跑整套链，用 Host 上报的 usage 记录真实 billed 成本。
+    naive_failure: >
+      默认直觉 "context 越小越便宜"。但若 Host/provider 对稳定前缀有 prompt-cache，
+      Arm B（复用前缀）会用便宜的 cache_read 命中；Arm A 每步 /clear 造成 cache_write +
+      冷前缀重读。故 Arm A 可能 context_size 更小、billed $ 却更高。
+    skill_mechanism: Fresh Context = context_size 最小化（orchestration「上下文只有几 KB」）
+    assertion: >
+      用 eval-contract 的 metrics: 记录两臂 `input/output/tool_result_tokens` +
+      `cache_read/cache_write` + `audited_cost`（同口径对比）。
+      结论必须写「Fresh 省 billing / 更贵 / 持平」，不得只报 context_size。
+
+  - id: FC2
+    name: retry_rate（以重试换省 token 的反噬）
+    scenario: >
+      统计两臂失败重试（retry_count / 启动子步数）。若 Arm A 上游没有把关键事实
+      落盘到 state/artifact/session.json，下游被迫重读/重推导 → retry 上升。
+    naive_failure: >
+      progressive / isolation 的代价：index→hydrate、isolation 断链，可能以 "更少的
+      context" 换 "更多次重试"。token-saviour 指出便宜失败再重来可能最终更贵。
+    skill_mechanism: Compaction Invariant（关键事实必须落盘，不得只剩在对话里）
+    assertion: >
+      用 `quality.retries` 记两臂 retry_count/rate。若 Arm A 显著更高，回查
+      是否因未落盘导致 —— 这直接检验 Compaction Invariant 是否被遵守。
+
+  - id: FC3
+    name: quality（产物是否同达标）
+    scenario: >
+      两臂跑同一验收标准（reviewer PASS + 零回归 + artifact 齐全 + reuse 遵循）。
+    naive_failure: >
+      省 token 不能以质量换 —— 若 Arm A 漏掉某 artifact / 违背 reuse，省下来的 $ 不成立。
+    skill_mechanism: skill-io 的 3 出口（收尾报告 / state.json / 产出文件）+ gates
+    assertion: >
+      两臂产物分别跑 reviewer 判 PASS/FAIL，产出文件数一致，retry 达标。
+      质量不达标的一臂判定失效。
+
+  - id: FC4
+    name: contamination（污染隔离是否真的有效）
+    scenario: >
+      污染探针：在 Arm A 的 analyzer 对话里投放一条**与任务无关的红鲱鱼**注释
+      （如「company 导出组件在 v9 被 deprecated」）。Arm A 因 /clear 下游永远看不到；
+      Arm B 因累积上下文，planner/generator 可能拾取并误避 company 导出。
+    naive_failure: >
+      reuse 的隐藏成本：下游把上游对话里的噪声当事实。isolation 的价值正是阻断这种泄漏。
+    skill_mechanism: Fresh Context 的 context isolation / 污染隔离
+    assertion: >
+      检查两臂下游是否引用该红鲱鱼（grep 该串）。Arm B 引用 → 证明 contamination 真实存在、
+      isolation 有电流价值；两臂都不引用 → isolation 的防污染收益未触发（该维度为 bench 无差异）。
+
+verdict_criteria:
+  fresh_wins:   FC1 ≤ reuse 或持平 且 FC3（质量）不差且 FC4 显示 isolation 拦下污染且 FC2 不显著升高
+  reuse_wins:   FC1（audited_cost）显著更低且 FC3 持平且 FC4 污染在噪声内
+  inconclusive: 样本 < 2 两臂、或 usage 未上报 cache 无法判成本、或场景作废
+
+how_to_measure:
+  - 每臂一个独立 CLI 会话；用 Claude Code 的 usage/verbose 记录 input/output/tool_result + cache_read/write + retry。
+  - audited_cost 从 provider billing 页按会话取，两臂同口径。
+  - 污染探针：analyzer 步投放红鲱鱼 → 结束 grep 该串是否被下游引用。
+  - 结果落 results/fresh-context-ab/（native? 不适用，此为 fresh vs reuse 双侧）。

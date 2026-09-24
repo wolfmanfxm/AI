@@ -62,6 +62,39 @@ project-suite-eval/
 实证：round8 的「14/14 机制装饰品」是 **skill 级**结论；而 Resolver / Registry / Gate / 新 prompt /
 新 artifact / 新字段这类**机制级**对象，至今**没有一条 ablation 记录**（见 roadmap「已知缺口」G1）。
 
+### 四类度量契约（token / retry / cache / cost）
+
+> token/cost 度量属**行为评估层**（behavior eval），**不是** structural benchmark——benchmarks.md
+> 只测结构契约，此处定义「套件是否真的省、是否真的便宜」的可核对字段。
+> 数据源 = `timeline.json`（Suite 运行时）+ Host provider usage（cache / billing 需 Host 上报，非 Suite 可算）。
+
+`project-suite-eval/results/*.yaml` 的 `native:` / `suite:` 块，以及 ledger 的机制条目，在
+**支持度允许时**填下列字段（不支持则显式标 `unavailable`，不静默缺省）：
+
+```yaml
+metrics:
+  input_tokens        # 本轮实际输入 token
+  output_tokens       # 本轮实际输出 token
+  tool_result_tokens  # tool result 回灌 input 的部分
+  retry_count         # 失败重试次数
+  retry_rate          # retry_count / 启动的 sub-step 数
+  context_size        # 峰值上下文
+  cache_read          # prompt-cache read（Host 上报）
+  cache_write         # prompt-cache write（Host 上报）
+  audited_cost        # 实际 billed 成本（native vs suite 同口径对比）
+```
+
+**关键缺失项 = retry_rate 与 audited_cost**：`timeline.json` 现只有估算（`contextSizeEstimate` 为字符串、
+`approxTokens` 为输出估算），**接不住 cache 与 billed cost**。故：
+
+- 先扩 `runtime/metrics/timeline.schema.json` 加 `billing`（cacheRead/cacheWrite/actualCost）与 `quality.retries`，
+  让运行时能上报；
+- 再在 results/ 里填上方 `metrics:` 块。**先有可填的 data source，契约才有意义**。
+
+**断言纪律（吸收 token-saviour）**：写「progressive disclosure → 节省 <X>%，retry < Y」之前，
+必须满足 `baseline (metrics) vs suite (metrics)` 都有真实数值，且 `audited_cost` 两条臂同口径。
+否则**禁止宣称**「省 N token / 便宜 N%」——省 context bytes 不等于省账单（prompt-cache read 可极便宜）。
+
 ### 新增机制的准入义务
 
 新增**机制**（上列任一类）进入核心前，必须：

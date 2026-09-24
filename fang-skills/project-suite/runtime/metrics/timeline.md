@@ -145,6 +145,12 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 
 每次追加 run 时更新。也可定期重算。
 
+## 账单与重试度量（契约扩展，可选上报）
+
+> 支持度允许时，`run` 可额外上报 `input.inputTokens`（数值，替代 `contextSizeEstimate` 估算字符串）、
+> `billing.{cacheRead,cacheWrite,actualCost}`、`quality.retries`。这些是 token/retry/cost 行为评估
+> （见 `../../docs/eval-contract.md`）的数据源；Host 不上报时保持缺省，**禁止**用估算冒充 audited cost。
+
 ## 写入规则
 
 **所有 Skill 在 Output 阶段写入一条 run 记录。**

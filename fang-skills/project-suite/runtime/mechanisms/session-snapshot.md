@@ -86,3 +86,41 @@ Skill 启动时第一步：
 - git_commit 不同 → ⚠️ 代码已变更，自动提取的 knowledge 可能过期
 - last_checkpoint > 24h → ⚠️ Session 较旧，建议重新开始
 - last_checkpoint > 7d → 🔴 Session 过期，建议重新开始
+
+---
+
+## Compaction Invariant（长 Skill 内对话被压缩）
+
+Suite 是 **cross-skill stateless**：Skill 之间只靠 state/artifact/文件传递，不依赖对话历史。
+但**单个长 Skill**（如 analyzer 扫数千文件）一次运行中，对话上下文会被 compaction 压缩。
+规则只保证一件事——**「压缩不掉关键事实」**：
+
+```
+任何影响后续执行的关键事实，必须已持久化到下列存储之一；
+不得仅存在于当前对话上下文（否则 compaction 即丢失）。
+```
+
+| 存储 | 存什么 | 载体 |
+|------|--------|------|
+| 执行位置 | phase 进度、subtask 状态 | snapshot / `manifest.json`（checkpoint） |
+| 事实 / 为什么 | goal、assumptions、discoveries、反馈 | `runtime/memory/session.json` |
+| 产出 | 已生成的 artifact 路径 | `.project-knowledge/` 产出文件 |
+
+最小 survival set（**落盘才算数**）：
+
+- current goal / completed / remaining work
+- important discoveries / assumptions / open questions
+- changed files 或产出路径
+- 需复用的确切 command / path（含 exact errors，若后续执行要重试）
+
+淘汰优先级（对话上下文内可安全丢弃）：
+
+- stale tool output / 已确认的探索过程
+- 重复 grep / read / 已被 artifact 取代的原始输出
+- narration / chatter
+
+**一句判据**：对话上下文可被 compaction；持久化事实不可丢失。recover 的信息载体是
+state/artifact/session memory，不是「上次对话里我说过什么」。
+
+> 不引入任何删除/压缩算法（不学 fast-jev 的淘汰逻辑、不建 Pi 式 compaction engine）。
+> 本 invariant 只是「关键事实必须落盘」的纪律——与 memory-layer「让 Runtime 记，不让 LLM 记」一致。

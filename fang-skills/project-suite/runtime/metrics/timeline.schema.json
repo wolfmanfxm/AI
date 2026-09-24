@@ -75,7 +75,8 @@
             "planFile":    { "type": "string" },
             "capabilitiesUsed": { "type": "array", "items": { "type": "string" } },
             "knowledgeFilesRead": { "type": "integer" },
-            "contextSizeEstimate": { "type": "string" }
+            "contextSizeEstimate": { "type": "string" },
+            "inputTokens": { "type": "integer", "description": "数值输入 token（host 上报，用于 billing 对比；替代 contextSizeEstimate 的估算字符串）" }
           }
         },
         "output": {
@@ -94,8 +95,17 @@
             "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
             "warnings":   { "type": "integer", "minimum": 0 },
             "errors":     { "type": "integer", "minimum": 0 },
+            "retries":    { "type": "integer", "minimum": 0, "description": "失败重试次数（用于 retry_rate，评估 progressive-disclosure 是否以重试换省 token）" },
             "checkpointsPassed": { "type": "integer" },
             "degradedDimensions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "cacheRead":  { "type": "integer", "description": "prompt-cache read tokens（host 上报，未支持则缺省）" },
+            "cacheWrite": { "type": "integer", "description": "prompt-cache write tokens（host 上报，未支持则缺省）" },
+            "actualCost": { "type": "number", "description": "audited provider billed cost（USD，native vs suite 同口径才可对比）" }
           }
         },
         "dependencies": {

@@ -39,6 +39,25 @@ After:   Task → 按 type 分桶 → 全量 constraints + Top-K knowledge/guida
 }
 ```
 
+## Progressive Disclosure（强制）
+
+Resolver 输出 = metadata 指针，**不做默认全量 hydrate**。
+
+```
+Index → Select → Hydrate
+```
+
+1. **Index**：只存 metadata（`source` / `enforcement` / `priority` / `statement`）——见
+   [context-package.schema.json](context-package.schema.json) 的 `knowledgeEntry`，全文不出现。
+2. **Select**：仅对当前任务命中（candidates 过滤 + Top-K）的条目进入 hydrate。
+3. **Hydrate**：只取被选中条目的正文；未选中、未命中的条目**不载入**。
+4. **禁令**：禁止因「可能有用」而加载全文；禁止把 `patterns/`/`components/`/`api/` 原文灌入 package。
+5. 已有结构化结果（`pattern` / `constraints` / `recommendation.statement`）优先于 raw source——Generator
+   消费结构化结果，不自行 parse 原文。
+
+> 这不是新机制——schema v2.x 的 metadata-only / 方案 B hydrate 已是本契约的实现。此处显式化
+> 「不做默认全量 hydrate」的禁令，防止下游实现退化回「全量展开」。
+
 ## 结构事实（不走 Resolver，走 graph-query）
 
 组件/API/模块的存在性、依赖链、影响半径 → [Graph Query Protocol](graph-query.md)（`graph.json`）：
