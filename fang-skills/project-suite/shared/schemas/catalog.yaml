@@ -1,0 +1,81 @@
+# Schema 目录（catalog）
+#
+# 目的 ONLY：记录每个 schema「为什么存在、谁在运行时消费它、属于哪类契约」。
+# 不是校验器，不是 Registry（runtime/registry/ 才是 Registry）。
+#
+# 分类原则：按「谁在运行时消费」分类，**不是**按「有没有 validator」分类——
+#   manifest / event / workflow 没有 validator，但属 Runtime 契约，不是证据格式。
+#
+#   D — Data Contract     数据被 Producer/Consumer 机器消费（含结构事实 graph.json）
+#   R — Runtime Contract  Host/Runtime 依据它执行或恢复（checkpoint/recovery / 执行 / 事件）
+#   P — Protocol Contract 给 Skill/Host 作者遵循的协议（prose 规范，无运行时校验）
+#   E — Evidence Format   限定产物形态，不参与运行控制
+#
+# 约定：
+#   - `consumers` 是人维护的**意图**（grep 推导不出 manifest→checkpoint 这类控制流意图）。
+#   - `enforced`（有无 check 脚本真正引用）**不在此维护**——由 L6 从 repo 实际结构推导，
+#     不做手工状态字段（避免 metadata 漂移 / 「声称有校验就放心」的虚假置信）。
+#   - `notes` 承载未闭环 / 待确认等意图标记，不被任何检查消费。
+#
+# 冒烟（check-consistency.sh L6）：实际 *.schema.json 集合 == 本 catalog 的 path 集合，
+#   只查「新增 / 删除 / 路径错误 / 重复」，不查 consumer 是否真的消费 / 是否有 mutation。
+
+schemas:
+
+  context-package:
+    path: runtime/contracts/context-package.schema.json
+    class: D
+    consumers: [check-e2e-smoke, check-knowledge-pipeline, project-generator]
+    notes: 预消化知识包主输出；已被脚本强制
+
+  knowledge-index:
+    path: runtime/state/schemas/knowledge-index.schema.json
+    class: D
+    consumers: [check-knowledge-pipeline, knowledge-resolver, knowledge-compiler]
+    notes: 已被脚本强制
+
+  knowledge-object:
+    path: shared/schemas/knowledge-object.schema.json
+    class: D
+    consumers: [generate-skill-ir, project-analyzer]
+    notes: 被生成器/分析器引用；当前无通用 schema validator
+
+  graph:
+    path: shared/schemas/graph.schema.json
+    class: D
+    consumers: [graph-query, project-analyzer, project-planner, project-architect, project-generator, project-reviewer]
+    notes: 跨 6 个 Skill 真实消费的结构事实契约；当前无强制 validator → 下一轮 backlog 候选
+
+  manifest:
+    path: shared/schemas/manifest.schema.json
+    class: R
+    consumers: [checkpoint/recovery, stage-library]
+    notes: skill-policy.yaml 以 manifest_resume + checkpoint_file=manifest.json 恢复；无 validator → 高风险缺口候选
+
+  event:
+    path: shared/schemas/event.schema.json
+    class: R
+    consumers: [event-bus, show-events, execution-driver]
+    notes: 运行时事件协议（StageStarted→ArtifactGenerated→StageCompleted/Failed）；无 validator，但属 Runtime 契约
+
+  workflow:
+    path: shared/schemas/workflow.schema.json
+    class: R
+    consumers: [host]
+    notes: R? 已声明/可选/当前未闭环——仓库无真实 workflow.dsl.yaml，仅 .example；运行路径不可达状态须记录，而非假装已固
+
+  timeline:
+    path: runtime/metrics/timeline.schema.json
+    class: E
+    consumers: [timeline, knowledge-health]
+    notes: 限定 timeline 产物形态，不参与运行控制
+
+  analysis-config:
+    path: shared/schemas/analysis-config.schema.json
+    class: R
+    consumers: [project-analyzer]
+    notes: 疑为 Analyzer 输入/状态契约；暂无脚本证明运行时消费链 → 待确认，勿在此前删除
+
+# 2026-09-28 归档移除：memory.schema.json（无 memory.json Producer/Consumer）与
+# projects.schema.json（无 projects.json Producer/Consumer）经孤儿确认后移入 docs/archive/schemas/，
+# 不再属于 active contract，故不在本 catalog 登记（L4.5 亦排除 docs/archive）。

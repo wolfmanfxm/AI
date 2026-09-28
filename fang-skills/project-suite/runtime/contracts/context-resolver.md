@@ -41,7 +41,9 @@ After:   Task → 按 type 分桶 → 全量 constraints + Top-K knowledge/guida
 
 ## Progressive Disclosure（强制）
 
-Resolver 输出 = metadata 指针，**不做默认全量 hydrate**。
+Resolver 输出 = **metadata-first 索引 + 仅对选中条目 hydrate 的结构化摘要**。Index 层保持
+metadata-only（只存 source/enforcement/priority/statement，不存全文）；只有被 Select 选中的条目才
+hydrate 正文为结构化 pattern/constraints——**不做默认全量 hydrate**。
 
 ```
 Index → Select → Hydrate

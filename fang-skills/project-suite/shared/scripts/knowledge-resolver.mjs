@@ -218,6 +218,13 @@ if (candidates.size) {
   guidance.length = Math.min(guidance.length, TOP_K_GUIDANCE);
 }
 
+// Progressive Disclosure 的显式缺口：唯一「因为可能有用而加载全文」的路径。
+// 行为保留（向后兼容），但显式提示，让调用方知情、让回归测试可锁定「这是刻意行为而非静默退化」。
+if (candidates.size === 0 && (knowledge.length > 0 || guidance.length > 0)) {
+  console.warn(`ℹ️  未传 candidates → knowledge(${knowledge.length})/guidance(${guidance.length}) 全量加载`
+    + `（向后兼容退化路径，非 Progressive Disclosure 首选；首选是 Planner 传命中源）`);
+}
+
 // 保护：candidates 全未命中 → 显式告警（避免「garbage candidates → 静默空 knowledge」）
 if (candidates.size > 0 && knowledge.length === 0 && guidance.length === 0) {
   console.warn(`⚠️  ${candidates.size} 个 candidates 未命中任何 pattern/component/api/experience/playbook（knowledge/guidance 桶）`);

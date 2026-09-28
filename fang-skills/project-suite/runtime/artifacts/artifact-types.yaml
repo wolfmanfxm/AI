@@ -22,7 +22,7 @@ types:
 
   knowledge:
     description: 项目长期知识（Knowledge Base 持久化产物，由 analyzer 产出，经 Compiler→Resolver→context-package 注入，不作为下游 skill 的直接输入）
-    schema: shared/schemas/manifest.schema.json
+    schema: ../state/schemas/knowledge-index.schema.json
     schema_version: "1.2.0"
     location: .project-knowledge/
     lifecycle: [draft, verified, accepted, archived]

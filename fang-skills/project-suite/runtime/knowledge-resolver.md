@@ -33,6 +33,8 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
    - knowledge / guidance：按 candidates 过滤（传了才过滤 + 裁 Top-K；不传 = 全量，向后兼容）
    - Top-K：knowledge 默认 5，guidance 默认 3；rank 恒按 priority → confidence↓ → tag-overlap↓ → source
    - candidates 全未命中 → 显式告警（stderr），不静默返回空 knowledge/guidance
+   - **不传 candidates → 全量 + stderr 显式提示**：行为保留（向后兼容），但提示「这是退化路径而非
+     Progressive Disclosure 首选」，让调用方知情；有回归测试锁定该语义（见 check-knowledge-pipeline.sh §6）
 
 3. Hydrate（读源取正文，确定性）
    - rule / project-decision：读 frontmatter `constraint` → context.rules[].constraint

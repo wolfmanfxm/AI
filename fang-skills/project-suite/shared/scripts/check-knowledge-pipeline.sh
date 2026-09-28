@@ -14,6 +14,7 @@
 #   - change-detection：knowledge.json 的 status 变化（Candidate→Accepted）触发重扫
 #   - change-detection：重命名（内容不变）也触发重扫（路径参与摘要）；编译器身份变化也触发重扫
 #   - 契约守卫：rules/decisions 缺 constraint 必须硬失败 + 补齐后恢复（真实项目断链的回归锁）
+#   - Progressive Disclosure：无 candidates = 全量（回归锁）+ 有 candidates = Top-K 触发（mutation 锁）
 #
 # Usage: bash shared/scripts/check-knowledge-pipeline.sh
 # Exit:  0 = 闭环通过；1 = 有断言失败
@@ -352,6 +353,66 @@ else
   fail "5c frontmatter 字段位于第 ${PROBE_LINE} 行未被读到 —— 硬窗口 bug 回归（字段写了但读不到）"
 fi
 rm -f "$LONG_FM"
+
+echo ""
+echo "=== 6. Progressive Disclosure：无 candidates=全量（回归锁）+ 有 candidates=Top-K（mutation 锁） ==="
+
+# 独立迷你 fixture（不复用被前面 section 污染的 $FIXTURE），只测 resolver 的「全量 vs Top-K」语义。
+# 6 条 Accepted pattern：无 candidates → 6 全量；有 candidates → 裁到 knowledge Top-K=5。
+F6="$FIXTURE/pd"
+mkdir -p "$F6/rules" "$F6/decisions" "$F6/patterns" "$F6/components" \
+         "$F6/api" "$F6/architecture" "$F6/experience" "$F6/playbooks" \
+         "$F6/recommendations" "$F6/runtime"
+for n in 1 2 3 4 5 6; do
+  cat > "$F6/patterns/pat$n.md" <<EOF
+---
+summary: 模式 $n
+confidence: $((100 - n))
+---
+# 模式 $n
+EOF
+done
+cat > "$F6/runtime/knowledge.json" <<'EOF'
+{"files":{
+  "patterns/pat1.md":{"status":"Accepted","occurrences":1},
+  "patterns/pat2.md":{"status":"Accepted","occurrences":1},
+  "patterns/pat3.md":{"status":"Accepted","occurrences":1},
+  "patterns/pat4.md":{"status":"Accepted","occurrences":1},
+  "patterns/pat5.md":{"status":"Accepted","occurrences":1},
+  "patterns/pat6.md":{"status":"Accepted","occurrences":1}
+}}
+EOF
+if ! bash "$SCRIPT_DIR/knowledge-compiler.sh" "$F6" >/dev/null 2>&1; then
+  fail "6 迷你 fixture 编译失败（无法测 Progressive Disclosure）"
+else
+  # 6a：无 candidates → 全量（文档化的向后兼容 = 刻意行为，保留但必须显式提示）
+  FULL6="$(bash "$SCRIPT_DIR/knowledge-resolver.sh" "$F6" >/dev/null 2>&1; \
+            node -e 'console.log((require(process.argv[1]).context.knowledge||[]).length)' "$F6/context-package.json")"
+  NOTICE="$(bash "$SCRIPT_DIR/knowledge-resolver.sh" "$F6" 2>&1 >/dev/null | grep -c '全量' || true)"
+  if [ "$FULL6" -eq 6 ]; then
+    pass "6a 无 candidates → knowledge 全量（$FULL6/6 = 文档化向后兼容，故意保留）"
+  else
+    fail "6a 无 candidates 应全量加载（实际 $FULL6/6）——退化路径被意外截断"
+  fi
+  if [ "${NOTICE:-0}" -ge 1 ]; then
+    pass "6a 全量加载时打显式提示（供调用方知情，非静默）"
+  else
+    fail "6a 未传 candidates 全量加载时未打提示（Progressive Disclosure 缺口静默）"
+  fi
+
+  # 6b：传 capability 名 candidates（'patterns' 命中全部 6 条）→ 触发 Top-K 裁到 5
+  #     mutation：若 Top-K 守卫被移除 / candidates 不再触发截断，本断言必红
+  if bash "$SCRIPT_DIR/knowledge-resolver.sh" "$F6" "patterns" >/dev/null 2>&1; then
+    TOPK6="$(node -e 'console.log((require(process.argv[1]).context.knowledge||[]).length)' "$F6/context-package.json")"
+    if [ "$TOPK6" -eq 5 ]; then
+      pass "6b 传 candidates('patterns') → 6 命中被裁到 Top-K=5（Top-K 守卫生效）"
+    else
+      fail "6b 有 candidates 应裁到 Top-K=5（实际 $TOPK6）——Top-K 守卫退化（mutation 锁）"
+    fi
+  else
+    fail "6b 传 candidates 后 resolver 运行失败"
+  fi
+fi
 
 echo ""
 echo "========================================"

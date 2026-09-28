@@ -320,6 +320,39 @@ else
 fi
 
 echo ""
+# ── L4.5: schema 文件集合 ↔ catalog ─────────────────────────
+# 契约增殖的防回归锁：只查「实际 *.schema.json 集合 == catalog 登记集合」。
+# 只做新增/删除/路径/重复四类集合比较——绝不检查 consumer 是否真的消费 / mutation 是否真的存在，
+# 那些会滑成新的治理引擎。enforced 等字段不在此手写，避免「声称有校验就放心」的虚假置信。
+echo "【L4.5】schema 文件集合 ↔ catalog（防契约增殖：只查集合，不查消费合法性）"
+echo "----------------------------------------"
+CATALOG="$SUITE_ROOT/shared/schemas/catalog.yaml"
+L45_FAIL=0
+# 实际 *.schema.json 集合（repo 相对路径）
+actual_schema=$(find "$SUITE_ROOT" -name '*.schema.json' \
+                -not -path '*/node_modules/*' -not -path '*/docs/archive/*' \
+                | sed "s|$SUITE_ROOT/||" | sort)
+# catalog 登记的 path 集合
+reg_schema=$(grep -E '^[[:space:]]+path:' "$CATALOG" 2>/dev/null | sed 's/.*path:[[:space:]]*//' | sort)
+schema_cnt=$(printf '%s\n' "$actual_schema" | grep -c . )
+
+for a in $actual_schema; do
+  echo "$reg_schema" | grep -qx "$a" || { red "  ❌ 未登记 schema: $a（新增契约须登记进 catalog.yaml）"; L45_FAIL=$((L45_FAIL+1)); }
+done
+for r in $reg_schema; do
+  [ -f "$SUITE_ROOT/$r" ] || { red "  ❌ catalog 登记但文件不存在/路径错: $r"; L45_FAIL=$((L45_FAIL+1)); }
+done
+reg_dup=$(printf '%s\n' "$reg_schema" | sort | uniq -d)
+[ -n "$reg_dup" ] && { red "  ❌ catalog 重复登记: $(echo "$reg_dup" | tr '\n' ' ')"; L45_FAIL=$((L45_FAIL+1)); }
+
+if [ "$L45_FAIL" -eq 0 ]; then
+  green "  ✅ schema 集合与 catalog 一致（${schema_cnt} 个）"
+  PASS=$((PASS+1))
+else
+  FAIL=$((FAIL+L45_FAIL))
+fi
+
+echo ""
 # ── L5: 实际行为（排除）────────────────────────────────────
 echo "【L5】实际行为"
 echo "----------------------------------------"
