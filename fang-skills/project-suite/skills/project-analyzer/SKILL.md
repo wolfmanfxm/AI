@@ -2,7 +2,7 @@
 name: project-analyzer
 metadata: skill.yaml
 description: >
-  分析软件项目并生成可复用的项目知识库：Multi-Extractor 架构（10 个提取器 + Candidate→Verify→Accept + Evidence Score + INDEX.md）。
+  分析软件项目并生成可复用的项目知识库：Multi-Extractor 架构（10 个提取器 + Candidate→Verify→Accept + Evidence Score + index.md）。
   触发词：分析项目、代码分析、项目审计、扫描项目、梳理组件、更新项目知识、刷新项目知识、
   项目规范、编码规范、analyze codebase、scan project、project refresh。
   不用于：已有知识覆盖且无明显漂移的普通开发任务。
@@ -19,6 +19,11 @@ description: >
 2. **先候选再验证** — 不直接写入（verification.mode: candidate-verify-accept）
 3. **Evidence Score 溯源** — 每个 Claim 标注证据（路径+行号+次数）
 4. **Rejected 保留** — 失败的知识也存档，供后续分析
+5. **首扫建立完整骨架** — 契约声明的**全部目录** + 6 个根产物一律创建（目录必须建，文件按发现建）。
+   产出目录集合的唯一权威是 [knowledge-directories.yaml](../../shared/schemas/knowledge-directories.yaml)，
+   人读视图见 [output-format.md](prompts/output-format.md)。由
+   [check-kb-contract.sh](../../shared/scripts/check-kb-contract.sh) **阻断式**断言——
+   缺任一项则不可声明 `status: completed`
 
 ## 何时触发（知识缺口入口）
 
@@ -54,5 +59,6 @@ description: >
 ## 职责边界
 
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
+→ [references/capability-matrix.md](references/capability-matrix.md)（产出契约 + 覆盖策略 + 维度并行策略）
 
 > 完成后：/project-planner 或 /project-architect。通用约束 → [workflow-protocol](../../workflow-protocol/SKILL.md)；git/命令护栏 → [command-guard](../../runtime/mechanisms/command-guard.md)。

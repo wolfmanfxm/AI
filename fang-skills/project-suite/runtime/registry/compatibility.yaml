@@ -6,10 +6,11 @@
 version: "1.0.0"
 
 # ═══ Current Versions ═══
-# 从 skill.yaml 提取，自动同步
+# 与各 skill.yaml 的 version 同步——⚠️ 无生成器会自动同步，靠 check-consistency.sh / check-conformance.sh 断言，
+# 改 skill.yaml 版本时必须同时改这里（实测 2026-09-30：analyzer 升 1.3.2 而此处仍 1.3.1 → 两项检查报错）。
 
 current:
-  project-analyzer:    "1.3.1"
+  project-analyzer:    "1.3.2"
   project-planner:     "1.3.0"
   project-architect:   "1.3.0"
   project-generator:   "1.3.0"

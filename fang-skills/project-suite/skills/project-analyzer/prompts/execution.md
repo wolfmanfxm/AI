@@ -66,7 +66,7 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 
 → [prompts/index-generator.md](index-generator.md)
 
-生成 Zettelkasten 风格 `INDEX.md` — 可导航的知识链接图。
+生成 Zettelkasten 风格 `index.md` — 可导航的知识链接图。
 
 ### Phase 6: Knowledge Classification
 
@@ -99,7 +99,7 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 | Phase 2→3 | `candidates/verification-report.md` 存在 + 每个 Candidate 有 verdict | 返回 Verifier 补判定 |
 | Phase 3→4 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
 | Phase 4→5 | `graph.json` + `.md` 双轨输出已写入 `.project-knowledge/` | 补跑 Knowledge Builder |
-| Phase 5→6 | `INDEX.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
+| Phase 5→6 | `index.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
 | Phase 6→7 | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
 | Phase 7→8 | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
 | Phase 8→Exit | `promotion-review.yaml` 存在 + all candidates scored | 补跑 Promotion Reviewer |
@@ -112,5 +112,5 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 - Verifier 已判定所有 Candidate（Phase 2 ✅）
 - Cross-Validator 已完成所有 pairs 检查（Phase 3 ✅）
 - Knowledge Builder 双轨输出已写入（Phase 4 ✅）
-- INDEX.md 已重新生成（Phase 5 ✅）
+- index.md 已重新生成（Phase 5 ✅）
 - Classifier 已分配所有 promotion level（Phase 6 ✅）

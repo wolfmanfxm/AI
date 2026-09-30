@@ -17,7 +17,7 @@ tests:
       从项目提取「命名规范」，写入 knowledge。
     naive_failure: >
       朴素 Agent 提取完直接写入 knowledge，跳过验证，导致错误/存疑结论进入知识库污染下游。
-    skill_mechanism: verification.mode: candidate-verify-accept（先候选再 5-Verify）
+    skill_mechanism: "verification.mode: candidate-verify-accept（先候选再 5-Verify）"
     assertion: 产物区分 candidates/accepted/rejected，accepted 均经过验证。
 
   - id: P3
@@ -38,3 +38,34 @@ tests:
       朴素 Agent 重跑全部 10 个 Extractor 做全量扫描，浪费大量 token，且可能覆盖/扰动已有知识。
     skill_mechanism: 「增量分析（Incremental Analysis）」——知识库存在但某领域缺失时，只跑该领域相关 Extractor，局部更新 graph.json + 对应 .md
     assertion: 只运行缺失领域相关的 Extractor，局部更新 graph.json + 对应 .md，不重跑全部 10 个 Extractor。
+
+  - id: P5
+    name: 首扫必须建立完整契约骨架
+    scenario: >
+      首次分析一个陌生项目（`.project-knowledge/` 不存在），用户说「分析这个项目」。
+    naive_failure: >
+      朴素 Agent 把「分析」理解成「出一份报告」——只写一个总报告 .md + 若干 candidate yaml，
+      契约目录 1/14、根产物 1/6，然后声明 `status: completed`。
+      **实测**：东风畅行正是此形态（1/14 目录、仅 manifest.json + 大写 INDEX.md，manifest status: complete）；
+      东风汽金 12/14（缺 recommendations/ conventions/）亦声明 completed。
+    skill_mechanism: >
+      核心原则 5「首扫建立完整骨架」+ Delivery Action 0（Finish Phase A/B 强制刷新根 JSON）
+      + Action 6 交付契约门禁（`check-kb-contract.sh`，阻断）
+    assertion: >
+      契约声明的全部目录存在 + 6 个固定根产物存在且大小写精确；缺失即门禁 exit 1，不可声明 completed。
+
+  - id: P6
+    name: 产出结构的单一权威
+    scenario: >
+      分析结束准备收尾，需要确定产出哪些目录与文件。
+    naive_failure: >
+      规格里有 5 份互相矛盾的产出清单（output-format.md 树 / knowledge-builder.md Coverage Gate /
+      main.md Wave 表 / validation.md V7 / capability-matrix.md 固定产出），目录集合各不相同。
+      Agent 任选其一 → 产出部分骨架；且 Coverage Gate 漏了 `recommendations/`，
+      虽有三处声明「产出 recommendations/」却无任何检查覆盖 → **两个真实项目都没产出该目录**。
+    skill_mechanism: >
+      全部 stage 改为**引用契约**（`shared/schemas/knowledge-directories.yaml`）而非各自列举；
+      唯一人读视图收敛到 output-format.md 的「固定产出结构」；Coverage Gate 按契约重组并补骨架行。
+    assertion: >
+      规格中不再出现硬编码的产出目录清单（除契约与其唯一派生视图外）；
+      `recommendations/` 被 Coverage Gate + 门禁同时覆盖（可由 `check-kb-contract.sh` 断言）。

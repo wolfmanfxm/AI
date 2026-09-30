@@ -81,6 +81,7 @@ sources:
 │
 ├── manifest.json                # 元数据（knowledgeVersion, skillVersion, gitCommit）
 ├── statistics.json              # 仪表盘数据（组件/API/模式/质量指标）
+├── context.json                 # 标准化项目上下文（技术栈/路径别名/模块清单）
 ├── graph.json                   # 结构化关系图谱（节点+边）
 ├── search-index.json            # 关键词→文件检索索引
 ├── index.md                     # 人类导航入口
@@ -89,20 +90,40 @@ sources:
 ├── components/                  # 组件
 ├── api/                         # API
 ├── patterns/                    # 模式（UI + 编码 + 可复用模式）
-├── observations/                # 观察数据
+├── conventions/                 # 编码规范（人读，不入 index）
+├── observations/                # 观察数据（人读，不入 index）
+├── recommendations/             # 项目级应然建议（一条建议一个文件）
+├── decisions/                   # 决策记录（入 index；文件必需 constraint:）
 ├── proposals/                   # 任务规划产物（PLAN-*.md，project-planner 产出）
 ├── reports/                     # 任务产物（REVIEW / TEST-REPORT / REFACTOR / CHANGELOG / RELEASE-CHECKLIST）
+├── candidates/                  # 候选暂存（accepted/ rejected/）
 │
 ├── rules/                       # 人工
 ├── experience/                  # 人工
-├── playbooks/                   # 人工
-└── decisions/                   # 人工
+└── playbooks/                   # 人工
 ```
 
-- 元数据 JSON 每次必定生成
-- 目录初次运行时全部创建
-- 各目录下按分析发现动态创建 `.md` 文件，有内容才建
-- `rules/` `experience/` `playbooks/` `decisions/` 仅创建 index.md
+> 目录集合的权威是 [`shared/schemas/knowledge-directories.yaml`](../../../shared/schemas/knowledge-directories.yaml)；
+> 上面这棵树是它 + 6 个根产物的**唯一**人读视图，其它 prompt 一律引用、不得再列一份。
+
+### 首扫契约（🔴 进 Exit 条件）
+
+**首次扫描必须建立完整骨架**——上列**全部目录** + **6 个根产物**，即使某维度本次无内容：
+
+- 目录**一律创建**，不是「有内容才建」。缺目录 = 下游 skill 按目录读取时知识链断裂。
+- 分析型目录（`architecture/` `components/` `api/` `patterns/` `conventions/` `observations/`
+  `recommendations/` `decisions/` `candidates/`）写入本次发现的内容。
+- 人工型目录（`rules/` `experience/` `playbooks/`）**仅创建 `index.md`**，内容归人工维护。
+- 根产物中**元数据 JSON 每次必定生成**（见下 Refresh Rules），不是首扫才有。
+
+> 由 [check-kb-contract.sh](../../../shared/scripts/check-kb-contract.sh) 机械断言，**缺失即阻断 Delivery**。
+> 实测教训：曾有项目在 13/14 契约目录缺失时仍声明 `status: completed`——「目录初次运行时全部创建」写在
+> bullet 里、且没有任何门禁检查它，于是等于没写。**规格里没进 Exit 的祈使句不构成要求。**
+
+- 各目录下按分析发现动态创建 `.md` 文件，有内容才建 *（目录必须建，文件按发现建——两者不同）*
+- 人工型目录（`rules/` `experience/` `playbooks/`）仅创建 `index.md`；`decisions/` 例外——
+  它同时接收 analyzer 的决策提取（写 `constraint:`）与人工 ADR
+
 
 ## Refresh Rules（重扫时的更新策略）
 

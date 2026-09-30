@@ -14,7 +14,7 @@
 
 执行分析时，按 Wave 分组并行 spawn agent，每个 agent 加载对应维度 prompt：
 
-| Wave | 维度 | Prompt | 输出目录 |
+| Wave | 维度 | Prompt | 落点（契约目录） |
 |------|------|--------|---------|
 | 0 | 架构 | [architecture.md](architecture.md) | architecture/ |
 | 1 | 组件 | [components.md](components.md) | components/ |
@@ -24,6 +24,11 @@
 | 2 | UI 模式 | [ui-pattern.md](ui-pattern.md) | patterns/ |
 | 2 | 通用模式 | [patterns.md](patterns.md) | patterns/ |
 | 3 | 观察统计 | [observations.md](observations.md) | observations/ |
+
+> **本表是「Wave → 落点」的路由视图，不是产出清单。** 产出目录的完整集合（含 `conventions/`
+> `recommendations/` `decisions/` `rules/` `candidates/` 与 6 个根产物）以
+> [knowledge-directories.yaml](../../../shared/schemas/knowledge-directories.yaml) +
+> [output-format.md](output-format.md)「固定产出结构」为准——**不得从本表推断「analyzer 只产出这几个目录」**。
 
 ## 产出格式
 

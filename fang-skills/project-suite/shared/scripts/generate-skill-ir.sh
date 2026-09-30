@@ -124,7 +124,18 @@ echo "Skill IR Generator v2.1"
 if [ "$TARGET" = "all" ]; then
   for d in "$SKILLS_DIR"/*/; do gen "$d"; done
 else
-  gen "$SKILLS_DIR/project-$TARGET" 2>/dev/null || gen "$SKILLS_DIR/$TARGET"
+  # 接受带或不带 project- 前缀。
+  # ⚠️ 不要写成 `gen A 2>/dev/null || gen B`：gen 对不存在的目录走 `[ ! -f "$y" ] && return`，
+  #    而 `[ ! -f ]` 为真时 return 的退出码是 0 → `||` 短路 → 回退分支永不执行 →
+  #    `generate-skill-ir.sh <skill>` 静默什么都不做（实测 2026-09-30）。改为显式 -d 判定。
+  if [ -d "$SKILLS_DIR/$TARGET" ]; then
+    gen "$SKILLS_DIR/$TARGET"
+  elif [ -d "$SKILLS_DIR/project-$TARGET" ]; then
+    gen "$SKILLS_DIR/project-$TARGET"
+  else
+    echo "❌ 无此 skill: $TARGET（试过 $SKILLS_DIR/$TARGET 与 $SKILLS_DIR/project-$TARGET）" >&2
+    exit 2
+  fi
 fi
 if [ -n "$EMPTY_VERIFY" ]; then
   echo "⚠️ 以下 skill 有 prompts/verifier.md，但 validation.md 里没有家族统一的 \`| V<n> |\` 校验表行，checks 记为 0:$EMPTY_VERIFY"

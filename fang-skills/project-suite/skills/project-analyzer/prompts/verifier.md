@@ -18,7 +18,7 @@
 | V2 | 频率 | Occurrences 与重新 grep 计数一致，且 ≥3（1-2 次是孤例） | 按偏差比例降权；偏差 >50% → ❌ Rejected |
 | V3 | 反例 | 抽样未发现明显反例 | 按反例比例降权；>50% → ❌ Rejected |
 | V4 | 预测力 | 能回答一个代码没有显式说明的问题 | -0.10，标注 `[DESCRIPTIVE]` |
-| V5 | 非显而易见性 | 不是任何有经验开发者一眼可见的常识 | -0.15，标注 `[OBVIOUS]`，INDEX.md 降权 |
+| V5 | 非显而易见性 | 不是任何有经验开发者一眼可见的常识 | -0.15，标注 `[OBVIOUS]`，index.md 降权 |
 | V6 | 契约字段齐备 | 目标目录要求的 `statement` / `constraint` 能给出**可注入**的一句 | ❌ Rejected——不许拿标题或描述凑数 |
 
 ### Verify 1: 存在性
@@ -45,8 +45,8 @@
 - 这个知识**是否任何有经验的开发者都能一眼看出**？
 - 例如："项目使用 Vue 3" → ❌ 太显然，package.json 第 3 行就能看到
 - 例如："项目禁止在 composable 外使用 useState" → ✅ 非显然，来自代码审查经验
-- 太显然的知识 → 扣分（-0.15），标注 `[OBVIOUS]` —— 降低其在 INDEX.md 中的排序权重
-- 非显然的知识 → 加分（+0.05），标注 `[INSIGHT]` ——在 INDEX.md 中提升排序
+- 太显然的知识 → 扣分（-0.15），标注 `[OBVIOUS]` —— 降低其在 index.md 中的排序权重
+- 非显然的知识 → 加分（+0.05），标注 `[INSIGHT]` ——在 index.md 中提升排序
 
 ### Verify 6: 契约字段齐备（Producer 侧硬要求）
 
@@ -82,7 +82,7 @@
 | Verify 3 发现反例 30-50% | 🟡 Accepted (confidence -0.25), 标注 `⚠️ COUNTER EXAMPLES` |
 | Verify 3 发现反例 >50% | ❌ Rejected → `candidates/rejected/` |
 | Verify 4 不能预测 | 🟡 Accepted (confidence -0.10), 标注 `[DESCRIPTIVE]` |
-| Verify 5 太显而易见 | 🟡 Accepted (confidence -0.15), 标注 `[OBVIOUS]` — INDEX.md 降权 |
+| Verify 5 太显而易见 | 🟡 Accepted (confidence -0.15), 标注 `[OBVIOUS]` — index.md 降权 |
 | Verify 6 产不出必需字段（`statement` / `constraint`） | ❌ Rejected → `candidates/rejected/`，reason 记「candidates 缺契约字段 `<field>`」——缺契约字段的知识**不得进入 knowledge** |
 
 **Adjusted 但未 Rejected 的 Candidate**：在 Output 中列出 adjusted 清单，标注原 confidence → 调整后 confidence + 原因。不得静默调整。

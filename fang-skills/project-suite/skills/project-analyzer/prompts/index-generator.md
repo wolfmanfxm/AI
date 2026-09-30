@@ -7,9 +7,9 @@
 1. 读取所有 Accepted Candidates
 2. 提取每个知识点的标签和引用关系
 3. 构建链接图：Architecture → Patterns → Components → API → Glossary
-4. 生成 INDEX.md
+4. 生成 index.md
 
-## Output: INDEX.md
+## Output: index.md
 
 ```markdown
 # Knowledge Index

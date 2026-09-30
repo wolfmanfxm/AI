@@ -16,13 +16,13 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
 所有 `promotion: project` 的知识 → 同步到个人知识库的项目目录。
 
 ```
-源: .project-knowledge/
-    ├── architecture/  components/  api/  patterns/  conventions/
-    ├── observations/  experience/  rules/
-    ├── glossary.md  principles.md  INDEX.md
-    ├── graph.json  context.json  statistics.json
-    ├── decisions/architecture-decisions.md  index.md
-    └── reports/latest.md
+源: .project-knowledge/          ← 目录集合以 shared/schemas/knowledge-directories.yaml 为准，此处不列举
+    ├── architecture/  components/  api/  patterns/  conventions/   ← 知识（.md）
+    ├── observations/  experience/  rules/  decisions/  recommendations/
+    ├── index.md                                                 ← 导航入口（**小写**）
+    ├── graph.json  context.json  statistics.json  manifest.json  search-index.json
+    ├── proposals/  reports/     ← 任务产物
+    └── candidates/              ← 候选暂存（不同步）
 
 目标: {vaultPath}/Projects/{project}/
     ├── README.md  (项目概述, KB 入口)
@@ -30,6 +30,11 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
     ├── Decisions/  Experience/  Glossary/
     └── Risks/  graph.json
 ```
+
+> ⚠️ **不要在本文件列举完整目录清单**——目录集合的权威是
+> [knowledge-directories.yaml](../schemas/knowledge-directories.yaml)。本文件只说明「同步到 Vault 的映射」。
+> 另注：`glossary.md` 属 `architecture/`、`principles.md` 属 `rules/`，**都不在 KB 根目录**；
+> 根目录的索引入口是**小写** `index.md`（曾误写 `INDEX.md`，在大小写敏感 FS 上会 404）。
 
 rsync 命令：
 ```bash

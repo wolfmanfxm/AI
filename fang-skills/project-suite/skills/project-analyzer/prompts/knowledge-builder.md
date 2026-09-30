@@ -49,22 +49,30 @@
 
 ## Coverage Gate
 
-**全部完成前不可退出。** 逐项验证：
+**全部完成前不可退出。** 逐项验证——**行集合 = 契约声明的知识目录**
+（[knowledge-directories.yaml](../../../shared/schemas/knowledge-directories.yaml)，此处只列落点与验证方式，不重述目录语义）：
 
-| Candidate | 目标文件 | 验证方式 |
-|-----------|---------|---------|
-| directory.md | architecture/modules.md | 目录树 + 模块清单已合并 |
-| framework.md | architecture/tech-stack.md | 技术栈表已写入 |
-| architecture.md | architecture/overview.md | 分层+边界已写入 |
-| patterns.md | patterns/*.md | 每种模式独立文件 |
-| conventions.md | conventions/*.md | 每种规范独立文件 |
-| glossary.md | architecture/glossary.md | 术语表已写入 |
-| decisions.md | decisions/decisions.md（**必需 `constraint:`**） | 决策记录已写入 |
-| risks.md | observations/risks.md | 风险清单已写入 |
-| antipatterns.md | observations/antipatterns.md | 反模式清单已写入 |
-| principles.md | conventions/principles.md | Always/Never/Prefer/Avoid 已写入 |
+| 契约目录 | Candidate 来源 | 落点 | 验证方式 |
+|---------|---------------|------|---------|
+| `architecture/` | directory / framework / architecture / glossary | `architecture/{modules,tech-stack,overview,glossary}.md` | 目录树 + 技术栈表 + 分层边界 + 术语表已写入 |
+| `patterns/` | pattern | `patterns/*.md` | 每种模式独立文件（**必需 `statement:`**） |
+| `components/` | components | `components/*.md` | 每个组件独立文件（**必需 `statement:`**） |
+| `api/` | api-pattern | `api/*.md` | 每个接口独立文件（**必需 `statement:`**） |
+| `conventions/` | convention | `conventions/*.md` | 每种规范独立文件 |
+| `rules/` | principle | `rules/principles.md` | Always/Never/Prefer/Avoid 已写入（**必需 `constraint:`**——不然 Compiler 拒绝生成 index） |
+| `decisions/` | decision | `decisions/*.md` | 决策记录已写入（**必需 `constraint:`**——同上） |
+| `recommendations/` | instinct-extractor | `recommendations/*.md` | **一条建议一个文件**；每条含「现状 → 应然建议 + 依据溯源」 |
+| `observations/` | risk / antipattern | `observations/{risks,antipatterns}.md` | 风险清单 + 反模式清单已写入 |
+| `candidates/` | 全部 Extractor | `candidates/accepted/*.yaml` | 每个 Extractor ≥1 candidate（V1/V2 已判） |
+| **骨架** | — | 契约声明的**每一个**目录 | 目录存在且含 `index.md`——**首扫必须建立完整骨架**，不是「有内容才建」 |
 
 **未覆盖的 Candidate → 返回重写对应文件 → 不可 Exit。**
+骨架行由 [check-kb-contract.sh](../../../shared/scripts/check-kb-contract.sh) 机械断言（契约目录全在位 + 6 个固定根产物），
+它同时是 Delivery 的阻断门禁——**本表与契约之间不得再插入第二份目录清单**。
+
+> ⚠️ **`recommendations/` 曾长期缺席本表**（2026-09-30 修复）：`skill.yaml` / `SKILL.md` / `instinct-extractor.md`
+> 三处都声明 analyzer 产出 `recommendations/`，但本 Gate 表没有对应行 → **两个真实项目都没产出该目录**。
+> 声称产出 ≠ 被覆盖检查，未被 Gate 覆盖的产出等于没要求。**这是本表按契约重组、并新增骨架行的直接原因。**
 
 ### frontmatter 契约（与 Coverage Gate 同级，缺失同样**不可 Exit**）
 
@@ -82,32 +90,16 @@
 
 **双轨输出**：Machine-readable Knowledge Graph（下游 Skill 消费）+ Human-readable Markdown（人读）。
 
-> ⚠️ **目录集合的单一权威是 [`shared/schemas/knowledge-directories.yaml`](../../../shared/schemas/knowledge-directories.yaml)**——
-> 哪个目录由谁产出、谁消费、是否进 index、必须写哪些 frontmatter，一律以它为准。本节的树是从它派生的视图，
-> **不得在此新增目录**（`check-io-connectivity.sh` 的不变量 I2 会断言：本节声明的写入目录必须已在契约中声明）。
+> **目录集合**：以 [`shared/schemas/knowledge-directories.yaml`](../../../shared/schemas/knowledge-directories.yaml) 为准。
+> 哪个目录由谁产出、谁消费、是否进 index、必须写哪些 frontmatter，**一律以它为准**。
+> 本文件**不列目录树**——派生的可读视图只有一处，在 [output-format.md](output-format.md) 的「固定产出结构」；
+> 这里重复第三份清单正是历史上五处清单互相矛盾（directory 集合各不相同）的成因之一。
 >
-> 另注：`decisions/` 是 index 目标目录（契约 `indexed_by_compiler: true`），且其文件**必须**写 `constraint:`
-> （契约 `compiler_enforced: [constraint]`）。**不要再把决策写进 `architecture/`**——那会被当作 pattern 索引。
-
-```
-.project-knowledge/
-├── graph.json     ← ⭐ 权威知识图谱（machine-readable）
-├── architecture/
-│   ├── overview.md          ← 人读版本
-│   ├── modules.md
-│   ├── tech-stack.md
-│   └── glossary.md
-├── patterns/
-├── components/
-├── api/
-├── conventions/             ← 人读（不入 index）
-├── decisions/               ← 入 index；文件必需 constraint:
-├── observations/            ← 人读（不入 index）：risks.md / antipatterns.md
-├── proposals/  reports/     ← 任务产物落点（不入 index）
-├── candidates/              ← 候选暂存（不入 index）
-├── statistics.json
-└── context.json
-```
+> 本节只保留**派生不出来**的两条语义：
+> - `decisions/` 是 index 目标目录（契约 `indexed_by_compiler: true`），其文件**必须**写 `constraint:`
+>   （契约 `compiler_enforced: [constraint]`）。**不要再把决策写进 `architecture/`**——那会被当作 pattern 索引。
+> - `conventions/` 与 `observations/` **刻意不进 index**（契约 `indexed_by_compiler: false`）：它们是
+>   机器链路的「人读镜像」（observations 的机器链路走 `graph.json`）。**不要因为「没进 index」就跳过产出。**
 
 ## .md frontmatter（供 Resolver hydrate）
 

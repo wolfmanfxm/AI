@@ -52,7 +52,7 @@ pass_fail: pass | fail | decorate | untested
 
 > ⚠️ **证据诚实标注（round8 已补测 8 个）**：round8 补测了 6 个格式型额外动作型（组件复用、增量修改、完整性、精确引用、可操作、AC 对照）+ 2 个执行型（可执行、先理解），**全部 RED 弱 = decorate**（naive 没 skill 也做对），已降级为 ❌。这推翻了 round7 的「额外动作型 RED 强」分类——「Read-then-Edit」「file:line 引用」「全状态覆盖」「跑测试」「读源码」都已是当前模型的默认行为。剩余未补测：Evidence Score、先候选、决策可追溯、AC 驱动（大概率也 decorate）。
 
-### project-analyzer（4 原则）
+### project-analyzer（5 原则）
 
 | 机制 | 类型 | RED 假设 | 验证状态 | 证据 |
 |------|------|---------|---------|------|
@@ -60,6 +60,7 @@ pass_fail: pass | fail | decorate | untested
 | 先候选再验证（candidate-verify-accept） | 额外动作 | 强 | ✅ 生效 | round5：candidates/accepted/rejected 区分明确 |
 | 增量分析（缺领域只跑相关 Extractor） | 额外动作 | 强 | ✅ 生效 | round5 N5-INC：5 个相关 Extractor，非全量 10 |
 | 知识缺口入口（新鲜知识库跳过） | 判断 | 弱 | ⚠️ 未单独测 | round3/4 验证过「跳过 vs 不跳过」，但粒度 vs 增量分析重叠 |
+| 首扫建立完整骨架（交付契约门禁） | 额外动作 | 强 | ⚠️ untested（2026-09-30 补） | 两真实项目 1/14、12/14 目录却都声明 `completed`；门禁回放 exit 1 / 合规 fixture exit 0，**无 agent 臂**。详见「回归基准记录」 |
 
 ### project-planner（4 原则）
 
@@ -138,7 +139,7 @@ pass_fail: pass | fail | decorate | untested
 | 🟡 一致性放大器 | 1 | 遵循项目模式——系统化遵循项目约定（value=一致性非质量，round10 实证） |
 | ⚠️ 纪律强制（RED 弱） | 1 | 放置正确（强制每次对照，降漏报率） |
 | ❌ 装饰品 | 14 | round8+10 实测 14 个机制全 RED 弱：判断型 6 + 格式型 6 + 执行型 2（LLM 通用能力覆盖） |
-| 未验证 | 1 | 跨 Skill 路由准确（新增，仅有静态证据；其余 25 个机制已至少跑过 1 轮 baseline） |
+| 未验证 | 2 | ① 跨 Skill 路由准确（新增，仅有静态证据）② 交付契约完成度门禁（2026-09-30 新增：机械可核但**无 agent 臂**，见「回归基准记录」）；其余机制已至少跑过 1 轮 baseline |
 
 ## 结论
 
@@ -353,6 +354,37 @@ pass_fail: pass | fail | decorate | untested
   `metrics:`——`input/output/tool_result_tokens`、`retry_rate`、`cache_read/write`、`audited_cost`、
   `quality`。数据源 = 扩后的 `timeline.json`（`billing` / `quality.retries`）+ Host 上报。
   **判决纪律**：audited cost 两臂同口径才可对比；省 context bytes ≠ 省账单。
+
+### 机制：交付契约完成度门禁（`check-kb-contract.sh`）
+
+- **Hypothesis**：无此门禁时，analyzer 会在产出**不完整骨架**的情况下声明完成——因为「产出哪些目录」
+  在 5 处规格里各自声明且互不相同（`output-format.md` 树 / `knowledge-builder.md` Coverage Gate /
+  `main.md` Wave 表 / `validation.md` V7 / `capability-matrix.md` 固定产出），且既有检查**只标注不阻断**
+  （V7 对缺目录仅标注；`finish-workflow.md` Phase D 明写「不阻断」）。缺目录 = 下游按目录读取时知识链断裂。
+- **Native baseline**：未跑受控 native 臂。但有**两个真实跑前基线**（非构造，是 in-the-wild 产出）：
+  - 东风畅行 cop-workspace：契约目录 **1/14**、根产物 **1.5/6**（仅 `manifest.json` + 大写 `INDEX.md`），
+    `manifest.status: complete`，且 `manifest.json` **不满足** `manifest.schema.json`（缺 4/5 required 字段）
+  - 东风汽金 afc-newcore-web-frontend：契约目录 **12/14**（缺 `recommendations/` `conventions/`）、
+    根产物 **6/6**，`manifest.status: completed`
+
+  **两者均声明完成**——即「不完整却自称完成」在真实产出里成立（这是四象限里的「naive 失败」，已观察到）。
+- **Suite behavior**：**未跑 LLM 臂**。本轮行为改变是**机械可核**的：对**上述同一批既有产出**回放新门禁
+  → 畅行 exit 1（18 项：13 缺目录 + 4 缺根产物 + 1 大小写不符）、汽金 exit 1（2 项）、
+  完全合规的构造 fixture exit 0、仅缺 `recommendations/` 的 fixture exit 1、非 `.project-knowledge` 参数 exit 2。
+  **这证明门禁有判别力（不是恒失败），但不证明「加载新规格的 agent 会去补齐并重跑到绿」。**
+- **Evidence**：`shared/scripts/check-kb-contract.sh` + 两个真实项目的**只读回放**
+  （副本 `/tmp/kbgate/{qijin,changxing}/.project-knowledge`，报告 `kb-contract-report.md`）；
+  设计层见 `benchmark/pressure-tests/project-analyzer.yaml` P5/P6。
+  回归锁：`check-yaml` / `check-consistency` / `check-conformance` /
+  `check-io-connectivity`（含 I2 4.4 全 skill 规格扫描）/ `check-knowledge-pipeline` 全绿，`check-e2e-smoke` 通过。
+- **Repeatability**：脚本侧**确定性**（同输入→同退出码，非概率行为，故「重复复现」不是该机制的风险面）；
+  **agent 侧未测（n=0）**。这正是本项不能判 `pass` 的原因。
+- **Pass/Fail**：untested —— 行为改变**机械可证**（脚本对两真实项目 exit 1、对合规 fixture exit 0；
+  「native 失败」在真实产出中确有观察），但缺 **native vs suite 的受控 delta**、缺「agent 收到 exit 1 后
+  会补齐并重跑」的行为证据。按台账定义不满足 `pass`。**不冒充已判定。**
+
+> ⚠️ **诚实边界**：汽金本身**不完全合规**（12/14）——「真实合规项目」这一臂在本轮**没有样本**，
+> 只有构造 fixture。将来若出现真实合规产出，应作为该机制的首个 GREEN 真实臂补记。
 
 ---
 
