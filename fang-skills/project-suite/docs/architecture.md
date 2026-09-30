@@ -123,3 +123,19 @@ v1.0 的 Runtime 本质是 Workflow Runtime（流程执行器）。v2.0 目标�
 ```
 感知 → 理解任务 → 查询知识 → 选择工具 → 规划流程 → 执行 Skill → 抽取知识 → 评估价值 → 沉淀知识
 ```
+
+### 硬边界：Suite 永不常驻注入行为
+
+> 反模式（同我反过的 Context Engine / Mode Engine / Intent Resolver / Policy Engine）。
+
+Suite 以 **Runtime = Protocol** 运作：只被 host **按需调用**（Skill / /command / pipeline），通过工具、prompts、gate 影响行为。
+**永远不通过 `SessionStart` / `UserPromptSubmit` 等 hook 常驻注入自己的 mode / 行为 / Context 层。**
+
+| ✅ 允许（Protocol 按需） | ❌ 禁止（Engine 常驻） |
+|---|---|
+| 执行 Skill 时注入对应 prompt / gate | `SessionStart` 持续注活 own mode |
+| 按 pipeline 编排多 Skill | 隐性持续改写每次 user prompt |
+| 通过 tool adapter 调外部能力 | 维护全局 Mode Engine / Policy Engine |
+
+违反此边界 = 增加一层"持续控制 Agent 行为的 Engine"，与架构上层（可编排、可验证、可解释）冲突。
+即：Suite 可以是 host 的**刹车**（防过度设计），永不成为 host 的**新引擎**。

@@ -11,7 +11,22 @@
 - `findTransitiveDeps(<变更模块>)` → 传递依赖深度 ≤2，检查是否引入循环依赖
 - 循环依赖检测命中 → 🔴 BLOCKER（架构级问题）
 
-### 1. 五轴扫描
+### 1. 必要性检查（Existential Gate，先于五轴）
+
+> Question existence FIRST。五轴审「做对了吗」，本 pass 先审「这层/这个改动该不该存在」。
+> 对齐 [Reuse Check Create Gate](../../../shared/primitives/reuse-check.md)，只标记不需要存在的结构，不修。
+
+| # | 必要性钩子 | 命中信号 → |
+|---|-----------|-----------|
+| 1 | 新增 abstraction 有第二个真实消费者吗？ | 单消费者 → 🟡 建议内联。工厂只被一处实现 → 直接内联 |
+| 2 | 新增 config 真的有变化需求吗？ | 恒为某值 / 无人改 → 🟡 硬编码，不引入配置层 |
+| 3 | 新增 dependency 已有 stdlib / 平台原生 / 已有依赖替代吗？ | 有 → 🟠 换原生，不加依赖 |
+| 4 | 新增 file/layer 是否形成真实 Producer + Consumer 闭环？ | 只有 Producer 无 Consumer（或反之）→ 🟠 假闭环，删 |
+| 5 | 是否只改声明不改消费者（假修复）？ | 是 → 🔴 需补全最少必要 Producer + Consumer |
+
+> ⚠️ 最小化**从属于**正确性与契约完整性：necessity 钩子只管"少加结构"，不得为省 diff 删掉有真实消费者的代码、破坏 API 契约或验收标准。
+
+### 2. 五轴扫描
 
 | 轴 | 重点 | Prompt |
 |----|------|--------|
@@ -25,21 +40,21 @@
 
 > 可选输入对照：discovery 若加载了 `ARCHITECTURE.md` → 架构轴逐条对照架构决策（模块边界/接口契约/选型），违反标 BLOCKER/HIGH；若加载了 `TEST-REPORT.md` → 正确性轴结合测试结果评估回归风险，未覆盖的改动路径标 `⚠️ 无测试覆盖`。
 
-### 2. AC 对照
+### 3. AC 对照
 
 逐条验证 `# Acceptance Criteria` → 标注 ✅/❌/⚠️。不能验证的（主观描述）→ 标注 ⚠️ + 原因。
 
 每个 finding（`F-xxx`）标注 `against: AC-xxx` —— 指向它违反的 AC，供 check-artifacts.sh 做 F→AC 追溯。
 
-### 3. Scope 边界检查
+### 4. Scope 边界检查
 
 变更是否超出 `# Scope` → 超出标注 `[SCOPE CREEP]`。
 
-### 4. Candidate 验证
+### 5. Candidate 验证
 
 若 Generator 产出了 Candidate 知识 → 验证准确性 → 标注 confidence → 满足 R3 (>85) → 更新 `knowledge.json`。
 
-### 5. 问题分级
+### 6. 问题分级
 
 | 🔴 BLOCKER | 🟠 HIGH | 🟡 MEDIUM | 🟢 LOW | 🔵 PRAISE |
 |------------|---------|-----------|--------|-----------|

@@ -13,6 +13,8 @@
 
 **收益定位：过程质量，不是速度。** 收益是 Decision Record 可追溯、边界纪律（反 gold-plate）、证据密度、长任务护栏——**不是** token 省或复用率。
 
+**核心原则 — Fewest Necessary Changes。** "shortest working diff"，但不等同于"最少文件/最小 diff"。修 bug、加功能、重构时，**先理解真实调用流**，改**最少必要的一组 Producer + Consumer**，并做连接性 / mutation verification（prove no drift）。最小化约束"改动数量"，不约束"阅读理解"；不了解 flow 时最小 diff 反而制造第二个 bug。**最小化从属于正确性、契约完整性与明确要求**——这不是 YAGNI 的另一种说法，而是对 YAGNI 的约束：既要防过度设计（Question existence），也要防"为省 diff 只修一头"的假修复（只改 declaration 不改 consumer）→ 见 [Reuse Check Create Gate](shared/primitives/reuse-check.md) 与 reviewer 的 [Existential Gate](skills/project-reviewer/prompts/execution.md)。
+
 ## 阅读约定：机制 vs 占位符
 
 > 框架的 prompt / 协议中，具体组件名、路径别名一律用 `<占位符>` 表示（如 `<统一表单封装>`、`<统一表格>`、`<业务层别名>`、`<组件库前缀>`）。真实名称由 Analyzer 从项目提取，经 Knowledge Resolver 动态注入，不写死在框架里。
@@ -66,7 +68,7 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 | 3 | **architect** | 技术选型 + 模块设计 + API 契约 | ADR + 对比矩阵 + Graph 分析 |
 | 4 | **generator** | 项目知识 → 生产级代码 | Pattern 复用 + Graph 查询 |
 | 5 | **tester** | AC 驱动测试生成 + 执行 | Framework auto-detect |
-| 6 | **reviewer** | 五轴审查（正确性/安全/可读/架构/性能） | BLOCKER→PRAISE 分级 |
+| 6 | **reviewer** | 必要性检查（Existential Gate，先于五轴）→ 五轴审查（正确性/安全/可读/架构/性能） | BLOCKER→PRAISE 分级 |
 | 7 | **refactorer** | 安全重构（行为不变） | 小步循环 + 指标量化 |
 | 8 | **documenter** | API/组件/README 文档 | 源码溯源 + Vault 同步 |
 | 9 | **releaser** | 版本 bump + Changelog + 发布检查 | 全链路 Confidence Gate |
