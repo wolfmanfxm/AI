@@ -36,6 +36,14 @@
 `graph.json`、`search-index.json`、`index.md`。
 由 [check-kb-contract.sh](../../../shared/scripts/check-kb-contract.sh) 断言在位，**缺失阻断 Delivery**。
 
+**项目级入口（KB 之外）** — `<项目根>/.claude/CLAUDE.md`，每次扫描必定存在/更新：
+知识库指针（→ `.project-knowledge/index.md`）+「开发前必读」任务路由表 +
+首行 `kb-stats` 标记（数字取自本次 `statistics.json`）。它是 Claude Code 会话启动时的自动加载通道——
+**上面所有产出都齐备，缺这一项仍等于「知识库存在但没人被自动告知」**。
+写入**幂等且只增不删**：不存在则创建；已存在但无 `.project-knowledge/` 引用则追加；
+已有引用则**只重写首行标记**（人工撰写的段落永不被改写）。
+由 [check-claude-md.sh](../../../shared/scripts/check-claude-md.sh) 断言，**缺失或数字过期阻断 Delivery**。
+
 **按需产出** — 由维度 agent 按实际代码检测结果动态生成，有内容才建文件：`architecture/`
 `components/` `api/` `patterns/` `conventions/` `observations/` `recommendations/` `candidates/`。
 
@@ -43,7 +51,7 @@
 同一仓库含 ≥2 个可独立运行的应用）额外产出 **`components/reuse-ledger.md`：组件复用总账**——
 逐组件记录「在哪些应用出现、是否各应用各自重写、可提升为共享组件的候选」，跨应用复用率落此一处。
 
-> ⚠️ **不要为复用账新建目录**（曾出现 `component-inventory/`）：契约未声明该目录 → 它不进 index、
+> ⚠️ **不要为复用账新建目录**（如 `component-inventory/`）：契约未声明该目录 → 它不进 index、
 > 下游读不到，且违反 [check-io-connectivity.sh](../../../shared/scripts/check-io-connectivity.sh) 的不变量 I2
 > （规格里声明的写入目录必须已在契约中声明）。**并入 `components/` 即符合契约，且能被 Compiler 索引。**
 

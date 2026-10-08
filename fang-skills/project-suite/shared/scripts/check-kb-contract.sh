@@ -5,9 +5,8 @@
 # 这是 analyzer 交付阶段的**阻断门禁**——不满足即不可声明 status: completed。
 #
 # 为什么要它（2026-09-30 实证）：
-#   同一套 project-analyzer skill 在两个真实项目上跑出的产出差 10 倍：
-#     东风汽金 afc-newcore-web-frontend → 契约目录 12/14、根 JSON 5/5
-#     东风畅行 cop-workspace            → 契约目录  1/14、根 JSON 0/5
+#   同一套 project-analyzer skill 在真实项目上跑出的产出结构差异可达 10 倍：
+#     有的项目契约目录 / 根 JSON 基本齐全；有的只产出 1/14 目录、0/5 根 JSON。
 #   根因不是 agent 能力，而是**技能规格自相矛盾**：产出结构在 5 处各自声明且互不相同
 #   （output-format.md 树 / knowledge-builder.md Coverage Gate / main.md Wave 表 /
 #     validation.md V7 / capability-matrix.md 固定产出），且 finish-workflow.md
@@ -103,7 +102,7 @@ fi
 # ── 2. 固定根产物必须存在（**大小写精确**）──────────────────────────────
 # 大小写为什么要专门查：`[ -f index.md ]` 在 macOS 的大小写不敏感 APFS 上对 `INDEX.md`
 # 也同样为真，于是「索引文件名漂移」在开发机上永远测不出来，却在大小写敏感的 CI/Linux
-# 上直接 404。实证：畅行写了 INDEX.md，契约是小写 index.md。
+# 上直接 404。实证：真实产出里出现过 `INDEX.md`（大写），而契约是小写 `index.md`。
 # 做法：比对 `ls` 输出的**真实文件名**，而非用 test 去猜。
 ACTUAL_NAMES="$(ls -1 "$KNOWLEDGE_DIR" 2>/dev/null || true)"
 MISSING_ROOT=""

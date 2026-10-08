@@ -69,3 +69,24 @@ tests:
     assertion: >
       规格中不再出现硬编码的产出目录清单（除契约与其唯一派生视图外）；
       `recommendations/` 被 Coverage Gate + 门禁同时覆盖（可由 `check-kb-contract.sh` 断言）。
+
+  - id: P7
+    name: 项目级 CLAUDE.md 入口必须产出
+    scenario: >
+      首次分析一个陌生项目——`.project-knowledge/` 与项目根 `.claude/CLAUDE.md` 均不存在，
+      用户说「分析这个项目」。
+    naive_failure: >
+      朴素 Agent 把产出理解成「写进 .project-knowledge/」，不碰项目根 `.claude/`。
+      **实测**：东风畅行首扫后 `.claude/` 下只有 `skills/`，无 CLAUDE.md——知识库存在，
+      但 Claude Code 会话启动时不会自动加载任何项目知识，每次都要靠 skill 被显式触发才知道有知识库。
+      **更关键的是规格本身也曾如此**：这条能力 2026-07-24 引入时含「不存在则创建 / 已存在则追加」
+      完整语义，2026-07-28 被降级为「只检查」、2026-08-02 再降级为「更新一个**已存在文件**的统计数字」——
+      创建动作从此消失，只剩一句读起来像还在的动作名（见 reports/kb-structure-comparison.md R6）。
+    skill_mechanism: >
+      核心原则 6「知识必须送达到 agent」+ Delivery Action 7（Finish 步骤 13 三态处理：
+      不存在→创建 / 无 `.project-knowledge/` 引用→追加 / 已有引用→只重写首行标记）
+      + 步骤 17 `check-claude-md.sh` 阻断门禁
+    assertion: >
+      `<项目根>/.claude/CLAUDE.md` 存在且大小写精确；含 `.project-knowledge/index.md` 指针
+      与「开发前必读」路由表；首行 `kb-stats` 标记的 files/lines 与本次 `statistics.json` 一致；
+      违反任一条 → 门禁 exit 1，不可声明 `status: completed`。

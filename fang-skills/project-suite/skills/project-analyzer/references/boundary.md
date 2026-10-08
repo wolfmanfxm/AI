@@ -16,7 +16,7 @@
 | 2 | **用只读 Explore agent 做维度分析** | 无 Write 权限，分析结果丢失 | 用 `general-purpose` agent |
 | 3 | **跳过 CHECKPOINT 直接全量扫描** | 用户未确认范围和深度，产出不符合预期 | CHECKPOINT → AskUserQuestion 确认后才执行 |
 | 4 | **重扫时只更新 markdown，跳过 JSON 产物** | manifest 标记 unchanged 就跳过 context.json 生成，下游读到过期数据 | Phase A 强制刷新：statistics + context + graph + search-index 每次必定重新生成 |
-| 5 | **CLAUDE.md 统计数字不更新** | 只检查 CLAUDE.md 是否存在，不更新其中过期的源文件数/代码行数 | Phase D 步骤 13：读 CLAUDE.md 第一行，替换为最新 statistics 数字 |
+| 5 | **只更新统计数字、不创建入口文件** | 规格里若只剩「读 CLAUDE.md 第一行替换数字」——它**预设文件已存在**，文件缺失时静默跳过、永不报错。实测：同一套 skill，一个项目有入口、另一个首扫后 `.claude/` 为空——差一个 agent 入口 | Phase D 步骤 13 三态处理（不存在→创建 / 无 KB 引用→追加 / 已有引用→只刷 `kb-stats` 标记），步骤 17 由 `check-claude-md.sh` **阻断**断言 |
 
 ## 失败兜底
 

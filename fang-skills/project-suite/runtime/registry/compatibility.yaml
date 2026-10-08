@@ -10,7 +10,7 @@ version: "1.0.0"
 # 改 skill.yaml 版本时必须同时改这里（实测 2026-09-30：analyzer 升 1.3.2 而此处仍 1.3.1 → 两项检查报错）。
 
 current:
-  project-analyzer:    "1.3.2"
+  project-analyzer:    "1.3.3"
   project-planner:     "1.3.0"
   project-architect:   "1.3.0"
   project-generator:   "1.3.0"

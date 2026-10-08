@@ -1,5 +1,5 @@
 id: project-analyzer
-version: "1.3.2"
+version: "1.3.3"
 mode: Production
 owner: project-suite
 category: analysis
@@ -13,7 +13,7 @@ requires: [general-purpose agent]
 produces: [KnowledgeBase, Context, Graph, Recommendation]
 consumes: []
 boundary: 只分析项目生成知识文件，不修改源码
-last_reviewed: "2026-09-30"
+last_reviewed: "2026-10-08"
 review_cadence_days: 90
 waivers:
   - { gate: G3, reason: "反例在 references/boundary.md(2条) + references/anti-patterns.md(详细)中，SKILL.md 无内嵌表但边界文档完整", expires: "2026-11-04", approved_by: "dispatcher" }

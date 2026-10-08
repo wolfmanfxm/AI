@@ -24,6 +24,11 @@ description: >
    人读视图见 [output-format.md](prompts/output-format.md)。由
    [check-kb-contract.sh](../../shared/scripts/check-kb-contract.sh) **阻断式**断言——
    缺任一项则不可声明 `status: completed`
+6. **知识必须送达到 agent** — 分析后 `<项目根>/.claude/CLAUDE.md` 必须存在，内容为知识库指针 +
+   「开发前必读」路由表 + `kb-stats` 标记（数字取自本次 statistics.json）。不存在则创建，
+   已存在则**只增不删**（缺引用才追加，有引用只刷标记）——人工撰写的段落永不被改写。
+   它是 Claude Code 的自动化加载通道：**缺它则知识库齐全但没人被自动告知**。
+   由 [check-claude-md.sh](../../shared/scripts/check-claude-md.sh) **阻断式**断言
 
 ## 何时触发（知识缺口入口）
 

@@ -2,10 +2,11 @@
 
 > 此文件包含 analyzer Finish 4-Phase 的完整执行指引。SKILL.md 保留摘要 + 引用。
 
-> **调用方**（本文件此前**零个 stage 引用** = 孤儿规格，2026-09-30 接线）：
+> **调用方**：
 > - **Phase A + B** ← [delivery.md](../prompts/delivery.md) **Action 0**（每次交付强制刷新根 JSON）
-> - **Phase C** ← Delivery Action 7（写 manifest + state）
-> - **Phase D 的契约门禁（第 16 步）** ← Delivery Action 6 + [validation.md](../prompts/validation.md) V7
+> - **Phase C** ← Delivery Action 8（写 manifest + state）
+> - **Phase D 的两道阻断门禁（第 16 / 17 步）** ← Delivery Action 6（契约完整性）
+>   + Action 7（项目级 CLAUDE.md 入口）+ [validation.md](../prompts/validation.md) V7 / V8
 >
 > 本文件**不是独立 stage**（[skill.yaml](../skill.yaml) 的 `stages` 里没有 `finish`）——
 > 它是 Delivery 的执行细节。规格写在没有调用方的文件里 = 没有生效的规格。
@@ -56,7 +57,29 @@
    > 真实知识库长期处于「有已知质量问题但可用」的状态，把知识质量变成硬拦截会让每个真实项目都跑不完。
    > 这与契约对 `statement` 合规率 0/12 的处理同理：**差距是要被记录的事实，不是要被硬拦的错误**。
    > 但下一节的「契约完整性」不是知识质量问题，而是「产出是否成型」——那里必须阻断。
-13. CLAUDE.md 统计数字更新 — 读第一行，替换为 statistics.json 最新源文件数+代码行数
+13. **确保项目级 CLAUDE.md 入口**（🔴 进 Exit 条件）
+
+    项目根 `.claude/CLAUDE.md` 是**自动化加载通道**：Claude Code 在会话启动时自动读它，
+    于是「先读知识库再写代码」不依赖 skill 被显式触发。**没有它 = 知识库存在但没人被自动告知。**
+
+    落点：`<项目根>/.claude/CLAUDE.md`（与项目根 `CLAUDE.md` 同为合法自动加载位置，本 skill 统一用前者）
+
+    写入内容三部分：
+    - **首行机器标记**：`<!-- kb-stats: files=<statistics.totalSourceFiles> lines=<statistics.totalLines> generated=<statistics.generatedAt> -->`
+      ——数字取自**本次** `statistics.json`；标记是第 17 步门禁的比对锚点
+    - **知识库指针**：标题 + 规模行 + 指向 `.project-knowledge/index.md` 的链接
+    - **开发前必读（按任务选 1-2 份）**：任务 → 文档的路由表，**只列 KB 中真实存在的文件**
+      （`patterns/` `components/` `api/` `architecture/` `experience/` —— 不存在的不写，不虚构路径）
+
+    ⚠️ **幂等——只增不删，绝不覆盖人工内容**：
+
+    | 现状 | 动作 |
+    |------|------|
+    | 文件不存在 | 创建（三部分全写） |
+    | 存在，但无 `.project-knowledge/` 引用 | 在文件末尾**追加**「知识库指针 + 开发前必读」两段 |
+    | 存在，且已有引用 | **只重写首行 `kb-stats` 标记**，其余一字不动 |
+
+    人工撰写的约定/规范段落**永不被本步骤改写**——它只在缺失时补入口，在已有入口时刷数字。
 14. Vault 同步 + 验证 — rsync → 对比文件数差异，>3 → 标注 `⚠️ Vault sync gap`
 15. 写 timeline.json
 16. **契约完整性门禁（🔴 阻断）**
@@ -67,11 +90,28 @@
 
     断言契约声明的**全部目录** + **6 个固定根产物**在位（清单从契约派生，不硬编码）。
 
-    Exit 0 → 继续；**Exit 1 → 不得执行第 17 步**，按 `.project-knowledge/kb-contract-report.md`
+    Exit 0 → 继续；**Exit 1 → 不得执行第 18 步**，按 `.project-knowledge/kb-contract-report.md`
     的缺失清单补齐后重跑门禁。
 
     > **为什么与上一节相反**：目录 / 根产物缺失 = 知识链**结构性**断裂（下游按目录读取会直接读空），
-    > 不存在「有质量问题但可用」的中间态。此前本文件对契约完整性**无任何检查**，且 Phase D 统一写
-    > 「不阻断」——实测结果是 13/14 契约目录缺失仍能走到第 17 步声明 `status: completed`。
-    > **一个不阻断的门禁等于没有门禁。**
-17. manifest status → completed
+    > 不存在「有质量问题但可用」的中间态。若这里只标注不阻断，契约目录缺到剩 1/14 仍能声明
+    > `status: completed`——这是「假完成」。**一个不阻断的门禁等于没有门禁。**
+17. **项目级 CLAUDE.md 入口门禁（🔴 阻断）**
+
+    ```bash
+    bash shared/scripts/check-claude-md.sh .
+    ```
+
+    断言三件事（第 16 步查 `.project-knowledge/` **内部**是否成型，本步查知识是否**送达到 agent**）：
+
+    1. `<项目根>/.claude/CLAUDE.md` 存在（**大小写精确**——`claude.md` 在不敏感 FS 上测不出、在 CI 上 404）
+    2. 含 `.project-knowledge/` 引用 + `.project-knowledge/index.md` 入口链接（**存在 ≠ 送达**）
+    3. `kb-stats` 标记与本次 `statistics.json` 数字一致（把「统计数字更新」从散文变成断言）
+
+    Exit 0 → 继续；**Exit 1 → 不得执行第 18 步**，回到第 13 步补齐，按
+    `.project-knowledge/claude-md-report.md` 的违约清单修正后重跑。
+
+    > **为什么阻断**：入口缺失不是质量问题，是「知识库对 agent 完全不可见」——与第 16 步同类，
+    > 无中间态。若本步只写「更新统计数字」，而统计数字存在于一个**可能根本不存在的文件**里，
+    > 缺失永远不报错——必须断言入口文件本身存在。
+18. manifest status → completed

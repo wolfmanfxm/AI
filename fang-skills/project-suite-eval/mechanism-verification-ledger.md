@@ -52,7 +52,7 @@ pass_fail: pass | fail | decorate | untested
 
 > ⚠️ **证据诚实标注（round8 已补测 8 个）**：round8 补测了 6 个格式型额外动作型（组件复用、增量修改、完整性、精确引用、可操作、AC 对照）+ 2 个执行型（可执行、先理解），**全部 RED 弱 = decorate**（naive 没 skill 也做对），已降级为 ❌。这推翻了 round7 的「额外动作型 RED 强」分类——「Read-then-Edit」「file:line 引用」「全状态覆盖」「跑测试」「读源码」都已是当前模型的默认行为。剩余未补测：Evidence Score、先候选、决策可追溯、AC 驱动（大概率也 decorate）。
 
-### project-analyzer（5 原则）
+### project-analyzer（6 原则）
 
 | 机制 | 类型 | RED 假设 | 验证状态 | 证据 |
 |------|------|---------|---------|------|
@@ -61,6 +61,7 @@ pass_fail: pass | fail | decorate | untested
 | 增量分析（缺领域只跑相关 Extractor） | 额外动作 | 强 | ✅ 生效 | round5 N5-INC：5 个相关 Extractor，非全量 10 |
 | 知识缺口入口（新鲜知识库跳过） | 判断 | 弱 | ⚠️ 未单独测 | round3/4 验证过「跳过 vs 不跳过」，但粒度 vs 增量分析重叠 |
 | 首扫建立完整骨架（交付契约门禁） | 额外动作 | 强 | ⚠️ untested（2026-09-30 补） | 两真实项目 1/14、12/14 目录却都声明 `completed`；门禁回放 exit 1 / 合规 fixture exit 0，**无 agent 臂**。详见「回归基准记录」 |
+| 项目级 CLAUDE.md 入口（`check-claude-md.sh`） | 额外动作 | 强 | ⚠️ untested（2026-10-08 恢复） | 畅行首扫后 `.claude/` 为空、汽金有入口——**同一套 skill 差一个 agent 入口**；门禁 9 臂实测有判别力，**无 agent 臂**。详见「回归基准记录」 |
 
 ### project-planner（4 原则）
 
@@ -139,7 +140,7 @@ pass_fail: pass | fail | decorate | untested
 | 🟡 一致性放大器 | 1 | 遵循项目模式——系统化遵循项目约定（value=一致性非质量，round10 实证） |
 | ⚠️ 纪律强制（RED 弱） | 1 | 放置正确（强制每次对照，降漏报率） |
 | ❌ 装饰品 | 14 | round8+10 实测 14 个机制全 RED 弱：判断型 6 + 格式型 6 + 执行型 2（LLM 通用能力覆盖） |
-| 未验证 | 2 | ① 跨 Skill 路由准确（新增，仅有静态证据）② 交付契约完成度门禁（2026-09-30 新增：机械可核但**无 agent 臂**，见「回归基准记录」）；其余机制已至少跑过 1 轮 baseline |
+| 未验证 | 3 | ① 跨 Skill 路由准确（仅有静态证据）② 交付契约完成度门禁（2026-09-30：机械可核但**无 agent 臂**；2026-10-08 复测：畅行回填后首个真实 GREEN 臂，仍无受控过程）③ 项目级 CLAUDE.md 入口（2026-10-08 恢复的一条被删除规格：机械可核、无 agent 臂，且**幂等性无机械证明**）——均见「回归基准记录」；其余机制已至少跑过 1 轮 baseline |
 
 ## 结论
 
@@ -372,6 +373,9 @@ pass_fail: pass | fail | decorate | untested
   → 畅行 exit 1（18 项：13 缺目录 + 4 缺根产物 + 1 大小写不符）、汽金 exit 1（2 项）、
   完全合规的构造 fixture exit 0、仅缺 `recommendations/` 的 fixture exit 1、非 `.project-knowledge` 参数 exit 2。
   **这证明门禁有判别力（不是恒失败），但不证明「加载新规格的 agent 会去补齐并重跑到绿」。**
+  **2026-10-08 复测**：畅行已被回填 → 该门禁对其返回 **exit 0**（首个真实 GREEN 臂）；汽金仍 exit 1。
+  即本轮观察到的真实世界变化是「一个真实项目从 18 项违约收敛到 0」，**首尾两端都有机械证据**，
+  缺的仍是中间的受控过程。
 - **Evidence**：`shared/scripts/check-kb-contract.sh` + 两个真实项目的**只读回放**
   （副本 `/tmp/kbgate/{qijin,changxing}/.project-knowledge`，报告 `kb-contract-report.md`）；
   设计层见 `benchmark/pressure-tests/project-analyzer.yaml` P5/P6。
@@ -383,8 +387,68 @@ pass_fail: pass | fail | decorate | untested
   「native 失败」在真实产出中确有观察），但缺 **native vs suite 的受控 delta**、缺「agent 收到 exit 1 后
   会补齐并重跑」的行为证据。按台账定义不满足 `pass`。**不冒充已判定。**
 
-> ⚠️ **诚实边界**：汽金本身**不完全合规**（12/14）——「真实合规项目」这一臂在本轮**没有样本**，
-> 只有构造 fixture。将来若出现真实合规产出，应作为该机制的首个 GREEN 真实臂补记。
+> ⚠️ **诚实边界（2026-10-08 更正）**：本条原文曾写「汽金本身不完全合规（12/14）——『真实合规项目』
+> 这一臂在本轮**没有样本**，只有构造 fixture。将来若出现真实合规产出，应作为该机制的首个 GREEN
+> 真实臂补记」——**该补记已发生**：东风畅行 cop-workspace 于 **2026-09-30**（门禁落地同日）被
+> **回填重建**，`check-kb-contract.sh` 现对其返回 **exit 0**（14/14 目录 + 6/6 根产物；规模 24 → 110
+> 文件）。详见 `reports/kb-structure-comparison.md` §1b / §3c。
+>
+> **但 pass_fail 不因此改判。** 回填是**半自然证据**：真实项目 + 方向正确 + manifest 自证
+> （`scan_type: contract-backfill`，`contract.baseline_violations: 18` 与门禁对旧布局的实测
+> `⛔ 18 项违约` **数字吻合**，且引用契约版本 1.0.1 与门禁名），**但无对照臂**——无法排除人工介入，
+> 也无法证明「受控条件下加载新规格的 agent 必然补齐到绿」。按台账定义仍为 `untested`。
+
+---
+
+### 机制：项目级 CLAUDE.md 入口（`check-claude-md.sh`）
+
+- **Hypothesis**：无此机制时，analyzer 会把产出**全部关在 `.project-knowledge/` 内**，不生成项目根的
+  agent 自动加载入口——于是「知识库齐全」与「agent 知道有知识库」是两件事，前者成立不蕴含后者。
+  本条的特殊之处：**它是一条被删除过一次的规格**。2026-07-24 引入的「确保 CLAUDE.md 规则」含完整语义
+  （不存在→创建 / 已存在→检查有无 `.project-knowledge/` 引用，无则追加）；2026-07-28 被降级为
+  「只检查」，2026-08-02 再降级为「更新一个**已存在文件**的统计数字」——创建动作从此消失。
+  **降级后规格里仍留着一句读起来像还在的动作名（「CLAUDE.md 统计数字更新」），因此无人察觉。**
+- **Native baseline**：未跑受控 native 臂。但有**两个真实基线**（in-the-wild，非同轮构造）：
+  - 东风畅行 cop-workspace（2026-09-30 首扫）：`.claude/` 下**只有 `skills/`**，无 `CLAUDE.md`——
+    机制缺失的直接观测。
+  - 东风汽金 afc-newcore-web-frontend：`.claude/CLAUDE.md` **存在**（git 历史显示为人工引入
+    `chore: Add Claude AI assistant configuration…`，并在 2026-04-24 的一次 chore 中把一版 87 行旧文件
+    移出版本控制），且其内容形态（「项目知识库」+「开发前必读（按任务选 1-2 份）」路由表）
+    **与 2026-07-24 那条规格的描述一致**——但它**不含** `kb-stats` 标记，且首行规模为 `~3,123 源文件`，
+    而 `statistics.json` 已是 `3,197`（`generatedAt: 2026-09-17`，文件 mtime `2026-09-09`）。
+    → 连「更新统计数字」这步在最近一轮扫描中**也没有执行**。
+
+  **即「不生成入口」与「不刷新统计」在真实产出中均已观察到**（四象限里的 naive 失败）。
+- **Suite behavior**：**未跑 LLM 臂**。本轮行为改变是**机械可核**的：门禁在 9 个臂上实测有判别力——
+  GREEN（合规 fixture）exit 0；NOFILE / NODIR / NOREF / NOMARKER / STALE / CASE(小写 `claude.md`) 各 exit 1；
+  REAL-汽金 exit 1（归类「入口存在但缺 `kb-stats` 标记」，非「缺失」）；REAL-畅行 exit 1（归类「整个
+  `.claude/` 目录不存在」）；非项目根参数 exit 2。
+  **GREEN 臂 exit 0 证明该门禁不是恒失败**（恒失败的门禁无判别力）。两个真实项目即天然的两个 RED 臂。
+  **但这不证明「加载新规格的 agent 会去创建入口并重跑到绿」。**
+- **Evidence**：`shared/scripts/check-claude-md.sh` + 两个真实项目的**只读副本回放**
+  （副本 `<tmp>/{qijin,changxing}/`，报告 `claude-md-report.md`；真实项目 `.project-knowledge/` 未被写入）；
+  规格落点 `skills/project-analyzer/references/finish-workflow.md` 步骤 13 / 17、
+  `prompts/delivery.md` Action 7、`prompts/validation.md` V8；
+  设计层见 `benchmark/pressure-tests/project-analyzer.yaml` **P7**；
+  规格丢失溯源见 `reports/kb-structure-comparison.md` **R6**。
+  回归锁：`check-yaml` / `check-consistency` / `check-conformance` / `check-io-connectivity` /
+  `check-knowledge-pipeline` / `check-artifacts` / `check-approval-audit` / `check-drift` / `check-e2e-smoke`
+  全绿。
+- **Repeatability**：脚本侧**确定性**（同输入→同退出码）；**agent 侧未测（n=0）**。
+  另：本机制的「幂等三态」在脚本侧**未覆盖**——`check-claude-md.sh` 只**断言产出**，
+  写入口的是 analyzer 自己（`finish-workflow.md` 步骤 13）。「已存在的人工内容不被改写」这一条
+  **本轮无任何机械证据**，是本项最薄的一环。
+- **Pass/Fail**：untested —— 行为改变**机械可证**（9 臂判别力 + 两个真实基线），但缺
+  **native vs suite 的受控 delta**、缺「agent 收到 exit 1 后会去创建并重跑」的行为证据，
+  且幂等性无机械证明。按台账定义不满足 `pass`。**不冒充已判定。**
+
+> ⚠️ **诚实边界（两点，② 已于 2026-10-08 关闭）**：
+> ① 汽金**尚未合规**（无 `kb-stats` 标记）——「真实合规项目」这一臂在本轮**仍无样本**，只有构造 fixture。
+> ② 【**已关闭**】落点 `.claude/CLAUDE.md` 的**自动加载性，已于 2026-10-08 在本机 3 臂探针实证**：
+>    在 `/tmp` 构造含唯一哨兵 `ZZQX-7742-KESTREL` 的 `.claude/CLAUDE.md` 与 `./CLAUDE.md` 两个独立目录，
+>    各开一次 `claude -p`（v2.1.285）探针 → **两个落点都逐字回诵哨兵**；空目录**负对照**回 `NONE`。
+>    即 `.claude/CLAUDE.md` 确实被会话启动自动加载，「文件写了、没人读」这一退化为装饰品的
+>    风险**已证伪**。原「本条目最大的未验证前提」因此降级为**唯一尚存**的一个：agent 会不会写入口。
 
 ---
 

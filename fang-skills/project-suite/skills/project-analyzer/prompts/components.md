@@ -29,5 +29,5 @@
 - 汇总跨应用复用率 + 「可提升为共享组件」的候选（依据：≥2 应用出现 + 接口清晰 + 无业务硬编码）
 - 落点必须是 `components/reuse-ledger.md`
 
-> ⚠️ **不要为复用账新建目录**（曾出现 `component-inventory/`）：契约未声明该目录 → 不进 index、
+> ⚠️ **不要为复用账新建目录**（如 `component-inventory/`）：契约未声明该目录 → 不进 index、
 > 下游读不到，且违反 `check-io-connectivity.sh` 的不变量 I2。并入 `components/` 即符合契约且可被 Compiler 索引。

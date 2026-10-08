@@ -70,9 +70,9 @@
 骨架行由 [check-kb-contract.sh](../../../shared/scripts/check-kb-contract.sh) 机械断言（契约目录全在位 + 6 个固定根产物），
 它同时是 Delivery 的阻断门禁——**本表与契约之间不得再插入第二份目录清单**。
 
-> ⚠️ **`recommendations/` 曾长期缺席本表**（2026-09-30 修复）：`skill.yaml` / `SKILL.md` / `instinct-extractor.md`
-> 三处都声明 analyzer 产出 `recommendations/`，但本 Gate 表没有对应行 → **两个真实项目都没产出该目录**。
-> 声称产出 ≠ 被覆盖检查，未被 Gate 覆盖的产出等于没要求。**这是本表按契约重组、并新增骨架行的直接原因。**
+> ⚠️ **`recommendations/` 必须在本表有对应行**：`skill.yaml` / `SKILL.md` / `instinct-extractor.md`
+> 都声明 analyzer 产出 `recommendations/`，Gate 表就必须覆盖它——**声称产出 ≠ 被覆盖检查，
+> 未被 Gate 覆盖的产出等于没要求**。本表和骨架行都按契约派生，不再另列。
 
 ### frontmatter 契约（与 Coverage Gate 同级，缺失同样**不可 Exit**）
 
