@@ -1,0 +1,54 @@
+{
+  "name": "cop-frontend-dev",
+  "version": "2.0.0",
+  "description": "东风畅行 cop-workspace 三应用（qiankun 微前端）的前端功能开发 skill，面向不会读 Vue 代码的后端开发者。读需求写 page-spec：脚本克隆真实页面骨架、业务内容全按 spec 渲染，缺的字段/字典码/接口地址留 TODO 标记，内容出处可机械校验（产物里的业务标识符都能在 spec 里找到）。",
+  "maturity": "production",
+  "status": "active",
+  "owner": "missing evidence",
+  "review_cadence": "missing evidence",
+  "target_platforms": [
+    "claude-code",
+    "agentskills-compatible"
+  ],
+  "context_budget_tier": "production",
+  "context_budget_note": "yao production 档上限 1000 initial-load tokens。SKILL.md 实测 2156（按本口径），距上限约 2.16x，超出。按**未消解风险**对待（未获人工豁免）；明细见 reports/context_budget_deviation.md。",
+  "context_budget_measure": "非分词器估算：汉字数 = 正则 [一-鿿] 命中数（仅汉字，不含中文标点/全角符号），非汉字数 = 总字符数（LC_ALL=*.UTF-8 下 wc -m）− 汉字数；tokens ≈ 汉字/1.5 + 非汉字/3.8。口径自校验：2026-09-30 快照（.darwin-backups/cop-frontend-dev.20260930-1645/SKILL.md）按此口径实算 2337，与当时记录的 2336 吻合。⚠️ 换用别的 CJK 口径会得出不同数字，复核请用本口径。本机无 yao validate_skill.py（未随包分发）。",
+  "input_files": [
+    "SKILL.md",
+    "references/pitfalls.md",
+    "references/components.md",
+    "references/conventions.md",
+    "references/crud-page.md",
+    "references/page-spec.md",
+    "references/checklist.md",
+    "references/cloning.md",
+    "scripts/new-page.sh",
+    "scripts/check-page.sh",
+    "reports/context_budget_deviation.md",
+    "reports/output_quality_scorecard.md",
+    "reports/darwin_optimization_report.md"
+  ],
+  "exemplar_pages": {
+    "why": "骨架来自各应用的一个真实页面（**布局与内容分离**：骨架逐字克隆，业务内容全部由 page-spec 渲染，需求缺的留 TODO(需求缺失) 标记）。样板寄存器见 scripts/new-page.sh 的 exemplar_for()，按 <应用>:<形态> 索引；本次只实现 crud，新形态需各自定义内容区与渲染规则。",
+    "opr:crud": "src/views/contractManage/contractTemplateManage/contractTemplateConfig（容器 + List + Info）",
+    "fsc:crud": "src/views/region-manage/region-manageInfo（容器 + List + Info）",
+    "ucp:crud": "src/views/system-manage/organization-manage/role-manage/role-group（index 列表 + form/form.vue）",
+    "content_sources": "spec 键 search/column/form/action/api.* → 渲染三处内容区 + data() 默认值 + service.js；缺项 → TODO(需求缺失) / service 里 CHANGE_ME",
+    "guard": "生成前校验 spec（widget 必须在应用词表里，否则写文件前报错）；生成后 gate 对各内容区做锚点断言 + check-page.sh 查产物",
+    "clone_set": "从样板 index.vue 出发按引用图收集（相对 import + 指向样板目录内的 @/views import），不是写死的文件名清单"
+  },
+  "output_contract": "按应用两种形态：opr/fsc 生成 src/views/<域>/<模块>/{index.vue,components/<模块>List.vue,components/<模块>Info.vue,service.js}；ucp 生成 src/views/<域>/<模块>/{index.vue(列表),form/form.vue(新增/修改),service.js}。两者都往该域路由文件追加路由条目（ucp 多挂 <模块>/add、<模块>/update 两条）。业务内容全部来自 spec，无样板残留；spec 缺的项渲染成 TODO(需求缺失) / service 里 CHANGE_ME，收尾列出。check-page.sh --spec 增加「内容出处」检查（业务标识符必须能在 spec 里找到），报告 0/1/2 退出码。",
+  "rollback_boundary": "new-page.sh 改动路由文件前自动生成 <路由文件>.bak；交付前应删除该 .bak。skill 自身改动以文件备份回滚（本仓库非 git 仓库）：2026-09-30 darwin 优化前的全量快照在 .claude/skills/.darwin-backups/cop-frontend-dev.20260930-1645/，一键还原见 reports/darwin_optimization_report.md §五。",
+  "dependencies": {
+    "runtime": "POSIX sh + awk + grep + find + diff（不需要 Python / Node）",
+    "external": "无"
+  },
+  "verification_history": {
+    "last_run": "iteration-1（2026-09-30）",
+    "last_result": "with-skill 100% vs baseline 87.1%, delta +0.13; token +17%",
+    "result_report": "reports/output_quality_scorecard.md",
+    "harness_status": "已移除：评测沙箱 / 评分器 / 用例定义曾散落在仓库内（.claude/skills/cop-frontend-dev-workspace/ 与 evals/），2026-09-30 按要求清理，不再随技能分发。",
+    "harness_recoverable_from": ".claude/skills/.darwin-backups/cop-frontend-dev.20260930-1645/evals/evals.json",
+    "reproducibility": "missing evidence —— 评分器与沙箱已删除，上述数字目前无法在本机重跑复现"
+  }
+}
