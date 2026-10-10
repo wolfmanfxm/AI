@@ -3,7 +3,7 @@
 # 规则：无法从本地证据推导的字段一律留空或标 missing evidence，不编造。
 
 name: cop-frontend-dev
-version: 2.0.0
+version: 2.0.1
 ir_schema_version: missing evidence   # yao 包内未附带 IR schema 定义
 
 display:
@@ -15,26 +15,19 @@ display:
     留显式 TODO(需求缺失) 标记，不静默猜也不中断；产物的业务标识符要在 spec 里找得到（可机查）。
 
 activation:
-  mode: description-routed
+  mode: user-invoked            # disable-model-invocation: true —— 只有点名才载入，常态不占上下文
   default_prompt: "我想在 cop-opr-ui 的合同管理业务域下加一个车辆保险管理页面，列表能查询、分页，能新增和编辑。"
-  should_trigger:
+  scope:
     - 新增页面 / 加个列表 / 加个查询
     - 加个弹窗 / 加个字段 / 表格列 / 表单校验 / 字典下拉
     - 调接口 / 写 service / 加路由 / 配菜单
-    - 加导出导入 / 导出下载
     - 修前端 bug（页面没反应、白屏、字段空白）
     - 跨应用引用组件
-  should_not_trigger:
+  out_of_scope:
     - 后端接口实现 / 数据库 / 服务端逻辑
     - 通用前端知识问答（与本仓库三应用无关）
     - 纯文档撰写 / 翻译 / 总结
-  near_neighbors:
-    - 描述: "给后端写接口文档"
-      verdict: 不触发（属后端范畴）
-    - 描述: "cop-workspace 的架构/知识库分析"
-      verdict: 不触发（应由 project-analyzer 处理）
-    - 描述: "给别的仓库（如 afc-newcore-web-frontend）做前端"
-      verdict: 不触发（本 skill 硬编码本仓路径与组件名）
+    - 给其他仓库做前端（本 skill 硬编码本仓路径与组件名）
 
 execution:
   context: 在仓库根执行 sh 脚本；脚本自行探测仓库根（先看 cwd，再看脚本目录）

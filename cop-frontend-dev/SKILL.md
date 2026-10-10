@@ -1,6 +1,7 @@
 ---
 name: cop-frontend-dev
-description: 在东风畅行 cop-workspace 三应用（cop-ucp-ui 基座 / cop-opr-ui / cop-fsc-ui，Vue 2.7 + Element UI + qiankun 微前端）上做前端功能开发时使用。你读需求（后端接口文档 / 原型图 / PRD）写一份 page-spec；脚本布局克隆自真实页面、业务内容全按 spec 渲染，缺的字段/字典码/接口地址留 TODO，不静默猜。覆盖：新增列表页/详情页/新增编辑弹窗、给既有页面加字段或按钮、对接后端新接口、修前端 bug、跨应用复用组件。产出与现有代码逐字一致、优先复用既有 Dc* 组件。触发场景：新增页面、加个列表、加个查询、加个弹窗、加个字段、调接口、写 service、加路由、配菜单、表格列、表单校验、字典下拉、跨应用引用组件。
+disable-model-invocation: true
+description: 在东风畅行 cop-workspace 三应用（cop-ucp-ui 基座 / cop-opr-ui / cop-fsc-ui，Vue 2.7 + Element UI + qiankun 微前端）做前端功能开发。你读需求（后端接口文档 / 原型图 / PRD）写一份 page-spec；脚本布局克隆自真实页面、业务内容全按 spec 渲染，缺的字段/字典码/接口地址留 TODO(需求缺失)。覆盖：新增列表/详情/弹窗、给既有页面加字段或按钮、对接新接口、修前端 bug、跨应用复用组件。产出与现有代码逐字一致、优先复用既有 Dc* 组件。用户点名调用。
 ---
 
 # cop-frontend-dev — 前端功能开发
@@ -10,8 +11,8 @@ description: 在东风畅行 cop-workspace 三应用（cop-ucp-ui 基座 / cop-o
 生成的页面**布局来自真实页面、内容来自需求**：脚本只克隆某个真实页面的**骨架**（imports /
 生命周期 / 分页与弹窗管道 / 路由登记，逐字不动），业务内容（搜索项 / 表格列 / 表单项 / 字段
 默认值 / 字典码 / 接口地址 / 按钮）**全部由你写的 spec 渲染**，业务的**逻辑不会被样板带过来**
-（[references/cloning.md](references/cloning.md)）；缺的字段名 / 字典码 / 接口地址留显式
-`TODO(需求缺失)` 标记，不静默猜、也不中断。
+（[references/cloning.md](references/cloning.md)）。缺的字段名 / 字典码 / 接口地址留显式
+`TODO(需求缺失)` 标记。
 
 ---
 
@@ -43,8 +44,8 @@ api.page   /api/opr/web/vehicleInsurance/page
 action     add|新增
 ```
 
-写 spec 后自审：三处字段名**拼写一致**、api.* 齐全、widget 在词表里。拿不准的码**宁可空着留 TODO
-也不要编**；语法与各应用词表见 [references/page-spec.md](references/page-spec.md)。
+写 spec 后自审：三处字段名**拼写一致**、api.* 齐全、widget 在词表里。拿不准的码**留空交 TODO**；
+语法与各应用词表见 [references/page-spec.md](references/page-spec.md)。
 
 ### 第 2 步：从 spec 生成骨架
 
@@ -86,7 +87,7 @@ sh .claude/skills/cop-frontend-dev/scripts/check-page.sh \
 > 🔴 **CHECKPOINT —— 自查不通过就不要提交。**
 > 退出码 `0` = 通过，`1` = 有必须修的问题，`2` = 用法/路径错。
 > 传 `--spec` 会**顺带查「内容出处」**：产物里的字段 / 字典码 / pageKey 在 spec 里找不到 → ERR
-> （说明有样板残留或 spec 拼写不一致）。它查的全是「打包不会失败、只是没反应」那类坑，**不要跳过**。
+> （说明有样板残留或 spec 拼写不一致）。它查的是「打包不失败、只是没反应」那类坑，**每跑必过**。
 > ❌ 按每条「→」改完，**重跑同一条命令，直到退出码 0 再往下走**。
 
 > 🛑 **STOP —— 提交前删掉路由备份**：`rm -f <路由文件>.bak`。
@@ -100,6 +101,7 @@ sh .claude/skills/cop-frontend-dev/scripts/check-page.sh \
 ## 🛟 卡住了怎么办
 
 按现象查。**一线修复**试完还不行，再走**兜底**——兜底那列是「不要再自己猜」的信号。
+完整 P1–P18 带源码行号见 [pitfalls.md](references/pitfalls.md)；下表只录入最高频、一句说得清修复的那几条。
 
 | 现象 | 一线修复 | 仍失败兜底 |
 |------|---------|-----------|
@@ -110,9 +112,7 @@ sh .claude/skills/cop-frontend-dev/scripts/check-page.sh \
 | 某个表单字段整行空白 | `dcType` 写错了（**不报错**） | 跑 `check-page.sh`；对照 [components.md](references/components.md) 的 `dcType` 全表 |
 | 字典列显示 `0`/`1` 或整格空白 | `type="dict"` 与 `:inputParam="{ dictCode }"` **两层都要写** | 确认码在 `dictCode.js` 白名单里；查 **P5** |
 | 点了「保存」没反应 | 表单上绑了不存在的 `@submit`——去掉它，改自己 `ref.validate()` 调 | 查 **P6** |
-| 列显示/隐藏设置不生效 | 表格绑上 `:key="reloadTable"` | 查 **P3** |
-| 表格高度塌陷 / 列设置为空 | 表格 `ref` 必须叫 `multipleTable` | 查 **P3** |
-| 多选跨页错乱 | `rowIdKey` 还在用模板遗留的 `'pyhid'` | 改成接口真实主键字段名；查 **P3** |
+| 表格系列（列显示不生效 / 高度塌陷 / 多选跨页错乱） | 表格 `ref` 叫 `multipleTable`、绑 `:key="reloadTable"`、`rowIdKey` 用主键列 | 查 **P3** |
 | 子应用页面崩溃 `TypeError` | `window.commonComponent` 消费点加判空 `\|\| {}` | 确认该组件真在 `commonComponent`（**只有 3 个成员**）；查 **P8** |
 | 点菜单报「模块找不到」/ 页面打不开 | 菜单 `menuUrl` 与文件路径不符——必须等于 `src/views/` 之后的路径去掉 `.vue`（本脚本生成的页面是 `/<域>/<模块>/index`） | 查 **P9**；直接手输完整 URL 验证路由本身是通的 |
 | 侧边栏根本没有这个菜单 | 后端还没把菜单配进 `userNav` | 手输完整 URL 能打开即证明前端已就绪，只差菜单数据 |

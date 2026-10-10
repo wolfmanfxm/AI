@@ -1,6 +1,6 @@
 {
   "name": "cop-frontend-dev",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "东风畅行 cop-workspace 三应用（qiankun 微前端）的前端功能开发 skill，面向不会读 Vue 代码的后端开发者。读需求写 page-spec：脚本克隆真实页面骨架、业务内容全按 spec 渲染，缺的字段/字典码/接口地址留 TODO 标记，内容出处可机械校验（产物里的业务标识符都能在 spec 里找到）。",
   "maturity": "production",
   "status": "active",
@@ -11,7 +11,7 @@
     "agentskills-compatible"
   ],
   "context_budget_tier": "production",
-  "context_budget_note": "yao production 档上限 1000 initial-load tokens。SKILL.md 实测 2156（按本口径），距上限约 2.16x，超出。按**未消解风险**对待（未获人工豁免）；明细见 reports/context_budget_deviation.md。",
+  "context_budget_note": "yao production 档上限 1000 initial-load tokens。SKILL.md 实测 2156（按本口径）。2.0.1 起 disable-model-invocation: true——description 不再随每条消息载入，常态上下文负荷清零；仅用户点名调用时载入 SKILL.md（此刻仍按 2156 结算）。明细见 reports/context_budget_deviation.md。",
   "context_budget_measure": "非分词器估算：汉字数 = 正则 [一-鿿] 命中数（仅汉字，不含中文标点/全角符号），非汉字数 = 总字符数（LC_ALL=*.UTF-8 下 wc -m）− 汉字数；tokens ≈ 汉字/1.5 + 非汉字/3.8。口径自校验：2026-09-30 快照（.darwin-backups/cop-frontend-dev.20260930-1645/SKILL.md）按此口径实算 2337，与当时记录的 2336 吻合。⚠️ 换用别的 CJK 口径会得出不同数字，复核请用本口径。本机无 yao validate_skill.py（未随包分发）。",
   "input_files": [
     "SKILL.md",
