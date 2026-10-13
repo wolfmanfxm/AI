@@ -38,7 +38,7 @@ echo "【L0】YAML 可解析（标准 parser）"
 echo "----------------------------------------"
 # ⚠️ 不要只吞退出码：check-yaml.sh 在**宿主无 YAML parser 时主动 `exit 0`** 并打印
 #    「这是跳过，不是通过——门禁未生效」。父脚本 `>/dev/null 2>&1` 把该提示吞掉、只看 exit code
-#    → 一个文件都没解析也打印「✅ 所有 .yaml 可被标准 parser 解析」（2026-09-18 修）。
+#    → 一个文件都没解析也打印「✅ 所有 .yaml 可被标准 parser 解析」。
 YAML_OUT="$(bash "$SUITE_ROOT/shared/scripts/check-yaml.sh" 2>&1)"; YAML_RC=$?
 if [ "$YAML_RC" -ne 0 ]; then
   red "  ❌ 有 .yaml 无法解析（运行 bash shared/scripts/check-yaml.sh 看清单）"
@@ -55,8 +55,8 @@ echo ""
 # ── L0.5: conf 阈值单一权威（ADR-003）──────────────────────
 # ADR-003 规定：conf 三档（PASS/REVIEW/BLOCK）的唯一权威是 rules.yaml 的 `gate:`；
 # gates.yaml 只管**维度**门禁（knowledge/coverage/safety/release/…）。
-# 2026-09-18 实测发现 gates.yaml 里**又长出了** 9 个 skill 的 `confidence: warn_below/block_below`
-# ——同一事实两个值，且 rules.yaml 里留着「对齐 gates.yaml block_below」这类手工同步痕迹。
+# gates.yaml 一旦再长出 skill 的 `confidence: warn_below/block_below`，就会同一事实两个值，
+# 且 rules.yaml 里会冒出「对齐 gates.yaml block_below」这类手工同步痕迹。
 # 本检查防的是**回退**：自动修复很容易把已删除的第二权威再种回去。
 echo "【L0.5】conf 阈值单一权威（ADR-003：唯一权威 = rules.yaml 的 gate:）"
 echo "----------------------------------------"
@@ -98,10 +98,10 @@ grab_stages() {
 }
 
 # workflow-library 指派表：skill → 期望 stages（**有序**）
-# 补于 2026-09-18：此前只查了「SKILL.md 表行集合 == interface.stages」，
-# 于是 analyzer 的 skill.yaml 写成 [discovery, execution, delivery, validation]（先交付后验证），
-# 与 skill-ir 自洽、与 SKILL.md 表也自洽，唯独与 workflow-library 的 standard 流程矛盾
-# ——**局部 SSOT 正确，跨 Producer/Consumer 契约错误**，全部检查放行。
+# ⚠️ 只查「SKILL.md 表行集合 == interface.stages」不够：analyzer 的 skill.yaml 可能写成
+# [discovery, execution, delivery, validation]（先交付后验证），与 skill-ir 自洽、与 SKILL.md 表
+# 也自洽，唯独与 workflow-library 的 standard 流程矛盾——**局部 SSOT 正确，跨 Producer/Consumer
+# 契约错误**，上面的字段比对会放行。故额外比 workflow-library 指派的有序 stages。
 WL_MAP="$(node -e '
   const fs = require("fs");
   const t = fs.readFileSync(process.argv[1], "utf8");
@@ -125,7 +125,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   mismatches=""
-  # ⚠️ 空值互等不算「一致」（2026-09-18 修）：两侧都取不到值时 `"" != ""` 为假 →
+  # ⚠️ 空值互等不算「一致」：两侧都取不到值时 `"" != ""` 为假 →
   #    该字段等于**没被检查**，却计入 ✅。字段缺失 / 块状 YAML 导致解析不出时即触发。
   #    「比不了」必须与「比了且相等」区分开。
   for field in id version produces consumes; do
@@ -147,15 +147,15 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # SKILL.md 的 name: 必须 == 目录名（== skill.yaml id:）
-  # 补于 2026-09-18 变异测试：把 name 改成 `project-relaser-TYPO`，一致性/合规/连通/漂移**四个检查全绿放行**。
-  # 而 name 正是 Host 注册 skill 用的标识——改名会让它以错误身份被路由，其余声明却完全自洽。
+  # ⚠️ name 是 Host 注册 skill 用的标识——改名会让它以错误身份被路由，其余声明却完全自洽，
+  #    一致性/合规/连通/漂移都会放行，故必须单独断言。
   md_name=$(grep -m1 "^name:" "$skill_dir/SKILL.md" 2>/dev/null | sed 's/^name: *//' || true)
   [ "$md_name" != "$skill" ] && mismatches="$mismatches SKILL.md.name($md_name≠$skill)"
 
   # SKILL.md 工作流表行集合 == skill.yaml interface.stages
-  # 补于 2026-09-18：此前 8 个 SKILL.md 的表里有 `Verify` 行，而 10/10 的 stages 都不含 verify、
-  # stage-templates/ 也没有 verify.md —— Host 按 `for each stage in interface.stages` 推进时，
-  # 这些 verifier.md **运行时永不被加载**。这条断言把「表行 ≠ stages」永久挡住。
+  # ⚠️ 防「表行里有 Verify 而 stages 不含 verify、stage-templates/ 也没有 verify.md」——Host 按
+  # `for each stage in interface.stages` 推进时，这类 verifier.md **运行时永不被加载**。
+  # 这条断言把「表行 ≠ stages」永久挡住。
   md_stages=$(grep -oE '^\| [A-Z][A-Za-z -]* \| \[prompts/' "$skill_dir/SKILL.md" 2>/dev/null \
               | sed 's/^| *//;s/ *|.*//' | tr 'A-Z' 'a-z' | tr ' ' '-' | sort -u | tr '\n' ' ' || true)
   yaml_stages=$(grep "stages:" "$sy" 2>/dev/null | grep -o '\[.*\]' | tr -d '[]' | tr ',' '\n' \
@@ -183,8 +183,8 @@ done
 
 # L1 补：整文件新鲜度。上面的字段比对只覆盖 id/version/produces/consumes/stages——
 # verification.checks / failure_conditions / description / boundary 漂移查不到。
-# 实证（2026-09-17）：analyzer 的 verifier.md 加了 Verify 6，skill-ir 仍写着旧的 checks: 9，
-# 全仓绿灯放行了很久，直到手工重跑生成器才发现。故此处做整文件逐字节比对。
+# 例如 verifier.md 加了 Verify 6 但 skill-ir 仍写着旧的 checks 数，逐字段比对不会报——
+# 故此处做整文件逐字节比对。
 if bash "$SCRIPT_DIR/generate-skill-ir.sh" --check >/dev/null 2>&1; then
   green "  ✅ skill-ir 全字段新鲜（含 verification / failure_conditions / description）"
   PASS=$((PASS+1))

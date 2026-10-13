@@ -378,9 +378,8 @@ const outputs = {
 const CHECK_MODE = process.argv.includes('--check');
 
 if (CHECK_MODE) {
-  // ⚠️ 只列**真正漂移**的文件名。此前这里硬编码列出全部 4 个（无论实际漂移几个），
-  //    逐行明明写着「capabilities.yaml — 一致」，摘要却把它一并列为漂移项——
-  //    只看摘要的人会去改 3 个本来一致的文件（2026-09-18 修）。
+  // ⚠️ 只列**真正漂移**的文件名，不要硬编码列出全部 4 个（无论实际漂移几个）——
+  //    否则逐行写着「一致」、摘要却把它一并列为漂移项，只看摘要的人会去改本来一致的文件。
   const drifted = [];
   for (const [name, content] of Object.entries(outputs)) {
     const filePath = join(REGISTRY_DIR, name);

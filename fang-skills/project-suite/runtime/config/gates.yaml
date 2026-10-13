@@ -4,9 +4,6 @@
 #
 # ⚠️ 本文件**不持有 confidence 阈值**（conf 三档 = PASS/REVIEW/BLOCK 的唯一权威是
 #    runtime/config/rules.yaml 的 `gate:`，见 ADR-003）。
-#    2026-09-18 移除了此处 9 个 skill 的 `confidence: warn_below/block_below` —— 它们与
-#    rules.yaml 的 `requires_review_below`/`blocks_downstream_below` 是同一事实的两个值，
-#    且 rules.yaml 的注释里留着「对齐 gates.yaml block_below」这类**手工同步痕迹**。
 
 version: "1.0.0"
 
@@ -23,8 +20,6 @@ skills:
       suggest_accept_threshold: 90 # ≥ 90 **建议** Reviewer 优先验证——
                                      # ⚠️ 不是自动晋升：Candidate→Accepted 由 Reviewer/Architect
                                      #    判定（见 runtime/state/schemas/knowledge-lifecycle.md）。
-                                     #    2026-09-18 由 auto_accept_threshold 改名——
-                                     #    原名声称「自动标记为 accepted」，与 lifecycle 直接冲突。
       suggest_review_below: 70  # < 70 建议 Reviewer 验证
 
   project-planner:

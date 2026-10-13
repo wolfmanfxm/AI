@@ -115,7 +115,7 @@ if [ "$MISSING" -eq 0 ]; then
       echo ""
       echo "要求首行含：\`<!-- kb-stats: files=<N> lines=<M> generated=<ISO8601> -->\`"
       echo ""
-      echo "没有这个标记，「统计数字不更新」就只能靠人眼看——正是它此前退化后无人察觉的原因。"
+      echo "没有这个标记，「统计数字不更新」就只能靠人眼看——统计一旦退化也无人察觉。"
       echo "标记让门禁能机械比对，无需解析散文格式。"
       echo ""
     } >> "$REPORT"

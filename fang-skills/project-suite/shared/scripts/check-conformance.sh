@@ -71,18 +71,14 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     green "  G3 PASS: ${total_anti} anti-patterns (boundary:${anti_count} + SKILL:${skill_anti}) ≥3"
   else
     # Check for waiver
-    # ⚠️ 原判定 `grep -q "waivers:" && grep -q "G3"` 近乎恒真：每个 skill.yaml 都有 `waivers:` 键
-    #    （哪怕是空列表 `waivers: []`），且文件里**任何位置**出现 "G3"（注释、TODO、别处说明）都算数。
-    #    实测：`# TODO(G3): anti-patterns pending` + `waivers: []` → 直接输出
-    #    「✅ G3 WAIVED: 0 anti-patterns, waiver active (no expiry)」（2026-09-18 修）。
-    #    现在必须有 **G3 的豁免条目**（`gate: G3`）才认。
+    # 必须有 **G3 的豁免条目**（`gate: G3`）才认——防止「文件任意位置出现 G3 字样 / 空 waivers 即算豁免」的假通过。
     if grep -q "gate: G3" "$skill_dir/skill.yaml" 2>/dev/null; then
       # Extract expires date from inline waiver: { gate: G3, reason: "...", expires: "YYYY-MM-DD", ... }
       expires=$(grep "gate: G3" "$skill_dir/skill.yaml" 2>/dev/null | grep -o 'expires: "[^"]*"' | grep -o '"[^"]*"' | tr -d '"' || echo "")
       if [ -n "$expires" ]; then
-        # 原实现只有 BSD 的 `date -j`（darwin 专有）。非 darwin 上解析必失败 → 空值在
-        # `[ "$now" -lt "$expires_epoch" ]` 里被当 0 → **有效豁免一律被报成「已过期」**。
-        # 这里补 GNU `date -d` 回退，并把「解析不出来」明确判为无法确认（不计作有效豁免）。
+        # 必须同时给 BSD `date -j`（darwin 专有）和 GNU `date -d` 回退：只用前者在非 darwin 上解析必失败 →
+        # 空值在 `[ "$now" -lt "$expires_epoch" ]` 里被当 0 → **有效豁免一律被报成「已过期」**。
+        # 把「解析不出来」明确判为无法确认（不计作有效豁免）。
         expires_epoch=$(date -j -f "%Y-%m-%d" "$expires" +%s 2>/dev/null || date -d "$expires" +%s 2>/dev/null || true)
         now_epoch=$(date +%s)
         if [ -z "$expires_epoch" ]; then
@@ -122,9 +118,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARNINGS=$((WARNINGS+1))
   fi
 
-  # G5: 职责边界表 with ✅/❌
-  # ⚠️ 原实现只 `grep -q "✅"`——注释写的是「职责边界表 with ✅/❌」，实际不查 ❌、不查是否表格、
-  #    也不查表头。任何含一个 ✅ 字符的文档都算通过（2026-09-18 修）。
+  # G5: 职责边界表 with ✅/❌ —— 同时要求 ✅ 和 ❌，防止「任意含 ✅ 字符的文档即算通过」。
   if [ -f "$skill_dir/references/boundary.md" ] \
      && grep -q "✅" "$skill_dir/references/boundary.md" \
      && grep -q "❌" "$skill_dir/references/boundary.md" \
@@ -179,7 +173,6 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # G11: prompts/ 至少 1 个文件
   # ⚠️ `|| true` 不可省：`set -euo pipefail` 下，目录不存在时 find 返回非 0 → 整条管道失败
   #    → 脚本**静默中止**，后续所有门禁与 Summary 都不执行，而退出码 1 与「查出 warnings」不可区分。
-  #    实测（2026-09-18）：删掉某个 skill.yaml 的 stages 行即可复现同样的中途死亡。
   prompt_count=$(find "$skill_dir/prompts" -name "*.md" 2>/dev/null | wc -l | tr -d ' ' || true); prompt_count=${prompt_count:-0}
   if [ "$prompt_count" -ge 1 ]; then
     green "  G11 PASS: prompts/ has ${prompt_count} file(s)"
@@ -208,8 +201,8 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       missing_stages+=("$stage")
     fi
   done
-  # ⚠️ 空集保护（2026-09-18）：stages 解析不到时，下面循环 0 次 → missing_stages 为空 →
-  #    原实现会打印「✅ G13 PASS: 0/0 stage prompts exist」——**永真的空集判定**。
+  # ⚠️ 空集保护：stages 解析不到时，下面循环 0 次 → missing_stages 为空 →
+  #    会打印「✅ G13 PASS: 0/0 stage prompts exist」——**永真的空集判定**。
   #    「没有 stages 可查」与「所有 stages 都齐」必须区分。
   if [ -z "$stages" ]; then
     yellow "  G13 WARN: 读不到 stages 声明（skill.yaml 缺 stages 或格式不符）——**无法判定**，不是「全部存在」"
@@ -260,8 +253,8 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 
   # G19: Verification Reachability —— 验证子流程在 Host 的真实执行路径上可达
   #      契约见 workflow-protocol/SKILL.md 的「Verification Contract」。
-  #      补于 2026-09-18：此前 8 个 skill 的 prompts/verifier.md 运行时**永不被加载**
-  #      （SKILL.md 写了 Verify 阶段行，但 stages 里没有 verify、stage-templates 也没有 verify.md）。
+  #      防的是：SKILL.md 写了 Verify 阶段行、verifier.md 也存在，但 stages 里没有 verify、
+  #      stage-templates 也没有 verify.md → 运行时**永不被加载**。
   #
   #      ⚠️ 本门禁是 **grep 级**：只认 markdown 链接形态 `[verifier.md](verifier.md)`——
   #         裸提及（说明文字里的 `verifier.md`）不算，否则一句散文就能骗过它（实测过）。
@@ -382,10 +375,8 @@ fi
 echo ""
 
 # ── G21: Stage Registry Contract（stage 声明的注册闭合）──────────────────
-# stage-library.yaml 头部声明「Host 据此验证 Skill 声明的 stages 是否合法」——
+# stage-library.yaml 声明「Host 据此验证 Skill 声明的 stages 是否合法」——
 # 本门禁把这条声明接到一个真实消费者上：Skill 声明的 stage 必须已在库里注册。
-# 真实缺口（2026-09-20 发现）：pipeline-orchestrator 声明 stages [discovery, orchestrate, validation, delivery]，
-# 而库里只有 6 个 stage、**没有 orchestrate** —— 声明合法却无库可依。
 echo "========================================"
 echo " G21 Stage Registry Contract（stage 注册闭合）"
 echo "========================================"

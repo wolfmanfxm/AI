@@ -136,7 +136,7 @@ node -e '
   // 分桶内容正确：rule 进 rules，pattern 进 knowledge
   if (!(ctx.rules || []).some(e => e.source === "rules/form-standard.md")) errs.push("rule 未进 rules 桶");
   if (!(ctx.knowledge || []).some(e => e.source === "patterns/table.md")) errs.push("pattern 未进 knowledge 桶");
-  // Recommendation 端到端（2026-09-18 补）：Producer(analyzer) → index → resolver → context.recommendations[]
+  // Recommendation 端到端：Producer(analyzer) → index → resolver → context.recommendations[]
   if (!(ctx.recommendations || []).some(e => e.source === "recommendations/use-composable.md"))
     errs.push("recommendation 未走通端到端（应出现在 context.recommendations）");
   if ((ctx.knowledge || []).some(e => e.source === "recommendations/use-composable.md"))

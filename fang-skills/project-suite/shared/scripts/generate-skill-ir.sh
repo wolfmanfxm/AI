@@ -43,8 +43,8 @@ gen() {
   stages=$(grep "stages:" "$y" | grep -o '\[.*\]' | tr -d '[]' | sed 's/, */, /g' | sed 's/^ *//;s/ *$//')
 
   # From SKILL.md — YAML multi-line description
-  # 用单个 awk 提取（原实现是逐行 `echo|grep`/`echo|sed` 的 while 循环，
-  # 每行 spawn 3-5 个进程 → 10 个 skill 要 8s；--check 要跑进检查链，必须快）
+  # 用单个 awk 提取：逐行 `echo|grep`/`echo|sed` 的 while 循环每行 spawn 3-5 个进程 →
+  # 10 个 skill 要 8s；--check 要跑进检查链，必须快。
   local desc
   desc=$(head -15 "$m" | awk '
     /^description:/ { in_d=1; sub(/^description: *>?[ ]*/, ""); printf "%s", $0; next }
@@ -55,9 +55,9 @@ gen() {
 
   # 校验项数：数「首格是 V<数字>」的表格行（形如 `| V1 | 名称 | 判据 | 修复 |`）。
   # ⚠️ 不能用 `grep -c "| V"` —— 那还会匹配判定表里的 `| Verify 1 失败 | ... |`，
-  #    于是 analyzer 报 10 而它的校验项其实只有 6 个（实测 2026-09-17）。
-  # 检查项的**唯一权威是 validation.md**（2026-09-18 收敛：verifier.md 不再重写检查表，
-  # 只定义验证对象与判定规则）。此前从 verifier.md 数，收敛后会全部数成 0。
+  #    于是 analyzer 报 10 而它的校验项其实只有 6 个。
+  # 检查项的**唯一权威是 validation.md**（verifier.md 只定义验证对象与判定规则，不重写检查表，
+  # 从 verifier.md 数会全部数成 0）。
   local verify_checks=0
   if [ -f "$dir/prompts/validation.md" ]; then
     verify_checks=$(grep -cE '^\| V[0-9]+ \|' "$dir/prompts/validation.md" 2>/dev/null || true)
@@ -65,14 +65,14 @@ gen() {
     [ "$verify_checks" -eq 0 ] && EMPTY_VERIFY="$EMPTY_VERIFY $name"
   fi
 
-  # exit_criteria **已移除（2026-09-18）**：原 `conditions:` 数的是 execution.md 里**所有** `^- ` 行
+  # exit_criteria 字段不存在：`conditions:` 会数 execution.md 里**所有** `^- ` 行
   # （generator 报 23，而其 `## Exit` 真实只有 4 条；Phase 2 的 V1-V6、步骤子弹全被计入）。
   # 全仓零 Consumer（只有生成器自己写它）。没有消费者的派生字段不值得维护，而要「算准」就得写
   # 一个 Markdown 解析器——正是 SUITE_SPEC §0.1 要挡的形态。故整个字段删除，不做「修正计数」。
 
   # Extract failure conditions from skill.yaml interface block
   # ⚠️ 不要写 `$(grep -c X f || echo 0)`：零匹配时 grep 已打印 0 且 exit 1，`|| echo 0` 再补一个
-  #    → 变量成两行 `0\n0` → 直接**写进 skill-ir.yaml 的 modes 字段**，产出坏 YAML（2026-09-18 修）。
+  #    → 变量成两行 `0\n0` → 直接**写进 skill-ir.yaml 的 modes 字段**，产出坏 YAML。
   local failure_modes
   failure_modes=$(grep -c "condition:" "$y" 2>/dev/null || true); failure_modes=${failure_modes:-0}
 
@@ -127,7 +127,7 @@ else
   # 接受带或不带 project- 前缀。
   # ⚠️ 不要写成 `gen A 2>/dev/null || gen B`：gen 对不存在的目录走 `[ ! -f "$y" ] && return`，
   #    而 `[ ! -f ]` 为真时 return 的退出码是 0 → `||` 短路 → 回退分支永不执行 →
-  #    `generate-skill-ir.sh <skill>` 静默什么都不做（实测 2026-09-30）。改为显式 -d 判定。
+  #    `generate-skill-ir.sh <skill>` 静默什么都不做。改为显式 -d 判定。
   if [ -d "$SKILLS_DIR/$TARGET" ]; then
     gen "$SKILLS_DIR/$TARGET"
   elif [ -d "$SKILLS_DIR/project-$TARGET" ]; then

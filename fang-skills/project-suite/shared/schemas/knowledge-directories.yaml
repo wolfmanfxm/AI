@@ -12,7 +12,7 @@
 #   - project-analyzer 的 output-format.md / knowledge-builder.md（引用本文件，不另列）
 #   - check-io-connectivity.sh 的一致性断言
 #
-# 背景：2026-09-17（round11）实测发现 Producer 与 Consumer 的目录集合不一致——
+# 背景：Producer 与 Consumer 的目录集合会不一致——
 #   analyzer 写 observations/ conventions/ 等，compiler 从不索引；decisions/ 规格写「人工」而实际是 analyzer 产出。
 #   本契约即为消除这类漂移而建立。
 
@@ -30,7 +30,7 @@ version: "1.0.1"
 #   required_frontmatter Producer **应当**写入的 frontmatter 字段（规范要求，见 knowledge-builder.md）
 #   compiler_enforced    其中 Compiler **硬校验**的子集（缺失即 exit 1、拒绝生成 index）
 #
-#   ⚠️ 为什么两者要分开：round11 实测——patterns/components/api 的 `statement` 在真实项目合规率 **0/12**。
+#   ⚠️ 为什么两者要分开：patterns/components/api 的 `statement` 在真实项目合规率 **0/12**。
 #      把 `statement` 纳入 compiler_enforced 会让**每个真实项目都编译失败**，比现状更糟。
 #      因此：Producer 该写 ≠ Consumer 该拦。差距本身是要被记录的事实，不是要被硬拦的错误。
 #
@@ -72,7 +72,7 @@ directories:
     path: decisions/
     producer: human, project-architect, project-analyzer
     # 三方都会写：human 手写 ADR；architect 写 decisions/ARCHITECTURE-*.md（artifact-types.yaml 的 design 类型）；
-    # analyzer 重扫与存量补齐（round11 实测）。多个产出者不影响 ownership——decisions/ 仍是人工维护，
+    # analyzer 重扫与存量补齐。多个产出者不影响 ownership——decisions/ 仍是人工维护，
     # 重扫不得覆盖（这与「谁写」是两个问题）。
     ownership: manual
     indexed_by_compiler: true

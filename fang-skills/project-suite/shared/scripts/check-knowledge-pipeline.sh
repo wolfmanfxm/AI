@@ -1,7 +1,7 @@
 #!/bin/bash
 # Knowledge Pipeline Closed-Loop Test v1.0
 #
-# 验证主知识链的端到端闭环（最关键的 Knowledge 链，此前只靠静态声明保证）：
+# 验证主知识链的端到端闭环（最关键的 Knowledge 链，仅靠静态声明无法保证）：
 #
 #   fixture project-knowledge
 #       ↓ knowledge-compiler.sh
@@ -33,9 +33,9 @@ fail() { red   "  ❌ $1"; FAIL=$((FAIL+1)); }
 FIXTURE="$(mktemp -d "${TMPDIR:-/tmp}/kc-fixture.XXXXXX")"
 trap 'rm -rf "$FIXTURE"' EXIT
 
-# ⚠️ 必须与契约的 KD_INDEXED（9 个 indexed 目录）**逐一对应**——此前漏了 `recommendations`，
-#    于是 compiler 的 `emit_one "recommendations" …` 从未被本闭环测试执行过：
-#    该桶若写错（能力名/类型/优先级），测试照样全绿（2026-09-18 补）。
+# ⚠️ 必须与契约的 KD_INDEXED（9 个 indexed 目录）**逐一对应**——漏掉 `recommendations`
+#    会让 compiler 的 `emit_one "recommendations" …` 从未被本闭环测试执行过：
+#    该桶若写错（能力名/类型/优先级），测试照样全绿。
 mkdir -p "$FIXTURE/rules" "$FIXTURE/decisions" "$FIXTURE/patterns" \
          "$FIXTURE/components" "$FIXTURE/api" "$FIXTURE/architecture" \
          "$FIXTURE/experience" "$FIXTURE/playbooks" "$FIXTURE/recommendations" \
@@ -135,13 +135,13 @@ if bash "$SCRIPT_DIR/knowledge-compiler.sh" "$FIXTURE" >/dev/null; then
     if (pats.some(f=>f.source==="patterns/upload.md")) errs.push("patterns/upload.md(Candidate) 不应入 index");
     const rules=(idx.capabilities.rules||{}).files||[];
     if (!rules.some(f=>f.source==="rules/form-standard.md")) errs.push("rules/form-standard.md 应恒入 index（用户手写）");
-    // recommendations 桶此前 fixture 里根本没建目录 → 该 emit_one 从未被执行过（2026-09-18 补）
+    // recommendations 桶必须建目录并断言入 index，否则该 emit_one 从未被执行过
     const recs=(idx.capabilities.recommendations||{}).files||[];
     if (!recs.some(f=>f.source==="recommendations/use-composable.md")) errs.push("recommendations/use-composable.md 未进 index");
 
-    // 产物 vs 契约互校：index 里出现的每个 type 必须在该 schema 的 enum 内（2026-09-18 补）。
-    // 此前 recommendation 已真实进 index，而 knowledge-index.schema.json 的 enum 不含它，
-    // 无任何断言报出来——正是这类「契约没跟上产物」的静默漂移。
+    // 产物 vs 契约互校：index 里出现的每个 type 必须在该 schema 的 enum 内。
+    // 防的是「recommendation 已真实进 index，而 knowledge-index.schema.json 的 enum 不含它」
+    // 这类「契约没跟上产物」的静默漂移。
     // 不引 JSON Schema 引擎，只取 enum 做集合比对（保持本套检查的轻量断言风格）。
     const schema=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
     const ENUM=schema.properties.capabilities.additionalProperties.properties.files.items.properties.type.enum;
@@ -179,9 +179,9 @@ if bash "$SCRIPT_DIR/knowledge-resolver.sh" "$FIXTURE" >/dev/null; then
     if (know.includes("patterns/upload.md")) errs.push("patterns/upload.md(Candidate) 不应进入 context-package");
     const ruleSrc=(ctx.rules||[]).map(e=>e.source);
     if (!ruleSrc.includes("rules/form-standard.md")) errs.push("rules/form-standard.md 应进入 context.rules");
-    // ⚠️ recommendation 的**消费端**断言（2026-09-18 补）：
-    //    此前本文件只断言「recommendation 进了 knowledge-index.json」（Producer 侧），
-    //    没有断言「它进了 context.recommendations[]」（Consumer 侧）——于是 resolver 缺分支、
+    // ⚠️ recommendation 的**消费端**断言：
+    //    只断言「recommendation 进了 knowledge-index.json」（Producer 侧）不够——
+    //    必须断言「它进了 context.recommendations[]」（Consumer 侧）。否则 resolver 缺分支、
     //    schema 缺字段、recommendation 被塞进 knowledge 桶，全程无人报错。
     const recSrc=(ctx.recommendations||[]).map(e=>e.source);
     if (!recSrc.includes("recommendations/use-composable.md"))
@@ -277,9 +277,9 @@ echo ""
 echo "=== 5. 契约守卫：rules/decisions 缺 constraint 必须硬失败 ==="
 
 # 本用例是真实项目断链的回归锁。
-# 实测（round11）：真实项目的 rules/decisions 常缺 constraint（人工产出 / analyzer 产出都可能漏），
-# 编译器 exit 1 → 不生成 knowledge-index.json → 整条知识链中断；而旧 fixture 恰好带着 constraint，
-# 于是「测试全绿、真实项目全挂」。此处锁定守卫必须存在，防止退化为静默产出不完整 index。
+# 真实项目的 rules/decisions 常缺 constraint（人工产出 / analyzer 产出都可能漏），
+# 编译器 exit 1 → 不生成 knowledge-index.json → 整条知识链中断；若 fixture 恰好都带 constraint，
+# 就会出现「测试全绿、真实项目全挂」。此处锁定守卫必须存在，防止退化为静默产出不完整 index。
 GUARD_FILE="$FIXTURE/rules/no-constraint-probe.md"
 cat > "$GUARD_FILE" <<'EOF'
 ---
@@ -318,8 +318,8 @@ fi
 rm -f "$GUARD_FILE"
 
 # 5c: 字段写在 frontmatter 后段（超过第 15 行）也必须被读到
-#     实测（round13）：真实项目的 decisions 文件 `sources:` 列了多条，补齐的 constraint 落到第 17/19/24 行；
-#     旧实现用 `sed -n '1,15p'` 硬窗口读字段 → **写了但读不到** → 「补齐成功」与「拒绝生成 index」同时成立，
+#     真实项目的 decisions 文件 `sources:` 可能列多条，constraint 落到第 17/19/24 行；
+#     若用 `sed -n '1,15p'` 硬窗口读字段 → **写了但读不到** → 「补齐成功」与「拒绝生成 index」同时成立，
 #     链路依旧断着而两边日志都正常。frontmatter 没有行数上限，这里锁住「无硬窗口」。
 LONG_FM="$FIXTURE/rules/long-frontmatter-probe.md"
 {

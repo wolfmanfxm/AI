@@ -85,7 +85,7 @@ Context Resolver 返回已有 knowledge → 识别缺口：
 - 是否需要邮箱验证？（留给 Architect 决策）
 ```
 
-## Domain-Aware Questioning — **未实现，已摘除（2026-09-18）**
+## Domain-Aware Questioning — **未实现**
 
 > 本节此前定义 Interview 读写 `domain/vocabulary.yaml`（相对 `.project-knowledge/`；活 Domain Model，v2 三分模型）。
 > **摘除原因**：Analyzer 的 `runtime/registry/extractor-registry.yaml` 里**没有 domain extractor**——

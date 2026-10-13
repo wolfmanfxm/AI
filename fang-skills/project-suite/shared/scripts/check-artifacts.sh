@@ -6,7 +6,7 @@
 # Usage: bash shared/scripts/check-artifacts.sh <project-knowledge-dir>
 # Exit: 0=consistent, 1=发现 issue, 2=参数不是 .project-knowledge 目录
 #
-# ⚠️ 参数守卫（2026-09-18 加）：本脚本把报告**写在参数目录内**。若误传项目根
+# ⚠️ 参数守卫：本脚本把报告**写在参数目录内**。若误传项目根
 #    （check-approval-audit.sh 的约定就是传项目根，两脚本约定不同），报告会落到项目根，
 #    违反「生成产物一律进 .project-knowledge/」。故先校验参数，不合格直接拒绝。
 
@@ -50,8 +50,8 @@ echo "> $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$REPORT"
 echo "" >> "$REPORT"
 
 # 1. Plan 内部术语覆盖：Scope 提到的术语是否在 Tasks 中有落地
-# ⚠️ 原实现标为「Spec → Plan」，但**只读了 PLAN 一个文件**——没有任何 spec 输入，等于拿 PLAN 和自己比。
-#    本 suite 也没有 spec artifact，所以改为如实描述：查 PLAN 内部 Scope→Tasks 的术语覆盖（2026-09-18）。
+# ⚠️ 本 suite 没有 spec artifact，只读 PLAN 一个文件、无 spec 输入 → 「Spec → Plan」无意义，
+#    故如实描述：查 PLAN 内部 Scope→Tasks 的术语覆盖。
 echo "## 1. Plan 内部术语覆盖（Scope → Tasks）" >> "$REPORT"
 if compgen -G "$KNOWLEDGE_DIR/proposals/PLAN-*.md" > /dev/null 2>&1; then
   spec_terms=$(cat "$KNOWLEDGE_DIR"/proposals/PLAN-*.md 2>/dev/null | grep -oE "上传|upload|avatar|头像" | sort -u || true)
@@ -85,8 +85,8 @@ fi
 echo "" >> "$REPORT"
 
 # 3. Architecture 规模（信息项，**不做断言**）
-# ⚠️ 原实现在此假装检查「tasks 是否覆盖 components」——代码里没有比对，只有一句 echo 说
-#    "verify tasks cover them"，既无数也无论断。改为如实标注为信息项（2026-09-18）。
+# ⚠️ 本节**不做断言**：tasks 是否覆盖 components 没有可靠映射，只能靠人工或 V8 语义复核，
+#    故如实标注为信息项，不打印无依据的「verify tasks cover them」。
 echo "## 3. Architecture 规模（信息项，非断言）" >> "$REPORT"
 if compgen -G "$KNOWLEDGE_DIR/decisions/ARCHITECTURE-*.md" > /dev/null 2>&1; then
   arch_components=$(count_in "component\|Component\|模块\|module" "$KNOWLEDGE_DIR"/decisions/ARCHITECTURE-*.md)
@@ -96,8 +96,8 @@ echo "" >> "$REPORT"
 
 # 4. Principle Compliance: do plan/architecture respect project principles?
 echo "## 4. Principle Compliance" >> "$REPORT"
-# ⚠️ 原路径是 `$KNOWLEDGE_DIR/../runtime/contracts/...` = **项目根目录**的 runtime/，
-#    真实项目里没有这个文件 → 本节**永不执行**（静默跳过）。这里应为**套件自身**的 runtime/（2026-09-18 修）。
+# ⚠️ 路径必须指向**套件自身**的 runtime/，不能用 `$KNOWLEDGE_DIR/../runtime/`（那是项目根，
+#    真实项目里没有这个文件 → 本节**永不执行**、静默跳过）。
 PRINCIPLES="$SUITE_ROOT/runtime/contracts/project-principles.schema.yaml"
 if [ -f "$PRINCIPLES" ]; then
   principles=$(count_in "principle\." "$PRINCIPLES")
@@ -206,8 +206,8 @@ echo "" >> "$REPORT"
 echo "## Summary" >> "$REPORT"
 echo "| Check | Status |" >> "$REPORT"
 echo "|-------|--------|" >> "$REPORT"
-# ⚠️ 原先这一行标签是「Spec → Plan」，值却取**全局** ISSUES（含 §2/§4/§5/§6 的 issue），
-#    即标签与数值不是一回事。改为如实分列（2026-09-18）。
+# ⚠️ 标签与数值必须对应：这一行取的是**全局** ISSUES（含 §2/§4/§5/§6 的 issue），
+#    故如实分列，标签写「全部检查（合计）」而非误导性的「Spec → Plan」。
 echo "| 全部检查（合计） | $([ "$ISSUES" -eq 0 ] && echo '✅ 无 issue' || echo "⚠️ $ISSUES issue(s)") |" >> "$REPORT"
 echo "| 其中 §5 ID 孤立引用 | $([ "${orphan_ids:-0}" -eq 0 ] && echo '✅' || echo "⚠️ ${orphan_ids}") |" >> "$REPORT"
 

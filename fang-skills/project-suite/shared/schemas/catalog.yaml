@@ -76,6 +76,6 @@ schemas:
     consumers: [project-analyzer]
     notes: 疑为 Analyzer 输入/状态契约；暂无脚本证明运行时消费链 → 待确认，勿在此前删除
 
-# 2026-09-28 归档移除：memory.schema.json（无 memory.json Producer/Consumer）与
-# projects.schema.json（无 projects.json Producer/Consumer）经孤儿确认后移入 docs/archive/schemas/，
-# 不再属于 active contract，故不在本 catalog 登记（L4.5 亦排除 docs/archive）。
+# memory.schema.json（无 memory.json Producer/Consumer）与
+# projects.schema.json（无 projects.json Producer/Consumer）已移入 docs/archive/schemas/，
+# 不在 active contract 内，故不在本 catalog 登记（L4.5 亦排除 docs/archive）。

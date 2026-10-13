@@ -41,9 +41,7 @@ type_to_cap() {
   esac
 }
 
-# 合法 type：**从 SSOT 解析**，不再手抄副本
-# （2026-09-18 修：此前这里是 artifact-types.yaml 的一份手抄副本，脚本注释里自己写着
-#  「增删 artifact type 时两处都要改」——那正是本仓库反复在剿的「新建 SSOT 又复制一份」。）
+# 合法 type：**从 SSOT 解析**，不维护手抄副本（手抄副本会让「增删 artifact type 时两处都要改」的漂移复现）。
 ARTIFACT_TYPES_FILE="$SUITE_ROOT/runtime/artifacts/artifact-types.yaml"
 VALID_TYPES="$(sed -n '/^types:/,/^[a-z]/p' "$ARTIFACT_TYPES_FILE" 2>/dev/null \
                | grep -oE '^  [a-z][a-z-]*:' | tr -d ' :' | tr '\n' ' ' || true)"
@@ -163,8 +161,8 @@ else
 fi
 
 # 4.3 I4：契约要求的 Producer 字段，必须出现在 analyzer 的 frontmatter 字段表里
-#     —— 这正是 2026-09-17 实测到的缺口成因：knowledge-builder 说 statement 必写，
-#        而权威字段表 output-format.md 根本没列它 → 产出者按字段表走 → 真实项目 0/12 合规。
+#     —— 防的是「要求了但没告诉产出者」：knowledge-builder 说某字段必写，
+#        而权威字段表 output-format.md 没列它 → 产出者按字段表走 → 该字段永远不会被写。
 OF="$SKILLS_DIR/project-analyzer/prompts/output-format.md"
 MISSING_SPEC=""
 for pair in ${KD_REQUIRED:-}; do
@@ -186,7 +184,7 @@ fi
 #     匹配 `.project-knowledge/<seg>/` 这种**显式带前缀**的写法——也正是要推的写法。
 #
 #     ⚠️ 本断言**抓不到「裸写文件名」**（如 `CHANGELOG.md` 不带任何目录前缀）——那类只能靠人工评审，
-#        不要指望这条兜住（2026-09-17 releaser 的 CHANGELOG 漂移即属该类型）。
+#        不要指望这条兜住这类漂移。
 #     ⚠️ 扫描面排除 docs/：ADR 是冻结的历史记录，目录改名后扫它必然误报。
 KD_NON_KNOWLEDGE="runtime"   # .project-knowledge/runtime/ 是运行时状态目录（state/timeline），非知识目录，
                              # 不在契约范围内。显式排除而**不**在契约里声明——声明了会被 I3 判为「死产出」
@@ -211,7 +209,7 @@ fi
 echo ""
 
 # ── 自检：证明本检查器**有判别力**（不只是在真仓上打印 ✅）───────────
-# 来源（2026-09-18 外部评审）：检查器的价值不在于「能接通的说接通」，而在于
+# 来源：检查器的价值不在于「能接通的说接通」，而在于
 # **「接不通的确实报错」**。只在真仓上跑，无法区分「一切正常」与「检查器失效」。
 # 做法：造一个**已知断裂**的 fixture，把本脚本对着它重跑，断言它必须红。
 # ⚠️ 用 IO_SKILLS_DIR 标记「正在自检」以避免无限递归。

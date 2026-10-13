@@ -30,7 +30,7 @@ PASS=0; WARN=0; VIOLATION=0
 # ⚠️ 计数统一用 count_of()，不要写 `$(grep -c X f || echo 0)`：
 #    grep -c 在「文件存在但零匹配」时会**打印 0 且 exit 1**，`|| echo 0` 再补一个 0
 #    → 变量变成两行 `0\n0` → 后续 `[ "$var" -gt 0 ]` 报 integer expression 错误并**静默走 else 分支**。
-#    实测（2026-09-18）：本脚本每次真实运行喷 3 个 shell 错误。
+#    否则本脚本每次真实运行会喷 3 个 shell 错误。
 count_of() {
   local n
   n=$(grep -c "$1" "$2" 2>/dev/null || true)
@@ -38,9 +38,9 @@ count_of() {
 }
 
 # Check 1: 每次 skill 执行都要有 approval_log 条目
-# ⚠️ 原实现只判 `approval_count > 0` 就打印 ✅，**从不比较 skill_count**——
-#    实测：2 次执行只有 1 条审批记录，照样输出「✅ 1 entries for 2 skill executions」。
-#    声称的是「每次执行都有条目」，实际只查了「至少有一条」→ 假检查（2026-09-18 修）。
+# ⚠️ 必须比较 skill_count，不能只判 `approval_count > 0` 就打印 ✅：
+#    2 次执行只有 1 条审批记录时也会照样输出「✅ 1 entries for 2 skill executions」。
+#    声称的是「每次执行都有条目」，只查「至少有一条」就是假检查。
 skill_count=$(count_of '"skill"' "$STATE_FILE")
 approval_count=$(count_of '"level"' "$STATE_FILE")
 if [ "$skill_count" -eq 0 ]; then

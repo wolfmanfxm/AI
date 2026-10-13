@@ -3,11 +3,9 @@
 #
 # 校验 Suite 内所有 .yaml 能被**标准 YAML parser** 解析。
 #
-# 为什么需要（2026-09-17 补）：既有 checker 全是文本/regex 校验，全绿也不代表 YAML 真能被解析。
-# 实测当时有 3 个文件不可解析（project-documenter/skill.yaml 的 `recovery: 标记[CONFLICT]`、
-# 一份已删除的 Context Engine 规格里的箭头 DSL，以及前者向 skills.generated.yaml 的传播）——门禁全绿却全是坏的。
-# （2026-09-20 注：那份箭头 DSL 规格的可执行版本已随清场删除，.md 仅作设计史归档在 docs/archive/，
-#   见 docs/roadmap.md G1.1(c)——但**本门禁仍覆盖 docs/archive/ 的 .yaml**，故该注记保留其历史价值。）
+# 为什么需要：既有 checker 全是文本/regex 校验，全绿也不代表 YAML 真能被标准 parser 解析。
+# 文本全绿不代表语法合法——例如 `recovery: 标记[CONFLICT]` 这类值会被 Psych 拒收。
+# 本门禁覆盖 docs/archive/ 的 .yaml（归档文件也须可解析）。
 #
 # 解析器优先级（保持零 Node 依赖）：
 #   1. ruby -ryaml      macOS 自带

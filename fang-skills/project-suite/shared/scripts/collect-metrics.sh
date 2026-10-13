@@ -19,9 +19,9 @@ mkdir -p "$REPORT_DIR"
 REPORT="$REPORT_DIR/telemetry-report.md"
 TODAY=$(date +%Y-%m-%d)
 
-# ═══ Guard: 前置检查 RUNTIME_DIR（2026-09-20 修）═══
+# ═══ Guard: 前置检查 RUNTIME_DIR ═══
 #
-# 为什么需要：本脚本对**没有 .project-knowledge/runtime/ 的项目**运行时，此前会 **静默 exit 1**
+# 为什么需要：本脚本对**没有 .project-knowledge/runtime/ 的项目**运行时会**静默 exit 1**
 #   （stdout/stderr 全空、不留报告），根因是两个抑制器合谋——
 #   `manifest_count=$(find "$RUNTIME_DIR" … 2>/dev/null | wc -l)`：
 #   ① `2>/dev/null` 吞掉 find 的报错；② `set -o pipefail` 让 find 的 exit 1 穿透管道；
@@ -42,7 +42,7 @@ fi
 # 1. Execution history from state.json
 if [ -f "$STATE_FILE" ]; then
   # ⚠️ 不要写 `$(grep -c X f || echo 0)`：零匹配时 grep 已打印 0 且 exit 1，`|| echo 0` 再补一个
-  #    → 变量成两行 `0\n0` → 指标数字报错/失真（2026-09-18 修）
+  #    → 变量成两行 `0\n0` → 指标数字报错/失真。
   total_executions=$(grep -c '"skill"' "$STATE_FILE" 2>/dev/null || true); total_executions=${total_executions:-0}
   completed=$(grep -c '"status": "completed"' "$STATE_FILE" 2>/dev/null || true); completed=${completed:-0}
   partial=$(grep -c '"status": "partial"' "$STATE_FILE" 2>/dev/null || true); partial=${partial:-0}

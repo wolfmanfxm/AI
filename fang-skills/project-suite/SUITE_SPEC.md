@@ -52,7 +52,7 @@
 
 **逆命题同样成立**：只被静态工具消费、**不被运行时消费**的声明，要么给它运行时入口，要么删掉。
 
-**退役契约的落点规则（2026-09-20 补）**：
+**退役契约的落点规则**：
 
 > Retired Contract may exist in history/archive, but **MUST NOT** be referenced by any
 > executable path, active schema, active configuration, generated artifact, or Host execution instruction.
@@ -63,20 +63,17 @@
 `runtime/context/` 的 active 文件。
 
 **为什么单列一条**：它比「零消费者」更严。零消费者只能证明**删了不会坏**，证明不了
-**它没有在暗示自己仍然存在**。2026-09-20 清退「Context Engine 契约」族（字段块 + 引擎规格，见
-[roadmap G1.1](docs/roadmap.md)）时，关键词扫描早已全绿，逐类语义复查仍揪出三处复述旧语义——
-本规范 §3.1 的一处字段墓碑、`check-yaml.sh` 注释里的文件名、以及归档 `.md` **正文仍是现在时执行语态**
-（"所有 Skill 统一按此栈加载上下文" / "缺失任一项 → 下游 skill BLOCK，拒绝执行"）。
+**它没有在暗示自己仍然存在**——退役契约的正文若仍是现在时执行语态，就在暗示自己仍然存在。
 **故清场验收必须做两遍：先按精确关键词 grep 定位，再逐条读命中处是不是仍在描述当前行为。**
 （本条规则自身即不写退役名，以保证「活跃文件命中数 = 0」这条不变式无需自我豁免。）
 搜精确关键词，**不要搜 `context`**——`runtime/context/` 里的 `context.md` / `context-resolution.md`
 是**活的 Context Protocol**（描述产物及其 LLM 处置规则），与要清退的 Context **Engine** 是两回事。
 
-**为什么把它抬成一等原则**：2026-09-18 一轮排查挖出的问题**全是这一条的实例**——
+**为什么把它抬成一等原则**：下面的问题**全是这一条的实例**——
 
 | 实例 | 表面状态 | 实际 |
 |------|---------|------|
-| `constraint` 字段（round11/13） | 字段写了、diff 能验证 | 编译器前 15 行硬窗口 → 字段在后段则**读不到** |
+| `constraint` 字段 | 字段写了、diff 能验证 | 编译器前 15 行硬窗口 → 字段在后段则**读不到** |
 | `verification.mode`（10/10 skill.yaml） | 声明齐全、取值一致 | **零消费者**：无 schema、无脚本读它 |
 | 幽灵 Verify 阶段（8/10） | SKILL.md 写了 `Verify` 行、`verifier.md` 存在 | 不在 `interface.stages` 的路径上 → **运行时永不被加载** |
 | `artifact-types.location` | 每类产物都有落点声明 | **零脚本解析**；漂移只能靠人眼 |
@@ -172,12 +169,7 @@ boundary: <string>          # 一行职责边界
 
 ### 3.2 版本兼容声明（→ suite 级，不在 skill.yaml）
 
-> **2026-09-20 修正**：本节此前要求**每个 skill** 声明 `compatibility:` 块（🟡 IMPORTANT + 「必须声明」），
-> 与 [ADR-003](docs/decisions/ADR-003-skill-contract-vs-orchestration.md) 的权威映射表**直接冲突**——
-> ADR-003 白纸黑字：「版本兼容约束 → `compatibility.yaml` 的 `matrix`，**不是** skill.yaml」。
-> 实测该块 **0/10 声明**，且 G1–G17 无一项覆盖它，于是「10 个 skill 全部不遵守 MUST」全仓绿灯。
->
-> 现已删去 skill 级要求，**兼容性单一承载于 `runtime/registry/compatibility.yaml`**（含 `current` 版本登记
+> **兼容性单一承载于 `runtime/registry/compatibility.yaml`**（含 `current` 版本登记
 > 与 `matrix` 兼容矩阵，由 `check-consistency.sh` 的 L3 真实消费）；
 > suite 级最低要求见 `suite-manifest.yaml` 的 `compatibility:` 块。
 > **不为「让规范和 skill.yaml 一致」去补 10 份声明**——那是新增一份无消费者的权威。

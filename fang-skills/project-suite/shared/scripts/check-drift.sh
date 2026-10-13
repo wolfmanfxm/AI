@@ -9,8 +9,8 @@
 #   4. Stage count vs template — 阶段数是否在合理区间
 #   5. @adapter 引用 vs adapter-registry
 #
-# ⚠️ 2026-09-18 修正：Drift 1/2/5 此前均为**假检查**——Drift 1/5 会在没有任何比对的情况下打印 ✅，
-#    Drift 2 只取到 `description: >` 这一行、关键词永不命中。三者现在要么真查、要么明确降级为
+# ⚠️ Drift 1/2/5 都曾是无依据的假检查：Drift 1/5 在没有任何比对的情况下打印 ✅，
+#    Drift 2 只取到 `description: >` 这一行、关键词永不命中。现三者要么真查、要么明确降级为
 #    「仅声明存在性」，不再输出无依据的 ✅。
 #
 # Usage: bash shared/scripts/check-drift.sh
@@ -29,8 +29,8 @@ green() { echo -e "\033[32m$1\033[0m"; }
 DRIFT_COUNT=0; PASS=0; WARN=0
 
 # 取 SKILL.md frontmatter 里 description 的**完整多行块**（YAML `>` 折叠块）。
-# ⚠️ 原实现是 `head -10 "$md" | grep "description:"` —— 只拿到 `description: >` 这一行本身，
-#    折叠块内容一行都没取到，于是 Drift 2 的关键词永不可能命中（假检查，2026-09-18 修）。
+# ⚠️ 必须取**完整折叠块**：只 grep `description:` 行只能拿到 `description: >` 本身，
+#    折叠块内容一行都没取到 → Drift 2 的关键词永不可能命中。
 skill_description() {
   awk '
     /^description:/ { in_d=1; sub(/^description: *>?[ ]*/, ""); print; next }
@@ -63,7 +63,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # ⚠️ 这里**不验证**「是否真的产出交付物」——实际交付物只在**跑过的项目**里存在
   #    （PLAN.md 只在跑过 planner 的项目里才有），静态仓里无法判定。该断言的正规归属是
   #    eval 仓的 benchmark（见 docs/eval-contract.md 的分工）。
-  #    原实现在此打印 `✅ produces: [...]` 却没有任何比对，是**假信号**（2026-09-18 降级为信息项）。
+  #    仅打印声明存在性，不打印无依据的 ✅「比对通过」。
   produces=$(grep "^produces:" "$yaml" | sed 's/.*\[\(.*\)\].*/\1/' || echo "")
   if [ -z "$produces" ]; then
     yellow "  ⚠️  No produces declared"
@@ -75,10 +75,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # Drift 2: description 声明的能力是否超出 produces
   #          先取**完整**折叠块，再剥掉负边界段（见上方 strip_negative_boundary 的说明）。
   #
-  # ⚠️ 关键词必须是**生产性措辞**，不能是裸的「代码 / Code」——2026-09-18 实测：修好取块后，
-  #    裸关键词一次报出 4 条**全部误报**（analyzer/documenter/reviewer/tester）：
+  # ⚠️ 关键词必须是**生产性措辞**，不能是裸的「代码 / Code」：
+  #    裸关键词会一次报出多条**误报**（analyzer/documenter/reviewer/tester）——
   #    它们的描述里出现「代码」是因为**对代码做事**（审查代码、为代码写文档/测试），
-  #    而非**产出代码**。命中率 0/4 → 收紧为明确的生产性短语。
+  #    而非**产出代码**。故收紧为明确的生产性短语。
   desc=$(skill_description "$md" | strip_negative_boundary)
   if printf '%s' "$desc" | grep -qE "生成代码|写代码|实现代码|编写代码|产出代码|新增代码|generate code|write code|implement code"; then
     if ! echo "$produces" | grep -q "Code\|RefactoredCode"; then
@@ -95,9 +95,8 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # Drift 3: prompt and reference links — do they resolve?
-  # ⚠️ 原正则只匹配 `../` 开头的链接（`\(\.[^)]*\.md\)`），同目录链接（如 `(prompts/discovery.md)`）
-  #    **完全没查**，但输出却写「All SKILL.md links resolve」——实测把 `prompts/discovery.md`
-  #    改成 `prompts/NOPE.md`，四个检查全绿放行（2026-09-18 修）。
+  # ⚠️ 必须覆盖**同目录**相对链接（如 `(prompts/discovery.md)`），不能只查 `../` 开头的；
+  #    否则把同目录链接改坏也照报「All SKILL.md links resolve」。
   #    现覆盖一切相对 .md 链接（排除含 `:` 的绝对 URL 与含 `#` 的锚点）。
   dead_links=0
   # while read -r 逐行读：link label 可能含空格（如 [Complexity Gate](...)），for..in $(..) 会按空白拆散导致误报死链。
@@ -129,10 +128,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     WARN=$((WARN+1))
   fi
 
-  # Drift 5 已删除（2026-09-18）。原实现有两处错：
-  #   1. 计数错——`grep -A20 "^interface:" | grep "name:"` 把 **inputs 和 outputs 一起数了**，
-  #      却输出 `✅ interface.outputs: N output(s) match produces`，N 是假的、match 也没查。
-  #   2. 重复——「output type → produces Capability」的真检查已在 check-io-connectivity.sh
+  # Drift 5 不在此保留：它有两个固有缺陷——
+  #   1. 计数错：`grep -A20 "^interface:" | grep "name:"` 会把 inputs 和 outputs 一起数，
+  #      无法只取 outputs 数量，match 也无从比对。
+  #   2. 重复：「output type → produces Capability」的真检查已在 check-io-connectivity.sh
   #      的第 3 项做了（那才是真正读 type 映射的版本）。此处不再保留一个更弱的副本。
   # 保留这段注释是为了让「为什么少了一项」可追溯，而不是静默消失。
 
