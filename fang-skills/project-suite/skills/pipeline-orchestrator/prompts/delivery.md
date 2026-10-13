@@ -13,6 +13,8 @@
    - 建议的下一步操作
 3. 更新 `state.json`（追加 pipeline 执行历史）
 
+4. （可选，用户点名触发）**Session Retro** — 仅在高信号场景（多轮修复才成功的 defect / 「声明但无 consumer」类 defect / 用户点名复盘）执行。按 [Session Retro 原语](../../../shared/primitives/session-retro.md) 的七类检查 agent 自身工作环境，发现作为修改建议交用户确认，不自动扩展规范、目录或 Runtime。
+
 ## Exit
 
 - `pipeline-report.md` 写入成功
