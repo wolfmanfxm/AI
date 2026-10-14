@@ -153,7 +153,7 @@ project-suite/
 │   ├── metrics/           ← Timeline + Knowledge Health
 │   └── artifacts/         ← Artifact Types Registry
 ├── skills/                ← 10 Skills
-├── shared/                ← Schemas(7) · Scripts(25) · Primitives(4) · Conventions · Examples · Templates
+├── shared/                ← Schemas(7) · Scripts(25) · Primitives(5) · Conventions · Examples · Templates
 ├── docs/                  ← Skill Atlas · Benchmarks · Review Cadence · Review Studio · Waiver · Prompt Quality · Cross-Run Reliability · Roadmap · Architecture
 ├── reports/               ← Trust(90) · Quality Scorecard · Trigger Eval
 └── suite-manifest.yaml    ← 单文件治理

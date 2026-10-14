@@ -51,7 +51,7 @@ retro 补的就是这条反向边。它的核心动作不是改业务代码，�
 ### 2. Automated checks（自动检查）⚠️ 先查现有
 
 > **查什么**：agent 犯的错，是否有现成检查本该拦住？
-> **先查现有（retro 核心纪律）**：先读本仓库已有的检查命令——`shared/scripts/check-*.sh`（19 个）、`check-conformance.sh`、`command-guard.sh`、`confidence.yaml` gate 条件。**一个已存在但没接进 pipeline / 静默失效的 check，本身就是 finding，不是「再发明一个」的理由。** 仓库完全无 guardrail（无 pre-commit、无 CI 跑 lint/typecheck/test）本身就是 finding。
+> **先查现有（retro 核心纪律）**：先读本仓库已有的检查命令——`shared/scripts/check-*.sh`（12 个）、`check-conformance.sh`、`command-guard.sh`、`confidence.yaml` gate 条件。**一个已存在但没接进 pipeline / 静默失效的 check，本身就是 finding，不是「再发明一个」的理由。** 仓库完全无 guardrail（无 pre-commit、无 CI 跑 lint/typecheck/test）本身就是 finding。
 > **路由**：现有 check 未接线 → 接进 conformance gate；现有 check 静默失效 → 修；确无对应 check → 加到 `check-*.sh` 或 `confidence.yaml` gate 条件。
 > _触发信号：agent 犯了一个本可被自动检查拦住的错。_
 
