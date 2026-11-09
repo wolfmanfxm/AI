@@ -45,6 +45,7 @@
 | 结构门 G1–G18 | `shared/scripts/check-conformance.sh` |
 | 声明链一致性（skill.yaml ↔ skill-ir ↔ registry ↔ compatibility） | `shared/scripts/check-consistency.sh` |
 | 知识链闭环（compiler → index → resolver → package） | `shared/scripts/check-knowledge-pipeline.sh` |
+| 任务隔离（串行 A→B→回 A） + 单写者锁 | `shared/scripts/check-task-isolation.sh` |
 | YAML 可解析 | `shared/scripts/check-yaml.sh` |
 | 产物写入路径 / 契约 | `shared/scripts/check-artifacts.sh` |
 | E2E 主链 wiring | `shared/scripts/check-e2e-smoke.sh` |

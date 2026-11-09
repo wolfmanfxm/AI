@@ -25,7 +25,7 @@ interface:
     - { name: PLAN.md, type: planning, required: false, source: project-planner, fixture: true, description: Acceptance Criteria }
   outputs:
     - { name: "*.test.ts/*.spec.ts", type: test, confidence_range: "70-90", description: Given-When-Then结构测试用例 }
-    - { name: TEST-REPORT.md, type: test, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
+    - { name: TEST-REPORT-<task_id>.md, type: test, confidence_range: "70-85", description: 覆盖率摘要+AC对照+失败分析 }
   side_effects: { writes_state: true, writes_knowledge: true, modifies_code: false, writes_timeline: true }
   failure_modes:
     - { condition: 检测不到测试框架, severity: DEGRADED, recovery: 默认jest风格,标注⚠️ }

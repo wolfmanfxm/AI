@@ -103,11 +103,13 @@ Exit 0 → 继续。**Exit 1 → 不可声明 `status: completed`**，回到步�
 > ⚠️ **为什么这条要写成「断言产出」而非「更新文件」**：规格里留着一句读起来还在的动作名不算数——
 > 只有入口文件**真的生成**，知识库才被送达 agent。故本门禁断言的是产出本身，不是「有没有检查过」。
 
-### 8. Write Manifest + State
+### 8. Write Manifest + State + Release Lock
 
-- 写入 manifest.json（status=completed）
-- 写入 state.json（confidence + history）
-- 追加 timeline.json
+- 写入 `manifest.json`（status=completed，项目级知识产物；本 Skill 持单写者锁）
+- 写入 state.json（confidence + history，history 带 task_id）
+- 追加 timeline.jsonl（`bash shared/scripts/timeline-append.sh <project-root> -`；`taskId` 单独字段，`runId` = `<taskId>/<skill>/<startedAt>`）
+- **释放单写者锁**：`writer-lock.sh <kd> analyzer release --owner-id <owner>`
+  （失败/降级/用户取消等所有退出路径都要释放）
 
 ## Exit
 

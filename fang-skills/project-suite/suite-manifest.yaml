@@ -12,14 +12,14 @@
 
 suite:
   name: project-suite
-  version: "1.0.0"
-  spec_version: "1.0.0"
+  version: "1.2.0"
+  spec_version: "1.2.0"
 
 governance:
   owner: project-suite
   mode: Production+  # targeting Governed
   review_cadence_days: 90
-  last_reviewed: "2026-08-04"
+  last_reviewed: "2026-11-09"
 
 protocols:
   workflow:
@@ -28,8 +28,8 @@ protocols:
     templates: [discovery, execution, validation, delivery, code-audit, graph-analysis]
     dsl_schema: shared/schemas/workflow.schema.json
   mechanisms:
-    version: "0.7.0"
-    components: [state-machine, checkpoint, error-recovery, confidence-gate, event-bus, scheduler]
+    version: "0.9.0"
+    components: [state-machine, checkpoint, error-recovery, confidence-gate, event-bus, scheduler, task-identity, single-writer]
 
 quality_gates:
   G1:  { name: "SKILL.md ≤130行", level: required }
@@ -53,6 +53,8 @@ quality_gates:
 
 compatibility:
   context_schema: ">=1.0.0"
-  state_schema: ">=1.0.0"
+  state_schema: ">=1.1.0"     # 1.1.0 起 history[].task_id + active_tasks
+  task_schema: ">=1.0.0"      # runtime/tasks/<task_id>/meta.json
+  timeline_schema: ">=2.0.0"  # 2.0.0 起 timeline.jsonl（一行一 run，append-only；聚合读取时计算）
   suite_minimum: ">=0.8.0"
   # skill 级兼容性不在此声明——见 runtime/registry/compatibility.yaml（唯一权威，ADR-003）。

@@ -99,7 +99,7 @@ input:
 expected:
   files:
     - "*.test.ts" or "*.spec.ts"   # 可解析的测试文件
-    - reports/TEST-REPORT.md
+    - reports/TEST-REPORT-<task_id>.md
   ac_coverage: 1.0                 # 每条 AC 至少 1 个测试
   boundary_cases: 3                # null/undefined/empty 至少 3 种
   executable: true                 # 无语法错误

@@ -12,8 +12,8 @@
 | **`state.json`** | **Execution State（唯一权威）** — 项目当前 phase/status/history/blockers | 唯一权威，其他 Skill 读它了解「现在到哪了」 |
 | `knowledge.json` | 知识生命周期（独立维度，不是执行状态） | 权威：知识的 Accepted/Candidate 状态 |
 | `manifest.json` | 断点续传辅助（skill 级子任务进度） | **skill 自维护的执行级状态（子任务粒度），非 state.json 派生**，不是独立执行状态真相 |
-| `.sessions/<skill>/state.json` | Session 快照（跨 session 恢复） | **恢复辅助**，内容以 state.json 为准 |
-| `timeline.json` | 执行指标（timing/quality） | **指标派生**，不含执行状态决策信息 |
+| `.sessions/<task_id>/<skill>/state.json` | Session 快照（跨 session 恢复） | **恢复辅助**，内容以 state.json 为准 |
+| `timeline.jsonl` | 执行指标（timing/quality） | **指标派生**，不含执行状态决策信息 |
 
 **规则**：判断「项目现在什么阶段、哪些 skill 完成了、有什么 blocker」——**只读 `state.json`**。manifest/session-snapshot/timeline 记录不同粒度的执行细节（skill 内子任务进度 / session 快照 / 指标），不参与「项目当前阶段」判定；冲突时以 state.json 为准。
 
@@ -56,7 +56,7 @@ Skill
 ├── state.json              # 项目当前状态 + 执行历史（含 confidence gate）
 ├── knowledge.json           # 知识文件生命周期追踪
 ├── metrics/                 # 可观测层（v1.3.0）
-│   ├── timeline.json        # 全量执行历史指标
+│   ├── timeline.jsonl       # 全量执行历史指标（一行一 run，append-only）
 │   ├── knowledge-health.json # 知识库质量检测报告
 │   └── archive/             # 归档的旧 timeline（按季度）
 ```
@@ -74,10 +74,16 @@ Skill
   "status": "in_progress",
   "current": {
     "skill": "project-planner",
+    "task_id": "task-20261109-user-approval",
     "started": "2026-07-28T15:00:00"
+  },
+  "active_tasks": {
+    "task-20261109-user-approval": { "skill": "project-planner", "status": "in_progress" },
+    "task-20261109-order-management": { "skill": "project-generator", "status": "in_progress" }
   },
   "history": [
     {
+      "task_id": "task-20261109-user-approval",
       "skill": "project-analyzer",
       "status": "completed",
       "confidence": 92,
@@ -95,13 +101,15 @@ Skill
 |------|------|
 | `phase` | 当前阶段：analyzing / planning / architecture / generating / testing / reviewing / releasing |
 | `status` | in_progress / waiting / blocked / completed |
-| `current` | 当前执行的 Skill |
-| `history[]` | 执行历史，每个 Skill 追加一条 |
+| `current` | 最近一次执行的 Skill（兼容字段；`task_id` 必填） |
+| `active_tasks` | 并行任务视图：task_id → 最近 skill + status。**唯一权威仍是本文件**，不是另建状态层 |
+| `history[]` | 执行历史，每条**必须带 `task_id`**；多个任务各自追加，互不覆盖 |
 | `history[].confidence` | 该 Skill 的自评置信度 |
 | `history[].suggested_next` | Skill 建议的下一步（用户参考） |
 | `blockers[]` | 阻塞项列表 |
 
 **规则：** Skill 只追加 history，不删除。用户可随时查看完整执行链路。
+> 并发写同一 `state.json` 时按 [task-identity.md](../mechanisms/task-identity.md) 的写入纪律：一次一个写者；读改写冲突则重读合并，不静默覆盖。
 
 ## knowledge.json
 
@@ -160,13 +168,29 @@ Skill
    - 执行本 Skill 的职责
 
 3. 写 State:
-   - state.json → 追加 history（含 confidence + suggested_next）
+   - state.json → 追加 history（含 task_id + confidence + suggested_next）
    - knowledge.json → 更新知识状态（analyzer/reviewer）
-   - timeline.json → 追加 run 记录（timing/quality/dependencies）
-   - 产出文件 → 写入 `.project-knowledge/` 对应子目录（proposals/decisions/reports/）
+   - timeline.jsonl → 追加一行 run（`taskId` 单独字段；`runId` = `<taskId>/<skill>/<startedAt>`，必须唯一）
+   - 任务级产出 → `runtime/tasks/<task_id>/`（session / context-package / pipeline-state）
+   - 产出文件 → 写入 `.project-knowledge/` 对应子目录（文件名带 task_id，见下）
 
 4. 输出收尾报告:
    - 做了什么 / 没做什么
    - confidence
    - 建议下一步（用户参考）
 ```
+
+## 产出文件命名
+
+任务产物必须带 `task_id`，避免两个并行任务互相覆盖：
+
+| 产物 | 路径 |
+|------|------|
+| PLAN | `proposals/PLAN-<task_id>.md` |
+| ARCHITECTURE | `decisions/ARCHITECTURE-<task_id>.md` |
+| REVIEW | `reports/REVIEW-<task_id>.md` |
+| TEST-REPORT | `reports/TEST-REPORT-<task_id>.md` |
+| REFACTOR | `reports/REFACTOR-<task_id>.md` |
+
+> 需要额外区分同一任务内的多份报告时，用 `<TYPE>-<task_id>-<topic>.md`。
+> 项目级知识（architecture/ components/ api/ patterns/）**不带** task_id——它们描述项目，不描述任务。

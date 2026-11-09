@@ -1,6 +1,6 @@
 # Context Resolver v2.0
 
-> Task → 分桶（constraints / knowledge / guidance）→ context-package.json。
+> Task + task_id → 分桶（constraints / knowledge / guidance）→ `runtime/tasks/<task_id>/context-package.json`。
 > 解决"1000 篇知识，Skill 读哪些？"的问题——**Skill 不读 .md，只消费 Resolver 编译好的知识包**。
 >
 > 算法与实现见 [../knowledge-resolver.md](../knowledge-resolver.md) + `shared/scripts/knowledge-resolver.sh`。
@@ -21,7 +21,7 @@ After:   Task → 按 type 分桶 → 全量 constraints + Top-K knowledge/guida
 | **knowledge** | patterns / components / api | recommended | 用于实现（REUSE） |
 | **guidance** | experience / playbooks / task-scope decisions | advisory | 参考，非强制 |
 
-## 输出（context-package.json）
+## 输出（`runtime/tasks/<task_id>/context-package.json`）
 
 ```json
 {
@@ -72,4 +72,4 @@ Index → Select → Hydrate
 
 ## 集成
 
-Planner / Generator / Reviewer 的 Discovery 阶段第一步：读 context-package.json（Resolver 已编译）→ 加载 constraints（blocking）→ knowledge（reuse）→ guidance（advisory）→ 再做现状探查。
+Planner / Generator / Reviewer 的 Discovery 阶段第一步（Task Resolution 之后）：读 `runtime/tasks/<task_id>/context-package.json`（Resolver 已编译）→ 加载 constraints（blocking）→ knowledge（reuse）→ guidance（advisory）→ 再做现状探查。

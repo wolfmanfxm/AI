@@ -1,7 +1,7 @@
 # Execution — Planner
 
 > @template: execution
-> Session Snapshot: 每步 Pipeline 后写入 `.project-knowledge/.sessions/project-planner/state.json` → 跨 session resume
+> Session Snapshot: 每步 Pipeline 后写入 `.project-knowledge/.sessions/<task_id>/project-planner/state.json` → 跨 session resume
 
 ## Actions
 
@@ -23,7 +23,7 @@
 → 工作量评估：[prompts/estimation.md](estimation.md)
 
 🔴 CHECKPOINT — 展示 PLAN.md 摘要（任务数+估时+风险TOP3）
-⚡ 写入 session snapshot: `current_step` + `completed_sections` → 中断后从此步骤 resume
+⚡ 写入 session snapshot: `.project-knowledge/.sessions/<task_id>/project-planner/state.json`（current_step + completed_sections）→ 中断后从此步骤 resume
 
 ## Decision Record
 

@@ -26,6 +26,11 @@
       "type": "string",
       "description": "Source PLAN.md path"
     },
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]{8}(-[A-Za-z0-9][A-Za-z0-9._-]*)?$",
+      "description": "Task identity. Consumer MUST verify it equals its resolved task_id; mismatch = another task's knowledge bundle. Absent only on legacy root-level packages."
+    },
     "confidence": {
       "type": "integer",
       "minimum": 0,

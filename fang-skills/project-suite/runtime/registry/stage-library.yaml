@@ -53,7 +53,7 @@ stages:
   delivery:
     description: 最终产出写入与同步
     standard_input: [validated_outputs]
-    standard_output: [final_artifacts, state.json_updated, timeline.json_appended]
+    standard_output: [final_artifacts, state.json_updated, timeline.jsonl_appended]
     entry_condition: validation_passed
     exit_condition: all_files_written + manifest_completed
     checkpoint: false
@@ -96,7 +96,7 @@ contracts:
     produces: [validation-report.md]
   delivery:
     consumes: [validated_outputs]
-    produces: [final_artifacts, state.json, timeline.json]
+    produces: [final_artifacts, state.json, timeline.jsonl]
   code-audit:
     consumes: [project_source, confirmed_scope]
     produces: [audit_annotations]

@@ -1,12 +1,15 @@
 # Memory Layer v1.0
 
 > 四级持久记忆。Skill 间传递"是什么"（state.json/knowledge.json）和"为什么"（memory）。
+>
+> ⚠️ **Session 级按 task_id 隔离**：`.project-knowledge/runtime/tasks/<task_id>/session.json`。
+> 固定单文件会被后一个任务覆盖，导致 resume 时读到别的任务的 goal/assumptions。见 [task-identity.md](../mechanisms/task-identity.md)。
 
 ## 四级记忆
 
 | Level | 存活时间 | 存什么 | 存在哪 |
 |-------|---------|--------|--------|
-| **Session** | 当前会话 | 本次执行的上下文、中间产出、用户反馈 | `.project-knowledge/runtime/memory/session.json` |
+| **Session** | 单个任务 | 本次任务的上下文、中间产出、用户反馈 | `.project-knowledge/runtime/tasks/<task_id>/session.json` |
 | **Project** | 项目生命周期 | 架构决策、已知约束、团队约定 | `.project-knowledge/runtime/memory/project.json` |
 | **Suite** | 跨项目 | 通用模式、最佳实践、学习到的规则 | `runtime/memory/suite.json` |
 | **Decision** | 永久 | 为什么做某个决策（ADR的"为什么"部分） | `.project-knowledge/runtime/memory/decisions/<id>.json` |
@@ -15,6 +18,7 @@
 
 ```json
 {
+  "task_id": "task-20261109-user-approval",
   "session_id": "20260804-153000",
   "skill": "project-planner",
   "context": {
@@ -27,7 +31,9 @@
 }
 ```
 
-下游 Skill（architect/generator）读取 Session Memory 了解"用户说了什么"和"做了什么假设"——不用重新问。
+下游 Skill（architect/generator）读取**同一 task_id** 的 Session Memory 了解"用户说了什么"和"做了什么假设"——不用重新问。
+
+> 🔴 读写守卫：读之前必须确认 `session.json.task_id` == 当前解析出的 task_id；不一致视为"别的任务的记忆"，不得使用。
 
 ## Project Memory
 
@@ -108,7 +114,8 @@ Analyzer 生成后写入，下游 Skill 直接读——不重新分析。
 Skill 启动时按以下顺序加载 Memory：
 
 ```
-1. Session Memory → 了解当前上下文（最高优先）
+0. Task Resolution → 确定 task_id（见 task-identity.md）
+1. Session Memory（当前 task_id）→ 了解当前任务上下文（最高优先）
 2. Project Memory → 了解项目约束（analyzer 已分析）
 3. Decision Memory → 了解为什么之前那样决策
 4. Suite Memory → 通用最佳实践（最低优先）
@@ -118,7 +125,7 @@ Skill 启动时按以下顺序加载 Memory：
 
 | Memory | 谁写 | 何时 |
 |--------|------|------|
-| Session | 任何 Skill | CHECKPOINT 时写入用户反馈 + 发现 |
+| Session | 任何 Skill | CHECKPOINT 时写入**当前 task_id** 的用户反馈 + 发现；写完校验 task_id 未变 |
 | Project | analyzer | 分析完成后写入约束 + conventions |
 | Decision | architect | 每个 ADR 决策写入 |
 | Suite | (手动/跨项目聚合) | 识别到跨项目通用模式时写入 |

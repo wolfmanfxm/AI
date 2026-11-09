@@ -100,7 +100,7 @@ After（Knowledge as Capability）:
 ### Generator — 消费 context-package（不读 index）
 
 ```
-1. 读 context-package.json（Resolver 已预消化，见 ../../knowledge-resolver.md）
+1. 读 `runtime/tasks/<task_id>/context-package.json`（Resolver 已预消化，见 ../../knowledge-resolver.md）
 2. rules[] → 加载 blocking 约束；knowledge[] → 注入 pattern；guidance[] → 参考
 3. 不再读 knowledge-index.json，也不再读整个 patterns/ 目录
 ```
@@ -160,7 +160,7 @@ After（Knowledge as Capability）:
 
 ```
 knowledge-index.json   — 全局映射（knowledge-compiler 产出，所有 skill 可用）
-context-package.json    — 任务级知识包（Resolver 产出，generator 消费）
+context-package.json    — 任务级知识包（runtime/tasks/<task_id>/，Resolver 产出，generator 消费）
                            ↑ 预消化 pattern + constraints + components
 
 ⚠️ Legacy: knowledge-list.json（v1 文件路径清单）已废弃，不再作为正式输入。

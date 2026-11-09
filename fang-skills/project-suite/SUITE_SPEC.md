@@ -236,11 +236,13 @@ RefactoredCode | Documentation | Release | PipelinePlan | Recommendation
 | Knowledge Lifecycle | `runtime/state/schemas/knowledge-lifecycle.md` | ✅（Generator 只读 accepted；Reviewer 验证 Candidate） |
 | Knowledge Index | `runtime/state/schemas/knowledge-index.md` | ✅（analyzer 生成，下游按 capability 查询） |
 | Confidence Gate | `runtime/mechanisms/confidence-gate.md` | ✅（confidence → Gate 行为：PASS/REVIEW/GATE/BLOCK） |
-| Timeline | `runtime/metrics/timeline.md` | ✅（所有 Skill 追加执行指标到 timeline.json） |
+| Timeline | `runtime/metrics/timeline.md` | ✅（所有 Skill 向 `timeline.jsonl` 追加一行，append-only） |
 | Knowledge Health | `runtime/metrics/knowledge-health.md` | ✅（analyzer 增量模式自动检测知识库质量） |
 | Unified I/O | `runtime/contracts/skill-io.md` | 🟡（建议遵循，非强制） |
 | 状态机 | `runtime/mechanisms/state-machine.md` | ✅ |
-| 断点续传 | `runtime/mechanisms/checkpoint.md` | ✅（manifest.json 读写） |
+| 断点续传 | `runtime/mechanisms/checkpoint.md` | ✅（manifest-<skill>.json 读写，按 task_id 分区） |
+| 任务身份 / 多任务隔离 | `runtime/mechanisms/task-identity.md` | ✅（task_id + task-registry.sh + Task Resolution） |
+| 单写者（项目级真相） | `runtime/mechanisms/single-writer.md` | ✅（writer-lock.sh；analyzer/releaser） |
 | DAG 调度 | `runtime/mechanisms/scheduler.md` | ✅（按 capabilities.yaml 优先级） |
 | Context Protocol | `runtime/context/context.md` | ✅（下游 skill 读 context.json） |
 | 能力注册 | `runtime/registry/capabilities.yaml` | ✅（定义 produces/consumes） |

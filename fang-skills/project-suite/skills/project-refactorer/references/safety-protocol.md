@@ -15,8 +15,8 @@
 
 2. **记录当前内容**
    ```
-   读目标文件 → 把要改的函数/片段的 before 内容记进 REFACTOR.md
-   回滚依据 = REFACTOR.md 里的 before 片段（不是 git）
+   读目标文件 → 把要改的函数/片段的 before 内容记进 REFACTOR-<task_id>.md
+   回滚依据 = REFACTOR-<task_id>.md 里的 before 片段（不是 git）
    ```
 
 ## 安全层 1：表征测试
@@ -55,7 +55,7 @@ describe('processOrder (characterization)', () => {
 ## 安全层 3：验证后记录
 
 ```
-重构 → npm test → 通过 → 记录 before/after 到 REFACTOR.md
+重构 → npm test → 通过 → 记录 before/after 到 REFACTOR-<task_id>.md
                → 失败 → 分析 diff，修复或用 Edit 反向回滚
 ```
 
@@ -64,7 +64,7 @@ describe('processOrder (characterization)', () => {
 如果重构后发现逻辑变了（测试失败且修复成本高于还原）：
 
 ```
-Edit 反向 → 用 REFACTOR.md 记录的 before 片段恢复到重构前状态
+Edit 反向 → 用 REFACTOR-<task_id>.md 记录的 before 片段恢复到重构前状态
 ```
 
 这就是为什么小步记录重要 — 只回滚失败的那一步。

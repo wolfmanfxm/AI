@@ -38,7 +38,7 @@
 
 每轴逐文件检查，每个发现标注 `file:line` + `修复方案`。
 
-> 可选输入对照：discovery 若加载了 `ARCHITECTURE.md` → 架构轴逐条对照架构决策（模块边界/接口契约/选型），违反标 BLOCKER/HIGH；若加载了 `TEST-REPORT.md` → 正确性轴结合测试结果评估回归风险，未覆盖的改动路径标 `⚠️ 无测试覆盖`。
+> 可选输入对照：discovery 若加载了 `ARCHITECTURE-<task_id>.md` → 架构轴逐条对照架构决策（模块边界/接口契约/选型），违反标 BLOCKER/HIGH；若加载了 `TEST-REPORT-<task_id>.md` → 正确性轴结合测试结果评估回归风险，未覆盖的改动路径标 `⚠️ 无测试覆盖`。
 
 ### 3. AC 对照
 

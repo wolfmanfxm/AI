@@ -2,14 +2,30 @@
 
 > Suite 拥有（Protocol）。Skill 通过 `@template: discovery` 引用，只需提供 Actions/Exit/Failure。
 
+## Task Resolution（Step 0 — 所有 Skill 强制，先于一切文件读取）
+
+> 没有 task_id，就会读到别的任务的 session / context-package / snapshot。
+> 权威协议：[task-identity.md](../../../runtime/mechanisms/task-identity.md)
+
+```
+1. 显式 task_id（参数或 $PS_TASK_ID）→ 使用
+2. 用户说「继续 X」→ task-registry.sh list 按 goal 匹配
+3. 恰好一个 active 任务 → 使用（打印一行确认，不阻塞）
+4. 多个 active 任务 → 列出 id + goal + 最后活跃时间 → AskUserQuestion 选择
+5. 无 active 任务 → task-registry.sh create（非 planner 类 Skill 见 task-identity.md 的回退规则）
+```
+
+此步完成前**禁止**写入任何任务级文件（session / context-package / snapshot / pipeline-state）。
+任务级路径一律带 `<task_id>`，项目级（state.json / 知识目录 / analyzer 根产物）不带。
+
 ## Standard Contract
 
 | Field | Value |
 |-------|-------|
 | Entry  | 用户触发 {skill_name} 需求（匹配触发词） |
 | Input  | 参见 skill.yaml `interface.inputs` — P0 缺失则 BLOCKED |
-| Output | manifest.json (status=discover) + 阶段确认产物（如 analysis-config.json） |
-| Recovery | 读 manifest.json → 若 status=discover 且产物已存在 → 跳过信息收集，直入 CHECKPOINT |
+| Output | manifest-<skill>.json (status=discover) + 阶段确认产物（如 analysis-config.json） |
+| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 若 status=discover 且产物已存在 → 跳过信息收集，直入 CHECKPOINT |
 
 ## Custom Fields (Skill Must Provide)
 

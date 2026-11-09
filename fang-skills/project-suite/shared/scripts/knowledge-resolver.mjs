@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Knowledge Resolver — 分桶 + hydrate + 候选集过滤 + tag/confidence rank。
 // 读取 knowledge-index.json，按 type 分桶产出 context-package.json。
-// 由 knowledge-resolver.sh 调用：node knowledge-resolver.mjs <knowledgeDir> <generatedAt> <indexPath> <outPath> <candidates>
+// 由 knowledge-resolver.sh 调用：node knowledge-resolver.mjs <knowledgeDir> <generatedAt> <indexPath> <outPath> <candidates> <taskId>
 
 import fs from 'node:fs';
 import path from 'node:path';
 
-const [, , knowledgeDir, generatedAt, indexPath, outPath, candidatesRaw = ''] = process.argv;
+const [, , knowledgeDir, generatedAt, indexPath, outPath, candidatesRaw = '', taskId = ''] = process.argv;
 
 const candidates = new Set(candidatesRaw.split(',').map(c => c.trim()).filter(Boolean));
 const TOP_K_KNOWLEDGE = 5;
@@ -236,6 +236,7 @@ const pkg = {
   schemaVersion: '2.1.0',
   generatedBy: 'knowledge-resolver',
   generatedAt,
+  ...(taskId ? { taskId } : {}),
   context: { rules, knowledge, guidance, recommendations },
 };
 

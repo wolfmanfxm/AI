@@ -1,6 +1,9 @@
 # Session Snapshot v1.0
 
 > 跨 Session 恢复。Claude 重启 ≠ 重来。借鉴 GSD Checkpoint 思想。
+>
+> ⚠️ **路径按 task_id × skill 分区**：`.sessions/<task_id>/<skill>/state.json`。
+> 只用 `<skill>` 做键会让同一 Skill 的两个任务互相覆盖。task 解析见 [task-identity.md](task-identity.md)。
 
 ## 核心假设
 
@@ -8,11 +11,12 @@ LLM 一定会忘。不要让 LLM 一直记，让 Runtime 帮它记。
 
 ## Snapshot 格式
 
-`.project-knowledge/.sessions/<skill>/state.json`：
+`.project-knowledge/.sessions/<task_id>/<skill>/state.json`：
 
 ```json
 {
   "skill": "project-analyzer",
+  "task_id": "task-20261109-user-approval",
   "session_id": "20260807-093000",
   "status": "paused",
   "current_phase": 3,
@@ -45,15 +49,16 @@ LLM 一定会忘。不要让 LLM 一直记，让 Runtime 帮它记。
 Phase N 完成 → 更新 phases[N].status = completed
            → 更新 current_phase = N+1
            → 更新 knowledge_extracted
-           → 写入 .project-knowledge/.sessions/<skill>/state.json
+           → 写入 .project-knowledge/.sessions/<task_id>/<skill>/state.json
 ```
 
 ## Resume 流程
 
-Skill 启动时第一步：
+Skill 启动时第一步（**先 Task Resolution，再检查 snapshot**）：
 
 ```
-1. 检查 .project-knowledge/.sessions/<skill>/state.json 是否存在
+0. 解析 task_id → [task-identity.md](task-identity.md) 的 Task Resolution
+1. 检查 .project-knowledge/.sessions/<task_id>/<skill>/state.json 是否存在
 2. 存在 + status = paused:
    a. 对比 git_commit: 代码是否变化？
       - 不变 → 从 current_phase 继续
@@ -69,6 +74,7 @@ Skill 启动时第一步：
 
 ```
 🔍 检测到未完成的 Session:
+   Task:  task-20261109-user-approval（开发用户审批功能）
    Skill: project-analyzer
    已完成: Phase 1-2 (extraction + verification)
    当前: Phase 3 (cross-validation)
@@ -103,7 +109,7 @@ Suite 是 **cross-skill stateless**：Skill 之间只靠 state/artifact/文件�
 | 存储 | 存什么 | 载体 |
 |------|--------|------|
 | 执行位置 | phase 进度、subtask 状态 | snapshot / `manifest.json`（checkpoint） |
-| 事实 / 为什么 | goal、assumptions、discoveries、反馈 | `runtime/memory/session.json` |
+| 事实 / 为什么 | goal、assumptions、discoveries、反馈 | `runtime/tasks/<task_id>/session.json` |
 | 产出 | 已生成的 artifact 路径 | `.project-knowledge/` 产出文件 |
 
 最小 survival set（**落盘才算数**）：

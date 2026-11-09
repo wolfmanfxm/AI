@@ -34,7 +34,7 @@
 ```
 .project-knowledge/
 ├── knowledge-index.json        ← Knowledge Compiler 产出（结构索引，不掺 decay 字段）
-├── context-package.json        ← Knowledge Resolver 产出
+├── runtime/tasks/<task_id>/context-package.json  ← Knowledge Resolver 产出
 └── .lifecycle/
     └── health.json             ← 未来 Knowledge Health Producer 产出（decay/trust）
 ```
@@ -65,7 +65,7 @@
 | 模块 | 职责 | 产物 |
 |------|------|------|
 | Knowledge Compiler | 编译成可消费索引 | `knowledge-index.json` |
-| Knowledge Resolver | 取出当前任务需要的知识 | `context-package.json` |
+| Knowledge Resolver | 取出当前任务需要的知识 | `runtime/tasks/<task_id>/context-package.json` |
 | Knowledge Health Producer（未来） | 判断知识可信度（decay） | `.lifecycle/health.json` |
 
 > 旧 `check-decay.sh` 已废弃并**归档到 `docs/archive/`**（依赖从未产出的 `knowledge-graph.yaml`）；

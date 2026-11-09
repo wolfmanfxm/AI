@@ -81,7 +81,7 @@
 
     人工撰写的约定/规范段落**永不被本步骤改写**——它只在缺失时补入口，在已有入口时刷数字。
 14. Vault 同步 + 验证 — rsync → 对比文件数差异，>3 → 标注 `⚠️ Vault sync gap`
-15. 写 timeline.json
+15. 追加 timeline.jsonl（`timeline-append.sh`；`taskId` 单独字段，`runId` 唯一）
 16. **契约完整性门禁（🔴 阻断）**
 
     ```bash

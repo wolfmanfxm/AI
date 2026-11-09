@@ -4,7 +4,7 @@
 
 ## Actions
 
-写入 `.project-knowledge/reports/REVIEW-<topic>.md`：
+写入 `.project-knowledge/reports/REVIEW-<task_id>[-<topic>].md`：
 
 1. **问题列表**（按 BLOCKER → HIGH → MEDIUM → LOW 排序）—— 每个 finding 分配 `F-xxx` ID，并标注 `against: AC-xxx`（该 finding 违反哪条 AC，无对应 AC 则标 `against: -`）
 2. **PRAISE**（值得学习的代码）
@@ -15,7 +15,7 @@
 
 ## Exit
 
-- `REVIEW-<topic>.md` 写入成功
+- `REVIEW-<task_id>[-<topic>].md` 写入成功
 - state.json 更新（confidence + history）
 
 ## Failure

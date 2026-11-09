@@ -4,7 +4,7 @@
 
 ## Actions
 
-写入 `.project-knowledge/reports/REFACTOR.md`：
+写入 `.project-knowledge/reports/REFACTOR-<task_id>.md`：
 - **变更清单**（每个重构动作 + commit hash）
 - **改善指标**（圈复杂度/行数/重复率/依赖深度 Before→After）
 - **测试结果**（通过数/失败数/跳过数）
@@ -12,7 +12,7 @@
 
 ## Exit
 
-- `REFACTOR.md` 写入成功
+- `REFACTOR-<task_id>.md` 写入成功
 - state.json 更新
 
 ## Failure

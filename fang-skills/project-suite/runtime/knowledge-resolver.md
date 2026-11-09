@@ -3,7 +3,7 @@
 > Task → 分桶（constraints/knowledge/guidance）→ context-package.json → Generator
 > Generator 永远不自己搜索知识库。Resolver 是唯一的检索入口。
 >
-> 📖 **人类读这里**（算法说明） · ⚙️ **Schema: [context-package.schema.json](contracts/context-package.schema.json)** · 📍 **输出: `.project-knowledge/context-package.json`**
+> 📖 **人类读这里**（算法说明） · ⚙️ **Schema: [context-package.schema.json](contracts/context-package.schema.json)** · 📍 **输出: `.project-knowledge/runtime/tasks/<task_id>/context-package.json`**（未指定 task 时回退根路径，仅向后兼容）
 
 ## 核心原则
 
@@ -17,8 +17,8 @@ Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀�
 ## 算法
 
 ```
-输入: Task + candidates（Planner # Reuse Analysis 传入：source/capability/tag/basename）+ knowledge-index.json
-输出: context-package.json（分桶：constraints 全量 + knowledge Top-K + guidance Top-K）
+输入: Task + task_id + candidates（Planner # Reuse Analysis 传入：source/capability/tag/basename）+ knowledge-index.json
+输出: runtime/tasks/<task_id>/context-package.json（分桶：constraints 全量 + knowledge Top-K + guidance Top-K）
 
 1. 分桶（按 type，确定性）
    遍历 knowledge-index.json 每个 capability 的每个 file entry，按 type 归桶：
@@ -179,16 +179,21 @@ Planner 在 Step 4（Reuse Analysis）之后调用 Resolver:
 
 ```
 1. Reuse Analysis → 确定涉及的组件/API/模式 → 产出 candidates
-2. 调用 Resolver(任务列表, candidates) → context-package.json
-3. 将 context-package.json 写入 `.project-knowledge/context-package.json`
+2. 调用 Resolver(任务列表, candidates, task_id) → runtime/tasks/<task_id>/context-package.json
+3. 将知识包写入该任务目录（路径必须带 task_id）
 ```
+
+> 🔴 任务身份：Resolver 必须收到 `--task <task_id>`（或 `$PS_TASK_ID`）。
+> 不传会写 legacy 根路径并 stderr 告警——那是**多个任务共享同一个知识包**的污染源。
 
 ### Generator 消费
 
 Generator 启动时:
 
 ```
-1. 读 context-package.json（唯一知识入口）
+0. Task Resolution → 确定 task_id（见 [task-identity.md](mechanisms/task-identity.md)）
+1. 读 runtime/tasks/<task_id>/context-package.json（唯一知识入口）
+   - 校验包内 taskId == 当前 task_id；不一致 → 拒绝消费并按降级处理
 2. 遍历 context.knowledge → 直接注入 pattern + 遵守 constraints
 3. 遍历 context.components → reuse=true 的直接 import，不重新生成
 4. 遍历 context.api → 按 conventions 生成 API 调用
@@ -201,7 +206,7 @@ Generator 启动时:
 Reviewer 审查时:
 
 ```
-1. 读 context-package.json
+1. 读 runtime/tasks/<task_id>/context-package.json（先解析 task_id）
 2. 验证 Generator 的代码是否符合 context.knowledge[].pattern
 3. 检查是否使用了 context.components[].reuse=true 的组件
 4. context.rules[].blocking=true 的约束被违反 → BLOCKER
@@ -211,9 +216,10 @@ Reviewer 审查时:
 
 ```
 knowledge-index.json 不存在 → Resolver 无法运行（需先跑 knowledge-compiler.sh 生成 index）
-context-package.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取文件列表
+runtime/tasks/<task_id>/context-package.json 不存在 → Generator 从 PLAN.md # Reuse Analysis 提取文件列表
 两者都不存在 → Generator 降级通用模式
 ```
+> Legacy 回退：根级 `.project-knowledge/context-package.json` 只在**未解析出 task_id** 时读取，且必须校验包内 `taskId` 缺失或匹配；不得用它替代当前任务的知识包。
 
 ## Legacy Compatibility（v1 → v2）
 

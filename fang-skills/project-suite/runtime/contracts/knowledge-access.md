@@ -11,12 +11,12 @@
 | 类别 | 访问方式 | 底层产物 | 契约 |
 |------|---------|---------|------|
 | **结构事实**（组件/API/模块存在性、依赖链、影响半径） | 图查询 | `graph.json` | [graph-query.md](graph-query.md) |
-| **知识**（rules/decisions/patterns/components/api/experience/playbooks 的约束与模式） | Resolver 预消化 | `knowledge-index.json` → `context-package.json` | [../knowledge-resolver.md](../knowledge-resolver.md) |
+| **知识**（rules/decisions/patterns/components/api/experience/playbooks 的约束与模式） | Resolver 预消化 | `knowledge-index.json` → `runtime/tasks/<task_id>/context-package.json` | [../knowledge-resolver.md](../knowledge-resolver.md) |
 
 ## 规则
 
 1. **Knowledge 不直接读 .md** —— 结构事实走 `graph-query`，知识走 `Resolver` 产出的
-   `context-package.json`，Skill 不手翻 `.project-knowledge/**/*.md`。
+   `runtime/tasks/<task_id>/context-package.json`，Skill 不手翻 `.project-knowledge/**/*.md`。
 2. **Task Artifact 不通过 Query** —— PLAN.md / ARCHITECTURE.md / 目标源码直接
    `@adapter:filesystem.read`。
 3. **两条路径不混用** —— `component/api/module` 属于结构事实（graph.json 节点）；

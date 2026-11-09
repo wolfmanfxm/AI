@@ -9,7 +9,7 @@
 | Entry  | 现状核实完成（如有），范围已最终确认 |
 | Input  | graph.json（由 analyzer 生成） |
 | Output | Graph 分析结果（耦合度/跨层依赖/影响范围/循环依赖） |
-| Recovery | 读 manifest.json → 若已分析 → 跳过，直入 CHECKPOINT |
+| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 若已分析 → 跳过，直入 CHECKPOINT |
 
 ## Custom Fields (Skill Must Provide)
 

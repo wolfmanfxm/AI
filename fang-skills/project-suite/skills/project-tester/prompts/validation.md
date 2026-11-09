@@ -23,7 +23,7 @@
 ## Output
 
 - 测试文件（按项目测试框架与命名约定）
-- `.project-knowledge/reports/TEST-REPORT.md`（覆盖率摘要 + AC 对照表 + QA findings + 失败分析）
+- `.project-knowledge/reports/TEST-REPORT-<task_id>.md`（覆盖率摘要 + AC 对照表 + QA findings + 失败分析）
 
 ## Verification（独立验证子流程，**非 Stage**）
 

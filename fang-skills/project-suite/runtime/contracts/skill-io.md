@@ -10,12 +10,16 @@
 ┌─────────────────────────────────────────┐
 │               Skill Input               │
 ├───────────────┬─────────────────────────┤
+│ task_id       │ 当前任务身份（默认由 Discovery 解析）│
 │ context.json  │ 项目技术上下文            │
 │ state.json    │ 项目当前状态 + 上游产出    │
 │ task.md       │ 当前任务描述              │
-│ context-package.json │ 知识注入（预消化，唯一入口）│
+│ context-package.json │ 知识注入（预消化，唯一入口，按 task_id 隔离）│
 └───────────────┴─────────────────────────┘
 ```
+
+> 🔴 **task_id 是一等输入**：Discovery 第 0 步解析（[task-identity.md](../mechanisms/task-identity.md)）。
+> 未解析出 task_id 时不得读写任何任务级文件。
 
 ### context.json（来自 Analyzer）
 ```json
@@ -31,10 +35,13 @@
 ```json
 {
   "phase": "generating",
-  "current": { "skill": "project-generator", "task": null },
+  "current": { "skill": "project-generator", "task_id": "task-20261109-user-approval" },
+  "active_tasks": {
+    "task-20261109-user-approval": { "skill": "project-generator", "status": "in_progress" }
+  },
   "history": [
-    {"skill": "project-planner", "confidence": 85, "output": "proposals/PLAN-user-activate.md"},
-    {"skill": "project-architect", "confidence": 90, "output": "decisions/ARCHITECTURE-auth.md"}
+    {"task_id": "task-20261109-user-approval", "skill": "project-planner", "confidence": 85, "output": "proposals/PLAN-task-20261109-user-approval.md"},
+    {"task_id": "task-20261109-user-approval", "skill": "project-architect", "confidence": 90, "output": "decisions/ARCHITECTURE-task-20261109-user-approval.md"}
   ],
   "blockers": []
 }
@@ -45,12 +52,13 @@
 
 ### context-package.json（知识注入，v2 预消化）
 
-> 知识注入唯一入口 = `context-package.json`（Knowledge Resolver 产出，预消化 pattern + constraints + components）。
+> 知识注入唯一入口 = `runtime/tasks/<task_id>/context-package.json`（Knowledge Resolver 产出，预消化 pattern + constraints + components）。
 > Generator 不再读文件、不自己判断——直接遍历 `context.knowledge[]` 注入。见 [knowledge-resolver.md](../knowledge-resolver.md)。
 
 ```json
 {
-  "plan": "PLAN-user-activate.md",
+  "plan": "PLAN-task-20261109-user-approval.md",
+  "taskId": "task-20261109-user-approval",
   "generated_by": "knowledge-resolver",
   "schemaVersion": "2.0.0",
   "context": {
@@ -65,8 +73,9 @@
 ```
 
 **规则：**
-- Planner 在 `# Reuse Analysis` 中列出可复用资产 → Resolver 产出 `context-package.json`
-- Generator 启动时读 `context-package.json` → 遍历 `context.knowledge[]` 直接注入，遵守 constraints、避免 anti_pattern
+- Planner 在 `# Reuse Analysis` 中列出可复用资产 → Resolver 产出 `runtime/tasks/<task_id>/context-package.json`
+- Generator 启动时读**自己 task_id** 的知识包 → 遍历 `context.knowledge[]` 直接注入，遵守 constraints、避免 anti_pattern
+- 消费前校验包内 `taskId` == 当前 task_id；不一致 → 🔴 拒绝消费（不是自己的知识）
 - Generator **不搜索** `.project-knowledge/` — 不知道还有别的知识
 - Context 恒定、可预测、不膨胀
 
@@ -91,16 +100,18 @@
 
 | Skill | 收尾报告文件名 |
 |-------|--------------|
-| analyzer | `validation-report.md`（+ verification-report.md） |
-| planner | `validation-report.md` |
-| architect | `ARCHITECTURE-<topic>.md`（ADR 本身即收尾） |
-| generator | `completion-report.md` |
-| tester | `TEST-REPORT.md` |
-| reviewer | `REVIEW-<topic>.md` |
-| refactorer | `REFACTOR.md` |
+| analyzer | `runtime/tasks/<task_id>/validation-report.md`（+ verification-report.md） |
+| planner | `runtime/tasks/<task_id>/validation-report.md` |
+| architect | `decisions/ARCHITECTURE-<task_id>.md`（ADR 本身即收尾） |
+| generator | `runtime/tasks/<task_id>/completion-report.md` |
+| tester | `reports/TEST-REPORT-<task_id>.md` |
+| reviewer | `reports/REVIEW-<task_id>[-<topic>].md` |
+| refactorer | `reports/REFACTOR-<task_id>.md` |
 | documenter | 文档本身（含 Evidence Header） |
-| releaser | `CHANGELOG.md` + `RELEASE-CHECKLIST.md` |
-| pipeline-orchestrator | `pipeline-report.md` |
+| releaser | `reports/CHANGELOG.md` + `reports/RELEASE-CHECKLIST.md`（项目级，单写者） |
+| pipeline-orchestrator | `runtime/tasks/<task_id>/pipeline-report.md` |
+
+> 任务级报告一律带 `<task_id>`；项目级产物（analyzer 的 6 个根文件、知识目录）不带。
 
 统一格式（内容结构，非文件名）：
 
@@ -135,17 +146,22 @@
 ### state.json（增量更新）
 Skill 只更新自己负责的字段，不覆盖整个 state.json：
 - `phase` / `status` → 更新项目状态
-- `history[]` → 追加本次执行记录
+- `current` → 更新最近执行 Skill + `task_id`
+- `active_tasks[<task_id>]` → 更新该任务状态
+- `history[]` → 追加本次执行记录（**必须带 `task_id`**）
 - `blockers[]` → 追加/解除阻塞项
 
-### timeline.json（执行指标追加）
+> 并发写纪律见 [task-identity.md](../mechanisms/task-identity.md)：一次一个写者；冲突重读合并，不静默覆盖。
 
-**所有 Skill 在 Output 阶段必须向 timeline.json 追加一条 run 记录。**
+### timeline.jsonl（执行指标追加）
+
+**所有 Skill 在 Output 阶段必须向 `runtime/metrics/timeline.jsonl` 追加一行 run 记录。**
 
 最简写入（必填字段）：
 ```json
 {
-  "runId": "run-20260730-NNN",
+  "taskId": "task-20261109-user-approval",
+  "runId": "task-20261109-user-approval/project-xxx/2026-11-09T14:10:00Z",
   "skill": "project-xxx",
   "wave": 4,
   "status": "completed",
@@ -158,7 +174,8 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 完整写入（建议能填就填）：
 ```json
 {
-  "runId": "run-20260730-NNN",
+  "taskId": "task-20261109-user-approval",
+  "runId": "task-20261109-user-approval/project-xxx/2026-11-09T14:10:00Z",
   "skill": "project-xxx",
   "wave": 4,
   "status": "completed",
@@ -188,26 +205,29 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 ```
 
 **写入时机**：state.json 写入之后，收尾报告输出之前。
-**写入方式**：读 timeline.json → 追加 runs[] → 增量更新 aggregates → 写回。
+**写入方式**：`bash shared/scripts/timeline-append.sh <project-root> -`（JSON 从 stdin）——
+append-only 单次追加，**禁止**读 `timeline.jsonl` → 改 → 写回。`runId` 必须唯一
+（`<taskId>/<skill>/<startedAt>`），不能只用 `taskId`；`taskId` 单独成字段。
 
 → 完整协议：[../metrics/timeline.md](../metrics/timeline.md)
 
 ### 产出文件
-按类型写入 `.project-knowledge/` 对应子目录：`proposals/`（PLAN）/ `decisions/`（ARCHITECTURE）/ `reports/`（REVIEW / TEST-REPORT / CHANGELOG）
+- 任务级：`runtime/tasks/<task_id>/`（session / context-package / pipeline-state / manifest-<skill>.json）+ 命名带 task_id 的 PLAN/ARCHITECTURE/REPORT
+- 项目级：`architecture/` `components/` `api/` `patterns/` 等（不带 task_id）
 
 ## 各 Skill 的映射
 
 | Skill | Input: task.md 来源 | Output（.project-knowledge/ 子目录） |
 |-------|--------------------|--------------------|
-| analyzer | 用户需求（分析范围） | 知识文件（patterns/ components/ api/ 等） |
-| planner | 用户需求 | proposals/ |
-| architect | PLAN.md > # Decision | decisions/ |
+| analyzer | 用户需求（分析范围） | 知识文件（patterns/ components/ api/ 等，项目级） |
+| planner | 用户需求 | `proposals/PLAN-<task_id>.md` |
+| architect | PLAN.md > # Decision | `decisions/ARCHITECTURE-<task_id>.md` |
 | generator | PLAN.md > # Task Breakdown | code（项目目录） |
-| tester | PLAN.md > # Acceptance Criteria | reports/ |
-| reviewer | 变更 diff | reports/ |
-| refactorer | 重构目标描述 | code + reports/ |
+| tester | PLAN.md > # Acceptance Criteria | `reports/TEST-REPORT-<task_id>.md` |
+| reviewer | 变更 diff | `reports/REVIEW-<task_id>.md` |
+| refactorer | 重构目标描述 | code + `reports/REFACTOR-<task_id>.md` |
 | documenter | 文档需求 | 项目内文档（含 Evidence Header） |
-| releaser | 发布指令 | reports/ |
+| releaser | 发布指令 | `reports/CHANGELOG.md`（项目级，单写者） |
 
 ## 置信度（Confidence）
 

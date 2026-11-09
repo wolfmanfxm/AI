@@ -57,7 +57,7 @@ types:
     description: 9 模块执行契约（Goal→Scope→Context→Reuse→Decision→Tasks→Deps→Risk→Acceptance），含每个 Task 的 placement/target 放置决议
     schema: skills/project-planner/prompts/task-breakdown.md
     schema_version: "1.0.0"
-    location: .project-knowledge/proposals/PLAN-*.md
+    location: .project-knowledge/proposals/PLAN-<task_id>.md
     producer: project-planner
     consumers: [project-architect, project-generator, project-reviewer, project-tester]
 
@@ -65,7 +65,7 @@ types:
     description: 架构决策记录（ADR 格式）— 技术选型/模块设计/API 契约
     schema: skills/project-architect/SKILL.md
     schema_version: "1.0.0"
-    location: .project-knowledge/decisions/ARCHITECTURE-*.md
+    location: .project-knowledge/decisions/ARCHITECTURE-<task_id>.md
     producer: project-architect
     consumers: [project-generator, project-reviewer]
 
@@ -79,21 +79,21 @@ types:
   test:
     description: 测试文件 + 测试报告
     schema_version: "1.0.0"
-    location: "*.test.ts | *.spec.ts + .project-knowledge/reports/TEST-REPORT.md"
+    location: "*.test.ts | *.spec.ts + .project-knowledge/reports/TEST-REPORT-<task_id>.md"
     producer: project-tester
     consumers: [project-reviewer, project-refactorer, project-releaser]
 
   review:
     description: 五轴审查报告（分级问题 + 修复建议 + AC 对照）
     schema_version: "1.0.0"
-    location: .project-knowledge/reports/REVIEW-*.md
+    location: .project-knowledge/reports/REVIEW-<task_id>.md
     producer: project-reviewer
     consumers: [project-generator, project-refactorer, project-documenter, project-releaser]
 
   refactored-code:
-    description: 重构后的代码 + REFACTOR.md 变更记录（行为不变 + 改善指标）
+    description: 重构后的代码 + REFACTOR-<task_id>.md 变更记录（行为不变 + 改善指标）
     schema_version: "1.0.0"
-    location: workspace/ | src/ + .project-knowledge/reports/REFACTOR.md
+    location: workspace/ | src/ + .project-knowledge/reports/REFACTOR-<task_id>.md
     producer: project-refactorer
     consumers: [project-reviewer, project-tester]
 

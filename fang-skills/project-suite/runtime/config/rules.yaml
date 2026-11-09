@@ -201,5 +201,5 @@ cross_skill:
     rules_ref: state/schemas/knowledge-lifecycle.md
 
   timeline:
-    description: 所有 Skill 在 Output 阶段追加 run 到 timeline.json
+    description: 所有 Skill 在 Output 阶段向 runtime/metrics/timeline.jsonl 追加一行 run（timeline-append.sh；禁止读改写）
     schema: metrics/timeline.schema.json

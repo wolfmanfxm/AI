@@ -6,7 +6,7 @@
 
 | 目录 | 说明 |
 |------|------|
-| [mechanisms/](mechanisms/) | 执行引擎 — State · Checkpoint · Error · Confidence · Event · Approval |
+| [mechanisms/](mechanisms/) | 执行引擎 — State · Checkpoint · Error · Confidence · Event · Approval · **Task Identity** · **Single Writer** |
 | [registry/](registry/) | 能力注册 — Capability · Stage · Workflow · Routing · Extractor |
 | [memory/](memory/) | 四级记忆 — Session · Project · Suite · Decision |
 | [tool-adapters/](tool-adapters/) | 工具适配 — Filesystem · Browser · Git · Network · Design |
@@ -25,6 +25,9 @@
 | 新增一个 Skill | [capabilities.yaml](registry/capabilities.yaml) → [skill-io.md](contracts/skill-io.md) |
 | 了解 Skill 如何执行 | [state-machine.md](mechanisms/state-machine.md) → [execution-driver.md](../workflow-protocol/references/execution-driver.md) |
 | 中断后恢复 | [checkpoint.md](mechanisms/checkpoint.md) → [error-recovery.md](mechanisms/error-recovery.md) |
+| 多任务隔离 / 选任务 | [task-identity.md](mechanisms/task-identity.md) → [task-registry.sh](../shared/scripts/task-registry.sh) |
+| 防止两个 Analyzer 互相覆盖 | [single-writer.md](mechanisms/single-writer.md) → [writer-lock.sh](../shared/scripts/writer-lock.sh) |
+| 记录一次执行指标 | [metrics/timeline.md](metrics/timeline.md) → [timeline-append.sh](../shared/scripts/timeline-append.sh) |
 | 新增 Pipeline 模式 | [workflow-library.yaml](registry/workflow-library.yaml) |
 | 新增能力类型 | [capabilities.yaml](registry/capabilities.yaml) → [capability-routing.yaml](registry/capability-routing.yaml) |
 | 新增 Extractor | [extractor-registry.yaml](registry/extractor-registry.yaml) |

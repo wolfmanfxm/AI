@@ -5,13 +5,15 @@
 
 ## Resume（跨 Session）
 
-启动时检查 `.project-knowledge/.sessions/project-analyzer/state.json` → [session-snapshot](../../../runtime/mechanisms/session-snapshot.md)：
-
-1. 存在 + status = paused → 展示已完成 phases + extracted knowledge → 用户选择"继续/重新开始"
-2. 继续 → 从 `current_phase` 开始，跳过已完成
-3. 不存在 → 正常启动
+0. 先完成 Task Resolution（Discovery 已做则复用结果）→ 得到 task_id
+1. 检查 `.project-knowledge/.sessions/<task_id>/project-analyzer/state.json` → [session-snapshot](../../../runtime/mechanisms/session-snapshot.md)：
+   - 存在 + status = paused → 展示已完成 phases + extracted knowledge → 用户选择"继续/重新开始"
+   - 继续 → 从 `current_phase` 开始，跳过已完成
+   - 不存在 → 正常启动
 
 每 Phase 完成后立即写入 snapshot（current_phase + knowledge_extracted + git_commit）。解决了"5000 文件项目 Context 爆炸 → Claude 重启 → 重来"的问题。
+
+> 🔴 **单写者**：本 Skill 写的是项目级知识（graph/statistics 等）。Discovery 已 `writer-lock.sh <kd> analyzer acquire`；每个 checkpoint 前 `status` 校验 owner 仍是自己，被 break 后不得继续写。见 [single-writer.md](../../../runtime/mechanisms/single-writer.md)。
 
 ## Actions
 

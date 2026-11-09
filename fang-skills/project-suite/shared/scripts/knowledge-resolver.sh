@@ -22,16 +22,40 @@
 #   `.lifecycle/health.json` 存在 → 未来做降级（stale→warning / decaying→非 blocking / deprecated→排除）
 #   `.lifecycle/health.json` 缺失 → 正常行为，**不推断 decay**（无可靠 Producer，不伪造衰减判断）
 #
-# Usage: bash shared/scripts/knowledge-resolver.sh [project-knowledge-dir] ["source1,source2,cap3,tag4"]
-# Output: <dir>/context-package.json
+# Task Identity（见 runtime/mechanisms/task-identity.md）：
+#   --task <task_id> 或 $PS_TASK_ID → 输出到 <dir>/runtime/tasks/<task_id>/context-package.json
+#   未指定 task → 保留根路径 <dir>/context-package.json（legacy 回退，stderr 告警）
+#
+# Usage: bash shared/scripts/knowledge-resolver.sh [project-knowledge-dir] ["source1,source2,cap3,tag4"] [--task <task_id>]
+# Output: <dir>/runtime/tasks/<task_id>/context-package.json  |  <dir>/context-package.json (legacy)
 
 set -euo pipefail
 
-KNOWLEDGE_DIR="${1:-.project-knowledge}"
-CANDIDATES="${2:-}"
+KNOWLEDGE_DIR=".project-knowledge"
+CANDIDATES=""
+TASK_ID=""
+POSITIONAL=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --task) TASK_ID="${2:-}"; shift 2 ;;
+    *) POSITIONAL=$((POSITIONAL+1))
+       if [ "$POSITIONAL" -eq 1 ]; then KNOWLEDGE_DIR="$1"
+       elif [ "$POSITIONAL" -eq 2 ]; then CANDIDATES="$1"
+       else echo "knowledge-resolver: unexpected arg '$1'" >&2; exit 64; fi
+       shift ;;
+  esac
+done
+[ -n "$TASK_ID" ] || TASK_ID="${PS_TASK_ID:-}"
+
 mkdir -p "$KNOWLEDGE_DIR"
 INDEX="${KNOWLEDGE_DIR}/knowledge-index.json"
-OUT="${KNOWLEDGE_DIR}/context-package.json"
+if [ -n "$TASK_ID" ]; then
+  OUT="${KNOWLEDGE_DIR}/runtime/tasks/${TASK_ID}/context-package.json"
+  mkdir -p "$(dirname "$OUT")"
+else
+  OUT="${KNOWLEDGE_DIR}/context-package.json"
+  echo "⚠️  knowledge-resolver: 未指定 --task，写入 legacy 根路径 $OUT。任务级隔离要求 --task <task_id>（见 runtime/mechanisms/task-identity.md）" >&2
+fi
 GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 if [ ! -f "$INDEX" ]; then
@@ -40,4 +64,4 @@ if [ ! -f "$INDEX" ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-node "$SCRIPT_DIR/knowledge-resolver.mjs" "$KNOWLEDGE_DIR" "$GENERATED_AT" "$INDEX" "$OUT" "$CANDIDATES"
+node "$SCRIPT_DIR/knowledge-resolver.mjs" "$KNOWLEDGE_DIR" "$GENERATED_AT" "$INDEX" "$OUT" "$CANDIDATES" "$TASK_ID"

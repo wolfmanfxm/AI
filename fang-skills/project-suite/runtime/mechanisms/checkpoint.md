@@ -1,15 +1,20 @@
 # Checkpoint Protocol
 
 > 断点续传协议。所有 skill 在批量执行子任务时遵循本协议，确保中断后可恢复。
+>
+> ⚠️ **路径按 task_id × skill 分区**：`runtime/tasks/<task_id>/manifest-<skill>.json`。
+> 旧文档只写「每个 skill 维护自己的 manifest.json」却没给路径——结果是所有 Skill 抢同一个根文件。
+> Analyzer 例外：根 `manifest.json` 是项目级知识产物，见文末。
 
 ## Manifest 结构
 
-每个 skill 维护自己的 `manifest.json`，存储执行状态：
+每个 skill 在**当前任务目录**下维护自己的 `manifest-<skill>.json`：
 
 ```json
 {
   "skillVersion": "0.1.0",
   "schemaVersion": "1.0.0",
+  "task_id": "task-20261109-user-approval",
   "status": "in_progress",
   "generatedBy": "<skill-name>",
   "generatedAt": "2026-07-27T10:00:00Z",
@@ -55,7 +60,8 @@
 ### 恢复策略
 
 ```
-读 manifest → 过滤 status = "completed" 的子任务（跳过）
+读 runtime/tasks/<task_id>/manifest-<skill>.json（先解析 task_id）
+           → 过滤 status = "completed" 的子任务（跳过）
            → 过滤 status = "in_progress" 的子任务（重试，文件可能不完整）
            → 按序执行 status = "pending" 的子任务
 ```
@@ -89,3 +95,7 @@ Wave 2: task-D                       (依赖 task-B + task-C)
 ## 与 analyzer 原有协议的关系
 
 替代 `project-analyzer/protocol/runtime-protocol.md` 中的 manifest 状态机和 Failure Contract 部分。
+
+> **Analyzer 例外**：`.project-knowledge/manifest.json` 同时是项目级知识产物（`knowledgeVersion` / `gitCommit` / `executionLog`），
+> 路径保持根级不变。它的执行状态由 `.sessions/<task_id>/project-analyzer/state.json` 承载，
+> 写入受 [single-writer.md](single-writer.md) 的单写者锁保护——不能用 task_id 分区。

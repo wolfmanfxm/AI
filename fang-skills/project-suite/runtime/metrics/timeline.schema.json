@@ -1,131 +1,104 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fang-skills/project-suite/runtime/metrics/timeline.schema.json",
-  "title": "Timeline — Execution Observability",
-  "description": "Records every skill run with timing, quality, and dependency data. Skills append runs; aggregates are auto-computed.",
+  "title": "Timeline Run Record — one JSONL line",
+  "description": "One JSON object per line in .project-knowledge/runtime/metrics/timeline.jsonl. Append-only: writers never read-modify-write. Aggregates are derived by readers (collect-metrics.sh), never stored.",
   "type": "object",
-  "required": ["schemaVersion", "project", "runs"],
+  "required": ["schemaVersion", "project", "taskId", "runId", "skill", "status", "timing", "quality"],
+  "additionalProperties": false,
   "properties": {
-    "schemaVersion": { "type": "string" },
-    "project": { "type": "string", "description": "Project name from analysis-config.json" },
-    "runs": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/run" }
+    "schemaVersion": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "JSONL line format version"
     },
-    "aggregates": {
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project name from analysis-config.json (falls back to directory name)"
+    },
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]{8}(-[A-Za-z0-9][A-Za-z0-9._-]*)?$",
+      "description": "Task identity; see runtime/mechanisms/task-identity.md"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique per run: <taskId>/<skill>/<startedAt ISO>. Must not be taskId alone — one task runs multiple skills and may retry."
+    },
+    "skill": {
+      "type": "string",
+      "enum": ["project-analyzer","project-planner","project-architect","project-generator","project-tester","project-reviewer","project-refactorer","project-documenter","project-releaser"]
+    },
+    "wave": {
+      "type": "integer",
+      "description": "DAG wave number (0-8)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed","degraded","blocked","failed"]
+    },
+    "timing": {
       "type": "object",
-      "description": "Auto-computed on each append",
+      "required": ["startedAt","finishedAt","durationMs"],
       "properties": {
-        "totalRuns": { "type": "integer" },
-        "totalDurationMs": { "type": "integer" },
-        "bySkill": {
-          "type": "object",
-          "additionalProperties": { "$ref": "#/$defs/skillAggregate" }
-        },
-        "byStatus": {
-          "type": "object",
-          "properties": {
-            "completed": { "type": "integer" },
-            "degraded": { "type": "integer" },
-            "blocked": { "type": "integer" },
-            "failed": { "type": "integer" }
-          }
-        }
-      }
-    }
-  },
-
-  "$defs": {
-    "run": {
-      "type": "object",
-      "required": ["runId", "skill", "status", "timing", "quality"],
-      "properties": {
-        "runId": {
-          "type": "string",
-          "description": "Unique id: run-YYYYMMDD-NNN"
-        },
-        "skill": {
-          "type": "string",
-          "enum": ["project-analyzer","project-planner","project-architect","project-generator","project-tester","project-reviewer","project-refactorer","project-documenter","project-releaser"]
-        },
-        "wave": {
-          "type": "integer",
-          "description": "DAG wave number (0-8)"
-        },
-        "status": {
-          "type": "string",
-          "enum": ["completed","degraded","blocked","failed"]
-        },
-        "timing": {
-          "type": "object",
-          "required": ["startedAt","finishedAt","durationMs"],
-          "properties": {
-            "startedAt":  { "type": "string", "format": "date-time" },
-            "finishedAt": { "type": "string", "format": "date-time" },
-            "durationMs": { "type": "integer", "minimum": 0 }
-          }
-        },
-        "input": {
-          "type": "object",
-          "properties": {
-            "scope":       { "type": "string" },
-            "mode":        { "type": "string" },
-            "filesScanned":{ "type": "integer" },
-            "dimensions":  { "type": "array", "items": { "type": "string" } },
-            "planFile":    { "type": "string" },
-            "capabilitiesUsed": { "type": "array", "items": { "type": "string" } },
-            "knowledgeFilesRead": { "type": "integer" },
-            "contextSizeEstimate": { "type": "string" },
-            "inputTokens": { "type": "integer", "description": "数值输入 token（host 上报，用于 billing 对比；替代 contextSizeEstimate 的估算字符串）" }
-          }
-        },
-        "output": {
-          "type": "object",
-          "properties": {
-            "filesGenerated": { "type": "integer" },
-            "artifacts":      { "type": "array", "items": { "type": "string" } },
-            "linesOfCode":    { "type": "integer" },
-            "approxTokens":   { "type": "integer" }
-          }
-        },
-        "quality": {
-          "type": "object",
-          "required": ["confidence"],
-          "properties": {
-            "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
-            "warnings":   { "type": "integer", "minimum": 0 },
-            "errors":     { "type": "integer", "minimum": 0 },
-            "retries":    { "type": "integer", "minimum": 0, "description": "失败重试次数（用于 retry_rate，评估 progressive-disclosure 是否以重试换省 token）" },
-            "checkpointsPassed": { "type": "integer" },
-            "degradedDimensions": { "type": "array", "items": { "type": "string" } }
-          }
-        },
-        "billing": {
-          "type": "object",
-          "properties": {
-            "cacheRead":  { "type": "integer", "description": "prompt-cache read tokens（host 上报，未支持则缺省）" },
-            "cacheWrite": { "type": "integer", "description": "prompt-cache write tokens（host 上报，未支持则缺省）" },
-            "actualCost": { "type": "number", "description": "audited provider billed cost（USD，native vs suite 同口径才可对比）" }
-          }
-        },
-        "dependencies": {
-          "type": "object",
-          "properties": {
-            "upstreamSkills":         { "type": "array", "items": { "type": "string" } },
-            "upstreamConfidenceMin":  { "type": "integer" },
-            "knowledgeFilesRead":     { "type": "array", "items": { "type": "string" } },
-            "knowledgeCapabilitiesUsed": { "type": "array", "items": { "type": "string" } }
-          }
-        }
+        "startedAt":  { "type": "string", "format": "date-time" },
+        "finishedAt": { "type": "string", "format": "date-time" },
+        "durationMs": { "type": "integer", "minimum": 0 }
       }
     },
-    "skillAggregate": {
+    "input": {
       "type": "object",
       "properties": {
-        "runs":          { "type": "integer" },
-        "avgDurationMs": { "type": "integer" },
-        "avgConfidence": { "type": "integer" },
-        "failures":      { "type": "integer" }
+        "scope":       { "type": "string" },
+        "mode":        { "type": "string" },
+        "filesScanned":{ "type": "integer" },
+        "dimensions":  { "type": "array", "items": { "type": "string" } },
+        "planFile":    { "type": "string" },
+        "architectureFile": { "type": "string" },
+        "capabilitiesUsed": { "type": "array", "items": { "type": "string" } },
+        "knowledgeFilesRead": { "type": "integer" },
+        "contextSizeEstimate": { "type": "string" },
+        "inputTokens": { "type": "integer", "description": "数值输入 token（host 上报，用于 billing 对比；替代 contextSizeEstimate 的估算字符串）" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "filesGenerated": { "type": "integer" },
+        "artifacts":      { "type": "array", "items": { "type": "string" } },
+        "linesOfCode":    { "type": "integer" },
+        "approxTokens":   { "type": "integer" }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["confidence"],
+      "properties": {
+        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "warnings":   { "type": "integer", "minimum": 0 },
+        "errors":     { "type": "integer", "minimum": 0 },
+        "retries":    { "type": "integer", "minimum": 0, "description": "失败重试次数（用于 retry_rate，评估 progressive-disclosure 是否以重试换省 token）" },
+        "checkpointsPassed": { "type": "integer" },
+        "degradedDimensions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "billing": {
+      "type": "object",
+      "properties": {
+        "cacheRead":  { "type": "integer", "description": "prompt-cache read tokens（host 上报，未支持则缺省）" },
+        "cacheWrite": { "type": "integer", "description": "prompt-cache write tokens（host 上报，未支持则缺省）" },
+        "actualCost": { "type": "number", "description": "audited provider billed cost（USD，native vs suite 同口径才可对比）" }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "upstreamSkills":         { "type": "array", "items": { "type": "string" } },
+        "upstreamConfidenceMin":  { "type": "integer" },
+        "knowledgeFilesRead":     { "type": "array", "items": { "type": "string" } },
+        "knowledgeCapabilitiesUsed": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

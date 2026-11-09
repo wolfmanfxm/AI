@@ -9,7 +9,7 @@ description: >
 
 # Refactorer
 
-> 代码 → 识别坏味道 → 安全重构 → 验证 → REFACTOR.md
+> 代码 → 识别坏味道 → 安全重构 → 验证 → REFACTOR-<task_id>.md
 > 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — stages 声明 + prompts 业务逻辑
 
 ## 核心原则

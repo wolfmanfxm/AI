@@ -8,8 +8,8 @@
 |-------|-------|
 | Entry  | 前置阶段全部完成（CHECKPOINT 已确认），所有 Input 已就绪 |
 | Input  | 参见 skill.yaml `interface.inputs` + 前置阶段的 Output |
-| Output | 本 Skill 的核心产出（参见 skill.yaml `interface.outputs`），manifest.subtasks 全部 completed/failed |
-| Recovery | 读 manifest.json → 跳过 completed/failed subtasks → 只执行 pending/in_progress → [checkpoint protocol](../../../runtime/mechanisms/checkpoint.md) |
+| Output | 本 Skill 的核心产出（参见 skill.yaml `interface.outputs`），`runtime/tasks/<task_id>/manifest-<skill>.json` 的 subtasks 全部 completed/failed |
+| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 跳过 completed/failed subtasks → 只执行 pending/in_progress → [checkpoint protocol](../../../runtime/mechanisms/checkpoint.md) |
 
 ## Custom Fields (Skill Must Provide)
 

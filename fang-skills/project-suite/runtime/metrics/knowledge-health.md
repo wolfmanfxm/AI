@@ -80,7 +80,7 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
       "severity": "info",
       "type": "orphan_knowledge",
       "file": "patterns/upload-legacy.md",
-      "detail": "知识文件 90 天内未被任何 skill 读取（timeline.json 无引用记录）",
+      "detail": "知识文件 90 天内未被任何 skill 读取（timeline.jsonl 无引用记录）",
       "daysUnused": 90,
       "suggestion": "确认是否仍适用，考虑标记 Deprecated"
     },
@@ -132,7 +132,7 @@ knowledge-health.json → 哪些文件有质量问题（NEW v1.3.0）
 | 类型 | 检测方式 | 阈值 |
 |------|---------|------|
 | `stale_reference` | 引用指向已删除的代码文件（对比 git log） | 代码文件已删除 |
-| `orphan_knowledge` | timeline.json 中无该文件被读取的记录 | > 90 天 |
+| `orphan_knowledge` | timeline.jsonl 中无该文件被读取的记录 | > 90 天 |
 | `large_file` | `wc -l` | > 500 行 |
 
 ## 检测执行规则
@@ -172,18 +172,18 @@ summary.issuesBySeverity.warning > 5:
   → 在 context.json 标注 ⚠️ "知识库健康度低（{N} warnings），下游 skill 注意验证"
 ```
 
-## 与 timeline.json 的联动
+## 与 timeline.jsonl 的联动
 
-`orphan_knowledge` 检测依赖 timeline.json：
+`orphan_knowledge` 检测依赖 timeline.jsonl：
 
 ```
 for each file in .project-knowledge/:
-  search timeline.json runs[].input.knowledgeFilesRead
+  search timeline.jsonl（逐行）的 input.knowledgeFilesRead
   if file not found in any run within 90 days:
     → orphan_knowledge
 ```
 
-这要求 timeline.json 中至少 1 个 run 记录了 `input.knowledgeFilesRead`。
+这要求 timeline.jsonl 中至少 1 个 run 记录了 `input.knowledgeFilesRead`。
 
 ## 查询能力
 

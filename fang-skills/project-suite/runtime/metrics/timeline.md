@@ -1,138 +1,77 @@
-# Timeline Protocol v1.0.0
+# Timeline Protocol v2.0.0
 
 > 执行链路可观测。记录每个 Skill 的运行指标，解决"哪个 Skill 最慢？哪个最容易失败？"只能凭感觉的问题。
 >
-> 📖 **人类读这里** · ⚙️ **Schema: [timeline.schema.json](timeline.schema.json)** · 📍 **输出: `.project-knowledge/runtime/metrics/timeline.json`**
+> 📖 **人类读这里** · ⚙️ **Schema: [timeline.schema.json](timeline.schema.json)** · 📍 **输出: `.project-knowledge/runtime/metrics/timeline.jsonl`**
 
 ## 定位
 
 ```
-state.json    → 项目当前状态（现在到哪了）
+state.json     → 项目当前状态（现在到哪了）
 knowledge.json → 知识生命周期（哪些知识可信）
-timeline.json  → 执行历史指标（每次运行花了多久、产出多少、成功还是失败）
+timeline.jsonl → 执行历史指标（每次运行花了多久、产出多少、成功还是失败）
                   ↑ 本协议定义
 ```
 
 ## 文件位置
 
-`.project-knowledge/runtime/metrics/timeline.json`
+`.project-knowledge/runtime/metrics/timeline.jsonl`
 
-## Schema
+## 为什么是 JSONL（v1 → v2）
+
+v1 的写入流程是 **读 `timeline.json` → 追加 `runs[]` → 增量更新 `aggregates` → 写回**。
+两个并发 Skill（或同任务的两个会话）同时执行时，后写者会覆盖先写者 —— **丢 run 记录，且
+`aggregates` 变成不可信的脏数据**。这不是性能问题，是正确性问题。
+
+v2 改为 **append-only JSONL**：
+
+| | v1 `timeline.json` | v2 `timeline.jsonl` |
+|---|---|---|
+| 形态 | 单个 JSON 对象（`runs[]` + `aggregates`） | 一行一个 run 记录 |
+| 写入 | 读改写整文件 | `O_APPEND` 追加一行（不读旧内容） |
+| 并发 | 丢更新 | 追加不丢（见 [single-writer.md](../mechanisms/single-writer.md) 的边界） |
+| 聚合 | 写入时维护 `aggregates` | **不存储**，读取时按行计算 |
+
+> **聚合不再落盘**：任何"写完再更新汇总"的字段都会重新引入读改写竞态。`collect-metrics.sh`
+> 读取时自行聚合，数据永远从唯一事实（行记录）推导。
+
+### 与旧文件的兼容
+
+- **新写入一律进 `timeline.jsonl`**，禁止再写 `timeline.json`。
+- 读取方（`collect-metrics.sh`）按顺序探测：`metrics/timeline.jsonl` → `metrics/timeline.json`（v1）→
+  `runtime/timeline.json`（更早的 collector 路径）。命中 v1 时按 `{runs:[]}` 或顶层数组解析。
+- 旧项目迁移：保留 `timeline.json` 只读，新记录继续写 `timeline.jsonl`；两者在读取时合并即可。
+  需要一次性合并时，把每个 run 逐行追加到 `.jsonl` 后删除旧文件（**先备份**）。
+
+## 一行记录
 
 ```json
-{
-  "schemaVersion": "1.0.0",
-  "project": "my-web-app",
-  "runs": [
-    {
-      "runId": "run-20260730-001",
-      "skill": "project-analyzer",
-      "wave": 1,
-      "status": "completed",
+{"schemaVersion":"2.0.0","project":"my-web-app","taskId":"task-20261109-user-approval","runId":"task-20261109-user-approval/project-analyzer/2026-11-09T14:00:00Z","skill":"project-analyzer","wave":1,"status":"completed","timing":{"startedAt":"2026-11-09T14:00:00Z","finishedAt":"2026-11-09T14:03:22Z","durationMs":202000},"input":{"scope":"full","mode":"standard","filesScanned":2260,"dimensions":["architecture","components","coding-style","ui-pattern","api","patterns","observations"],"contextSizeEstimate":"~80k tokens"},"output":{"filesGenerated":18,"artifacts":["context.json","graph.json","knowledge-index.json","index.md","overview.md"],"approxTokens":45000},"quality":{"confidence":92,"warnings":0,"errors":0,"degradedDimensions":[]},"dependencies":{"upstreamSkills":[],"knowledgeFilesRead":[],"knowledgeCapabilitiesUsed":[]}}
+```
 
-      "timing": {
-        "startedAt": "2026-07-30T14:00:00Z",
-        "finishedAt": "2026-07-30T14:03:22Z",
-        "durationMs": 202000
-      },
-
-      "input": {
-        "scope": "full",
-        "mode": "standard",
-        "filesScanned": 2260,
-        "dimensions": ["architecture","components","coding-style","ui-pattern","api","patterns","observations"],
-        "contextSizeEstimate": "~80k tokens"
-      },
-
-      "output": {
-        "filesGenerated": 18,
-        "artifacts": ["context.json","graph.json","knowledge-index.json","index.md","overview.md","..."],
-        "approxTokens": 45000
-      },
-
-      "quality": {
-        "confidence": 92,
-        "warnings": 0,
-        "errors": 0,
-        "degradedDimensions": []
-      },
-
-      "dependencies": {
-        "upstreamSkills": [],
-        "knowledgeFilesRead": [],
-        "knowledgeCapabilitiesUsed": []
-      }
-    },
-    {
-      "runId": "run-20260730-002",
-      "skill": "project-generator",
-      "wave": 4,
-      "status": "completed",
-
-      "timing": {
-        "startedAt": "2026-07-30T14:10:00Z",
-        "finishedAt": "2026-07-30T14:12:05Z",
-        "durationMs": 125000
-      },
-
-      "input": {
-        "planFile": "proposals/PLAN-user-activate.md",
-        "architectureFile": "decisions/ARCHITECTURE-user.md",
-        "capabilitiesUsed": ["VueConvention","TablePattern","FormPattern","ApiPattern"],
-        "knowledgeFilesRead": 4,
-        "contextSizeEstimate": "~45k tokens"
-      },
-
-      "output": {
-        "filesGenerated": 3,
-        "artifacts": ["workspace/views/user/activate/index.vue","workspace/api/user.ts","workspace/types/user.d.ts"],
-        "linesOfCode": 320,
-        "approxTokens": 28000
-      },
-
-      "quality": {
-        "confidence": 85,
-        "warnings": 2,
-        "errors": 0,
-        "checkpointsPassed": 2
-      },
-
-      "dependencies": {
-        "upstreamSkills": ["project-analyzer","project-planner","project-architect"],
-        "upstreamConfidenceMin": 90,
-        "knowledgeCapabilitiesUsed": ["VueConvention","TablePattern","FormPattern","ApiPattern"]
-      }
-    }
-  ],
-
-  "aggregates": {
-    "totalRuns": 8,
-    "totalDurationMs": 1800000,
-    "bySkill": {
-      "project-analyzer": { "runs": 2, "avgDurationMs": 195000, "avgConfidence": 91, "failures": 0 },
-      "project-generator": { "runs": 3, "avgDurationMs": 130000, "avgConfidence": 83, "failures": 0 }
-    },
-    "byStatus": {
-      "completed": 7,
-      "degraded": 1,
-      "blocked": 0,
-      "failed": 0
-    }
-  }
-}
+```json
+{"schemaVersion":"2.0.0","project":"my-web-app","taskId":"task-20261109-user-approval","runId":"task-20261109-user-approval/project-generator/2026-11-09T14:10:00Z","skill":"project-generator","wave":4,"status":"completed","timing":{"startedAt":"2026-11-09T14:10:00Z","finishedAt":"2026-11-09T14:12:05Z","durationMs":125000},"input":{"planFile":"proposals/PLAN-task-20261109-user-approval.md","architectureFile":"decisions/ARCHITECTURE-task-20261109-user-approval.md","capabilitiesUsed":["VueConvention","TablePattern","FormPattern","ApiPattern"],"knowledgeFilesRead":4,"contextSizeEstimate":"~45k tokens"},"output":{"filesGenerated":3,"artifacts":["workspace/views/user/activate/index.vue","workspace/api/user.ts","workspace/types/user.d.ts"],"linesOfCode":320,"approxTokens":28000},"quality":{"confidence":85,"warnings":2,"errors":0,"checkpointsPassed":2},"dependencies":{"upstreamSkills":["project-analyzer","project-planner","project-architect"],"upstreamConfidenceMin":90,"knowledgeCapabilitiesUsed":["VueConvention","TablePattern","FormPattern","ApiPattern"]}}
 ```
 
 ## 字段说明
 
-### 每条 run 记录
+### 身份字段（必填）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `runId` | string | 唯一标识，格式 `run-YYYYMMDD-NNN` |
-| `skill` | string | skill 名称 |
+| `schemaVersion` | string | 行格式版本，当前 `2.0.0` |
+| `project` | string | 项目名（来自 `analysis-config.json`，缺省为项目目录名） |
+| `taskId` | string | 任务身份，见 [task-identity.md](../mechanisms/task-identity.md) |
+| `runId` | string | **本次运行**唯一标识：`<taskId>/<skill>/<startedAt ISO>`。不要只用 `taskId`——同一任务会跑多个 Skill / 多次重试 |
+
+### 运行字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `skill` | string | skill 名称（枚举见 schema） |
 | `wave` | number | DAG 调度波次 |
 | `status` | enum | `completed` / `degraded` / `blocked` / `failed` |
-| `timing.durationMs` | number | 执行耗时（毫秒） |
+| `timing.durationMs` | number | 执行耗时（毫秒）；缺失时由 `finishedAt - startedAt` 推导 |
 | `input.contextSizeEstimate` | string | 估算上下文大小 |
 | `output.filesGenerated` | number | 产出文件数 |
 | `output.approxTokens` | number | 估算输出 token 数 |
@@ -141,73 +80,62 @@ timeline.json  → 执行历史指标（每次运行花了多久、产出多少�
 | `quality.errors` | number | 错误数（不可恢复） |
 | `dependencies.upstreamConfidenceMin` | number | 上游 Skill 中最低的 confidence |
 
-### aggregates（由 Runtime 自动计算）
+### 必填 / 选填
 
-每次追加 run 时更新。也可定期重算。
-
-## 账单与重试度量（契约扩展，可选上报）
-
-> 支持度允许时，`run` 可额外上报 `input.inputTokens`（数值，替代 `contextSizeEstimate` 估算字符串）、
-> `billing.{cacheRead,cacheWrite,actualCost}`、`quality.retries`。这些是 token/retry/cost 行为评估
-> （见 `../../docs/eval-contract.md`）的数据源；Host 不上报时保持缺省，**禁止**用估算冒充 audited cost。
+- **必填**：`schemaVersion` `project` `taskId` `runId` `skill` `status` `timing` `quality.confidence`
+- **选填**：`wave` `input` `output` `dependencies.billing`（能填就填，不强制）
 
 ## 写入规则
 
-**所有 Skill 在 Output 阶段写入一条 run 记录。**
+**所有 Skill 在 Output 阶段追加一行。**
 
-写入流程：
+```bash
+# 方式 A：JSON 从 stdin
+printf '%s' "$RUN_JSON" | bash shared/scripts/timeline-append.sh <project-root> -
+
+# 方式 B：JSON 来自文件
+bash shared/scripts/timeline-append.sh <project-root> /tmp/run.json
 ```
-1. 读 timeline.json（若存在）
-2. 追加当前 run 到 runs[] 末尾
-3. 更新 aggregates（增量计算：移动平均 + 计数递增）
-4. 写回 timeline.json
-```
+
+写入器负责：
+
+1. 校验必填字段与枚举；不合规 → exit 2，**不写半条记录**。
+2. 缺省补齐：`schemaVersion` / `project` / `taskId`（取 `$PS_TASK_ID`）/ `runId`（由 `taskId + skill + startedAt` 生成）/ `timing.durationMs`。
+3. 单次 `O_APPEND` 追加 `JSON.stringify(record) + "\n"`。
+
+**禁止**：读 `timeline.jsonl` → 改 → 写回；禁止在内存里维护 aggregate 后落盘。
 
 **写入时机**：state.json 写入之后，收尾报告输出之前。
 
-**最简写入**（Skill 不知道精确 token 数时可以省略估算字段）：
-```json
-{
-  "runId": "run-20260730-003",
-  "skill": "project-tester",
-  "wave": 5,
-  "status": "completed",
-  "timing": { "startedAt": "...", "finishedAt": "...", "durationMs": 45000 },
-  "output": { "filesGenerated": 2 },
-  "quality": { "confidence": 78 }
-}
-```
-
-**必填字段**：`runId` `skill` `status` `timing` `quality.confidence`
-**选填字段**：`input` `output` `dependencies`（能填就填，不强制）
-
 ## 查询能力
 
-有了 timeline.json 后可以回答：
+```bash
+# 哪个 Skill 最慢？（按 avg duration 排序）
+node -e '
+const fs=require("fs");
+const runs=fs.readFileSync(process.argv[1],"utf8").split("\n").filter(Boolean).map(JSON.parse);
+const by={};
+for(const r of runs){const d=r.timing?.durationMs??0;(by[r.skill]??=[]).push(d);}
+Object.entries(by).map(([k,v])=>[k,Math.round(v.reduce((a,b)=>a+b,0)/v.length)])
+  .sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>console.log(v+"ms\t"+k));
+' .project-knowledge/runtime/metrics/timeline.jsonl
+```
+
+可以回答：
 
 ```
-"哪个 Skill 最慢？"
-→ 按 skill 分组，AVG(durationMs) DESC
-
-"哪个 Skill 最容易失败？"
-→ 按 skill 分组，COUNT(status=failed) / COUNT(*) DESC
-
-"哪个 Skill confidence 最低？"
-→ 按 skill 分组，AVG(confidence) ASC
-
-"最近一次 planner 到 generator 之间等了多久？"
-→ timeline 按 startedAt 排序，计算相邻 skill 的间隔
-
-"generator 的 confidence 在下降吗？"
-→ 按时间序列看 generator confidence 趋势
+"哪个 Skill 最容易失败？"   → COUNT(status=failed) / COUNT(*) DESC
+"哪个 Skill confidence 最低？" → AVG(confidence) ASC
+"最近一次 planner 到 generator 之间等了多久？" → 按 startedAt 排序，计算相邻间隔
+"task A 一共跑了哪些 skill？" → filter taskId == A
 ```
 
 ## 与 state.json 的分工
 
-| | state.json | timeline.json |
+| | state.json | timeline.jsonl |
 |---|---|---|
 | **内容** | 项目当前状态 | 执行历史指标 |
-| **粒度** | 每个 Skill 最新一次 | 每次执行一条 |
+| **粒度** | 每个 Skill 最新一次 | 每次执行一行 |
 | **用途** | Dispatcher 决策下一步 | 分析 Skill 性能和质量趋势 |
-| **写入** | 覆盖当前状态 + 追加 history 摘要 | 追加 run 记录 + 更新聚合 |
+| **写入** | 覆盖当前状态 + 追加 history 摘要（单写者） | 追加一行（append-only） |
 | **归档** | 始终保留 | 可定期归入 `metrics/archive/` |

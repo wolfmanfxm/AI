@@ -50,7 +50,7 @@ schemas:
     path: shared/schemas/manifest.schema.json
     class: R
     consumers: [checkpoint/recovery, stage-library]
-    notes: skill-policy.yaml 以 manifest_resume + checkpoint_file=manifest.json 恢复；无 validator → 高风险缺口候选
+    notes: task-scoped checkpoint = runtime/tasks/<task_id>/manifest-<skill>.json（analyzer 例外：根 manifest.json 是知识产物）；无 validator → 高风险缺口候选
 
   event:
     path: shared/schemas/event.schema.json
@@ -67,14 +67,20 @@ schemas:
   timeline:
     path: runtime/metrics/timeline.schema.json
     class: E
-    consumers: [timeline, knowledge-health]
-    notes: 限定 timeline 产物形态，不参与运行控制
+    consumers: [timeline, knowledge-health, collect-metrics, timeline-append]
+    notes: 一行一 run（timeline.jsonl，append-only）；校验在 timeline-append.sh，聚合由 timeline-stats.mjs 读取时计算
 
   analysis-config:
     path: shared/schemas/analysis-config.schema.json
     class: R
     consumers: [project-analyzer]
     notes: 疑为 Analyzer 输入/状态契约；暂无脚本证明运行时消费链 → 待确认，勿在此前删除
+
+  task-meta:
+    path: shared/schemas/task-meta.schema.json
+    class: R
+    consumers: [task-registry, check-task-isolation, project-analyzer, project-planner]
+    notes: 任务身份与生命周期（runtime/tasks/<task_id>/meta.json）；task-registry.sh 读写
 
 # memory.schema.json（无 memory.json Producer/Consumer）与
 # projects.schema.json（无 projects.json Producer/Consumer）已移入 docs/archive/schemas/，

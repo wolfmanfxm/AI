@@ -9,7 +9,7 @@
 | Entry  | Discovery 完成，范围/Goal 已确认 |
 | Input  | 项目源码 + Discovery 阶段确认的范围 |
 | Output | 现状标注结果（`[新][有骨架][基本完成][已完成]`）+ 修正后估时 |
-| Recovery | 读 manifest.json → 若已标注 → 跳过，直入 CHECKPOINT |
+| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 若已标注 → 跳过，直入 CHECKPOINT |
 
 ## Custom Fields (Skill Must Provide)
 

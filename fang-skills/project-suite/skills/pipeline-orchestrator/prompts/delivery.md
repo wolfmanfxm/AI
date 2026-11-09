@@ -4,8 +4,8 @@
 
 ## Actions
 
-1. 写入 `pipeline-state.json`（完整执行记录 + 每个 Skill 的 status/confidence）
-2. 生成 `pipeline-report.md`：
+1. 写入 `runtime/tasks/<task_id>/pipeline-state.json`（完整执行记录 + 每个 Skill 的 status/confidence）
+2. 生成 `runtime/tasks/<task_id>/pipeline-report.md`：
    - Pipeline 名称 + 执行时间
    - 每个 Skill 的状态（completed/skipped/failed）+ confidence
    - 全链路 confidence 趋势
@@ -17,9 +17,9 @@
 
 ## Exit
 
-- `pipeline-report.md` 写入成功
-- `pipeline-state.json` 更新为 completed
-- `state.json` 已追加
+- `runtime/tasks/<task_id>/pipeline-report.md` 写入成功
+- `runtime/tasks/<task_id>/pipeline-state.json` 更新为 completed
+- `state.json` 已追加（history 带 task_id）
 
 ## Failure
 

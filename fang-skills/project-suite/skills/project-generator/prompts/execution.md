@@ -1,14 +1,15 @@
 # Execution — Generator
 
 > @template: execution
-> Session Snapshot: 每个文件生成后写入 `.project-knowledge/.sessions/project-generator/state.json` → 跨 session resume
+> Session Snapshot: 每个文件生成后写入 `.project-knowledge/.sessions/<task_id>/project-generator/state.json` → 跨 session resume
+> 前置：Discovery 已完成 Task Resolution，`task_id` 已知。
 
 ## Actions
 
 ### Phase 1: Candidate Generation
 
 ```
-读 context-package.json（pattern + component）→ `@adapter:filesystem.search "similar implementation" workspace/` → 提取模式 → 套用模式生成 → `@adapter:filesystem.write <file>` → Candidate 代码
+读 `runtime/tasks/<task_id>/context-package.json`（pattern + component）→ `@adapter:filesystem.search "similar implementation" workspace/` → 提取模式 → 套用模式生成 → `@adapter:filesystem.write <file>` → Candidate 代码
 ```
 
 ### Phase 2: Verification
@@ -29,11 +30,13 @@
 
 ### 1. 知识加载（不读 .md）
 
-读 context-package.json（Resolver 已编译），分两类：
+读 `runtime/tasks/<task_id>/context-package.json`（Resolver 已编译），分两类：
 - **知识**（pattern / convention）：context-package.json 的 knowledge[]
 - **结构**（component / api 是否已存在）：查 graph.json（[Graph Query Protocol](../../../runtime/contracts/graph-query.md) 的 findNode）
 
-降级：`context-package.json` 缺失 → 兜底直读 `.project-knowledge/rules/`、`decisions/`（project-scope）、`experience/`。
+> 🔴 消费前校验包内 `taskId` == 当前 task_id。不一致 → 拒绝消费（这是别的任务的知识包）。
+
+降级：`runtime/tasks/<task_id>/context-package.json` 缺失 → 兜底直读 `.project-knowledge/rules/`、`decisions/`（project-scope）、`experience/`。**不要读根级 legacy context-package.json**。
 
 ### 2-3. Graph 查询 + 参考实现
 → [Graph Query Protocol](../../../runtime/contracts/graph-query.md)
@@ -86,7 +89,7 @@ decisions:
 | 目标文件已存在 | `Read` → diff 理解现状 → `Edit` 增量修改，标注 `[已存在]` |
 | 需新增依赖（package.json 未安装） | 使用已有依赖的替代方案 → 标注 `TODO: 安装 {package}` |
 | 无类似实现可参考（全新模式） | 使用 `context.json` 项目约定生成 → 标注 `⚠️ 全新模式，建议人工审核` |
-| `context-package.json` 缺失且 PLAN.md 缺失 | 🔴 BLOCKER — 提示先执行 planner |
+| `runtime/tasks/<task_id>/context-package.json` 缺失且 PLAN.md 缺失 | 🔴 BLOCKER — 提示先执行 planner |
 
 ## Confidence Gate
 

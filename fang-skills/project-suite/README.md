@@ -21,11 +21,13 @@
 > 唯一例外是各 skill 的 `references/examples.md`（已标注「Reference example only」）。
 > 框架的通用部分是**机制**（Registry / Resolver / Evidence / Decision Record / Confidence Gate），不绑定任何具体项目。
 
-## 当前版本：Suite v1.0 Spec / Release v1.0
+## 当前版本：Suite v1.2 Spec / Release v1.2
 
 ```
 Knowledge 层         — Object + Context Resolver + Promotion Reviewer（Decay：planned，未实现）
 Runtime（Protocol）   — Tool Adapter(9/10) + Event Bus + Background Pipeline（规范层，非独立 Engine）
+Task 隔离            — task_id + Task Resolution + 单写者锁（session/context/snapshot 按任务分区）
+Timeline 指标        — append-only JSONL（timeline-append.sh；读取时聚合，不落盘 aggregates）
 Reasoning 层         — Query API + Orchestrator (Decision-Boundary Checkpoint, auto-advance 仅 background)
 Governed-ready       — Conformance G1-G17, Drift 40/40, Trust 90/100
 Organization Layer   — Task→Project→Organization→Personal 四层
@@ -153,7 +155,7 @@ project-suite/
 │   ├── metrics/           ← Timeline + Knowledge Health
 │   └── artifacts/         ← Artifact Types Registry
 ├── skills/                ← 10 Skills
-├── shared/                ← Schemas(7) · Scripts(25) · Primitives(5) · Conventions · Examples · Templates
+├── shared/                ← Schemas(10) · Scripts(31) · Primitives(5) · Conventions · Examples · Templates
 ├── docs/                  ← Skill Atlas · Benchmarks · Review Cadence · Review Studio · Waiver · Prompt Quality · Cross-Run Reliability · Roadmap · Architecture
 ├── reports/               ← Trust(90) · Quality Scorecard · Trigger Eval
 └── suite-manifest.yaml    ← 单文件治理

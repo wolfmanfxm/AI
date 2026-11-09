@@ -4,15 +4,18 @@
 
 ## Actions
 
-0. **Context Resolver** — 读 context-package.json（rules[]/knowledge[]/guidance[]），先拿到本项目的约束与知识 → [Context Resolver](../../../runtime/contracts/context-resolver.md)
+0. **Task Resolution** — 先解析 task_id（[task-identity.md](../../../runtime/mechanisms/task-identity.md)）。新任务 → `task-registry.sh create "<goal>" --skill project-planner`；存在未完成任务 → 用户确认是继续还是新建。**task_id 未确定前不读知识包、不写任何文件。**
 
-1. **Project Constraints（blocking）** — 加载 context-package.json 的 rules[] 全部 blocking 约束（rules + project-scope decisions）。这是硬约束，后续 Reuse/Decision/Task 都据此判断。
+1. **Context Resolver** — 读 `runtime/tasks/<task_id>/context-package.json`（rules[]/knowledge[]/guidance[]），先拿到本项目的约束与知识 → [Context Resolver](../../../runtime/contracts/context-resolver.md)
+   - 本任务还没有知识包（新建任务）→ 直读项目级 `rules/`、`decisions/`（project-scope）、`experience/`，**不要读根级 legacy context-package.json**（那是别的任务的过滤结果）
 
-2. **Relevant Knowledge（recommended）** — 加载 context-package.json 的 knowledge[]（patterns/components/api），用于 Reuse Analysis。
+2. **Project Constraints（blocking）** — 加载 context-package.json 的 rules[] 全部 blocking 约束（rules + project-scope decisions）。这是硬约束，后续 Reuse/Decision/Task 都据此判断。
 
-3. **Experience / Playbooks（advisory）** — 加载 context-package.json 的 guidance[]（含 task-scope decisions），用于提高方案质量，非强制。
+3. **Relevant Knowledge（recommended）** — 加载 context-package.json 的 knowledge[]（patterns/components/api），用于 Reuse Analysis。
 
-4. **Code Audit** → [prompts/code-audit.md](code-audit.md)：标注 `[已实现]` / `[部分实现]` / `[未实现]` → Interview 前先知道项目有什么。
+4. **Experience / Playbooks（advisory）** — 加载 context-package.json 的 guidance[]（含 task-scope decisions），用于提高方案质量，非强制。
+
+5. **Code Audit** → [prompts/code-audit.md](code-audit.md)：标注 `[已实现]` / `[部分实现]` / `[未实现]` → Interview 前先知道项目有什么。
 
 5. **Completeness Check** → [prompts/completeness-check.md](completeness-check.md)：
    - 多维度评分（goal/scope/constraints/knowledge）→ planning_confidence

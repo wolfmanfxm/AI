@@ -21,7 +21,7 @@
 
 1. 确认当前版本（`git describe --tags` 或 `package.json` version）
 2. 收集 git log（上次 release tag 到 HEAD）
-3. 收集 PR 列表 + REVIEW.md + TEST-REPORT.md（若存在）
+3. 收集 PR 列表 + `reports/REVIEW-*.md` + `reports/TEST-REPORT*.md`（若存在；按 task_id 聚合）
 
 ## 要求
 

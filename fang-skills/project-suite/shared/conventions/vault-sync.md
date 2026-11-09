@@ -38,13 +38,28 @@ promotion: personal → 跨项目通用 → Knowledge Promotion → Vault/Knowle
 
 rsync 命令：
 ```bash
-rsync -av --include='*/' --include='*.md' --include='*.json' --include='*.yaml' \
-  --exclude='proposals/' --exclude='reports/REVIEW-*' --exclude='reports/CHANGELOG.md' \
-  --exclude='reports/TEST-REPORT.md' --exclude='reports/REFACTOR.md' \
-  --exclude='reports/RELEASE-CHECKLIST.md' \
-  --exclude='decisions/ARCHITECTURE-*' --exclude='candidates/' \
+# ⚠️ 规则顺序 = 优先级（rsync 首次匹配即生效）：先排除 → 再包含 → 最后 --exclude='*' 兜底。
+#    反例（曾用）：把 --include='*/' 放最前面会先放行所有目录，后面的 --exclude 永不生效。
+#    在 afc-newcore-web-frontend 的真实 dry-run 中，该顺序导致 .sessions/、runtime/tasks/、
+#    proposals/ 全部被列入同步清单——排除规则形同虚设。
+rsync -av \
+  --exclude='proposals/' --exclude='candidates/' \
+  --exclude='REVIEW-*.md' --exclude='TEST-REPORT*.md' --exclude='REFACTOR*.md' \
+  --exclude='reports/CHANGELOG.md' --exclude='reports/RELEASE-CHECKLIST.md' \
+  --exclude='decisions/ARCHITECTURE-*' \
+  --exclude='runtime/tasks/' --exclude='runtime/metrics/' \
+  --exclude='.sessions/' --exclude='.locks/' --exclude='.scan/' \
+  --include='*/' --include='*.md' --include='*.json' --include='*.yaml' --exclude='*' \
   .project-knowledge/ "{vaultPath}/Projects/{project}/"
 ```
+
+> `runtime/tasks/`、`runtime/metrics/`、`.sessions/`、`.locks/`、`.scan/` 是**执行状态 / 指标 / 扫描中间态**
+> （session / context-package / snapshot / 锁 / timeline.jsonl / manifest 备份），
+> 不是项目知识，永远不进 Vault。
+> 任务产物用**不带路径前缀**的模式排除（`REVIEW-*.md` / `TEST-REPORT*.md` / `REFACTOR*.md`），
+> 这样同时覆盖 `reports/` 下的规范位置与历史上落在知识库根目录的文件。
+> `timeline.jsonl` 本身不会命中 `*.json` include，但排除 `runtime/metrics/` 同时挡住
+> legacy `timeline.json` 与 `knowledge-health.json`。
 
 ## Knowledge Promotion（默认关闭）
 
@@ -72,11 +87,16 @@ Promotion 条件（Reviewer 判断）：
 | 文件 | 原因 |
 |------|------|
 | proposals/PLAN-*.md | 一次性任务规划 |
-| reports/REVIEW-*.md | 一次性代码审查 |
+| REVIEW-*.md | 一次性代码审查（任意目录，兼容根目录旧放置） |
 | reports/CHANGELOG.md | 变更日志（发布产物，随仓库走） |
 | reports/RELEASE-CHECKLIST.md | 发布检查清单（单次发布） |
-| reports/TEST-REPORT.md | 一次性测试报告 |
-| reports/REFACTOR.md | 一次性重构记录 |
+| TEST-REPORT*.md | 一次性测试报告（含 task_id 后缀） |
+| REFACTOR*.md | 一次性重构记录（含 task_id 后缀） |
+| runtime/tasks/ | 任务级执行状态（session / context-package / pipeline-state） |
+| runtime/metrics/ | 执行指标（timeline.jsonl / knowledge-health.json），不是项目知识 |
+| .sessions/ | Session Snapshot（跨 session 恢复点） |
+| .locks/ | 单写者锁 |
+| .scan/ | Analyzer 扫描中间态与 manifest 备份 |
 | decisions/ARCHITECTURE-<feature>.md | 单功能架构决策 |
 | candidates/ | 中间产物 |
 

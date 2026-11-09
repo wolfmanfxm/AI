@@ -10,8 +10,8 @@
 循环直到目标达成:
   1. 跑现有测试 → 确认全绿（不绿则停止，先修测试）`@adapter:execution.run "npm test"`
   2. 做 1 个重构动作（提取/内联/重命名/简化条件/...）
-  3. 跑测试 → 仍绿 → 记录 before/after 到 REFACTOR.md
-  4. 测试变红 → Edit 反向回滚 → 分析原因 → 记录 REFACTOR.md → 继续下一个动作
+  3. 跑测试 → 仍绿 → 记录 before/after 到 `REFACTOR-<task_id>.md`
+  4. 测试变红 → Edit 反向回滚 → 分析原因 → 记录 `REFACTOR-<task_id>.md` → 继续下一个动作
 ```
 
 ### 重构手法（9种）
