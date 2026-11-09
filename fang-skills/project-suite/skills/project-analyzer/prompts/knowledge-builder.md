@@ -88,18 +88,24 @@
 
 ## Output Structure
 
-**双轨输出**：Machine-readable Knowledge Graph（下游 Skill 消费）+ Human-readable Markdown（人读）。
+**Knowledge Object 是内部表示，不是独立持久化产物。** Knowledge Builder 的落盘只有 `.md`：
+`knowledge-index.json` 由 Knowledge Compiler 从 `.md` 派生，`context-package.json` 由 Resolver 按任务生成。
+`context.json` 是 Analyzer 产出的项目结构化上下文（技术栈/模块清单），是结构图 Producer 的输入，
+**不属于** Knowledge Object 的存储层。
 
 > **目录集合**：以 [`shared/schemas/knowledge-directories.yaml`](../../../shared/schemas/knowledge-directories.yaml) 为准。
 > 哪个目录由谁产出、谁消费、是否进 index、必须写哪些 frontmatter，**一律以它为准**。
 > 本文件**不列目录树**——派生的可读视图只有一处，在 [output-format.md](output-format.md) 的「固定产出结构」；
 > 这里重复第三份清单正是历史上五处清单互相矛盾（directory 集合各不相同）的成因之一。
 >
-> 本节只保留**派生不出来**的两条语义：
+> 本节只保留**派生不出来**的三条语义：
 > - `decisions/` 是 index 目标目录（契约 `indexed_by_compiler: true`），其文件**必须**写 `constraint:`
 >   （契约 `compiler_enforced: [constraint]`）。**不要再把决策写进 `architecture/`**——那会被当作 pattern 索引。
-> - `conventions/` 与 `observations/` **刻意不进 index**（契约 `indexed_by_compiler: false`）：它们是
->   机器链路的「人读镜像」（observations 的机器链路走 `graph.json`）。**不要因为「没进 index」就跳过产出。**
+> - `conventions/` 与 `observations/` **刻意不进 index**（契约 `indexed_by_compiler: false`）：
+>   两者当前都是**人读产物**，没有机器消费者。**不要因为「没进 index」就跳过产出。**
+> - `observations/` 里的 risk/antipattern **不要塞进 `graph.json`**：结构图只存结构事实
+>   （见 [knowledge-access.md](../../../runtime/contracts/knowledge-access.md) 硬白名单）。
+>   当前没有 risk 的机器链路；未来需要时再一次性闭环 Compiler→Resolver→context-package，并同步 schema/E2E。
 
 ## .md frontmatter（供 Resolver hydrate）
 
@@ -124,55 +130,63 @@ tags: "table, list, search, workspace"
 
 没有 `statement` 时，Resolver 退化为「`# 标题` + `##` 节标题」拼接（仍可用，但不如 statement 精确）。
 
-## graph.json — Knowledge Objects
+## Knowledge Objects（内部表示，不写入 graph.json）
 
-从 accepted candidates 组装 → [schema](../../../shared/schemas/knowledge-object.schema.json)
+```
+Accepted Candidate
+  → Knowledge Object（内部对象，knowledge-object.schema.json 校验）
+  → .md（frontmatter statement/constraint）
+  → Knowledge Compiler
+  → knowledge-index.json
+  → Knowledge Resolver
+  → context-package.json
+  → 下游 Skill
+```
+
+`knowledge-object.schema.json` 只校验这个**内部对象形态**，不是 `graph.json` 的 schema；
+Knowledge Object **不落盘成 `knowledge-objects.json`**——不制造第三份知识权威。
 
 ```yaml
-# .project-knowledge/graph.json
-nodes:
-  - id: pattern.repository
-    type: pattern
-    category: behavioral
-    confidence: 0.94
-    statement: "项目使用 Repository Pattern 封装数据访问"
-    evidence:
-      - { path: src/repositories/UserRepository.ts, type: file, lines: 45 }
-      - { path: src/repositories/OrderRepository.ts, type: file, lines: 62 }
-    related:
-      - { id: principle.repository, relation: implements }
-      - { id: api.user, relation: references }
-    source: { extractor: pattern, verdict: accepted }
-    occurrences: 17
-    predictive_power: "Can answer: where to add data access for new entity?"
-    obviousness: non-obvious
-    tags: [repository, data-access, abstraction]
-
-  - id: convention.pascalcase
-    type: convention
-    category: behavioral
-    confidence: 0.95
-    statement: "组件命名使用 PascalCase"
-    evidence:
-      - { path: workspace/views/, type: ratio, note: "95% of .vue files" }
-    related:
-      - { id: antipattern.kebabcase, relation: contradicts }
-    source: { extractor: convention, verdict: accepted }
-    occurrences: 380
-    obviousness: somewhat-obvious
-    tags: [naming, component, convention]
-
-edges:
-  - { from: pattern.repository, to: principle.repository, relation: implements }
-  - { from: pattern.repository, to: api.user, relation: references }
-  - { from: convention.pascalcase, to: antipattern.kebabcase, relation: contradicts }
-
-# 下游 Skill 消费方式:
-# Planner:   读取 graph.json → 了解可复用资产
-# Architect: 读取 nodes[type=decision] → 了解已有架构决策
-# Generator: 读取 nodes[type=pattern,component,api] → 套用模式生成代码
-# Reviewer:  读取 nodes[type=antipattern,risk] → 对照审查
+# 内部对象示例（不是 graph.json 的节点）
+- id: pattern.repository
+  type: pattern
+  scope: project          # schema required：task=一次性, project=项目级, organization=企业级, personal=个人资产
+  category: behavioral
+  confidence: 0.94
+  statement: "项目使用 Repository Pattern 封装数据访问"
+  evidence:
+    - { path: src/repositories/UserRepository.ts, type: file, lines: 45 }
+    - { path: src/repositories/OrderRepository.ts, type: file, lines: 62 }
+  related:
+    - { id: principle.repository, relation: implements }
+    - { id: api.user, relation: references }
+  source: { extractor: pattern, verdict: accepted }
+  occurrences: 17
+  predictive_power: "Can answer: where to add data access for new entity?"
+  obviousness: non-obvious
+  tags: [repository, data-access, abstraction]
 ```
+
+**落盘规则：**
+
+| 对象 | 落点 | 生产者 | 说明 |
+|------|------|--------|------|
+| Knowledge Object | `.md` + frontmatter | Knowledge Builder | **唯一的持久化知识来源** |
+| `knowledge-index.json` | `.project-knowledge/runtime/state/` | Knowledge Compiler | 从 `.md` 派生，不是 Builder 直接写 |
+| `context-package.json` | `runtime/tasks/<task_id>/` | Knowledge Resolver | 按任务分桶注入 |
+| `context.json` | `.project-knowledge/` | Analyzer | 项目结构化上下文；只把 `modules`/`layers` 喂给结构图 |
+| `graph.json` | `.project-knowledge/` | Analyzer Post Processing | **只存结构事实**，白名单见 [knowledge-access.md](../../../runtime/contracts/knowledge-access.md) |
+
+**下游消费方式**（知识走 context-package，结构才走 graph）：
+
+- Planner：`context-package.json` 的 rules/knowledge/guidance；结构查询 `graph.json` 的 `findNode(module)`
+- Architect：`context-package.json` 的 decisions；结构查询 `findDependencies` / `findConsumers`
+- Generator：`context-package.json` 的 pattern/constraints；结构查询 `findNode(component/api)`
+- Reviewer：`context-package.json` 的 rules/guidance；结构查询 `findImpacted` / `findConsumers`
+
+> ⚠️ **不要**把 `pattern` / `convention` / `decision` / `risk` / `antipattern` 写成 `graph.json` 节点。
+> 结构图的节点类型白名单、禁止字段与 `edges` 方向以
+> [knowledge-access.md](../../../runtime/contracts/knowledge-access.md) 为唯一权威。
 
 ## Evidence Score Section
 

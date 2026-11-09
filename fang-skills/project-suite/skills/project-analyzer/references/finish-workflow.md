@@ -22,7 +22,18 @@
    - `apiFunctionCount` 与 `statistics.topApiModules` 汇总对齐
    - `routeCount` 从 router 文件实际解析
    - ⚠️ **禁止复用旧 version/数字** — 每个字段必须从本次扫描数据重新提取
-3. **graph.json** — 从 modules 列表重建节点：每个业务模块目录 → node，每个 `patterns/*.md` → node，新增模块自动追加，已删除自动移除，`dependsOn` 按 import 关系推导
+3. **graph.json** — 结构图**全量重建**（**不是** Knowledge Objects 图）：
+   - 输入：`context.json.modules`（模块清单）+ 本次扫描得到的全项目 import 关系
+   - 节点：`module`（每个业务模块目录，`domain` 必填）、`component` / `api` / `view` / `store` / `infrastructure`
+     （按扫描结果，`layer` 必填）。`file` 节点只在需要文件级精度时生成；优先用节点 `files[]`
+     声明源文件，避免「每个文件一个节点」把图撑爆
+   - 边：`imports` / `depends_on` / `uses` / `composes` / `configures`；方向 **`from` = 消费者，
+     `to` = 提供方**（`A.vue imports B.ts` → `{from:A.vue, to:B.ts}`）
+   - **只产 `edges`，不产节点 `dependsOn` 数组**；每次全量重建，删除已删模块与悬空边
+   - ❌ **禁止**把 `patterns/*.md` 或任何 Knowledge Object 写成节点——节点类型白名单见
+     [knowledge-access.md](../../../runtime/contracts/knowledge-access.md)，schema 见
+     [graph.schema.json](../../../shared/schemas/graph.schema.json)（v3.0.0）
+   - 结构图由 Post Processing 产出，**不**与 Knowledge Builder 的 `.md` 输出捆绑为「双轨」
 4. **search-index.json** — 扫描全部 `.md` 提取关键词（组件名/API 函数名前缀/模式名），目标条目数 `min(80, 模块数×3 + 组件数×1 + API模块数×2)`，⚠️ 禁止只复制旧 index
 
 ## Phase B — .project-knowledge/runtime/ 初始化或更新
@@ -89,6 +100,8 @@
     ```
 
     断言契约声明的**全部目录** + **6 个固定根产物**在位（清单从契约派生，不硬编码）。
+    同时对 `graph.json` 执行结构契约校验：3.0.0 且节点/边非法 → Exit 1；
+    2.0.0（旧 Knowledge Objects 图）只给 warning 并提示重跑 Analyzer，不硬阻断既有项目。
 
     Exit 0 → 继续；**Exit 1 → 不得执行第 18 步**，按 `.project-knowledge/kb-contract-report.md`
     的缺失清单补齐后重跑门禁。

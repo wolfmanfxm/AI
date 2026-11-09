@@ -31,7 +31,7 @@ principles_example:
     type: form_standard              # 对应 types 里的某个类型
     statement: "<本项目的原则陈述>"     # 具体陈述来自项目，如「所有表单用统一封装」
     scope: project
-    source: graph.json#pattern.<id>  # 证据源
+    source: patterns/<id>.md       # 知识来源（graph.json 只存结构事实，不存 pattern）
     confidence: 0.9
     enforcement: hard
     evidence: ["<统计证据，如 N 处使用>"]

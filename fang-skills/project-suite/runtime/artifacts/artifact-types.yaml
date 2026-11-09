@@ -38,12 +38,13 @@ types:
     consumers: [project-planner, project-architect, project-generator, project-reviewer, project-tester, project-refactorer, project-documenter]
 
   graph:
-    description: 项目结构关系图谱（节点+边）
+    description: 项目结构关系图谱（节点+边；仅结构事实，不含 Knowledge Object）
     schema: ../../shared/schemas/graph.schema.json
-    schema_version: "1.0.0"
+    schema_version: "3.0.0"
     location: .project-knowledge/graph.json
     producer: project-analyzer
-    consumers: [project-planner, project-architect, project-generator, project-reviewer]
+    consumers: [project-planner, project-architect, project-generator, project-reviewer, project-documenter]
+    notes: 旧 2.0.0（Knowledge Objects 形状）见 check-graph-contract.sh → warning，重跑 Analyzer 重建
 
   recommendation:
     description: 项目级应然建议（新代码改进方向，依据本项目统计/证据；**非现状规范**，advisory 不阻塞）

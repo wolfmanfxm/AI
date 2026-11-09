@@ -37,14 +37,14 @@ schemas:
   knowledge-object:
     path: shared/schemas/knowledge-object.schema.json
     class: D
-    consumers: [generate-skill-ir, project-analyzer]
-    notes: 被生成器/分析器引用；当前无通用 schema validator
+    consumers: [project-analyzer]
+    notes: 内部对象校验规格（不持久化）；持久化形态是 .md → knowledge-index.json → context-package.json
 
   graph:
     path: shared/schemas/graph.schema.json
     class: D
-    consumers: [graph-query, project-analyzer, project-planner, project-architect, project-generator, project-reviewer]
-    notes: 跨 6 个 Skill 真实消费的结构事实契约；当前无强制 validator → 下一轮 backlog 候选
+    consumers: [graph-query, project-analyzer, project-planner, project-architect, project-generator, project-reviewer, project-documenter]
+    notes: 结构事实契约 v3.0.0；共享 validator = shared/scripts/graph-validate.mjs（check-graph-contract.sh / E2E 共用）
 
   manifest:
     path: shared/schemas/manifest.schema.json

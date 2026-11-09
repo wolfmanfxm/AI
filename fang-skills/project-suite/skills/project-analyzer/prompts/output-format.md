@@ -82,7 +82,7 @@ sources:
 ├── manifest.json                # 元数据（knowledgeVersion, skillVersion, gitCommit）
 ├── statistics.json              # 仪表盘数据（组件/API/模式/质量指标）
 ├── context.json                 # 标准化项目上下文（技术栈/路径别名/模块清单）
-├── graph.json                   # 结构化关系图谱（节点+边）
+├── graph.json                   # 结构关系图谱（仅结构事实；知识在 .md/index）
 ├── search-index.json            # 关键词→文件检索索引
 ├── index.md                     # 人类导航入口
 │
@@ -131,7 +131,7 @@ sources:
 |------|---------|---------|
 | `statistics.json` | **Always** — 每次扫描强制重新生成 | 任何扫描 |
 | `context.json` | **Always** — 每次扫描强制重新生成，所有数字从 statistics 重新提取 | 任何扫描 |
-| `graph.json` | **Always** — 每次扫描重建节点，自动追加新模块/移除已删模块 | 任何扫描 |
+| `graph.json` | **Always** — 从 `context.json.modules` + 全项目 import 扫描**全量重建**；只产 `edges`，不产节点 `dependsOn`；已删模块/悬空边一并移除 | 任何扫描 |
 | `search-index.json` | **Always** — 每次扫描重新提取关键词 | 任何扫描 |
 | `.md` 知识文件 | **On Change** — 仅内容变化时更新，未变化仅更新 `last_scan` | 维度分析发现变化 |
 | `manifest.json` | **Always** — 追加 executionLog，更新 gitCommit/updatedAt/statistics | 任何扫描 |
@@ -144,5 +144,5 @@ sources:
 |-----------|-----------|
 | context.json 中 layers.files 用上次缓存的数字 | 从 statistics.byLayer 重新提取 |
 | search-index.json 因为 markdown 没变就不重新生成 | 重新扫描全部 .md 提取关键词 |
-| graph.json 保留旧节点不追加新模块 | 从 modules 列表重建，自动补齐 |
+| graph.json 保留旧节点不追加新模块 | 全量重建，已删模块/悬空边一并移除 |
 | "这个文件标记了 unchanged，跳过" | unchanged 只对 .md 生效，JSON 永远强制刷新 |

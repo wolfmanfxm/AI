@@ -100,7 +100,7 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 | Phase 1→2 | 10 个 `candidates/accepted/*.yaml` 全部存在且 ≥500 bytes | 补跑缺失 Extractor |
 | Phase 2→3 | `candidates/verification-report.md` 存在 + 每个 Candidate 有 verdict | 返回 Verifier 补判定 |
 | Phase 3→4 | `cross-validation-report.yaml` 存在 + 所有 pairs checked | 返回 Cross-Validator 补检查 |
-| Phase 4→5 | `graph.json` + `.md` 双轨输出已写入 `.project-knowledge/` | 补跑 Knowledge Builder |
+| Phase 4→5 | `.md` 知识产出已写入；`graph.json` 已从 `context.json.modules` + import 扫描全量重建并过结构契约 | 补跑 Knowledge Builder / Post Processing |
 | Phase 5→6 | `index.md` 已更新 + 所有 `[[link]]` 目标可达 | 补跑 INDEX Generator |
 | Phase 6→7 | `classification-report.yaml` 存在 + 所有 knowledge object 已分类 | 补跑 Classifier |
 | Phase 7→8 | `instincts.yaml` 存在 + personal_candidates 已提炼 | 补跑 Instinct Extractor |
@@ -113,6 +113,6 @@ Agent 协调规则：禁止提前返回 → 全部完成后一次性写入 → �
 - 10 个 Extractor 全部返回结果（Phase 1 ✅）
 - Verifier 已判定所有 Candidate（Phase 2 ✅）
 - Cross-Validator 已完成所有 pairs 检查（Phase 3 ✅）
-- Knowledge Builder 双轨输出已写入（Phase 4 ✅）
+- Knowledge Builder `.md` 输出已写入，结构图已从 `context.json.modules` + import 扫描全量重建（Phase 4 ✅）
 - index.md 已重新生成（Phase 5 ✅）
 - Classifier 已分配所有 promotion level（Phase 6 ✅）

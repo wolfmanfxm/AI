@@ -14,6 +14,12 @@
 
 Generator 不知道还有别的知识。Context 恒定、可预测、不膨胀。
 
+> ⚠️ **风险/反模式当前不进入本链路。** `observations/`（risk/antipattern）是**人读产物**：
+> Compiler 不索引它，`context-package.schema.json` 也没有 risk/antipattern 桶，Resolver 不读取。
+> 不要为了「机器可用」把它们塞进 `graph.json`——结构图只存结构事实。若未来要闭环，
+> 必须一次性打通 `observations → Compiler → knowledge-index → Resolver → context-package`
+> 并同步 schema 与 E2E（见 [knowledge-access.md](contracts/knowledge-access.md) Rule 4）。
+
 ## 算法
 
 ```

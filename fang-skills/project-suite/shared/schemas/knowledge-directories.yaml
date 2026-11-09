@@ -145,8 +145,8 @@ directories:
     path: observations/
     producer: project-analyzer
     ownership: generated
-    indexed_by_compiler: false   # 刻意不索引：它是 graph.json 中 antipattern/risk 节点的「人读镜像」
-    human_readable: true         # 机器链路经 graph.json 走，本目录给人看
+    indexed_by_compiler: false   # 刻意不索引：risk/antipattern 当前**没有机器链路**
+    human_readable: true         # 仅供人读；不要经由 graph.json 做「机器镜像」（结构图只存结构事实）
     compiler_enforced: []
 
   conventions:

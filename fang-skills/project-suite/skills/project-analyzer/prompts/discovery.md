@@ -12,7 +12,7 @@
    - 无法创建锁目录 → 🟡 DEGRADED，继续但收尾报告标注 `⚠️ 未获单写者保护`
    → [single-writer.md](../../../runtime/mechanisms/single-writer.md)
 
-1. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：从项目路径提取 tags → 查询 `graph.json` → 注入已有的 architecture/patterns/glossary
+1. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：从项目路径提取 tags → **结构事实查 `graph.json`**；已有的 architecture/patterns/glossary **知识**走 `knowledge-index.json`/`context.json`，**不要从 graph 取知识**
 2. 探测技术栈：`@adapter:filesystem.read package.json`（dependencies/devDependencies/scripts）、`@adapter:filesystem.read tsconfig.json`（paths/baseUrl）、`@adapter:filesystem.read vite.config.*`（alias/resolve）
 3. 探测目录结构：`@adapter:filesystem.list src/` + 按技术栈定位组件文件（扩展名从 package.json/配置文件推断）
 4. 探测 Knowledge Vault 路径：`@adapter:filesystem.list "$HOME/Data/Knowledge Vault"` → `@adapter:filesystem.list "./Knowledge Vault"` → `@adapter:filesystem.list "$HOME/Documents/Knowledge Vault"`，取第一个可达路径

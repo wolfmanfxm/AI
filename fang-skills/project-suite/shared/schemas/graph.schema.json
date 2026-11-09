@@ -1,13 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Knowledge Graph",
-  "description": "项目结构关系图谱。由 analyzer 的 Post Processing 从各维度汇总生成。",
+  "$id": "https://fang-skills/project-suite/shared/schemas/graph.schema.json",
+  "title": "Structural Project Graph",
+  "description": "项目结构关系图谱 v3.0.0。只描述结构事实（module/file/component/api/view/store/infrastructure），不承载 pattern/decision/risk 等知识对象；知识走 knowledge-index → context-package。节点类型白名单见 runtime/contracts/knowledge-access.md。",
   "type": "object",
-  "required": ["nodes", "edges"],
+  "additionalProperties": false,
+  "required": ["schemaVersion", "capabilities", "nodes", "edges"],
   "properties": {
     "schemaVersion": {
-      "type": "string",
-      "description": "graph.schema.json 的版本"
+      "const": "3.0.0",
+      "description": "Graph Schema 版本；与 Graph Query Protocol 版本、Artifact Registry 版本独立管理"
     },
     "capabilities": {
       "type": "array",
@@ -17,33 +19,92 @@
       },
       "description": "本 graph 具备的查询能力。project-analyzer 只声明 module/file；symbol/call/reference/impact 由外部 Code Intelligence provider（如 CodeGraph）声明。仅元数据，不存储 symbol 数据。"
     },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "本次结构图生成时间（UTC）"
+    },
+    "project": {
+      "type": "string",
+      "description": "项目名（可选）"
+    },
     "nodes": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "type", "label", "group"],
-        "properties": {
-          "id": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["layer", "component", "api", "infrastructure", "store", "view"]
-          },
-          "label": { "type": "string" },
-          "refs": { "type": "integer", "description": "引用次数（组件）" },
-          "functions": { "type": "integer", "description": "导出函数数（API）" },
-          "group": { "type": "string" }
-        }
-      }
+      "items": { "$ref": "#/$defs/node" }
     },
     "edges": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["from", "to", "relation"],
-        "properties": {
-          "from": { "type": "string" },
-          "to": { "type": "string" },
-          "relation": { "type": "string", "description": "关系描述：imports/使用/组合/配置/依赖" }
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["module", "file", "component", "api", "view", "store", "infrastructure"]
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "group": {
+          "type": "string",
+          "description": "仅展示分组（UI/报表），不承载业务域或架构层语义。架构层判定用 layer，业务域用 domain。"
+        },
+        "layer": {
+          "type": "string",
+          "enum": ["view", "component", "api", "store", "infrastructure"],
+          "description": "结构层；component/api/view/store/infrastructure 节点必填。module 节点用 domain，不用 layer。"
+        },
+        "domain": {
+          "type": "string",
+          "description": "业务域；module 节点必填。"
+        },
+        "files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "该节点对应的仓库相对源文件路径。findImpacted 用它做 path→node 映射；不要求为每个文件建独立 file 节点。"
+        },
+        "refs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "引用次数（组件）"
+        },
+        "functions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "导出函数数（API）"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "module" } }, "required": ["type"] },
+          "then": { "required": ["domain"] }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "enum": ["component", "api", "view", "store", "infrastructure"] }
+            },
+            "required": ["type"]
+          },
+          "then": { "required": ["layer"] }
+        }
+      ]
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "relation"],
+      "description": "方向：from 是消费者/依赖方，to 是被依赖方/提供方。A.vue imports B.ts => {from: A.vue, to: B.ts}。禁止在 node 上另存 dependsOn 数组。",
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "relation": {
+          "type": "string",
+          "enum": ["imports", "depends_on", "uses", "composes", "configures"]
         }
       }
     }

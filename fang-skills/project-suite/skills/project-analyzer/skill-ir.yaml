@@ -8,6 +8,5 @@ produces: [KnowledgeBase,Context,Graph,Recommendation]
 consumes: []
 stages: [discovery, execution, validation, delivery]
 verification: { checks: 8, source: prompts/validation.md }
-evidence: { format: knowledge-object.schema.json, source: graph.json }
 failure_conditions: { modes: 4, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-10-08"

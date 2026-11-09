@@ -18,7 +18,7 @@ decisions:
   - field: form_component
     state: KNOWN
     value: <统一表单封装>
-    source: graph.json#pattern.form-wrapper
+    source: context-package.json#knowledge(pattern.form-wrapper)
   - field: avatar_storage
     state: ASSUMED
     value: existing-upload-service

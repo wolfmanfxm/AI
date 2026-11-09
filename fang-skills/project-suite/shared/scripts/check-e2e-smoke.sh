@@ -214,63 +214,50 @@ node -e '
   || fail "Verification Reachability：有 skill 的验证子流程在声明路径上不可达（见上）"
 
 echo ""
-# ── 7. Graph Contract：结构 + 3 个 mutation ────────────────────
+# ── 7. Graph Contract：结构 + mutation + 查询语义 ────────────────
 # graph.json = analyzer → graph-query → 5 个下游 Skill 的真实数据契约（见 artifact-types.yaml）。
-# 第一版不跑完整 JSON Schema 引擎，只验最关键结构 + 3 个能抓退化/漂移的 mutation。
-# 最高价值的是 mutation 3（dangling edge）——JSON Schema 不易表达、却是 graph 的真正业务约束。
-echo "【7】Graph Contract：结构 + 3 个 mutation（dangling-edge 最高价值）"
+# 校验器与 check-graph-contract.sh 共用 shared/scripts/graph-validate.mjs，避免「两把尺子」。
+# 最高价值的是 mutation（dangling edge / knowledge 字段回流 / 旧 schemaVersion）——
+# JSON Schema 不易表达、却是 graph 的真正业务约束。
+echo "【7】Graph Contract：结构 + mutation + 查询语义"
 echo "----------------------------------------"
-GV="$FIXTURE/graph-validate.cjs"
-cat > "$GV" <<'EOF'
-// graph.json 结构校验器（复用自 graph.schema.json 的关键字段）：
-// 合法→exit 0，非法→exit 1。被合法 fixture + 3 个 mutation 共用，保证「同一把尺子」。
-const fs = require("fs");
-const g = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-const TYPE = ["layer","component","api","infrastructure","store","view"];
-const errs = [];
-if (!Array.isArray(g.nodes)) errs.push("缺顶层 nodes 数组");
-if (!Array.isArray(g.edges)) errs.push("缺顶层 edges 数组");
-const ids = new Set((g.nodes || []).map(n => n.id));
-for (const [i, n] of (g.nodes || []).entries()) {
-  if (!n.id || !n.type || !n.label || n.group === undefined) errs.push(`node[${i}] 缺 id/type/label/group`);
-  else if (!TYPE.includes(n.type)) errs.push(`node[${i}].type=${n.type} 非法（应为 ${TYPE.join("/")}）`);
-}
-for (const [i, e] of (g.edges || []).entries()) {
-  if (!e.from || !e.to || !e.relation) errs.push(`edge[${i}] 缺 from/to/relation`);
-  if (g.nodes && !ids.has(e.from)) errs.push(`edge[${i}].from=${e.from} 指向不存在的 node`);
-  if (g.nodes && !ids.has(e.to)) errs.push(`edge[${i}].to=${e.to} 指向不存在的 node`);
-}
-if (errs.length) { console.error(errs.join("\n")); process.exit(1); }
-EOF
+GV="$SUITE_ROOT/shared/scripts/graph-validate.mjs"
 GF="$FIXTURE/graph.json"
 cat > "$GF" <<'EOF'
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "3.0.0",
   "capabilities": ["module", "file"],
+  "generatedAt": "2026-11-09T00:00:00Z",
+  "project": "fixture",
   "nodes": [
-    { "id": "layer-credit", "type": "layer", "label": "credit", "group": "modules" },
-    { "id": "component-user", "type": "component", "label": "UserTable", "group": "components" },
-    { "id": "api-user", "type": "api", "label": "userApi", "group": "api" }
+    { "id": "module-user", "type": "module", "label": "user", "domain": "user-management", "files": ["src/views/user/"] },
+    { "id": "view-user", "type": "view", "label": "UserView", "layer": "view", "files": ["src/views/user/index.vue"] },
+    { "id": "component-user", "type": "component", "label": "UserTable", "layer": "component", "files": ["src/components/UserTable.vue"] },
+    { "id": "api-user", "type": "api", "label": "userApi", "layer": "api", "files": ["src/api/user.ts"] },
+    { "id": "infra-http", "type": "infrastructure", "label": "http", "layer": "infrastructure", "files": ["src/utils/http.ts"] }
   ],
-  "edges": [ { "from": "component-user", "to": "api-user", "relation": "使用" } ]
+  "edges": [
+    { "from": "view-user", "to": "component-user", "relation": "imports" },
+    { "from": "component-user", "to": "api-user", "relation": "uses" },
+    { "from": "api-user", "to": "infra-http", "relation": "depends_on" }
+  ]
 }
 EOF
-# 合法 fixture 必须通过
-if node "$GV" "$GF" >/dev/null 2>&1; then
-  pass "graph.json 结构合法（nodes/edges/type/edge 引用）"
+if node "$GV" "$GF" --strict >/dev/null 2>&1; then
+  pass "graph.json 结构合法（v3.0.0 / 节点白名单 / 边引用 / id 唯一）"
 else
   fail "graph.json 结构校验失败（合法 fixture 不应报错）"
 fi
-# 3 个 mutation：写坏 graph.json → 同一校验器必须红。
-# ⚠️ 每次从干净基线 GF_BASE 重建，避免 mutation 间状态串扰（head 修 bug：
-#    mutation1 删掉 nodes 后，mutation2 读被污染 fixture → g.nodes[0] 崩溃）。
+
+# mutation：写坏 graph.json → 同一校验器必须红。
+# ⚠️ 每次从干净基线 GF_BASE 重建，避免 mutation 间状态串扰。
 GF_BASE="$(
   node -e 'const g=require(process.argv[1]); process.stdout.write(JSON.stringify(g));' "$GF"
 )"
 mutate_and_check() {  # $1=描述  $2=node 写坏逻辑（面对 $GF）
   printf '%s' "$GF_BASE" > "$GF"                # 重建干净基线
   if node -e "$2" "$GF" > "$GF.tmp" 2>/dev/null && mv "$GF.tmp" "$GF"; then
-    if node "$GV" "$GF" >/dev/null 2>&1; then
+    if node "$GV" "$GF" --strict >/dev/null 2>&1; then
       fail "mutation「$1」本应被抓到却通过 —— graph 校验退化"
     else
       pass "mutation「$1」被拒绝（校验守卫生效）"
@@ -283,8 +270,59 @@ mutate_and_check "缺失 nodes 数组" \
   'const g=require(process.argv[1]); delete g.nodes; process.stdout.write(JSON.stringify(g));'
 mutate_and_check "node.type 非法(badger)" \
   'const g=require(process.argv[1]); g.nodes[0].type="badger"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "knowledge object 节点(type=pattern)" \
+  'const g=require(process.argv[1]); g.nodes[0].type="pattern"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "合法 type 上带 statement（知识字段回流）" \
+  'const g=require(process.argv[1]); g.nodes[1].statement="x"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "节点 dependsOn 数组（双关系表示）" \
+  'const g=require(process.argv[1]); g.nodes[1].dependsOn=[]; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "module 缺 domain" \
+  'const g=require(process.argv[1]); delete g.nodes[0].domain; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "重复 node.id" \
+  'const g=require(process.argv[1]); g.nodes[1].id=g.nodes[0].id; process.stdout.write(JSON.stringify(g));'
 mutate_and_check "dangling edge.to 悬空" \
   'const g=require(process.argv[1]); g.edges[0].to="node-并不存在"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "legacy schemaVersion 2.0.0" \
+  'const g=require(process.argv[1]); g.schemaVersion="2.0.0"; process.stdout.write(JSON.stringify(g));'
+
+# 还原干净基线，供查询语义测试使用。
+printf '%s' "$GF_BASE" > "$GF"
+
+# 7b. findImpacted 方向：A.vue → B.ts；改 B.ts 必须返回 A.vue（消费者），
+# 而不是返回 B.ts 的依赖。用 files[] + 节点级影响，不建 file 节点。
+IMPACTED="$(jq --argjson files '["src/components/UserTable.vue"]' '
+  [ .nodes[] | select(
+      (((.files // []) | map(select(. as $f | $files | index($f))) | length) > 0)
+      or ((.id as $i | $files | index($i)) != null)
+    ) | .id ] as $changed
+  | [ .edges[] | select(.to as $t | $changed | index($t)) | .from ] | unique
+' "$GF")"
+if printf '%s' "$IMPACTED" | grep -q '"view-user"'; then
+  pass "findImpacted(B.ts) 返回消费者 A.vue（方向正确）"
+else
+  fail "findImpacted 方向错误：期望 view-user，实际 $IMPACTED"
+fi
+
+# 7c. findTransitiveDeps 真正递归 3 层：view-user → component-user → api-user → infra-http
+DEPS="$(jq --arg id 'view-user' '
+  def walk($frontier; $seen; $depth):
+    if $depth == 0 or ($frontier | length) == 0 then $seen
+    else
+      ([ $frontier[] as $n | .edges[] | select(.from == $n) | .to ] | unique) as $next
+      | ([ $seen[], $next[] ] | unique) as $newseen
+      | walk($next; $newseen; $depth - 1)
+    end;
+  walk([$id]; [$id]; 3) | .[] | select(. != $id)
+' "$GF")"
+DEPS_MISSING=""
+for want in component-user api-user infra-http; do
+  printf '%s' "$DEPS" | grep -q "\"$want\"" || DEPS_MISSING="$DEPS_MISSING $want"
+done
+if [ -z "$DEPS_MISSING" ]; then
+  pass "findTransitiveDeps 真正递归 3 层（component-user/api-user/infra-http）"
+else
+  fail "findTransitiveDeps 缺层:$DEPS_MISSING（实际: $DEPS）"
+fi
 
 echo ""
 echo "========================================"

@@ -10,7 +10,8 @@ description: >
 
 # Analyzer
 
-> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects → graph.json + recommendations/（现状 vs 应然建议）
+> 10 Extractor → Candidate → Evidence → 5-Verify → Knowledge Objects（内部）→ `.md` + `recommendations/`
+> （现状 vs 应然建议）；结构图由 Post Processing 从 `context.json.modules` + import 扫描重建
 > 遵循 [workflow-protocol](../../workflow-protocol/SKILL.md) — Registry-driven + Evidence-based Knowledge Graph
 
 ## 核心原则
@@ -34,7 +35,7 @@ description: >
 
 > Analyzer 不是默认入口，是**知识缺口入口**：只在 `.project-knowledge/` 不存在 / 未覆盖当前领域 / `last_scan` 过期时才跑。已有知识库且覆盖当前任务 → 跳过 Analyzer，用 Knowledge Resolver → Reuse（见 [Complexity Gate ②b](../../shared/prompts/complexity-gate.md)）。
 
-> **增量分析（Incremental Analysis）**：知识库存在、但只有某个领域缺失时，只跑该领域相关的 Extractor，局部更新 graph.json + 对应 .md——不重跑全部 10 个 Extractor。全量 10-Extractor 扫描只在「知识库不存在 / 结构漂移」时才做。
+> **增量分析（Incremental Analysis）**：知识库存在、但只有某个领域缺失时，只跑该领域相关的 Extractor，局部更新对应 `.md`——不重跑全部 10 个 Extractor。**`graph.json` 仍每次全量重建**（从 `context.json.modules` + 全项目 import 扫描），因为局部改图会留下悬空边；全量 10-Extractor 扫描只在「知识库不存在 / 结构漂移」时才做。
 
 > **跳过时的 drift 抽查**：知识库新鲜、决定跳过全量分析时，仍需做一次**轻量 drift 抽查**——读 package.json / 配置文件 + 抽查 1-2 个代表源码，比对 KB 的关键结论（技术栈版本、构建脚本、命名约定）是否仍一致。发现漂移 → 只局部修正漂移的对应 .md，不重跑全量。这是「盲信复用」与「全量重扫」之间的中间路径。
 

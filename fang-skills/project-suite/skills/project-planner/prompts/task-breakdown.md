@@ -329,7 +329,7 @@ B 完全独立？                 → 无依赖
 ## 已有模式
 | 模式 | 来源 | 应用于 |
 |------|------|--------|
-| {name} | graph.json 中的 pattern 节点 | T-{NNN} |
+| {name} | context-package.json 的 pattern（或 patterns/&lt;id&gt;.md） | T-{NNN} |
 
 ## 已有 API
 | 模块 | 路径 | 已有端点 |

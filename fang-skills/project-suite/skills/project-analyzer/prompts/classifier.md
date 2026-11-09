@@ -23,8 +23,8 @@
 | `candidates/` | `none` | 中间产物 |
 | `architecture/` `components/` `api/` | `project` | 项目结构知识 |
 | `patterns/` `conventions/` `observations/` | `project` | 项目模式与规范 |
-| `glossary.md` `index.md` `graph.json` | `project` | 项目知识索引 |
-| `context.json` `graph.json` `statistics.json` | `project` | 结构化项目数据 |
+| `glossary.md` `index.md` | `project` | 项目知识索引 |
+| `context.json` `statistics.json` `graph.json` | `project` | 结构化项目数据 / 结构关系图谱（graph 不是知识索引） |
 | `decisions/architecture-decisions.md` `decisions/index.md` | `project` | 项目级决策标准 |
 | `reports/latest.md` | `project` | 项目变更历史 |
 | `rules/` | `project` | 视情况晋升 personal |

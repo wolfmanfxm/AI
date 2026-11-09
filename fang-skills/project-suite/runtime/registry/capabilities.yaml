@@ -24,7 +24,7 @@ capability_types:
     description: 项目持久化状态（执行历史/置信度/知识生命周期）
     format: [.json]
   Graph:            # graph.json
-    description: 项目结构关系图谱（nodes+edges），支持 6 种标准查询
+    description: 项目结构关系图谱（nodes+edges），支持 7 种标准查询
     format: [.json]
   Plan:             # PLAN.md（9 模块 Contract）
     description: Goal / Scope / Context / Reuse / Decision / Task / Deps / Risk / Acceptance

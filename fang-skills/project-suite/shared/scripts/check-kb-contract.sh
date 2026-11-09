@@ -141,6 +141,45 @@ else
   echo "" >> "$REPORT"
 fi
 
+# ── 3. graph.json 结构契约（v3.0.0）────────────────────────────────────
+# 存在性由第 2 步保证；这里校验**内容**。与 E2E 共用 check-graph-contract.sh / graph-validate.mjs，
+# 避免「门禁一把尺子、测试另一把尺子」。
+# legacy 2.0.0（旧 Knowledge Objects 形状）在非 strict 下只 warning，不阻断既有项目——
+# 但会写进报告，提示重跑 Analyzer 全量重建。
+GRAPH_STATUS="—"
+if [ -f "$KNOWLEDGE_DIR/graph.json" ]; then
+  GRAPH_OUT="$(bash "$SCRIPT_DIR/check-graph-contract.sh" "$KNOWLEDGE_DIR/graph.json" 2>&1)"
+  GRAPH_RC=$?
+  if [ "$GRAPH_RC" -eq 0 ] && printf '%s' "$GRAPH_OUT" | grep -q "legacy graph"; then
+    GRAPH_STATUS="⚠️ legacy（需重跑 Analyzer）"
+    {
+      echo "## ⚠️ graph.json 仍是 legacy 形状（非结构图 v3.0.0）"
+      echo ""
+      echo '```'
+      printf '%s\n' "$GRAPH_OUT"
+      echo '```'
+      echo ""
+    } >> "$REPORT"
+  elif [ "$GRAPH_RC" -eq 0 ]; then
+    GRAPH_STATUS="✅ v3.0.0"
+    {
+      echo "## ✅ graph.json 结构契约通过（v3.0.0）"
+      echo ""
+    } >> "$REPORT"
+  else
+    GRAPH_STATUS="❌ 违约（rc=$GRAPH_RC）"
+    ISSUES=$((ISSUES + 1))
+    {
+      echo "## ❌ graph.json 结构契约违约"
+      echo ""
+      echo '```'
+      printf '%s\n' "$GRAPH_OUT"
+      echo '```'
+      echo ""
+    } >> "$REPORT"
+  fi
+fi
+
 # ── Summary ────────────────────────────────────────────────────────────
 {
   echo "## Summary"
@@ -149,6 +188,7 @@ fi
   echo "|-------|--------|"
   echo "| 契约目录 | $([ -n "$MISSING_DIRS" ] && echo "❌ $PRESENT_DIRS/$TOTAL_DIRS 在位" || echo "✅ $TOTAL_DIRS/$TOTAL_DIRS") |"
   echo "| 固定根产物 | $([ -n "$MISSING_ROOT" ] || [ -n "$BAD_CASE" ] && echo "❌ 有缺失/命名不符" || echo "✅ 齐全") |"
+  echo "| graph.json 结构 | $GRAPH_STATUS |"
   echo "| 合计 | $([ "$ISSUES" -eq 0 ] && echo '✅ 契约满足' || echo "⛔ $ISSUES 项违约") |"
 } >> "$REPORT"
 

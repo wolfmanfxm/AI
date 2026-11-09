@@ -129,4 +129,4 @@ summary: "<现状一句话 → 建议一句话>"
 
 - **`recommendations/` 是「建议」不是「规范」**——generator 用于新代码改进，但不得当 blocking constraint（那是 rules/ 的职责）。
 - **只写「有依据」的建议**——每条 recommendation 必须能溯源到**本项目统计/证据**（`basis`，即正文「依据：」的 source）；跨项目 Instinct 是可选的佐证，不是必需。
-- **不修改现状描述**——recommendations/ 单独存放，不混进 patterns/api/graph.json（事实与观点分层：现状描述在 patterns/api/graph，价值判断在 recommendations/）。
+- **不修改现状描述**——recommendations/ 单独存放，不混进 patterns/api/graph.json（事实与观点分层：结构事实在 graph.json，知识现状在 patterns/api/*.md，价值判断在 recommendations/）。

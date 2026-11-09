@@ -82,7 +82,8 @@ Organization Layer   — Task→Project→Organization→Personal 四层
 Phase 1: 10 Extractors (Registry-driven) → candidates/accepted/*.yaml
 Phase 2: 5-Verify → Accepted/Adjusted/Rejected
 Phase 3: Cross-Validator → contradictions + complements
-Phase 4: Knowledge Builder → graph.json + .md (双轨输出)
+Phase 4: Knowledge Builder → Knowledge Objects（内部）→ .md（知识持久化）
+        Post Processing → graph.json（结构事实，从 context.json.modules + import 全量重建）
 Phase 5: INDEX Generator → Zettelkasten Knowledge Graph
 Phase 6: Classifier → promotion: none/project/personal
 Phase 7: Instinct Extraction → Always/Prefer/Avoid/Never
@@ -117,7 +118,8 @@ Task (一次任务) → Project Knowledge (项目长期) → Review → Instinct
 
 | 门禁 | 状态 |
 |------|------|
-| Conformance (G1-G17) | 0 errors, 0 warnings |
+| Conformance (G1-G17) | 0 errors, 9 warnings（G17 复审到期，非结构问题） |
+| Graph Contract (v3.0.0) | ✅ 结构 + 9 mutation + 查询方向/递归（E2E §7） |
 | Drift Detection | 40/40 pass |
 | Trigger Eval | clean, no overlaps |
 | Runtime Neutrality | 0 red flags |

@@ -90,7 +90,6 @@ produces: [${produces}]
 consumes: [${consumes}]
 stages: [${stages}]
 verification: { checks: ${verify_checks}, source: prompts/validation.md }
-evidence: { format: knowledge-object.schema.json, source: graph.json }
 failure_conditions: { modes: ${failure_modes}, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "${last_reviewed}"
 EOF

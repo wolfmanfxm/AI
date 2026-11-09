@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "knowledge-object.schema.json",
-  "title": "Knowledge Object v2.0",
-  "description": "统一知识对象。.md 仅为 View，此为 Runtime 权威数据模型。",
+  "title": "Knowledge Object v2.1 (internal)",
+  "description": "统一知识对象（内部表示）。Knowledge Builder 用它校验 Accepted Candidate 的对象形态；持久化落点是 .md（frontmatter statement/constraint）+ knowledge-index.json，不落盘为 graph.json，也不新建 knowledge-objects.json。graph.json 的结构契约见 graph.schema.json。",
 
   "type": "object",
   "required": ["id", "type", "scope", "confidence"],
