@@ -35,13 +35,21 @@ v2 改为 **append-only JSONL**：
 > **聚合不再落盘**：任何"写完再更新汇总"的字段都会重新引入读改写竞态。`collect-metrics.sh`
 > 读取时自行聚合，数据永远从唯一事实（行记录）推导。
 
+> **执行指标也以 timeline 为准**：执行次数、completed/degraded/blocked/failed、平均 confidence、
+> skills used 全部由行记录聚合（`timeline-stats.mjs --shell`）。只有 timeline 不存在或没有有效
+> 记录时，才回退到 `state.json` 的 legacy 解析。报告中的 `Execution metrics source` 行显式标注
+> 本次来源（`timeline` / `state.json` / `none`），避免出现「Executions 0 而 Timeline entries 1」
+> 这种自相矛盾的假绿。报告写到**项目**的 `.project-knowledge/reports/telemetry-report.md`，
+> 不进 project-suite 包。
+
 ### 与旧文件的兼容
 
 - **新写入一律进 `timeline.jsonl`**，禁止再写 `timeline.json`。
 - 读取方（`collect-metrics.sh`）按顺序探测：`metrics/timeline.jsonl` → `metrics/timeline.json`（v1）→
   `runtime/timeline.json`（更早的 collector 路径）。命中 v1 时按 `{runs:[]}` 或顶层数组解析。
-- 旧项目迁移：保留 `timeline.json` 只读，新记录继续写 `timeline.jsonl`；两者在读取时合并即可。
-  需要一次性合并时，把每个 run 逐行追加到 `.jsonl` 后删除旧文件（**先备份**）。
+- 旧项目迁移：保留 `timeline.json` 只读，新记录继续写 `timeline.jsonl`。读取时按上述顺序
+  **命中即用、不合并**——因此迁移应把旧记录逐行追加到 `.jsonl` 后删除旧文件（**先备份**），
+  否则命中 `.jsonl` 后旧 `timeline.json` 的记录不会被计入。
 
 ## 一行记录
 

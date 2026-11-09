@@ -159,6 +159,6 @@ project-suite/
 ├── skills/                ← 10 Skills
 ├── shared/                ← Schemas(10) · Scripts(31) · Primitives(5) · Conventions · Examples · Templates
 ├── docs/                  ← Skill Atlas · Benchmarks · Review Cadence · Review Studio · Waiver · Prompt Quality · Cross-Run Reliability · Roadmap · Architecture
-├── reports/               ← Trust(90) · Quality Scorecard · Trigger Eval
+├── reports/               ← Output Quality Scorecard（框架治理产物；运行遥测落项目知识库，不进包）
 └── suite-manifest.yaml    ← 单文件治理
 ```

@@ -40,7 +40,7 @@ rsync 命令：
 ```bash
 # ⚠️ 规则顺序 = 优先级（rsync 首次匹配即生效）：先排除 → 再包含 → 最后 --exclude='*' 兜底。
 #    反例（曾用）：把 --include='*/' 放最前面会先放行所有目录，后面的 --exclude 永不生效。
-#    在 afc-newcore-web-frontend 的真实 dry-run 中，该顺序导致 .sessions/、runtime/tasks/、
+#    在真实项目的 dry-run 中，该顺序导致 .sessions/、runtime/tasks/、
 #    proposals/ 全部被列入同步清单——排除规则形同虚设。
 rsync -av \
   --exclude='proposals/' --exclude='candidates/' \

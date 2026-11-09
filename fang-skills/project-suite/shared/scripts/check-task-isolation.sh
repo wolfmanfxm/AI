@@ -212,6 +212,27 @@ LEGACY="$TMP/legacy-timeline.json"
 printf '%s' '{"schemaVersion":"1.0.0","project":"p","runs":[{"runId":"r1","skill":"project-planner","status":"completed","timing":{"startedAt":"2026-11-09T10:00:00Z","finishedAt":"2026-11-09T10:02:00Z","durationMs":120000},"quality":{"confidence":80}}]}' > "$LEGACY"
 assert_eq "legacy {runs:[]} 可被读取" "$(node "$STATS" "$LEGACY" | awk '{print $1}')" "1"
 
+# --shell：供 collect-metrics 读取完整聚合（执行数/状态/confidence/skills）
+SHELL_OUT="$(node "$STATS" "$TL" --shell)"
+assert_eq "--shell TOTAL_RUNS = 20" "$(printf '%s\n' "$SHELL_OUT" | sed -n 's/^TOTAL_RUNS=//p')" "20"
+assert_eq "--shell COMPLETED = 20" "$(printf '%s\n' "$SHELL_OUT" | sed -n 's/^COMPLETED=//p')" "20"
+assert_eq "--shell AVG_CONFIDENCE = 80" "$(printf '%s\n' "$SHELL_OUT" | sed -n 's/^AVG_CONFIDENCE=//p')" "80"
+assert_eq "--shell SKILLS 去重排序" "$(printf '%s\n' "$SHELL_OUT" | sed -n 's/^SKILLS=//p')" "project-generator,project-planner"
+
+# collect-metrics：timeline 是执行事实的唯一 append-only 来源。
+# 本 fixture 同时有 state.json（4 条 "skill"）和 timeline（20 行）→ 必须报 20 且 source=timeline。
+# 修复前的缺陷：执行数只读 state.json → 报 4，与同一报告的 timeline 20 自相矛盾。
+bash "$SCRIPT_DIR/collect-metrics.sh" "$TMP" >/dev/null
+METRICS_REPORT="$KD/reports/telemetry-report.md"
+assert_eq "collect-metrics 报告落在项目知识库（不写 suite 包）" \
+  "$([ -f "$METRICS_REPORT" ] && echo yes || echo no)" "yes"
+assert_eq "collect-metrics 执行数与 timeline 同源（20，而非 state 的 4）" \
+  "$(sed -n 's/^| Total executions | \(.*\) |$/\1/p' "$METRICS_REPORT")" "20"
+assert_eq "collect-metrics 标注 source=timeline" \
+  "$(sed -n 's/^| Execution metrics source | \(.*\) |$/\1/p' "$METRICS_REPORT")" "timeline"
+assert_eq "collect-metrics 取 timeline 的 confidence（80）" \
+  "$(sed -n 's/^| Avg confidence | \(.*\)% |$/\1/p' "$METRICS_REPORT")" "80"
+
 # ---------------------------------------------------------------------------
 echo
 if [ "$FAIL" -eq 0 ]; then
