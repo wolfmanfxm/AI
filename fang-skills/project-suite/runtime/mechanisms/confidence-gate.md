@@ -20,7 +20,7 @@ confidence < 40   →  🔴 BLOCK      阻断，必须重做或人工介入
 | 🟢 PASS | confidence ≥ 90 | 正常执行，无额外检查 | 无需操作 |
 | 🟡 REVIEW | 70 ≤ confidence < 90 | 建议先 Review，但不阻断 | 可选择跳过（标注风险） |
 | 🟠 GATE | 40 ≤ confidence < 70 | Reviewer 强制检查后才能进 Generator；禁止进入 Releaser | 必须 Review 或重做上游 |
-| 🔴 BLOCK | confidence < 40 | 拒绝执行下游，state.json 写入 blocker | 必须重做上游或人工介入 |
+| 🔴 BLOCK | confidence < 40 | 拒绝执行下游；State 更新建议中写入 blocker（Dispatcher 提交） | 必须重做上游或人工介入 |
 
 ## 各 Skill 的 Gate 位置
 
@@ -63,7 +63,7 @@ all skill.confidence ≥ 90:
 
 ## state.json 集成
 
-state.json 中每个 history 条目已含 `confidence` 字段：
+state.json 中每个 history 条目已含 `confidence` 字段（由 Dispatcher 从各 Skill 的 State 更新建议中提交；Skill 自身不写根 state.json）：
 
 ```json
 {

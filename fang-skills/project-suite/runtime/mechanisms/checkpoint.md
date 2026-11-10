@@ -48,6 +48,9 @@
 1. **子任务完成后立即写** — 避免已完成工作丢失
 2. **token 预警时** — 剩余 token < 20% 时，完成当前子任务后写 checkpoint 并暂停
 3. **用户触发暂停** — 用户说"暂停"/"等一下"时写 checkpoint
+4. **长任务续租单写者锁** — 每次写 checkpoint 时同时执行
+   `runtime-run.sh renew <project-root> --skill <name>`。锁 TTL 默认 3600s，
+   不续租的长扫描会在中途变成 stale；续租是显式调用，不引入后台心跳进程。
 
 ### 写入策略
 

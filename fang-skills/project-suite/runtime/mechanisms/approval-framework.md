@@ -15,7 +15,8 @@
 
 ## 审批日志格式
 
-每次审批决策写入 `state.json` 的 `approval_log` 数组：
+每次审批决策由 Skill 写入**收尾报告的 State 更新建议**（`approval_log` 条目），
+由 Dispatcher 串行提交到根 `state.json` 的 `approval_log` 数组。Skill 不直接写根 `state.json`：
 
 ```json
 {

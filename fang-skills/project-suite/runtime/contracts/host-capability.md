@@ -56,6 +56,7 @@ host_capabilities:
   convergence: advisory | enforced        # 收敛：建议 / 强制停止
   checkpoint: supported | unsupported     # CHECKPOINT：支持 / 不支持
   user_confirmation: supported | unsupported  # 用户确认：支持 / 不支持
+  run_lifecycle: advisory | enforced      # 运行生命周期：建议 / Host 兜底收尾
 ```
 
 | capability | advisory | managed / enforced / supported |
@@ -65,6 +66,30 @@ host_capabilities:
 | convergence | Suite 声明「已做够」，Agent 自行决定是否停 | Host 读 next_action 强制停止/继续 |
 | checkpoint | Suite 声明 CHECKPOINT 位置，Agent 自行处理 | Host 在 CHECKPOINT 处暂停等用户 |
 | user_confirmation | Suite 建议询问用户，Agent 自行判断 | Host 提供 AskUserQuestion 机制 |
+| run_lifecycle | Suite 要求 start/finish，Agent 自行执行 | Host 在运行结束时检查运行指针并 `finish --auto-finalized`（Start 仍由 Skill Discovery 执行） |
+
+> **Start 的唯一 Producer 是 Skill Discovery。** Host 的 `run_lifecycle` 能力只覆盖
+> **异常收尾**：Discovery 在 Task Resolution / 用户确认后调用 `runtime-run.sh start`；
+> Host 不知道用户最终确认的 task / goal / 范围，不应抢先登记——否则会落下
+> `Run <skill>` 这类无信息量任务，并与 Discovery 的 Task Resolution 竞争同一份运行状态。
+> 用户直接输入 `/skill` 或模型调用 Skill 工具，都只是「即将进入 Discovery」的信号，
+> 不构成创建 Task / Run 的依据。
+>
+> ⚠️ Start 也要求运行身份：`runtime-run.sh start` 在没有非空 session 时直接拒绝（exit 2）。
+> Claude Code 自动注入 `CLAUDE_CODE_SESSION_ID`（旧名 `CLAUDE_SESSION_ID` 仅兼容）；其它宿主
+> 必须由 Discovery 显式传 `--session-id <id>`，否则这次的 Run 无法被安全地 finish / renew。
+>
+> `run_lifecycle` 的价值：**运行没有产出就结束**（用户取消、monitor-only、模型中途停下）是最容易
+> 静默丢失的一类运行。Host 在**会话结束**时调用
+> `shared/scripts/runtime-run.sh finish <root> --skill <name> --session-id <id> --auto-finalized`，
+> 就能把它变成一条 `degraded` 记录，而不是空白。
+>
+> ⚠️ 必须是「会话结束」而不是「每一轮回复结束」。Claude Code 的 `Stop` 是每轮触发，
+> 用它收尾会在长任务中途释放锁；对应的事件是 `SessionEnd`。
+>
+> ⚠️ 收尾必须带 `--session-id`：运行指针记录启动它的 session，Host 不得代收别的 session 的 run。
+> 指针有 `sessionId` 而 Host 拿不到当前 session 时，`finish` 会 fail-closed（exit 2）而不是
+> 「当作同一个 session」；无 `sessionId` 的旧指针也不自动收尾，保留给人工恢复。
 
 ## Host 能力声明示例
 
@@ -77,6 +102,7 @@ host_capabilities:
   convergence: advisory
   checkpoint: supported            # 通过 AskUserQuestion
   user_confirmation: supported
+  run_lifecycle: supported         # SessionEnd Hook 只做异常收尾；Start 由 Discovery 执行
 ```
 
 ### 裸 API / 自定义 Harness（理论）

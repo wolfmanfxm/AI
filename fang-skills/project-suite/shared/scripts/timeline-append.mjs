@@ -24,8 +24,15 @@ const SKILLS = new Set([
   'project-tester', 'project-reviewer', 'project-refactorer', 'project-documenter',
   'project-releaser',
 ]);
-const STATUSES = new Set(['completed', 'degraded', 'blocked', 'failed']);
+const STATUSES = new Set(['completed', 'degraded', 'blocked', 'failed', 'skipped']);
 const TASK_RE = /^task-[0-9]{8}(-[A-Za-z0-9][A-Za-z0-9._-]*)?$/;
+// 顶层字段必须与 timeline.schema.json 对齐。schema 是 additionalProperties:false，
+// 但旧 writer 只校验必填/枚举 → 探针写入的 reason/discovery/notes 能落盘却过不了 schema。
+// 这里在写盘前拦截：额外信息放进 context，不再污染顶层。
+const TOP_LEVEL = new Set([
+  'schemaVersion', 'project', 'taskId', 'runId', 'skill', 'wave', 'status',
+  'timing', 'input', 'output', 'quality', 'context', 'billing', 'dependencies',
+]);
 
 function die(msg, code) {
   process.stderr.write(`❌ timeline-append: ${msg}\n`);
@@ -53,7 +60,15 @@ function validate(rec) {
     return errors;
   }
   if (!SKILLS.has(rec.skill)) errors.push(`skill 非法: ${JSON.stringify(rec.skill)}`);
-  if (!STATUSES.has(rec.status)) errors.push(`status 非法: ${JSON.stringify(rec.status)}（允许 completed/degraded/blocked/failed）`);
+  if (!STATUSES.has(rec.status)) errors.push(`status 非法: ${JSON.stringify(rec.status)}（允许 completed/degraded/blocked/failed/skipped）`);
+  for (const key of Object.keys(rec)) {
+    if (!TOP_LEVEL.has(key)) {
+      errors.push(`未知顶层字段 ${JSON.stringify(key)}——非指标信息请放进 context`);
+    }
+  }
+  if ('context' in rec && (rec.context === null || typeof rec.context !== 'object' || Array.isArray(rec.context))) {
+    errors.push('context 必须是对象');
+  }
   const timing = (rec.timing && typeof rec.timing === 'object') ? rec.timing : null;
   if (!timing) {
     errors.push('timing 缺失或不是对象');

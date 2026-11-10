@@ -78,20 +78,22 @@ v2 改为 **append-only JSONL**：
 |------|------|------|
 | `skill` | string | skill 名称（枚举见 schema） |
 | `wave` | number | DAG 调度波次 |
-| `status` | enum | `completed` / `degraded` / `blocked` / `failed` |
+| `status` | enum | `completed` / `degraded` / `blocked` / `failed` / `skipped`（`skipped` = 运行在产出前结束：monitor-only / 用户取消 / 无执行，**不代表失败**） |
 | `timing.durationMs` | number | 执行耗时（毫秒）；缺失时由 `finishedAt - startedAt` 推导 |
 | `input.contextSizeEstimate` | string | 估算上下文大小 |
 | `output.filesGenerated` | number | 产出文件数 |
 | `output.approxTokens` | number | 估算输出 token 数 |
-| `quality.confidence` | number | 0-100 |
+| `quality.confidence` | number | 0-100。`0` 表示**未评估**（degraded / skipped / 用户在产出前取消），不是「质量极差」；聚合平均只统计 `completed` |
 | `quality.warnings` | number | 警告数（降级/假设/推断） |
 | `quality.errors` | number | 错误数（不可恢复） |
 | `dependencies.upstreamConfidenceMin` | number | 上游 Skill 中最低的 confidence |
+| `context` | object | 非标准运行的审计上下文（`reason` / `notes` / `warnings` / `autoFinalized` 等）。**自由 schema**——除指标外的信息都放这里，不要新增顶层字段。`warnings` 为字符串数组，记录「运行成功但产物不完整」这类不影响 status 的告警（如 `discovery-artifact-missing`） |
 
 ### 必填 / 选填
 
 - **必填**：`schemaVersion` `project` `taskId` `runId` `skill` `status` `timing` `quality.confidence`
-- **选填**：`wave` `input` `output` `dependencies.billing`（能填就填，不强制）
+- **选填**：`wave` `input` `output` `dependencies` `billing` `context`（能填就填，不强制）
+- **禁止**：schema 之外的顶层字段。writer 会在写盘前拒绝未知顶层字段（见下），要把审计信息放进 `context`。
 
 ## 写入规则
 
@@ -107,13 +109,17 @@ bash shared/scripts/timeline-append.sh <project-root> /tmp/run.json
 
 写入器负责：
 
-1. 校验必填字段与枚举；不合规 → exit 2，**不写半条记录**。
+1. 校验必填字段与枚举，并拒绝 schema 之外的顶层字段（`additionalProperties: false`）；不合规 → exit 2，**不写半条记录**。
 2. 缺省补齐：`schemaVersion` / `project` / `taskId`（取 `$PS_TASK_ID`）/ `runId`（由 `taskId + skill + startedAt` 生成）/ `timing.durationMs`。
 3. 单次 `O_APPEND` 追加 `JSON.stringify(record) + "\n"`。
 
 **禁止**：读 `timeline.jsonl` → 改 → 写回；禁止在内存里维护 aggregate 后落盘。
 
-**写入时机**：state.json 写入之后，收尾报告输出之前。
+**写入时机（终态必写）**：**每条退出路径都必须留下恰好一行终态记录**——`completed` / `degraded` /
+`blocked` / `failed` / `skipped` 都算。包括 Discovery 后短路（monitor-only、drift-check、用户取消）、
+resume 跳过、以及被 hook 自动收尾的运行。只在 Delivery 写的旧约定会让这些运行在指标里完全不可见。
+显式收尾优先调用 `shared/scripts/runtime-run.sh finish <project-root> --skill <name> --status <status>`（见 workflow-protocol 的 Terminal Record）。
+`finish` 只结束本次 Run，不修改长期 Task 的 `status`；同一 `runId` 只写一行——释放锁失败后重试不会重复记账。
 
 ## 查询能力
 

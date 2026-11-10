@@ -21,6 +21,9 @@ Skill Discovery → Context Resolver → 读 knowledge-index.json → 分桶(con
 - `.md` 为 Human View，`knowledge-index.json` + `graph.json` 为 Machine Source of Truth
 - 知识（rules/decisions/patterns/components/api/experience/playbooks）走 Resolver 产出的 `context-package.json`；结构事实（组件/API/模块依赖）走 graph-query 直接查 `graph.json`
 - ⚠️ Query API 是 Protocol：Resolver 未实现时，agent 降级读 knowledge-index.json/catalog.md 解析 query 语义
+- ❌ **`knowledge-index.json` 缺失不是降级理由**：那是知识编译没做，不是 Resolver 不可用。
+  先跑 `shared/scripts/knowledge-compiler.sh`；编译器拒绝（如 `compiler_enforced` 字段缺失）时，
+  修数据或显式记录一次由用户确认的 degraded，**不得**把「绕过 Resolver 直接读 markdown」当成常规路径。
 
 ## 核心机制：Stage Template Injection
 
@@ -107,6 +110,61 @@ for each stage in interface.stages:
 ```
 
 Skill 通过 `runtime/config/skill-policy.yaml` 的 `stage_config` **声明**每个 stage 的行为偏好（checkpoint/retry/parallel/blocking）。这些是**给 Host 的推进建议**，Host 决定是否强制执行。默认值即可覆盖 90% 场景。
+
+## Terminal Record（终态记录契约）
+
+> **每一次运行，在所有退出路径上，恰好写一行终态记录。** 这不是「Delivery 的一个步骤」，
+> 而是运行的结束条件——运行在 Discovery 后结束，同样算一次运行。
+
+适用范围：任何声明了 `stages` 的 Skill 运行，包括 Discovery 后短路（monitor-only / drift-check /
+用户取消）、resume 跳过、门禁阻断、异常终止，以及被 hook 自动收尾的运行。
+
+唯一入口（不要分别调用底层脚本）：
+
+```bash
+# Discovery 开始：任务解析/创建 + 单写者锁 + 运行指针
+# 必须有运行身份：Claude Code 注入 CLAUDE_CODE_SESSION_ID；其他宿主显式传 --session-id
+bash shared/scripts/runtime-run.sh start <project-root> --skill <name> \
+  (--task-id <id> | --new-task --goal "...") [--slug ...] [--session-id <id>]
+
+# 任意退出点：一行 timeline + 释放锁（**不关闭长期 Task**）
+bash shared/scripts/runtime-run.sh finish <project-root> --skill <name> --status <status> \
+  [--confidence <0-100>] [--reason "..."] [--notes "..."] [--session-id <id>] [--auto-finalized]
+```
+
+| status | 含义 | confidence |
+|--------|------|-----------|
+| `completed` | 产出完成且通过门禁 | **必填**（真实评分） |
+| `degraded` | 产出可用但有已知缺口 / hook 自动收尾 | 0（未评估） |
+| `blocked` | 门禁或前置条件阻断 | 0 |
+| `failed` | 不可恢复错误 | 0 |
+| `skipped` | 在产出前结束（monitor-only / 用户取消 / 无执行） | 0 |
+
+**禁止**：
+- 只写成功路径（失败/取消的运行会在指标里彻底消失）
+- 直接调 `timeline-append.sh` / `writer-lock.sh`——`runId` 会与 `start` 不一致，甚至重复记账
+- 用 prose 声明「已记录」而不调用脚本：审计以实际 `tool_use` 为准
+
+> **`finish` 只结束 Run，不结束 Task。** 单次 Skill 完成不等于整个长期任务完成；
+> `meta.status` 的 `completed` / `abandoned` 必须由编排方或用户显式
+> `task-registry.sh set-status` 决定。`finish` 自动关任务会让同一任务的后续 Skill
+> 在 Task Resolution 时找不到 active 任务，从而新建一个任务、切断 resume。
+>
+> Host 若声明 [`run_lifecycle`](../runtime/contracts/host-capability.md) 能力，应在**会话结束**时
+> （Claude Code 用 `SessionEnd`，不是每轮触发的 `Stop`）对**本 session** 仍有运行指针的 skill 执行
+> `finish --auto-finalized`，把「模型忘了收尾」变成可观测的 `degraded` 行。
+> **Host 不负责 Start**：唯一调用 `runtime-run.sh start` 的是 Skill Discovery（Task Resolution 之后）；
+> Hook / 宿主事件不创建 Task / Run。
+> 收尾必须带 `--session-id`：指针记录了启动它的 session，别的 session 不得代收。
+> Claude Code 会自动注入 `CLAUDE_CODE_SESSION_ID`，Skill 直接调 `finish` 即可；其他宿主必须显式传。
+> 指针有 sessionId 而调用方没有 session 时 `finish` / `renew` / `start` 一律 fail-closed；
+> **`start` 本身也要求 session 非空**——没有身份的 Run 无法被安全收尾，直接拒绝。
+>
+> **Dispatcher 类 Skill 例外**：`pipeline-orchestrator` 协调多个 Task，本身不创建自己的 Run，
+> 因此不执行 Run 登记、不调用 `start`；但它必须在 Discovery 绑定一个目标 `task_id`
+> （选择已有任务或经用户确认后新建），通过 `PS_TASK_ID` 传给后续 Skill，并只做路由与
+> 根 `state.json` 的串行提交。判断标准：这个 Skill 有没有「属于自己的一个 Run」——
+> 没有就按 Dispatcher 类处理，但仍要绑定目标 Task。
 
 ## 三大能力
 

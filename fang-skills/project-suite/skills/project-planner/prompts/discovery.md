@@ -4,7 +4,12 @@
 
 ## Actions
 
-0. **Task Resolution** — 先解析 task_id（[task-identity.md](../../../runtime/mechanisms/task-identity.md)）。新任务 → `task-registry.sh create "<goal>" --skill project-planner`；存在未完成任务 → 用户确认是继续还是新建。**task_id 未确定前不读知识包、不写任何文件。**
+0. **Task Resolution（只读）** — 先解析 task_id（[task-identity.md](../../../runtime/mechanisms/task-identity.md)）。
+   - 新任务 → 记下待创建的 goal / slug，由收尾的 `runtime-run.sh start --new-task --goal ...` 创建（**不要在此步 `task-registry.sh create`**）
+   - 恰有一个 active 任务、且本次需求与它的 goal 是同一件事 → 使用（打印一行确认）
+   - 恰有一个 active 任务、但本次需求是另一件事 → `AskUserQuestion` 继续旧任务 / 新建任务
+   - 多个 active 任务 → 列出后让用户选择（含新建）
+   - **task_id 未确定前不读知识包、不写任何文件。** 单一 active 任务不等于当前用户意图。
 
 1. **Context Resolver** — 读 `runtime/tasks/<task_id>/context-package.json`（rules[]/knowledge[]/guidance[]），先拿到本项目的约束与知识 → [Context Resolver](../../../runtime/contracts/context-resolver.md)
    - 本任务还没有知识包（新建任务）→ 直读项目级 `rules/`、`decisions/`（project-scope）、`experience/`，**不要读根级 legacy context-package.json**（那是别的任务的过滤结果）
@@ -28,10 +33,22 @@
 
 8. CHECKPOINT — 展示 Goal + Scope
 
+9. **运行登记 + 单写者锁（唯一入口）** — 用户确认 Goal / Scope 后调用：
+   ```bash
+   # 恢复已有任务
+   bash shared/scripts/runtime-run.sh start <project-root> --skill project-planner \
+     --task-id <task_id> --goal "<确认后的 goal>"
+   # 新任务（用户明确选择新建时必须带 --new-task）
+   bash shared/scripts/runtime-run.sh start <project-root> --skill project-planner \
+     --goal "<确认后的 goal>" --slug <slug> --new-task
+   ```
+   → 输出 `TASK_ID` / `RUN_ID` / `STARTED_AT`，写入本次运行上下文。锁被占用 / stale → 🔴 BLOCKED。
+
 ## Exit
 
 - Goal 一句话已确认 + Scope 边界已确认
 - 用户已点确认
+- `TASK_ID` / `RUN_ID` 已确定（`runtime-run.sh start` 已执行）
 
 ## Failure
 

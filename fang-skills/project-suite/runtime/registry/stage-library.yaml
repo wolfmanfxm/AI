@@ -53,7 +53,7 @@ stages:
   delivery:
     description: 最终产出写入与同步
     standard_input: [validated_outputs]
-    standard_output: [final_artifacts, state.json_updated, timeline.jsonl_appended]
+    standard_output: [final_artifacts, state_update_suggestion, timeline.jsonl_appended]
     entry_condition: validation_passed
     exit_condition: all_files_written + manifest_completed
     checkpoint: false

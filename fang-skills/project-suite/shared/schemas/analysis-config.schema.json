@@ -3,7 +3,7 @@
   "title": "Analysis Config",
   "description": "Analyzer skill 的用户配置。首次分析时写入，此后只读。",
   "type": "object",
-  "required": ["projectName", "mode", "scope", "output"],
+  "required": ["projectName", "mode", "scope"],
   "properties": {
     "schemaVersion": {
       "type": "string",
@@ -15,8 +15,8 @@
     },
     "mode": {
       "type": "string",
-      "enum": ["quick", "standard", "deep"],
-      "description": "分析深度：快速/标准/详尽"
+      "enum": ["quick", "standard", "deep", "incremental"],
+      "description": "分析模式：quick/standard/deep 为深度；incremental 表示只重扫漂移领域（graph.json 仍全量重建）"
     },
     "scope": {
       "type": "array",
@@ -26,7 +26,7 @@
     "output": {
       "type": "array",
       "items": { "type": "string", "enum": ["vault", "local"] },
-      "description": "输出位置"
+      "description": "输出位置（可选；缺省视为 local，即 .project-knowledge/）"
     },
     "vaultPath": {
       "type": "string",

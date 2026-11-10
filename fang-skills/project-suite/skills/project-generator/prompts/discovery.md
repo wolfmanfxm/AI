@@ -4,9 +4,11 @@
 
 ## Actions
 
-0. **Task Resolution** — 解析 task_id（[task-identity.md](../../../runtime/mechanisms/task-identity.md)）。
+0. **Task Resolution（只读）** — 解析 task_id（[task-identity.md](../../../runtime/mechanisms/task-identity.md)）。
    - 用户指定了 PLAN / 任务 → 匹配对应 task
-   - 无法匹配且无 active 任务 → `task-registry.sh create --slug "generator-<timestamp>"`，收尾报告标注 `⚠️ 无上游任务，已自动建任务`
+   - 恰有一个 active 任务、且与本次 PLAN / 需求相符 → 使用（打印一行确认）
+   - 恰有一个 active 任务、但本次需求属于另一件事 → `AskUserQuestion` 继续旧任务 / 新建任务
+   - 无法匹配且无 active 任务 → 记下待建 goal，由收尾的 `runtime-run.sh start --new-task --goal ... --slug "generator-<timestamp>"` 创建，收尾报告标注 `⚠️ 无上游任务，已自动建任务`
    - **task_id 未确定前不读 context-package、不写任何文件**
 
 1. **Context Resolver** → [Context Resolver](../../../runtime/contracts/context-resolver.md)：读 `runtime/tasks/<task_id>/context-package.json` → 拿 rules[]/knowledge[]/guidance[]/recommendations[]
@@ -31,10 +33,22 @@
 
 8. CHECKPOINT — 展示过滤后改动范围（新建/修改文件清单 + 每文件预估行数 + REUSE 标注）
 
+9. **运行登记 + 单写者锁（唯一入口）** — 用户确认改动范围后调用：
+   ```bash
+   # 恢复已有任务
+   bash shared/scripts/runtime-run.sh start <project-root> --skill project-generator \
+     --task-id <task_id> --goal "<确认后的 goal>"
+   # 无上游任务时的回退
+   bash shared/scripts/runtime-run.sh start <project-root> --skill project-generator \
+     --goal "generate <scope>" --slug "generator-<timestamp>" --new-task
+   ```
+   → 输出 `TASK_ID` / `RUN_ID` / `STARTED_AT`，写入本次运行上下文。
+
 ## Exit
 
 - 用户确认改动范围（文件清单 + 预估行数 + REUSE 标注）
 - `runtime/tasks/<task_id>/manifest-project-generator.json` status = confirmed
+- `TASK_ID` / `RUN_ID` 已确定（`runtime-run.sh start` 已执行）
 
 ## Failure
 

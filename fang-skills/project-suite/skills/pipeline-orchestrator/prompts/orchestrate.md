@@ -5,7 +5,8 @@
 
 ## Actions
 
-> 前置：Discovery 已完成 Task Resolution，`task_id` 已知。Pipeline 状态与报告都落在该任务目录下。
+> 前置：Discovery 已完成 Task 绑定（选择已有任务或经用户确认后新建），`task_id` 已知并已导出为
+> `PS_TASK_ID`。Pipeline 状态与报告都落在该任务目录下。
 
 按 pipeline 定义的路径，逐 Skill 建议推进，在 Decision Boundary 暂停确认：
 

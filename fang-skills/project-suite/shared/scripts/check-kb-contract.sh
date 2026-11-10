@@ -144,23 +144,14 @@ fi
 # ── 3. graph.json 结构契约（v3.0.0）────────────────────────────────────
 # 存在性由第 2 步保证；这里校验**内容**。与 E2E 共用 check-graph-contract.sh / graph-validate.mjs，
 # 避免「门禁一把尺子、测试另一把尺子」。
-# legacy 2.0.0（旧 Knowledge Objects 形状）在非 strict 下只 warning，不阻断既有项目——
-# 但会写进报告，提示重跑 Analyzer 全量重建。
+# 必须 `--strict`：交付门禁不能被 legacy 2.0.0（旧 Knowledge Objects 形状）以 warning 放行——
+# 那会让「graph.json 根本不是结构图」的项目照样声明 status: completed。
+# legacy 图 → 门禁失败，按报告提示重跑 Analyzer 全量重建。
 GRAPH_STATUS="—"
 if [ -f "$KNOWLEDGE_DIR/graph.json" ]; then
-  GRAPH_OUT="$(bash "$SCRIPT_DIR/check-graph-contract.sh" "$KNOWLEDGE_DIR/graph.json" 2>&1)"
+  GRAPH_OUT="$(bash "$SCRIPT_DIR/check-graph-contract.sh" "$KNOWLEDGE_DIR/graph.json" --strict 2>&1)"
   GRAPH_RC=$?
-  if [ "$GRAPH_RC" -eq 0 ] && printf '%s' "$GRAPH_OUT" | grep -q "legacy graph"; then
-    GRAPH_STATUS="⚠️ legacy（需重跑 Analyzer）"
-    {
-      echo "## ⚠️ graph.json 仍是 legacy 形状（非结构图 v3.0.0）"
-      echo ""
-      echo '```'
-      printf '%s\n' "$GRAPH_OUT"
-      echo '```'
-      echo ""
-    } >> "$REPORT"
-  elif [ "$GRAPH_RC" -eq 0 ]; then
+  if [ "$GRAPH_RC" -eq 0 ]; then
     GRAPH_STATUS="✅ v3.0.0"
     {
       echo "## ✅ graph.json 结构契约通过（v3.0.0）"

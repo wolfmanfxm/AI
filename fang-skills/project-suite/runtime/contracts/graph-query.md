@@ -19,7 +19,7 @@
 
 | 项 | 约定 |
 |----|------|
-| 节点 `id` | 全局唯一；`file` 节点的 `id` 使用仓库相对路径 |
+| 节点 `id` | 全局唯一。非 `file` 节点为 `<type>-<name>` 或 `<type>:<name>`（如 `component:src/components/UserTable.vue`）；`file` 节点使用仓库相对路径。不得含空白 |
 | 节点 `type` | `module` · `file` · `component` · `api` · `view` · `store` · `infrastructure` |
 | `module.domain` | 业务域，必填 |
 | `component/api/view/store/infrastructure.layer` | 结构层，必填 |
@@ -85,11 +85,11 @@ jq --arg id "component-user" '
 
 **返回：** 上游/被依赖节点 ID 列表
 
-### 5. `findDependencies(nodeId)`
-查找指定节点的全部依赖链（递归，深度 ≤ 3，不含起点）。
+### 5. `findDependencies(nodeId, depth = 3)`
+查找指定节点的依赖链（递归，默认深度 3，不含起点）。`depth=1` 只看直接依赖。
 
 ```bash
-jq --arg id "view-user" '
+jq --arg id "view-user" --argjson depth 3 '
   def walk($frontier; $seen; $depth):
     if $depth == 0 or ($frontier | length) == 0 then $seen
     else
@@ -97,11 +97,11 @@ jq --arg id "view-user" '
       | ([ $seen[], $next[] ] | unique) as $newseen
       | walk($next; $newseen; $depth - 1)
     end;
-  walk([$id]; [$id]; 3) | .[] | select(. != $id)
+  walk([$id]; [$id]; $depth) | .[] | select(. != $id)
 ' graph.json
 ```
 
-**返回：** 依赖节点 ID 列表（去重，最多 3 层）
+**返回：** 依赖节点 ID 列表（去重，最多 `depth` 层）
 
 ### 6. `findImpacted(paths)`
 查找修改指定文件会影响哪些节点。输入是**仓库相对文件路径数组**。
@@ -126,22 +126,9 @@ jq --argjson files '["src/components/UserTable.vue"]' '
 > 如果只查 `.from == B.ts`，返回的是 B.ts 的依赖，方向就反了。
 
 ### 7. `findTransitiveDeps(nodeId)`
-查找指定节点的传递依赖链（深度 3 层，不含起点），用于精确加载结构上下文。
+`findDependencies(nodeId, 3)` 的**别名**（历史名称；Reviewer / Resolver 仍引用它）。
+语义、实现、返回值全部以 §5 为准——**不要维护第二份递归实现**。
 
-```bash
-jq --arg id "view-user" '
-  def walk($frontier; $seen; $depth):
-    if $depth == 0 or ($frontier | length) == 0 then $seen
-    else
-      ([ $frontier[] as $n | .edges[] | select(.from == $n) | .to ] | unique) as $next
-      | ([ $seen[], $next[] ] | unique) as $newseen
-      | walk($next; $newseen; $depth - 1)
-    end;
-  walk([$id]; [$id]; 3) | .[] | select(. != $id)
-' graph.json
-```
-
-**返回：** 传递依赖节点 ID 列表（去重，最多 3 层）
 **用途：** Generator 生成 `UserTable` → 查 graph → 依赖 API/Store/Validation → 只加载对应结构上下文。
 
 ## 知识加载流程（Resolver → Generator）

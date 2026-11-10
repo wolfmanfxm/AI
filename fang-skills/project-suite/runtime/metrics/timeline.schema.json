@@ -37,7 +37,8 @@
     },
     "status": {
       "type": "string",
-      "enum": ["completed","degraded","blocked","failed"]
+      "enum": ["completed","degraded","blocked","failed","skipped"],
+      "description": "skipped = 运行在产出前结束（monitor-only / 用户取消 / 无执行），不代表失败"
     },
     "timing": {
       "type": "object",
@@ -76,13 +77,23 @@
       "type": "object",
       "required": ["confidence"],
       "properties": {
-        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "confidence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "0 = 未评估（skipped/degraded 运行）；聚合平均 confidence 只统计 completed"
+        },
         "warnings":   { "type": "integer", "minimum": 0 },
         "errors":     { "type": "integer", "minimum": 0 },
         "retries":    { "type": "integer", "minimum": 0, "description": "失败重试次数（用于 retry_rate，评估 progressive-disclosure 是否以重试换省 token）" },
         "checkpointsPassed": { "type": "integer" },
         "degradedDimensions": { "type": "array", "items": { "type": "string" } }
       }
+    },
+    "context": {
+      "type": "object",
+      "description": "Optional audit context for non-standard runs (reason / notes / discovery / autoFinalized). Free-form by design; keep run metrics in the typed fields above.",
+      "additionalProperties": true
     },
     "billing": {
       "type": "object",

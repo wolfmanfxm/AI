@@ -59,8 +59,10 @@ mkdir -p "$REPORT_DIR"
 #   ③ 两者皆无 → 0，并显式标注 source=none
 
 metrics_source="none"
-total_executions=0; completed=0; partial=0; blocked_count=0; failed_count=0
-avg_confidence=0; confidence_samples=0; skills_used=""
+total_executions=0; completed=0; partial=0; blocked_count=0; failed_count=0; skipped_count=0
+avg_confidence=0; confidence_samples=0
+completed_avg_confidence=0; completed_conf_samples=0
+skills_used=""
 total_timeline_entries=0; min_dur=0; max_dur=0; avg_dur=0; dur_count=0
 
 # 2. Timeline metrics（v2 JSONL 优先，回退 v1 对象）
@@ -73,8 +75,8 @@ for candidate in "$TIMELINE_JSONL" "$TIMELINE_JSON" "$TIMELINE_LEGACY"; do
 done
 
 if [ -n "$TIMELINE_SOURCE" ]; then
-  tl_total=0; tl_completed=0; tl_degraded=0; tl_blocked=0; tl_failed=0
-  tl_avg_conf=0; tl_conf_samples=0; tl_skills=""
+  tl_total=0; tl_completed=0; tl_degraded=0; tl_blocked=0; tl_failed=0; tl_skipped=0
+  tl_avg_conf=0; tl_conf_samples=0; tl_comp_avg_conf=0; tl_comp_conf_samples=0; tl_skills=""
 
   tl_output=$(node "$SCRIPT_DIR/timeline-stats.mjs" "$TIMELINE_SOURCE" --shell 2>/dev/null || true)
   if [ -n "$tl_output" ]; then
@@ -85,8 +87,11 @@ if [ -n "$TIMELINE_SOURCE" ]; then
         DEGRADED)           tl_degraded="$value" ;;
         BLOCKED)            tl_blocked="$value" ;;
         FAILED)             tl_failed="$value" ;;
+        SKIPPED)            tl_skipped="$value" ;;
         AVG_CONFIDENCE)     tl_avg_conf="$value" ;;
         CONFIDENCE_SAMPLES) tl_conf_samples="$value" ;;
+        COMPLETED_AVG_CONFIDENCE)     tl_comp_avg_conf="$value" ;;
+        COMPLETED_CONFIDENCE_SAMPLES) tl_comp_conf_samples="$value" ;;
         SKILLS)             tl_skills="$value" ;;
         DURATION_SAMPLES)   dur_count="$value" ;;
         MIN_SECONDS)        min_dur="$value" ;;
@@ -105,8 +110,11 @@ if [ -n "$TIMELINE_SOURCE" ]; then
     partial="$tl_degraded"
     blocked_count="$tl_blocked"
     failed_count="$tl_failed"
+    skipped_count="$tl_skipped"
     avg_confidence="$tl_avg_conf"
     confidence_samples="$tl_conf_samples"
+    completed_avg_confidence="$tl_comp_avg_conf"
+    completed_conf_samples="$tl_comp_conf_samples"
     skills_used="$tl_skills"
   fi
 fi
@@ -134,6 +142,9 @@ if [ "$metrics_source" = "none" ] && [ -f "$STATE_FILE" ]; then
 
   # Skills used
   skills_used=$(grep -oE '"skill"[[:space:]]*:[[:space:]]*"[^"]*"' "$STATE_FILE" 2>/dev/null | sed 's/.*"\(.*\)".*/\1/' | sort -u | tr '\n' ',' | sed 's/,$//' || true)
+  # state.json 没有状态细分，无法区分 skipped；沿用同一份 confidence 作为 completed 口径
+  completed_avg_confidence="$avg_confidence"
+  completed_conf_samples="$confidence_samples"
   metrics_source="state.json"
 fi
 
@@ -143,14 +154,22 @@ manifest_count=$(find "$RUNTIME_DIR" -name "manifest*.json" 2>/dev/null | wc -l 
 # ⚠️ 不能写成 $(( total_executions > 0 ? completed * 100 / total_executions : 0 ))：
 #    bash 算术在求值 ternry 前就会对未选中分支的 `/ 0` 报错（实测 exit 1），
 #    而没有 state.json 的真实项目 total_executions 恒为 0 → collect-metrics 直接崩溃。
-if [ "$total_executions" -gt 0 ]; then
-  success_pct=$(( completed * 100 / total_executions ))
+#
+# skipped 是「运行在产出前结束」，不代表失败 → 从可靠性分母中剔除，
+# 否则「用户取消一次」会把成功率算成 50%。
+effective_total=$(( total_executions - skipped_count ))
+if [ "$effective_total" -gt 0 ]; then
+  success_pct=$(( completed * 100 / effective_total ))
 else
   success_pct=0
 fi
 
-if [ "$confidence_samples" -gt 0 ]; then
-  avg_confidence_display="${avg_confidence}%"
+# 报表用 completed-only 的 confidence：degraded/skipped 的 0 是「未评估」哨兵，
+# 混入平均会把「没跑完」误报成「质量极差」。
+if [ "$completed_conf_samples" -gt 0 ]; then
+  avg_confidence_display="${completed_avg_confidence}%"
+elif [ "$confidence_samples" -gt 0 ]; then
+  avg_confidence_display="n/a (no completed runs)"
 else
   avg_confidence_display="n/a (no samples)"
 fi
@@ -172,6 +191,7 @@ cat > "$REPORT" << EOF
 | Partial/Interrupted | $partial |
 | Blocked (confidence gate) | $blocked_count |
 | Failed | $failed_count |
+| Skipped (ended before output) | $skipped_count |
 | Avg confidence | ${avg_confidence_display} |
 | Skills used | ${skills_used:-none} |
 
@@ -203,8 +223,8 @@ cat > "$REPORT" << EOF
 
 ## Interpretation
 
-- **Confidence trend**: $(if [ "$confidence_samples" -gt 0 ]; then echo "avg ${avg_confidence}% — $(if [ "$avg_confidence" -ge 80 ]; then echo "healthy"; elif [ "$avg_confidence" -ge 60 ]; then echo "needs attention"; else echo "critical"; fi)"; else echo "no confidence samples"; fi)
-- **Reliability**: $completed/$total_executions completed (${success_pct}%)
+- **Confidence trend**: $(if [ "$completed_conf_samples" -gt 0 ]; then echo "avg ${completed_avg_confidence}% over $completed_conf_samples completed run(s) — $(if [ "$completed_avg_confidence" -ge 80 ]; then echo "healthy"; elif [ "$completed_avg_confidence" -ge 60 ]; then echo "needs attention"; else echo "critical"; fi)"; elif [ "$confidence_samples" -gt 0 ]; then echo "no completed runs yet — ${confidence_samples} run(s) recorded without a quality score (degraded/skipped), excluded from the average"; else echo "no confidence samples"; fi)
+- **Reliability**: $completed/$effective_total completed (${success_pct}%), excluding $skipped_count skipped run(s) that never produced output
 - **Interruptions**: $partial partial/interrupted — checkpoint protocol should enable resume
 
 ---

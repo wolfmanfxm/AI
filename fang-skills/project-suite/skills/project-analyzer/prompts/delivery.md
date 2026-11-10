@@ -103,13 +103,26 @@ Exit 0 → 继续。**Exit 1 → 不可声明 `status: completed`**，回到步�
 > ⚠️ **为什么这条要写成「断言产出」而非「更新文件」**：规格里留着一句读起来还在的动作名不算数——
 > 只有入口文件**真的生成**，知识库才被送达 agent。故本门禁断言的是产出本身，不是「有没有检查过」。
 
-### 8. Write Manifest + State + Release Lock
+### 8. Merge Config + Write Manifest/State + Terminal Record
 
+- **合并本次配置草稿**（仅此一处写根配置；先备份，任务级字段不进入根配置）：
+  `node shared/scripts/analysis-config-merge.mjs <project-root> .project-knowledge/runtime/tasks/<task_id>/analysis-config.json --apply`
 - 写入 `manifest.json`（status=completed，项目级知识产物；本 Skill 持单写者锁）
-- 写入 state.json（confidence + history，history 带 task_id）
-- 追加 timeline.jsonl（`bash shared/scripts/timeline-append.sh <project-root> -`；`taskId` 单独字段，`runId` = `<taskId>/<skill>/<startedAt>`）
-- **释放单写者锁**：`writer-lock.sh <kd> analyzer release --owner-id <owner>`
-  （失败/降级/用户取消等所有退出路径都要释放）
+- 提交 State 更新建议（confidence + history 建议，由 Dispatcher 统一写入根 state.json）
+- **写终态记录 + 释放锁**（一个入口，不要另调 `timeline-append.sh` / `writer-lock.sh`）：
+  ```bash
+  bash shared/scripts/runtime-run.sh finish <project-root> --skill project-analyzer \
+    --status completed --confidence <0-100> --notes "<一句话结论>"
+  ```
+  `finish` 负责：追加**恰好一行** `timeline.jsonl`（`taskId`/`runId` 与 start 一致）、释放单写者锁、清理运行指针。
+  **它不关闭长期任务**（不改 `meta.status`）——任务完成由编排方或用户显式 `task-registry.sh set-status` 决定。
+  它的输出若带 `WARNINGS=discovery-artifact-missing`，说明任务目录缺 `discovery.json`——在收尾报告中如实转述这条告警，不要当成成功静默略过。
+- **所有其它退出路径也走同一个 finish**（不要只写成功路径）：
+  - 用户取消 / monitor-only / 未产出 → `--status skipped --reason "..."`（confidence 自动为 0）
+  - 降级完成 → `--status degraded --reason "..."`
+  - 门禁阻断 → `--status blocked --reason "kb-contract"`
+  - 不可恢复错误 → `--status failed --reason "..."`
+  - 被 hook 自动收尾 → `--auto-finalized`（记为 degraded，上下文标 `autoFinalized`）
 
 ## Exit
 
@@ -121,6 +134,8 @@ Exit 0 → 继续。**Exit 1 → 不可声明 `status: completed`**，回到步�
 - Task Artifacts 已归档（promotion: none）
 - Knowledge Promotion candidates 已展示（promotion: personal）
 - manifest.status = completed
+- 根 `analysis-config.json` 已合并（有备份）
+- `runtime-run.sh finish` 已执行：timeline 恰好新增一行、锁已释放
 
 ## Failure
 

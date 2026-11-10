@@ -234,12 +234,12 @@ cat > "$GF" <<'EOF'
     { "id": "view-user", "type": "view", "label": "UserView", "layer": "view", "files": ["src/views/user/index.vue"] },
     { "id": "component-user", "type": "component", "label": "UserTable", "layer": "component", "files": ["src/components/UserTable.vue"] },
     { "id": "api-user", "type": "api", "label": "userApi", "layer": "api", "files": ["src/api/user.ts"] },
-    { "id": "infra-http", "type": "infrastructure", "label": "http", "layer": "infrastructure", "files": ["src/utils/http.ts"] }
+    { "id": "infrastructure-http", "type": "infrastructure", "label": "http", "layer": "infrastructure", "files": ["src/utils/http.ts"] }
   ],
   "edges": [
     { "from": "view-user", "to": "component-user", "relation": "imports" },
     { "from": "component-user", "to": "api-user", "relation": "uses" },
-    { "from": "api-user", "to": "infra-http", "relation": "depends_on" }
+    { "from": "api-user", "to": "infrastructure-http", "relation": "depends_on" }
   ]
 }
 EOF
@@ -284,6 +284,14 @@ mutate_and_check "dangling edge.to 悬空" \
   'const g=require(process.argv[1]); g.edges[0].to="node-并不存在"; process.stdout.write(JSON.stringify(g));'
 mutate_and_check "legacy schemaVersion 2.0.0" \
   'const g=require(process.argv[1]); g.schemaVersion="2.0.0"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "node.id 不符合类型命名空间" \
+  'const g=require(process.argv[1]); g.nodes[1].id="UserTable"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "根字段 project 类型错误（schema 声明 string）" \
+  'const g=require(process.argv[1]); g.project=42; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "generatedAt 不是 date-time" \
+  'const g=require(process.argv[1]); g.generatedAt="not-a-date"; process.stdout.write(JSON.stringify(g));'
+mutate_and_check "node.label 类型错误（schema 声明 string）" \
+  'const g=require(process.argv[1]); g.nodes[0].label=42; process.stdout.write(JSON.stringify(g));'
 
 # 还原干净基线，供查询语义测试使用。
 printf '%s' "$GF_BASE" > "$GF"
@@ -303,7 +311,7 @@ else
   fail "findImpacted 方向错误：期望 view-user，实际 $IMPACTED"
 fi
 
-# 7c. findTransitiveDeps 真正递归 3 层：view-user → component-user → api-user → infra-http
+# 7c. findTransitiveDeps 真正递归 3 层：view-user → component-user → api-user → infrastructure-http
 DEPS="$(jq --arg id 'view-user' '
   def walk($frontier; $seen; $depth):
     if $depth == 0 or ($frontier | length) == 0 then $seen
@@ -315,11 +323,11 @@ DEPS="$(jq --arg id 'view-user' '
   walk([$id]; [$id]; 3) | .[] | select(. != $id)
 ' "$GF")"
 DEPS_MISSING=""
-for want in component-user api-user infra-http; do
+for want in component-user api-user infrastructure-http; do
   printf '%s' "$DEPS" | grep -q "\"$want\"" || DEPS_MISSING="$DEPS_MISSING $want"
 done
 if [ -z "$DEPS_MISSING" ]; then
-  pass "findTransitiveDeps 真正递归 3 层（component-user/api-user/infra-http）"
+  pass "findTransitiveDeps 真正递归 3 层（component-user/api-user/infrastructure-http）"
 else
   fail "findTransitiveDeps 缺层:$DEPS_MISSING（实际: $DEPS）"
 fi

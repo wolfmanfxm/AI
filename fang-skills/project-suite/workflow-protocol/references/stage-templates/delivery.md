@@ -8,8 +8,8 @@
 |-------|-------|
 | Entry  | Validation passed（无 CRITICAL 发现或已修复） |
 | Input  | Execution 全部产出 + validation-report.md |
-| Output | 最终产出写入目标路径 + state.json 更新 + timeline 追加 + **convergence 判定** |
-| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 验证 completed → 若 state.json 缺失则重新写入 |
+| Output | 最终产出写入目标路径 + **State 更新建议（Dispatcher 统一提交根 state.json）** + **终态记录（`runtime-run.sh finish`：timeline + 释放锁）** + **convergence 判定** |
+| Recovery | 读 `runtime/tasks/<task_id>/manifest-<skill>.json` → 验证 completed → 若根 `state.json` 缺失，作为 State 更新建议上报（不自行写入根 State） |
 
 **Convergence（统一停止条件）**：交付即收敛。Skill 结束前必须产出收敛判定（见 [convergence.md](../../../shared/primitives/convergence.md)）：
 

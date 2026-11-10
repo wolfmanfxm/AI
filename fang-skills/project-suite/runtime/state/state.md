@@ -32,7 +32,7 @@
  │
  ▼
 Skill
- │  读 State → 执行 → 写 State → 输出收尾报告 → 结束
+ │  读 State → 执行 → 提交 State 更新建议 → 输出收尾报告 → 结束
  │  Skill 之间互相不知道对方存在
 ```
 
@@ -40,12 +40,12 @@ Skill
 
 ## 初始化
 
-**由 project-analyzer 在首次执行时创建 `.project-knowledge/runtime/`**：
+**由 project-analyzer 在首次执行时创建 `.project-knowledge/runtime/` 的目录骨架**：
 
 1. analyzer Finish Phase B 检测 `.project-knowledge/runtime/` 是否存在
-2. 不存在 → 创建目录结构：`state.json` + `knowledge.json` + `metrics/`
-3. 写入初始 state（`phase: analyzing, status: in_progress`）
-4. 后续 skill 通过读 state 了解当前阶段
+2. 不存在 → 创建目录骨架：`knowledge.json` + `metrics/`（**根 `state.json` 不在其中**）
+3. 产出初始的 State 更新建议（`phase: analyzing, status: in_progress`），由 **Dispatcher 串行提交**为根 `state.json`；analyzer 不直接写它
+4. 后续 skill 通过读 state 了解当前阶段（根 `state.json` 不存在时按「无状态」降级，不自行补写）
 
 **其他 skill 不负责创建 `.project-knowledge/runtime/`**，仅 analyzer 有这个职责。若 analyzer 未执行（如直接调用 generator），下游 skill 降级为无状态模式。
 
@@ -108,8 +108,11 @@ Skill
 | `history[].suggested_next` | Skill 建议的下一步（用户参考） |
 | `blockers[]` | 阻塞项列表 |
 
-**规则：** Skill 只追加 history，不删除。用户可随时查看完整执行链路。
-> 并发写同一 `state.json` 时按 [task-identity.md](../mechanisms/task-identity.md) 的写入纪律：一次一个写者；读改写冲突则重读合并，不静默覆盖。
+**规则：**
+> **写者唯一**：根 `state.json` 由 **Dispatcher 串行提交**（同一项目同一时刻一个写者，一次推进一个任务）。
+> Skill 的执行进度写任务级 snapshot，终态写 timeline；并行处理不同任务时，各 Skill **不得直接读改写根 `state.json`**。
+> Skill 只能产出 **State 更新建议**（history 条目 / phase 建议 / blocker），由 Dispatcher 合并后统一写入。
+> 写入纪律见 [task-identity.md](../mechanisms/task-identity.md#statejson--timelinejsonl-的写入纪律)。
 
 ## knowledge.json
 
@@ -167,10 +170,13 @@ Skill
    - 读需要的 artifacts（PLAN.md / ARCHITECTURE.md / code）
    - 执行本 Skill 的职责
 
-3. 写 State:
-   - state.json → 追加 history（含 task_id + confidence + suggested_next）
-   - knowledge.json → 更新知识状态（analyzer/reviewer）
-   - timeline.jsonl → 追加一行 run（`taskId` 单独字段；`runId` = `<taskId>/<skill>/<startedAt>`，必须唯一）
+3. 状态写入边界（固定）:
+   - 执行进度 → 任务级 `.sessions/<task_id>/<skill>/state.json`（并行任务各写各的；权威定义见 [session-snapshot.md](../mechanisms/session-snapshot.md)）
+   - 终态 → `timeline.jsonl` 追加一行 run（`taskId` 单独字段；`runId` = `<taskId>/<skill>/<startedAt>`，必须唯一）
+   - 根 `state.json` → **只由 Dispatcher 串行提交**（phase/status/history）；Skill 不直接读改写
+   - knowledge.json → 更新知识状态（analyzer / reviewer）。二者是同一份 **项目级共享资源**，
+     共用 `analyzer` 单写者锁（见 [single-writer.md](../mechanisms/single-writer.md)），
+     不同任务不能各自并发更新
    - 任务级产出 → `runtime/tasks/<task_id>/`（session / context-package / pipeline-state）
    - 产出文件 → 写入 `.project-knowledge/` 对应子目录（文件名带 task_id，见下）
 

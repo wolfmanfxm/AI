@@ -42,6 +42,19 @@ description: >
 
 ## 职责边界
 
+> **Task-scoped Dispatcher：不持有 Task Run，但必须绑定一个目标 task_id。**
+> 本 Skill 协调多个 Skill 的生命周期，本身不执行 Task Resolution 的 Run 登记，
+> 也不调用 `runtime-run.sh start`。但「不拥有 Run」不等于「不需要 Task 身份」：
+>
+> - **Discovery 必须绑定 task_id**：恢复已有任务则由用户/active 列表选定；
+>   新 Pipeline 则与用户确认 goal 后调用 `task-registry.sh create`（只建 Task，不建 Run）。
+> - 绑定的 `task_id` 通过 `PS_TASK_ID` 传给后续所有 Skill，保证同一 Pipeline 共用任务目录。
+> - 编排产物（`pipeline-state.json` / `pipeline-report.md`）写入该任务目录。
+> - 作为 Dispatcher **串行提交**根 `state.json`。
+>
+> 通用 Discovery 模板的「所有 Skill 必须 start」不适用于本 Skill（见
+> [task-identity.md](../../runtime/mechanisms/task-identity.md)）。
+
 → [references/boundary.md](references/boundary.md)（反例黑名单 + 失败兜底 + 常见借口）
 > 🔴 orchestrator 只调度不执行单个 Skill 的业务逻辑。不替代任何 Skill。
 

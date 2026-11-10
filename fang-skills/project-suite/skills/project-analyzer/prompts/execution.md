@@ -13,7 +13,7 @@
 
 每 Phase 完成后立即写入 snapshot（current_phase + knowledge_extracted + git_commit）。解决了"5000 文件项目 Context 爆炸 → Claude 重启 → 重来"的问题。
 
-> 🔴 **单写者**：本 Skill 写的是项目级知识（graph/statistics 等）。Discovery 已 `writer-lock.sh <kd> analyzer acquire`；每个 checkpoint 前 `status` 校验 owner 仍是自己，被 break 后不得继续写。见 [single-writer.md](../../../runtime/mechanisms/single-writer.md)。
+> 🔴 **单写者**：本 Skill 写的是项目级知识（graph/statistics 等）。Discovery 已由 `runtime-run.sh start` 获取 `analyzer` 锁；每个 checkpoint 前执行 `runtime-run.sh renew <root> --skill project-analyzer`——它按运行指针校验 session/owner 并续租，失败即停止项目级写入（不要另调 `writer-lock.sh`：它只校验锁本身，不校验指针与 session 的对应关系）。见 [single-writer.md](../../../runtime/mechanisms/single-writer.md)。
 
 ## Actions
 

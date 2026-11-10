@@ -38,8 +38,8 @@
 
 ## Phase B — .project-knowledge/runtime/ 初始化或更新
 
-5. 检查 `.project-knowledge/runtime/` 目录：不存在 → 按 `runtime/state/state.md` 创建（`state.json` + `knowledge.json` + `metrics/`）；已存在 → 追加本次执行记录
-6. **state.json** — 写入 `{ current: { skill, started }, history: [...] }`，含 confidence + suggested_next
+5. 检查 `.project-knowledge/runtime/` 目录：不存在 → 创建目录骨架（`metrics/` 等）；**根 `state.json` 不由本 Skill 写入**（Dispatcher 串行提交），已存在则只读
+6. **State 更新建议** — 在收尾报告中产出 `{ history_entry: { task_id, skill, status, confidence, suggested_next } }`；根 `state.json` 由 Dispatcher 统一提交，本 Skill 不直接读改写
 7. **knowledge.json** — 扫描 `.project-knowledge/` 每个文件：新文件 → Candidate；occurrences ≥3 → 保持 Candidate（达到晋升阈值，**不自动 Accepted**）；真正 Accepted 由 Reviewer/promotion-reviewer 按 [promotion-rules.md](../../../runtime/state/schemas/promotion-rules.md) 验证后更新
 
 ## Phase C — 差异化更新
@@ -49,6 +49,9 @@
 8. 写 `.md`（Evidence Header），仅对 `[CHANGED]` 维度
 9. 非首次：标记 `[NEW]/[CHANGED]/[CONFIRMED]`
 10. 写 `manifest.json` `index.md`
+    - `manifest.json` 是**项目级知识产物**，只在 Delivery/Phase C 写；Discovery 不得把它改成 `discover`
+10b. **合并配置草稿** — `node shared/scripts/analysis-config-merge.mjs <project-root> runtime/tasks/<task_id>/analysis-config.json --apply`
+    - 先备份到 `runtime/backups/`；`projectName` / `createdAt` 不被改写；`monitorOnly` 等任务级字段拒绝进入根配置
 11. manifest 完整性校验：mode/scope/dimensions/files/executionLog 与实际一致，若被外部进程篡改则以本次参数覆盖
 
 ## Phase D — 质量验证与同步
@@ -92,7 +95,10 @@
 
     人工撰写的约定/规范段落**永不被本步骤改写**——它只在缺失时补入口，在已有入口时刷数字。
 14. Vault 同步 + 验证 — rsync → 对比文件数差异，>3 → 标注 `⚠️ Vault sync gap`
-15. 追加 timeline.jsonl（`timeline-append.sh`；`taskId` 单独字段，`runId` 唯一）
+15. **终态记录 + 释放锁** — `bash shared/scripts/runtime-run.sh finish <project-root> --skill project-analyzer --status completed --confidence <n>`
+    - 由它追加**恰好一行** timeline（`taskId` / `runId` 与 Discovery 的 start 一致）、释放单写者锁、清理运行指针；**不关闭长期任务**（`meta.status` 由编排方/用户决定）
+    - 不要另调 `timeline-append.sh` / `writer-lock.sh`：两条路径会写出不同的 runId，甚至重复记账
+    - 非 completed 的退出（skipped / degraded / blocked / failed）走同一命令的不同 `--status`
 16. **契约完整性门禁（🔴 阻断）**
 
     ```bash
@@ -100,8 +106,9 @@
     ```
 
     断言契约声明的**全部目录** + **6 个固定根产物**在位（清单从契约派生，不硬编码）。
-    同时对 `graph.json` 执行结构契约校验：3.0.0 且节点/边非法 → Exit 1；
-    2.0.0（旧 Knowledge Objects 图）只给 warning 并提示重跑 Analyzer，不硬阻断既有项目。
+    同时对 `graph.json` 执行**严格**结构契约校验（`--strict`）：2.0.0 旧图或节点/边非法 → Exit 1。
+    旧图只给 warning 的场景仅限日常预检（直接调 `check-graph-contract.sh`、不带 `--strict`）；
+    Analyzer 本次扫描完成的 Delivery 门禁必须产出 Graph 3.0.0。
 
     Exit 0 → 继续；**Exit 1 → 不得执行第 18 步**，按 `.project-knowledge/kb-contract-report.md`
     的缺失清单补齐后重跑门禁。

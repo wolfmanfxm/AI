@@ -27,7 +27,8 @@
 | 中断后恢复 | [checkpoint.md](mechanisms/checkpoint.md) → [error-recovery.md](mechanisms/error-recovery.md) |
 | 多任务隔离 / 选任务 | [task-identity.md](mechanisms/task-identity.md) → [task-registry.sh](../shared/scripts/task-registry.sh) |
 | 防止两个 Analyzer 互相覆盖 | [single-writer.md](mechanisms/single-writer.md) → [writer-lock.sh](../shared/scripts/writer-lock.sh) |
-| 记录一次执行指标 | [metrics/timeline.md](metrics/timeline.md) → [timeline-append.sh](../shared/scripts/timeline-append.sh) |
+| 记录一次执行指标 | [metrics/timeline.md](metrics/timeline.md) → [runtime-run.sh](../shared/scripts/runtime-run.sh)（start / renew / finish） |
+| 所有退出路径都留下终态记录 | [workflow-protocol/SKILL.md](../workflow-protocol/SKILL.md) 的 Terminal Record |
 | 新增 Pipeline 模式 | [workflow-library.yaml](registry/workflow-library.yaml) |
 | 新增能力类型 | [capabilities.yaml](registry/capabilities.yaml) → [capability-routing.yaml](registry/capability-routing.yaml) |
 | 新增 Extractor | [extractor-registry.yaml](registry/extractor-registry.yaml) |

@@ -14,14 +14,15 @@
  │
  ▼
 Skill
- │  读 State（state.json + knowledge.json + 上游 artifacts）
- │  执行
- │  写 State（更新 state.json + knowledge.json）
+ │  读 State（state.json + knowledge.json + 上游 artifacts；根 state.json 只读）
+ │  执行（进度写任务级 snapshot）
+ │  写项目级产物（knowledge.json 走 analyzer 单写者锁）
+ │  追加终态 timeline + 产出 State 更新建议
  │  输出收尾报告（含 confidence + convergence + 建议下一步）
  │  结束
  │
  ▼
-用户（再次决策）
+用户 / Dispatcher（统一提交根 state.json，再次决策）
 ```
 
 **Skill 之间互相不知道对方存在。** 通信只靠 `.project-knowledge/runtime/` 中的文件。Skill 完成后给出建议，用户决定是否采纳。
@@ -52,12 +53,29 @@ Skill
 
 ## 并行建议
 
-当同 Wave 的 Skill 互不依赖时，建议用户可并行执行：
+并行必须遵守 [task-identity.md 的并发政策](../mechanisms/task-identity.md#并发政策)：
+
+| 场景 | 建议 |
+|------|------|
+| 不同 Task、相同 Skill | 协议允许（任务产物按 task_id 隔离）；⚠️ 当前运行指针仍按 skill 单槽，实现未生效 |
+| 不同 Task、不同 Skill | 允许，但需依赖已解除、写入范围不冲突 |
+| 相同 Task、相同 Skill | 禁止同时运行 |
+| 相同 Task、不同 Skill | 有条件允许（依赖解除 + 写入范围不冲突） |
+| 共享项目级写者（Analyzer / Releaser / 写 knowledge.json 的 Reviewer） | 始终受单写者锁约束，不同 task 不能绕过 |
+| 同时修改相同源码 | 文件范围不重叠，或使用独立 Git Worktree |
+
+当同 Wave 的 Skill 互不依赖时，可以并行：
 
 ```
 planner + architect（都只依赖 analyzer，互不依赖）→ 可并行
 tester + documenter（都只依赖 generator，互不依赖）→ 可并行
 ```
+
+**Task 级隔离不等于源码级隔离**：两个 Planner 写不同 PLAN 没问题；两个 Generator 即使 PLAN
+不同，也可能同时改同一个源文件。
+
+> 项目级 `state.json` 仍只由 Dispatcher 串行提交；并行任务各自写任务级 snapshot 和 timeline，
+> 不直接读改写根 `state.json`。
 
 ## Confidence 作为决策参考
 
@@ -74,20 +92,31 @@ tester + documenter（都只依赖 generator，互不依赖）→ 可并行
 
 ## State 更新协议
 
-每个 Skill 执行完成后更新 `.project-knowledge/runtime/state.json`：
+**Skill 不直接写根 `state.json`。** 每次执行结束后，Skill 产出的是「State 更新建议」，
+由 **Dispatcher 串行提交**；进度与终态另走两条独立通道：
+
+| 内容 | 写入者 | 位置 |
+|------|--------|------|
+| 执行进度（phase / 子任务） | 当前 Skill | `.sessions/<task_id>/<skill>/state.json`（任务级 snapshot） |
+| 运行终态（一次 Run 一行） | `runtime-run.sh finish` | `runtime/metrics/timeline.jsonl`（append-only） |
+| 项目当前状态（phase / status / active_tasks / history） | **仅 Dispatcher** | `runtime/state.json` |
+
+Skill 在收尾报告里给出的建议形如：
 
 ```json
 {
-  "phase": "architecture",
-  "status": "in_progress",
-  "history": [
-    {"skill": "project-analyzer", "status": "completed", "confidence": 92, "at": "..."},
-    {"skill": "project-planner", "status": "completed", "confidence": 85, "at": "..."}
-  ]
+  "state_update_suggestion": {
+    "phase": "architecture",
+    "status": "in_progress",
+    "history_entry": {"task_id": "task-20261109-user-approval", "skill": "project-analyzer",
+                      "status": "completed", "confidence": 92, "at": "..."},
+    "blockers": []
+  }
 }
 ```
 
-Skill 只追加 history，不删除。用户可随时查看完整执行链路。
+Dispatcher 合并多个任务的建议后**串行**写根 `state.json`：同一项目同一时刻只有一个写者，
+一次推进一个任务。`history[]` 由 Dispatcher 追加（带 `task_id`），Skill 不删除、不覆盖。
 
 ## Fresh Context 模式
 
@@ -96,8 +125,9 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
 ```
 /clear
 /project-planner
-  → 读 context.json + state.json + .project-knowledge/
-  → 写 PLAN.md + context-package.json + state.json
+  → 读 context.json + state.json + .project-knowledge/（根 state.json 只读）
+  → 写 PLAN.md + context-package.json（任务级）
+  → 产出 State 更新建议（Dispatcher 提交）
   → 结束（上下文丢弃）
 
 /clear
@@ -105,15 +135,15 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
   → 读 context-package.json（预消化知识包，~3-5 条 pattern/constraints）
   → 读 PLAN.md > # Task Breakdown
   → 生成代码
-  → 写收尾报告 + state.json
+  → 写收尾报告 + State 更新建议（Dispatcher 提交）
   → 结束（上下文丢弃）
 
 /clear
 /project-reviewer
   → 读 state.json（了解变更范围）
   → 读 PLAN.md > # Acceptance Criteria
-  → 审查
-  → 写 REVIEW.md + state.json
+  → 审查（写 knowledge.json 须持 analyzer 单写者锁）
+  → 写 REVIEW.md + State 更新建议（Dispatcher 提交）
   → 结束（上下文丢弃）
 ```
 
@@ -126,16 +156,18 @@ Skill 只追加 history，不删除。用户可随时查看完整执行链路。
 ```
 ✅ 每个 Skill:
    1. 启动（/clear 后的 fresh context）
-   2. 读 .project-knowledge/runtime/state.json（了解当前状态）
+   2. 读 .project-knowledge/runtime/state.json（只读，了解当前状态）
    3. 读 artifact 文件（PLAN.md / context-package.json / diff）
-   4. 执行
-   5. 写 .project-knowledge/runtime/state.json + artifact 文件
-   6. 结束
+   4. 执行（进度写 .sessions/<task_id>/<skill>/state.json）
+   5. 写项目级 artifact 文件 + 追加终态 timeline
+   6. 产出 State 更新建议（由 Dispatcher 提交根 state.json）
+   7. 结束
 
 ❌ 禁止:
    - 依赖上一轮对话中的信息
    - 假设上下文中有上次执行的结果
    - 跳过 state.json 直接读"我上次写的那个文件"
+   - 直接读改写根 state.json（违反单写者）
 ```
 
 这本质上就是 serverless function 的模型：启动 → 读入 → 计算 → 写出 → 销毁。Skill 是 stateless 的，State 是 persistent 的。

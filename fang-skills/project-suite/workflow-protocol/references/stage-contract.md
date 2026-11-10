@@ -28,11 +28,11 @@
 |----------|--------|
 | Entry    | 用户触发分析需求（"分析项目"/"扫描项目"等触发词） |
 | Input    | Project Root（工作目录） |
-| Actions  | 1. 探测技术栈（package.json/tsconfig/vite.config） 2. 探测目录结构 3. 探测 Knowledge Vault 路径 4. AskUserQuestion 确认项目名/深度/范围/输出位置 5. 写入 analysis-config.json + manifest.json |
-| Output   | analysis-config.json, manifest.json (status=discover) |
-| Exit     | framework identified, package manager identified, scope confirmed, config written |
+| Actions  | 1. Task Resolution（只读，确定沿用/新建任务） 2. 探测技术栈（package.json/tsconfig/vite.config） 3. 探测目录结构 4. 探测 Knowledge Vault 路径 5. AskUserQuestion 确认项目名/深度/范围/输出位置 6. runtime-run.sh start（用确认后的 goal 登记 + 加锁） 7. 写任务级 discovery.json + analysis-config.json 草稿 |
+| Output   | runtime/tasks/<task_id>/discovery.json, runtime/tasks/<task_id>/analysis-config.json（根 manifest / analysis-config 不改） |
+| Exit     | framework identified, package manager identified, scope confirmed, 任务级配置草稿已写入 |
 | Failure  | 无 package.json → AskUserQuestion 手动指定框架; 权限不足 → 🔴 BLOCKED |
-| Recovery | 读 manifest.json → 若 status=discover 且 config 已存在 → 跳过探测，直接进入 CHECKPOINT |
+| Recovery | 读 runtime/tasks/<task_id>/discovery.json → 若 status=discover 且草稿已存在 → 跳过探测，直接进入 CHECKPOINT |
 ```
 
 ### 示例 2：Generator 的 Execution Stage

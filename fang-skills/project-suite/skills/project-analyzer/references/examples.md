@@ -25,8 +25,8 @@ Phase 1 Discover:
   Q: 输出位置？
   A: Vault + 本地
 
-→ analysis-config.json 写入
-→ manifest.json status: confirmed
+→ runtime-run.sh start（task + analyzer 锁）
+→ 任务级 analysis-config.json 草稿写入（runtime/tasks/<task_id>/）
 → 🔴 CHECKPOINT: 展示 8 个维度预计产出 → 用户确认
 
 Phase 2 Execute:

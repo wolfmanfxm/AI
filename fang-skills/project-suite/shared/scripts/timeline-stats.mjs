@@ -8,8 +8,11 @@
  * totalRuns = 行数（含缺 timing 的记录）；durationSamples = 真正参与时长统计的条数。
  *
  * --shell：改为输出 KEY=value 行，供 collect-metrics.sh 读取完整聚合
- * （执行数 / completed / degraded / blocked / failed / avg confidence / skills），
+ * （执行数 / completed / degraded / blocked / failed / skipped / confidence / skills），
  * 使「执行计数」与「timeline」同源。默认输出保持不变，既有消费者不受影响。
+ *
+ * 两套 confidence：AVG_CONFIDENCE（全部有值的运行，旧语义）与
+ * COMPLETED_AVG_CONFIDENCE（只统计 completed，报表应使用后者）。
  *
  * 聚合在读取时计算——不读取/不依赖任何落盘的 aggregates 字段。
  * v1 兼容：接受 {runs: []} 或顶层数组两种旧形态。
@@ -60,8 +63,9 @@ if (file.endsWith('.jsonl')) {
 }
 
 const seconds = [];
-const statusCounts = { completed: 0, degraded: 0, blocked: 0, failed: 0 };
+const statusCounts = { completed: 0, degraded: 0, blocked: 0, failed: 0, skipped: 0 };
 const confidences = [];
+const completedConfidences = [];
 const skills = new Set();
 
 for (const r of runs) {
@@ -71,7 +75,12 @@ for (const r of runs) {
     statusCounts[r.status] += 1;
   }
   const confidence = r.quality && r.quality.confidence;
-  if (Number.isFinite(confidence)) confidences.push(confidence);
+  if (Number.isFinite(confidence)) {
+    confidences.push(confidence);
+    // 平均 confidence 只统计真正完成的分析：skipped/degraded 的 0 是「未评估」哨兵，
+    // 混进平均会把「没跑」误报成「质量极差」。
+    if (r.status === 'completed') completedConfidences.push(confidence);
+  }
   if (typeof r.skill === 'string' && r.skill) skills.add(r.skill);
 
   const t = r.timing || {};
@@ -93,9 +102,7 @@ const max = seconds.length ? Math.round(Math.max(...seconds)) : 0;
 const avg = seconds.length ? Math.round(seconds.reduce((a, b) => a + b, 0) / seconds.length) : 0;
 
 if (shellMode) {
-  const avgConfidence = confidences.length
-    ? Math.round(confidences.reduce((a, b) => a + b, 0) / confidences.length)
-    : 0;
+  const avgOf = (arr) => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
   process.stdout.write([
     `TOTAL_RUNS=${runs.length}`,
     `DURATION_SAMPLES=${seconds.length}`,
@@ -106,8 +113,13 @@ if (shellMode) {
     `DEGRADED=${statusCounts.degraded}`,
     `BLOCKED=${statusCounts.blocked}`,
     `FAILED=${statusCounts.failed}`,
-    `AVG_CONFIDENCE=${avgConfidence}`,
+    `SKIPPED=${statusCounts.skipped}`,
+    // AVG_CONFIDENCE = 全部有 confidence 的运行（保留旧语义，消费者不受影响）
+    `AVG_CONFIDENCE=${avgOf(confidences)}`,
     `CONFIDENCE_SAMPLES=${confidences.length}`,
+    // 报表应使用这一组：只统计 completed，避免把未评估的 0 计入质量
+    `COMPLETED_AVG_CONFIDENCE=${avgOf(completedConfidences)}`,
+    `COMPLETED_CONFIDENCE_SAMPLES=${completedConfidences.length}`,
     `SKILLS=${[...skills].sort().join(',')}`,
   ].join('\n') + '\n');
 } else {

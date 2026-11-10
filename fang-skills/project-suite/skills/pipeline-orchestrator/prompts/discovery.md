@@ -28,11 +28,22 @@ Gate 判定: [Reuse Fast Path | Quick | Standard | Full]（复杂度: X）
 
 5. CHECKPOINT — 用户确认 Gate 选定的路径（或显式覆盖，需说明理由）
 
+6. **绑定目标 Task（Task-scoped Dispatcher）**
+
+   Orchestrator 不创建自己的 Run，但必须绑定一个 `task_id`，后续所有 Skill 通过
+   `PS_TASK_ID=<task_id>` 共用该任务：
+
+   - **恢复已有任务**：从 `task-registry.sh list --status active` 中选择（多个时必须让用户选）
+   - **新 Pipeline**：与用户确认 goal →
+     `bash shared/scripts/task-registry.sh create "<goal>" --slug <slug> --skill project-<first-skill> --dir .project-knowledge`
+   - 输出 `TASK_ID=<task_id>`；**不要**调用 `runtime-run.sh start`（那是各执行 Skill 的 Discovery 职责）
+
 ## Exit
 
 - 用户已选择 pipeline
 - Pipeline 中所有 Skill 已验证可用
 - 项目状态已了解
+- **已绑定目标 `task_id`（或已创建新 Task），并准备好通过 `PS_TASK_ID` 传递**
 
 ## Failure
 

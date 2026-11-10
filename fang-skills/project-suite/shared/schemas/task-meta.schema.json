@@ -22,7 +22,7 @@
     "skills": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "参与过该任务的 Skill"
+      "description": "已废弃：历史任务保留读取兼容；新任务不再写入。执行历史以 timeline.jsonl 为准（无消费者）。"
     },
     "artifacts": {
       "type": "object",

@@ -88,7 +88,7 @@
 │              Skill Output               │
 ├───────────────┬─────────────────────────┤
 │ 收尾报告       │ 执行结果摘要（名字由 skill 自定，见下）│
-│ state.json    │ 更新后的项目状态           │
+│ state.json 更新建议 │ 提交给 Dispatcher，不直接写根 State │
 │ 产出文件       │ .project-knowledge/ 子目录 │
 └───────────────┴─────────────────────────┘
 ```
@@ -143,19 +143,43 @@
 
 > **Convergence**（统一停止条件）是 Suite 一级原语：`sufficient`=证据够、停下；`insufficient`=缺证据、补；`blocked`=缺输入、回上游。见 [convergence.md](../../shared/primitives/convergence.md)。
 
-### state.json（增量更新）
-Skill 只更新自己负责的字段，不覆盖整个 state.json：
-- `phase` / `status` → 更新项目状态
-- `current` → 更新最近执行 Skill + `task_id`
-- `active_tasks[<task_id>]` → 更新该任务状态
-- `history[]` → 追加本次执行记录（**必须带 `task_id`**）
-- `blockers[]` → 追加/解除阻塞项
+### state.json（只读 + 提交更新建议）
 
-> 并发写纪律见 [task-identity.md](../mechanisms/task-identity.md)：一次一个写者；冲突重读合并，不静默覆盖。
+**Skill 不直接写根 `.project-knowledge/runtime/state.json`。** 根 State 是项目级唯一权威，
+由 **Dispatcher 串行提交**（同一项目同一时刻一个写者）。Skill 只读它了解当前状态，
+并在收尾报告里产出建议：
+
+```json
+{
+  "state_update_suggestion": {
+    "phase": "generating",
+    "status": "in_progress",
+    "history_entry": {
+      "task_id": "task-20261109-user-approval",
+      "skill": "project-generator",
+      "status": "completed",
+      "confidence": 85,
+      "output": "src/views/user-approval/",
+      "at": "2026-11-09T14:10:00Z"
+    },
+    "blockers": []
+  }
+}
+```
+
+| 内容 | 写入者 | 位置 |
+|------|--------|------|
+| 执行进度（phase / 子任务） | 当前 Skill | `.sessions/<task_id>/<skill>/state.json` |
+| 运行终态 | `runtime-run.sh finish` | `runtime/metrics/timeline.jsonl` |
+| phase / status / active_tasks / history / blockers | **仅 Dispatcher** | `runtime/state.json` |
+
+> 并行任务**不得**直接读改写根 `state.json`：每个 Skill 只产出 State 更新建议，
+> 由 Dispatcher 串行提交。见 [task-identity.md](../mechanisms/task-identity.md)。
 
 ### timeline.jsonl（执行指标追加）
 
-**所有 Skill 在 Output 阶段必须向 `runtime/metrics/timeline.jsonl` 追加一行 run 记录。**
+**每次 Run 的终态由 `runtime-run.sh finish` 追加一行**；`pipeline-orchestrator` 是 Dispatcher 类
+Skill，没有自己的 Run，因此不追加（这是唯一例外）。
 
 最简写入（必填字段）：
 ```json
@@ -204,10 +228,12 @@ Skill 只更新自己负责的字段，不覆盖整个 state.json：
 }
 ```
 
-**写入时机**：state.json 写入之后，收尾报告输出之前。
-**写入方式**：`bash shared/scripts/timeline-append.sh <project-root> -`（JSON 从 stdin）——
-append-only 单次追加，**禁止**读 `timeline.jsonl` → 改 → 写回。`runId` 必须唯一
-（`<taskId>/<skill>/<startedAt>`），不能只用 `taskId`；`taskId` 单独成字段。
+**写入时机**：timeline 终态由 `runtime-run.sh finish` 在收尾时追加；**所有退出路径**都要走它
+（见 workflow-protocol 的 Terminal Record）。Skill 自己产出的是 State 更新建议，不是根 State 写入。
+**写入方式**：`bash shared/scripts/runtime-run.sh finish <project-root> --skill <name> --status <status> [--confidence N]`——
+它负责追加一行 timeline、释放单写者锁、清理运行指针；**不修改长期 Task 的 status**。不要直接调 `timeline-append.sh`：
+`runId` 以 `start` 时的记录为准，分头调用会写出不一致的 runId。
+底层仍是 append-only 单次追加，**禁止**读 `timeline.jsonl` → 改 → 写回。
 
 → 完整协议：[../metrics/timeline.md](../metrics/timeline.md)
 
@@ -252,9 +278,10 @@ confidence = 100
 ```
 
 **Confidence Gate 行为：**
-- 🟢 PASS → 下游正常执行，state.json 记录 `gate: "PASS"`
-- 🟡 REVIEW → 下游正常执行，state.json 标注 `gate: "REVIEW"` + AskUserQuestion
+- 🟢 PASS → 下游正常执行，State 更新建议中记录 `gate: "PASS"`
+- 🟡 REVIEW → 下游正常执行，建议中标注 `gate: "REVIEW"` + AskUserQuestion
 - 🟠 GATE → Reviewer 强制执行后才能进入 Generator；Releaser 拒绝执行
-- 🔴 BLOCK → state.json 写入 blocker，下游 Skill 启动时检测到 blocker → 拒绝执行
+- 🔴 BLOCK → State 更新建议中写入 blocker，下游 Skill 启动时检测到 blocker → 拒绝执行
+  （根 `state.json` 由 Dispatcher 提交后才对其他任务可见）
 
 → 完整 Gate 协议：[../mechanisms/confidence-gate.md](../mechanisms/confidence-gate.md)

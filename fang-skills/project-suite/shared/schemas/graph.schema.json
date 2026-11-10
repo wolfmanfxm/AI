@@ -43,7 +43,11 @@
       "additionalProperties": false,
       "required": ["id", "type", "label"],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "全局唯一。非 file 节点必须是 `<type>-<name>` 或 `<type>:<name>`（如 component:src/components/UserTable.vue）；file 节点使用仓库相对路径，不得含空白。"
+        },
         "type": {
           "type": "string",
           "enum": ["module", "file", "component", "api", "view", "store", "infrastructure"]
@@ -91,6 +95,29 @@
             "required": ["type"]
           },
           "then": { "required": ["layer"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "file" } }, "required": ["type"] },
+          "then": {
+            "properties": {
+              "id": { "pattern": "^[^\\s]+$" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "enum": ["module", "component", "api", "view", "store", "infrastructure"] }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "id": {
+                "pattern": "^(module|component|api|view|store|infrastructure)[-:][^\\s]+$"
+              }
+            }
+          }
         }
       ]
     },

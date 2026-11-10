@@ -20,7 +20,7 @@
 
 - 文档文件写入成功
 - API/组件文档 Vault 同步验证通过
-- state.json 更新
+- 提交 State 更新建议（Dispatcher 统一提交根 state.json）
 
 ## Failure
 

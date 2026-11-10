@@ -16,7 +16,7 @@
 - `CHANGELOG.md` 写入成功
 - `RELEASE-CHECKLIST.md` 写入成功
 - 版本号推荐已呈现
-- state.json 更新
+- 提交 State 更新建议（Dispatcher 统一提交根 state.json）
 
 ## Failure
 

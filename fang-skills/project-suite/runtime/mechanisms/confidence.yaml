@@ -1,7 +1,7 @@
 # Confidence Spec — Machine Readable v1.0.0
 #
 # 贯穿整个 Runtime 的可信度体系。
-# 每个 Skill 输出时按 deduction_rules 计算 confidence，写入 state.json。
+# 每个 Skill 输出时按 deduction_rules 计算 confidence，随 State 更新建议提交（Dispatcher 统一写入根 state.json）。
 
 version: "1.0.0"
 
@@ -68,7 +68,7 @@ gates:
   - level: BLOCK
     threshold: 0
     behavior:
-      downstream: 拒绝执行下游，state.json 写入 blocker
+      downstream: 拒绝执行下游，State 更新建议中写入 blocker（Dispatcher 提交）
       release: 🔴 禁止发布
     color: 🔴
 
@@ -157,7 +157,7 @@ skills:
       全部_gte_90: 🟢 PASS
 
 # ═══ Runtime Integration ═══
-# Skill 在 Output 阶段写入 state.json 时附带 confidence + gate 判定
+# Skill 在 Output 阶段把以下字段放进 State 更新建议，由 Dispatcher 串行提交到根 state.json
 
 output:
   state_json_fields:

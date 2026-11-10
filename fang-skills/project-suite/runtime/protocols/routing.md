@@ -106,7 +106,7 @@
    3. project-reviewer — 审查代码质量
    请选择编号，或描述你想做什么。
    ```
-3. **学习反馈** — 用户选择后，将"用户原始输入 → 最终 skill"记录到 `state.json` 的 `routing_history`，供后续语义路由参考
+3. **学习反馈** — 用户选择后，把"用户原始输入 → 最终 skill"作为 State 更新建议（`routing_history` 条目）提交，由 Dispatcher 串行写入根 `state.json`，供后续语义路由参考
 
 ## 路由表（从 capabilities.yaml 编译）
 
