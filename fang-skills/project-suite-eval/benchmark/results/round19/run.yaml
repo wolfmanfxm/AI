@@ -1,0 +1,213 @@
+# round19 — 2026-11-27 · A/B（suite L2 真实加载 + naive 基线，每臂 n=2）
+# 口径：suite 臂必须通过 Skill 工具真实加载；报告写 `Skill 调用: 成功（<skill>）`。
+#       reviewer 的 Independent QA 必须由 Agent/Task 派生；同上下文记 [QA NOT INDEPENDENT]。
+#       每臂 ≥2 次才算 repeatability。
+# 夹具：~/.cache/ps-eval/round19（持久夹具，替代 round18 的 /tmp/ps-eval-run2）。
+
+run:
+  date: "2026-11-27"
+  level: "L2 + naive A/B"
+  fixture: /Users/fangxiangming/.cache/ps-eval/round19
+  reps_per_arm: 2
+  isolation:
+    suite: >
+      每次运行为独立 headless `claude -p` 会话，cwd=/tmp/ps-eval-suite-cwd。
+      该目录 .claude/skills/ 软链 project-*，并软链 shared/runtime/workflow-protocol；
+      不含被测项目源码，夹具是唯一输入。
+    naive: >
+      本会话（cwd=~/.cache/ps-eval/round19，无 .claude/skills）派生的 fresh-context 子代理，
+      显式禁止 Skill/读取 skill 文件；audit 验证 Skill=0 且无真实路径触达。
+  caveats:
+    - suite 臂为 headless 会话（非交互），与 round18 的交互式会话形态不同；Skill 真实加载与 Agent 派生均由 transcript 审计确认。
+    - reviewer-real-r1 的 verifier 撞 25-turn 上限，主会话 SendMessage resume 两次后才拿到 Phase A/B 报告。
+    - reviewer-clean 夹具「预期 0 BLOCKER」未复现（见 findings）。
+
+mechanisms:
+  - id: planner-decision-boundary
+    level: L2
+    skill_invocation: 成功（project-planner）2/2
+    native_baseline: >
+      2/2 自行把「是否需要短信验证」判为本期不做，包装为可逆假设/ADR 并继续产出规格与实现；
+      rep2 还额外「表单预留验证状态字段位」。
+    suite_behavior: >
+      2/2 停在 CHECKPOINT；列 Pending Decision D-001/PD-001（A 不做 / B 做），
+      明确「Planner、Architect 均不得代决」，不产出 Task；confidence 65%/63%。
+    evidence: 输入与夹具完全相同，唯一变量是 skill；suite 2/2 vs naive 2/2 稳定分离。
+    repeatability: "2/2 suite vs 2/2 naive"
+    pass_fail: pass
+    tokens:
+      suite: {input: [73054, 72594], output: [3536, 3212]}
+      naive: {subagent: [31406, 31330]}
+
+  - id: reviewer-risk-qa
+    level: L2
+    skill_invocation: 成功（project-reviewer）4/4
+    native_baseline: >
+      2/2 单遍审查，无独立第二遍；reviewer-real 2/2 均找到 query ACL BLOCKER（r1 BLOCKED / r2 NEEDS_FIX）；
+      reviewer-clean 2/2 把跨菜单 403 判 HIGH，结论 NEEDS_FIX。
+    suite_behavior: >
+      4/4 触发 Independent QA，且全部由 Agent 派生 verifier（clean-r2 派生 2 个）；输出 Missed/Confirmed/Rejected。
+      real-r1 QA 补出 fakeMenuList/insidePage 恒放行的全站绕过；real-r2 QA 补出 mode=edit 越权写；
+      clean 两次 QA 补出上游约百处 prevMenuPath 生产者与调用方未清干净。
+    evidence: >
+      独立性：round18 为 2/6 真派生，round19 为 4/4，V9 修复生效且可观测。
+      增量：naive 也能找到 BLOCKER；但「补漏」成立：real commit 的 `fakeMenuList`/`insidePage` 恒放行类别
+      在 naive 2/2 中出现 0 次，在 suite 2/2 中出现——盲扫补的是 naive 漏掉的类别，不只是更具体。
+    repeatability: "suite 4/4 派生；naive 2/2 无第二方"
+    pass_fail: pass（独立 QA 机制）；增量强度：中
+    tokens:
+      suite: {input: [127779, 149650, 104777, 146777], output: [41245, 45516, 18439, 48568]}
+      naive: {subagent: [49480, 61802, 48964, 44687]}
+
+  - id: reviewer-clean-negative-control
+    level: L2
+    skill_invocation: 成功（project-reviewer）2/2
+    native_baseline: 2/2 判 HIGH（跨菜单详情 403）+ NEEDS_FIX。
+    suite_behavior: 2/2 判 BLOCKER=1（同一跨菜单 403）+ NEEDS_FIX；因此同时命中 one-way 与 BLOCKER>0。
+    evidence: >
+      v1（只去 query 信任、未加白名单）：8/8 运行（4 suite + 4 naive）一致拒绝——suite 判 BLOCKER、
+      naive 判 HIGH；它不是 0-BLOCKER 负对照，而是「语义回归正样本」。
+      v2（来源白名单 + 补齐 contractAudit；`reviewer-clean-v2`）：4/4 运行 0 BLOCKER。
+      suite 2/2：one-way 命中、BLOCKER=0、Agent 派生（r1 0 BLOCKER/0 HIGH → NEEDS_FIX 非阻断；r2 PASS）。
+      naive 2/2（`--bare --restricted`）：0 BLOCKER（NEEDS_FIX，仅 MEDIUM/LOW），无 Independent QA。
+    repeatability: "v2 suite 2/2 复现 0-BLOCKER 触发；naive 2/2 亦 0-BLOCKER"
+    pass_fail: pass（v2 决定性样本恢复，2/2）
+    note: >
+      v1 保留为「语义回归正样本」；「one-way 单独触发 QA」改用 v2。
+      v2 仍有 MEDIUM 级改进项（重复解析、Array.isArray、afterEach、测试缺口），但不影响 0 BLOCKER。
+
+  - id: tester-red-classification
+    level: L2
+    skill_invocation: 成功（project-tester）2/2
+    native_baseline: >
+      2/2 只写 1 条 AC 用例；node:test 执行得到 '.5' !== '0.5'；定位「以 . 开头无补零分支」；不改源码。
+    suite_behavior: >
+      2/2 用 node:test，写 3–4 条同族 RED + 6 条边界；标 [RED 证据]；给 V1–V6（V5 无覆盖率基线 ⚠️）；
+      同样不改源码（mtime 未变）。
+    evidence: 行为等价，差异仅在标签与校验结构。
+    repeatability: "2/2 vs 2/2 等价"
+    pass_fail: decorate
+    tokens:
+      suite: {input: [65240, 69958], output: [4774, 4882]}
+      naive: {subagent: [32635, 32927]}
+
+  - id: delivery-safety-invariant
+    level: L2
+    skill_invocation: 成功（project-releaser）2/2
+    native_baseline: >
+      2/2 主动执行 verify.mjs before|after 并报告 FAIL B→PASS A/B；列「发布前必补/待补测」：
+      迁移写入未断言、双写未断言、直读 userInfo 需 grep；给回滚/灰度建议。
+    suite_behavior: >
+      2/2 执行同一命令；显式拆出 Safety Invariant / Blast Radius / Proof / Rollback，
+      把未执行分支（消费方清单、回滚数据回填）标 UNPROVEN 且不计 PASS。
+    evidence: >
+      本夹具下 naive 也会跑可见证明并列出未验证项，增量收窄为「是否把未证明项排除在 PASS 之外」。
+      naive rep1 的「双写期内回滚安全」在代码事实上成立；suite r2 的「已迁移数据需回填」偏保守。
+    repeatability: "2/2 vs 2/2"
+    pass_fail: decorate（中性 prompt 复测后；结构化 UNPROVEN 是格式增量）
+    neutral_migration_ab: >
+      合成迁移夹具（幂等/部分失败续跑/回滚/回滚后可读），中性 prompt（不提 UNPROVEN），2+2：
+      suite 2/2 执行 before FAIL→after PASS 并给结构化 UNPROVEN；naive 2/2 也执行同一证明、
+      也列出「未证明/发布门禁」。行为等价，增量只剩字段结构化。
+    tokens:
+      suite: {input: [66939, 66820], output: [16845, 3743]}
+      naive: {subagent: [38826, 35747]}
+
+  - id: routing-sensitive-floor
+    level: L1（无对应可加载 Skill）
+    skill_invocation: N/A
+    native_baseline: >
+      2/2 判 Standard，要求安全复核 + 回归测试；均拒绝 Quick（「2 文件权限绕过」是反例）。
+    suite_behavior: >
+      2/2 执行 complexity-gate.sh 均崩溃（line 89/96：`$is_simple` 后紧跟全角逗号 U+FF0C，
+      macOS bash 3.2 + set -u → unbound variable）；按协议回落 LLM rubric：Standard、风险 HIGH、reviewer 必跑。
+    evidence: 最终路径一致；suite 增量是显式风险标记与固定调度；脚本崩溃是真实工具缺陷。
+    repeatability: "2/2"
+    pass_fail: L1 only（不可判 pass）
+    note: "已修 shared/scripts/complexity-gate.sh 第 96 行（变量加花括号），并接入 check-conformance 冒烟。"
+    r6_l2: >
+      挂载现有 pipeline-orchestrator 后，自然语言「从分析到发布」2/2 发现并加载；
+      2/2 执行 Complexity Gate + Reuse Check，停在 Decision Boundary，未绑定/创建 task（只读），
+      未自建 Run，未自动级联。未把 orchestrator 加入 VALID_SKILLS，未改 Run 契约。
+
+transcript_audit:
+  method: 扫描 tool_use 名称与输入路径（audit/audit-transcript.py），不靠自报
+  suite_arms: "10/10 skill 臂 `Skill=1`（Launching skill: project-*），routing 2/2 `Skill=0`（L1）"
+  reviewer_verifier_spawn: 4/4（clean-r1=1、clean-r2=2、real-r1=1、real-r2=1）
+  v2_retest: >
+    suite reviewer-clean-v2 2/2 `Skill=1 Agent=1`（且 SendMessage 做 Phase B）；
+    naive 2/2（`--bare --restricted`，无 hook/plugin 注入）`Skill=0 Agent=0`，零 skill 路径触达。
+  naive_arms: 12/12 `Skill=0`、`Agent=0`；无 Read/Bash/Grep 实际触达 SKILL.md / .claude/skills / project-suite
+  false_positive: naive-delivery-r1 的 2 条 path_hits 是其写报告文本含「project-suite」字样，非读取
+
+findings:
+  - id: reviewer-clean-fixture
+    finding: >
+      reviewer-clean 的修复只去 query 信任、未加来源白名单，导致跨菜单详情页 403；
+      8/8 运行一致拒绝，round18 的 0-BLOCKER 结论未复现。
+    action: >
+      已修（2026-11-27）：v1 改标注为「语义回归正样本」；新建 `reviewer-clean-v2`
+      （来源白名单 + 补齐 contractAudit），4/4 运行 0 BLOCKER；suite 2/2 由 one-way 触发并派生 Agent。
+  - id: gate-script-crash
+    finding: complexity-gate.sh:96 的全角逗号在 macOS bash 3.2 触发 unbound variable，任意输入必崩。
+    action: >
+      已修（2026-11-27）：`$is_simple`/`$RISK` 等改为 `${...}`；新增
+      `shared/scripts/check-complexity-gate.sh`（C / en_US.UTF-8 / zh_CN.UTF-8 三 locale 冒烟，已通过）。
+  - id: verifier-turn-cap
+    finding: >
+      独立 QA 派生已 4/4，但 real-r1 的 verifier 撞 25-turn 上限且无报告，主会话 resume 两次才完成。
+    action: verifier prompt 需限制探索轮次并要求先交付；或提高该 agent 的 turn 上限。
+  - id: delivery-delta-narrowed
+    finding: naive 也会执行证明并列出未验证项；suite 的差异化只剩「UNPROVEN 不计 PASS」的字段纪律。
+    action: 若要把该机制升级为 pass，需在 naive 不可能覆盖的证明场景（不可执行分支/回滚）上再设计夹具。
+
+limitations:
+  - n=2/臂，仍不足以升级为 pass（除 planner 与独立 QA 的机制性结论）。
+  - suite 臂为 headless 会话；交互式 Host 下的 skill 行为未在本轮覆盖。
+  - reviewer 分级属判断项：suite 判 BLOCKER、naive 判 HIGH，二者对同一事实的严重度口径不同。
+
+v2_retest:
+  date: "2026-11-27"
+  fixture: /Users/fangxiangming/.cache/ps-eval/round19/reviewer-clean-v2
+  change: 来源白名单（allowedPrevMenuPaths）+ 补齐 contractAudit；保留原 A→B 详情能力
+  runs:
+    - {arm: suite, rep: 1, skill: 1, agent: 1, blocker: 0, high: 0, verdict: "NEEDS_FIX（非阻断）", cost_usd: 2.01}
+    - {arm: suite, rep: 2, skill: 1, agent: 1, blocker: 0, verdict: PASS, cost_usd: 3.53}
+    - {arm: naive, rep: 1, skill: 0, agent: 0, blocker: 0, verdict: "NEEDS_FIX（仅 MEDIUM/LOW）", cost_usd: 0.22}
+    - {arm: naive, rep: 2, skill: 0, agent: 0, blocker: 0, verdict: "NEEDS_FIX（无 P0）", cost_usd: 0.24}
+  conclusion: >
+    「0 BLOCKER + one-way → 独立 QA」在 L2 下 2/2 复现，且 Agent 派生 2/2；
+    naive 在 bare 模式下 2/2 无 QA、零 skill 路径触达。v2 夹具可作为长期负对照。
+  artifacts: artifacts/out-v2-retest/、artifacts/audit-v2-retest.jsonl
+
+round19_addendum_AB:
+  A1_delivery:
+    fixture: delivery-migration（synthetic）
+    result: suite 2/2 与 naive 2/2 均执行 before FAIL→after PASS，均列出未证明项；suite 增量=结构化 UNPROVEN。
+    verdict: decorate
+  A2_reviewer_missed_class:
+    evidence: fakeMenuList/insidePage 在 naive 2/2 = 0 次，suite 2/2 = 出现；盲扫补的是漏掉的类别。
+    verdict: 增量成立（补漏）
+  A3_verifier_turn:
+    change: verifier.md 增加「先交付 Phase A 最小报告、接近上限标 [PARTIAL]、resume 只补未完成」
+    result: A4 两次交互式派生均完成（rep2 约 266s），未再出现 25-turn 无报告
+    verdict: 初步生效（2/2 无 resume）
+  A4_interactive:
+    runs: 2 次交互式子 agent（真实项目 commit 689679be0d）
+    result: Skill=1 2/2；Agent 派生 2/2；一次 BLOCKER=0 且由 one-way 触发，一次 BLOCKER=1
+    verdict: V9 在交互式 Host 下成立
+  A5_smoke_wired:
+    change: check-conformance.sh 调用 check-complexity-gate.sh（C/en_US/zh_CN）
+    result: conformance 0 error / 9 pre-existing warnings
+  B1_routing_l2:
+    result: R6 2/2 自然语言发现 pipeline-orchestrator；Gate/Reuse/Decision Boundary 正确；未自建 Run/未级联
+  B2_G5: 已更新为「部分机制已判定，仍有两项待判定」，未关闭
+  B3_delivery_scope:
+    fixture:
+      type: synthetic
+      category: amount-unit-migration + storage-key-migration
+      evidence_scope: executable-local-fixture
+      production_validation: unavailable
+      rollback_executed: true-local-only
+      production_rollback: false
+  B4_standard: n=2 + headless 作为 Level A 最低正式标准；跨项目泛化为 Level B，交互式为 Level C

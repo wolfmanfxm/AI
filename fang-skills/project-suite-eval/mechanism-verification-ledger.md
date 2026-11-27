@@ -71,6 +71,7 @@ pass_fail: pass | fail | decorate | untested
 | 放置决议 target（module/domain/placement） | 额外动作 | 强 | ✅ 生效 | round6 M1：落点 customerManage（纠正 round5 的 baseData 错误） |
 | Knowledge First（先扫描可复用资产） | 判断 | 弱 | ⚠️ 过程质量 | 结构化 REUSE/EXTEND/CREATE 裁决 vs naive ad-hoc |
 | Confidence 透明（<40 拒绝产出） | 判断 | 弱 | ✅ 生效 | round5 P3：naive 硬编，suite 暴露 Gaps |
+| 事实/决策分域 + 高影响不降级（interview） | 判断 | ✅ 强（round17/18/19） | ✅ pass（round19 n=2） | round17/18：naive 把「短信验证」判为本期不做，suite 停 CHECKPOINT；**round19 n=2 同向复现**：suite 2/2 停 CHECKPOINT（confidence 65%/63%），naive 2/2 自行决定「不做」并继续实现（rep2 还预留验证字段位）。L2 `Skill 调用: 成功（project-planner）` 2/2。场景 `project-planner.yaml` P6 |
 
 ### project-architect（4 原则）
 
@@ -98,6 +99,7 @@ pass_fail: pass | fail | decorate | untested
 | 先理解再测试（读源码理解边界） | 执行型 | 强 | ❌ 装饰品 | round8 复测：naive 也读源码、抓 0 不对称 bug（RED 弱） |
 | AC 驱动（每条 AC 至少一个用例） | 额外动作 | 强 | ✅ 生效 | round5 P1：naive 只测 happy path |
 | 项目约定优先（自动检测框架） | 判断 | 弱 | ❌ 装饰品 | round10：naive 也检测 vitest + .test.ts 命名（LLM 通用能力覆盖） |
+| 失败分型 + 断言目标行为（RED 证据 ≠ 潜在 Bug） | 判断 | 弱（round17/18/19） | ❌ 装饰品 | round17/18：naive 在 L1 与 L2 都写目标断言、跑出 RED、不改源码、定位根因；suite 的 L2 增量仍只有 `[RED 证据]` 标签与 V1–V6。**round19 n=2 同结论**：naive 1 条 AC 用例 vs suite 3–4 条 RED + 边界，两边都 RED、都定位 `amount.ts:51/63`、都不改源码。L2 `Skill 调用: 成功（project-tester）` 2/2 |
 
 ### project-reviewer（5 原则）
 
@@ -108,6 +110,7 @@ pass_fail: pass | fail | decorate | untested
 | 分级明确（五级符号 + 五轴） | 额外动作 | 中 | 🟡 部分生效 | round7 P4：naive 模糊三档，suite 精确五级+五轴 |
 | AC 对照（逐条验证） | 额外动作 | 强 | ❌ 装饰品 | round8：naive 也逐条对照 AC + file:line（RED 弱） |
 | 放置正确（V7 对照 target） | 判断 | 弱 | ⚠️ 纪律强制 | round7 V7：naive 也发现错位（LLM 通用），价值是「强制每次对照」降漏报率 |
+| 风险触发的独立盲扫（先盲扫再对照） | 额外动作 | 召回强 / 精确强（round19） | ✅ pass（触发 4/4；v2 0-BLOCKER 触发 2/2；Agent 派生 6/6 post-fix） | round18：0 BLOCKER + one-way 仍触发。round19：L2 触发 4/4、Agent 派生 4/4；v1 clean 夹具被 8/8 运行判为语义回归，v2 改为来源白名单并补齐 contractAudit 后 4/4 运行 0 BLOCKER，suite 2/2 由 one-way 触发 + Agent 派生，naive 2/2（bare）0 BLOCKER、无 QA。详见 [round19/analysis.md](benchmark/results/round19/analysis.md)。场景 `project-reviewer.yaml` P5 |
 
 ---
 
@@ -121,6 +124,8 @@ pass_fail: pass | fail | decorate | untested
 | Reuse Check primitive | 额外动作 | ✅ 生效 | round5：结构化 REUSE/EXTEND/CREATE 裁决 |
 | 跨 Skill 路由准确（措辞 → 正确 skill） | 声明 | 🟡 部分验证（suite-only） | round11：R1–R7 实测 top1 命中 **5/6**（可路由项）；另发现 2 处缺陷（R6 orchestrator 未装载→无匹配；R7 changelog 误落 documenter）。**无 native 臂，RED 仍未判** |
 | **Fresh Context**（跨 Skill /clear + state-only 传递） | 声明 / 成本行为 | ⚠️ 未验证（G1 欠账） | orchestration「每个 Skill 独立 /clear，只读 state/artifact」是核心编排，但**从未被 mechanism 级 ablation 过**。属 eval-contract 记的「Resolver/Registry/Gate/Fresh Context 机制级对象零条 ablation」——见下方六段 |
+| 敏感面路由下限（complexity-gate → 至少 Standard） | 声明 + 判断 | 弱（round17/18/19） | ❌ 装饰品 / 静态 | round17/18：naive 两次都判 Standard 并要求安全审查；suite 增量是显式 `风险: HIGH` 与固定调度。**round19 2/2** 同结论；且 `complexity-gate.sh:96` 在 macOS bash 3.2 必崩（`$is_simple` 后全角逗号 + `set -u`），两次均回落 LLM rubric。**无 L2 入口**（pipeline-orchestrator 不是可加载 Skill），只能 L1。场景 `cross-skill-routing.yaml` R13 |
+| Delivery Evidence · Safety Invariant + Proof | 额外动作 | 弱（round19 中性 2/2） | ❌ 装饰品 | round18：naive 也会跑可见证明；round19 合成迁移夹具（中性 prompt，2+2）：suite 与 naive 都执行 before FAIL→after PASS、都列出未证明项。suite 增量只剩结构化 `UNPROVEN` 字段与「不计 PASS」的格式纪律。场景 `project-releaser.yaml` P1；证据范围 `synthetic / production_validation: unavailable / production_rollback: false` |
 
 > ⚠️ **2026-09-17 追加（已跑 suite 侧，RED 仍未判）**：verifier V2 追加证据要求 ——
 > REUSE 裁决必须附 `命中` + `依据`（无证据 = V2 未通过），并明确「V2 = REUSE 且证据成立 →
@@ -135,12 +140,13 @@ pass_fail: pass | fail | decorate | untested
 
 | 判定 | 数量 | 说明 |
 |------|------|------|
-| ✅ 生效（RED 强） | 7 | 仅剩「增量分析」「Contract」「放置决议」有实测证据，其余 4 个（Evidence Score/先候选/决策可追溯/AC 驱动）仍理论分类待 Batch3 |
+| ✅ 生效（RED 强） | 9 | 仅剩「增量分析」「Contract」「放置决议」有实测证据，其余 4 个仍理论分类待 Batch3；**round19 新增 2 条**：事实/决策分域（n=2，suite 2/2 vs naive 2/2）、风险触发独立盲扫（触发 4/4、v2 0-BLOCKER 2/2、Agent 派生 6/6） |
+| 🟡 初步通过（round17/18/19） | 0 | 无（Delivery 经中性 2+2 复测降为装饰品） |
 | 🟡 部分/声明生效 | 2 | 分级明确（部分）、convergence（Specified，Host 解读） |
 | 🟡 一致性放大器 | 1 | 遵循项目模式——系统化遵循项目约定（value=一致性非质量，round10 实证） |
 | ⚠️ 纪律强制（RED 弱） | 1 | 放置正确（强制每次对照，降漏报率） |
-| ❌ 装饰品 | 14 | round8+10 实测 14 个机制全 RED 弱：判断型 6 + 格式型 6 + 执行型 2（LLM 通用能力覆盖） |
-| 未验证 | 3 | ① 跨 Skill 路由准确（仅有静态证据）② 交付契约完成度门禁（2026-09-30：机械可核但**无 agent 臂**；2026-10-08 复测：畅行回填后首个真实 GREEN 臂，仍无受控过程）③ 项目级 CLAUDE.md 入口（2026-10-08 恢复的一条被删除规格：机械可核、无 agent 臂，且**幂等性无机械证明**）——均见「回归基准记录」；其余机制已至少跑过 1 轮 baseline |
+| ❌ 装饰品 | 17 | round8+10 的 14 个 + round17/18/19 的 3 个（失败分型、敏感面路由下限、Delivery Safety Invariant + Proof——naive 在公平 prompt 下也做对） |
+| 未验证 | 3 | ① 跨 Skill 路由准确（仅有静态证据）② 交付契约完成度门禁（2026-09-30：机械可核但**无 agent 臂**；2026-10-08 复测：畅行回填后首个真实 GREEN 臂，仍无受控过程）③ 项目级 CLAUDE.md 入口（2026-10-08 恢复的一条被删除规格：机械可核、无 agent 臂，且**幂等性无机械证明**）——均见「回归基准记录」 |
 
 ## 结论
 
@@ -553,3 +559,274 @@ agent 加载的是**兄弟仓库 `afc-newcore-web-frontend` 里的 skill 副本*
 
 - **Repeatability**：**反例**——同提示词重复即不一致（E1），故本测量在 n=2 下不可复现。
 - **Pass/Fail**：`untested`。阳性证据只证明「验证子流程跑了」，没证明「它优于自发自检」。
+
+---
+
+## round17 — 2026-11-27 机制五条（每臂 n=1）
+
+> 详细分析：[round17/analysis.md](benchmark/results/round17/analysis.md)；结构化数据：[round17/run.yaml](benchmark/results/round17/run.yaml)。
+> ⚠️ n=1，只记方向，**不判 pass**。首轮 pilot 被目标项目 `.claude/skills` 污染，已作废，正式运行改用隔离夹具。
+
+### 机制：事实/决策分域 + 高影响不降级（planner）
+
+```yaml
+hypothesis: 高影响产品决策在 Interview 预算耗尽后不得降级为 Assumption，也不得交给 Architect 代决。
+native_baseline: 直接判「短信验证本期不做」，写成假设 A1，继续给 page-spec 与实现步骤。
+suite_behavior: 停 CHECKPOINT，产出 D-001（A 需要 / B 不需要），明确「不得代决」「预算耗尽不等于可假设」。
+evidence: round17 P6，同一 /tmp 夹具与 task.md；naive 缺失、suite 出现。
+repeatability: 1/1
+pass_fail: pass-preliminary
+```
+
+### 机制：失败分型 + 断言目标行为（tester）
+
+```yaml
+hypothesis: 失败要区分目标行为未满足（RED 证据）与预期外缺陷；断言写目标行为而非现状。
+native_baseline: 写 toBe('0.5')、跑出 RED、不改源码、定位根因；未用 [RED 证据] 标签。
+suite_behavior: 同一断言 + [RED 证据] + V1–V6，源码 sha256 未变。
+evidence: round17 P5；naive 与 suite 行为等价，差异仅在标签/结构。
+repeatability: 1/1
+pass_fail: decorate
+```
+
+### 机制：风险触发独立盲扫（reviewer）
+
+```yaml
+hypothesis: 高风险小 diff 即使主审查无 BLOCKER 也必须触发独立盲扫；低风险不触发。
+native_baseline: 单遍审查，无独立第二方；pilot 自述「审了 2 遍但没有第二方复看」。
+suite_behavior: >
+  BLOCKER=0 的真实权限 commit 上触发 Independent QA（依据 one-way），Missed 补出 2 条主审查未报的问题；
+  真实项目 2 行按钮换位因模块级 graph 7>5 也曾被误触发；移除 graph>5 后负对照复测 [QA SKIPPED]。
+evidence: round17 P5；召回阳性（pilot/isolated）、精确性修正后阴性（retest）。
+repeatability: 1/1
+pass_fail: pass-preliminary（召回 1/1；graph 移除后负对照 1/1；两方向各 1 次）
+```
+
+### 机制：敏感面路由下限（complexity-gate）
+
+```yaml
+hypothesis: 权限/schema/契约/并发类小改动不得走 Quick Path，至少 Standard 且风险 HIGH。
+native_baseline: 判 Standard，主动要求安全审查与回归测试（「文件少 ≠ 风险低」）。
+suite_behavior: Gate 原始 complex/HIGH → LLM 复核 medium/Standard/HIGH + reviewer 独立 QA。
+evidence: round17 R13；两臂最终路径一致，suite 增量是显式风险标记与固定调度。
+repeatability: 1/1
+pass_fail: decorate
+```
+
+### 机制：Delivery Evidence · Safety Invariant + Proof
+
+```yaml
+hypothesis: one-way/高风险变更必须给 Safety Invariant 与真实 Proof；无实跑标 UNPROVEN 且不计 PASS。
+native_baseline: 给「发布前验证」清单与回滚，没有不变式，也没有把验证标成「未执行」。
+suite_behavior: 给出不变式 + Proof=UNPROVEN（变更未落地）+ UNPROVEN 单列不计 PASS。
+evidence: round17 P1；naive 的清单被当成已验证，suite 显式区分。
+repeatability: 1/1
+pass_fail: pass-preliminary（只测了缺失方向；「变更存在时是否真跑 Proof」未测）
+```
+
+### 环境事实（影响本轮所有结论）
+
+- 目标项目 `.claude/skills/project-*` 是**指向套件仓的 symlink**。在项目内跑 naive 臂会被污染；
+  首轮 ROUTE-NAIVE 直接引用了套件的反例条目，已作废。
+- 正式运行使用 `/tmp/ps-eval-run1` 夹具（无 `.claude/skills`）；suite 臂用绝对路径加载 skill。
+- suite 臂多数表现为「读 skill 文件并遵循」，不是「Skill 工具成功加载」——与 round16 的加载随机性叠加，
+  本轮 suite 证据应理解为「规则文本生效」，不是「Host 加载生效」。
+- 隔离夹具缺 graph，导致 reviewer 负对照「正确跳过」；真实项目负对照暴露了 `graph>5` 误触发。
+  **负对照必须在该机制真实运行的资料条件下跑。**
+
+---
+
+## round18 — 2026-11-27 · L2（真实 Skill 加载）
+
+> 口径：suite 臂必须通过 Skill 工具加载；「读规则文本」降为 L1。详见 [round18/analysis.md](benchmark/results/round18/analysis.md)。
+> 全部 suite 臂报告 `Skill 调用: 成功`；router 无对应可加载 Skill，只能 L1。
+
+### 机制：事实/决策分域 + 高影响不降级
+
+```yaml
+hypothesis: 高影响产品决策在预算耗尽后不得降级为 Assumption，也不得交给 Architect 代决。
+native_baseline: 仍判「短信验证本期不做」，包装为可逆默认决策 + 显式记录，继续实现。
+suite_behavior: 停 CHECKPOINT，Pending Decision A/B，明确 Planner/Architect 均不得代决。
+evidence: round18 L2，Skill 成功；与 round17 L1 同向，naive 两次同向失败。
+repeatability: 2/2（L1+L2 各 1）
+pass_fail: pass-preliminary
+```
+
+### 机制：风险触发的独立盲扫
+
+```yaml
+hypothesis: 高风险小 diff 即使主审查无 BLOCKER 也必须触发独立盲扫；低风险不触发。
+native_baseline: 单遍审查，无独立第二方。
+suite_behavior: >
+  干净权限修复（0 BLOCKER，2 文件）→ one-way 命中 → Independent QA，盲扫补出 3 个未清理调用方；
+  真实权限 commit（BLOCKER=1）→ 触发；真实项目负对照 → [QA SKIPPED]。
+evidence: round18 L2，四次 Skill 调用成功；决定性样本排除了 BLOCKER>0 的替代解释。
+repeatability: 阳性 3 次 / 负对照 1 次
+pass_fail: pass-preliminary
+caveat: 独立性 2/6——transcript 审计显示只有 2 次真的派生了 verifier Agent；其余同上下文。
+followup: 已把「必须 Agent/Task 派生，否则标 [QA NOT INDEPENDENT]」写入 verifier.md 与 V9；复测 2/2 出现 Agent=1（修复前 2/6，样本小待重复）。
+```
+
+### 机制：失败分型 + 断言目标行为
+
+```yaml
+hypothesis: 区分目标行为未满足（RED 证据）与预期外缺陷。
+native_baseline: 目标断言 + RED + 不改源码 + 根因定位。
+suite_behavior: 同左 + [RED 证据] + V1–V6。
+evidence: round18 L2，Skill 成功；与 round17 一致，naive 行为等价。
+repeatability: 2/2（L1+L2）
+pass_fail: decorate
+```
+
+### 机制：敏感面路由下限
+
+```yaml
+hypothesis: 敏感面小改动不得走 Quick Path。
+native_baseline: Standard + 独立安全复核。
+suite_behavior: Gate complex/HIGH → LLM 复核 medium/Standard/HIGH。
+evidence: 无 L2 入口（pipeline-orchestrator 不是可加载 Skill）；L1 两臂同路径。
+repeatability: 2/2（L1）
+pass_fail: decorate（静态/协议检查）
+```
+
+### 机制：Delivery Evidence · Safety Invariant + Proof
+
+```yaml
+hypothesis: one-way 变更必须给不变式与真实 Proof；无实跑标 UNPROVEN。
+native_baseline: 主动跑 verify.mjs，报告 FAIL B→PASS；但无不变式字段，也未把未执行分支标 UNPROVEN。
+suite_behavior: 跑同一命令；给不变式；未执行分支单列 UNPROVEN，不计 PASS。
+evidence: round18 L2，Skill 成功；naive 在「证明可见」时也会跑，增量只在诚实分支。
+repeatability: 1/1（L2）
+pass_fail: decorate（中性 2+2 复测：naive 也执行证明并列出未证明项；增量=结构化 UNPROVEN）
+```
+
+---
+
+## round19 — 2026-11-27 · L2 + naive A/B，每臂 n=2
+
+> 夹具持久化到 `~/.cache/ps-eval/round19`；suite 臂 = 独立 headless 会话（neutral cwd 只挂 skill 软链、无项目源码），
+> naive 臂 = cwd 无 `.claude/skills` 的会话派生的 fresh-context 子代理。审计脚本扫 tool_use，不靠自报。
+> 详见 [round19/analysis.md](benchmark/results/round19/analysis.md) 与 `benchmark/results/round19/run.yaml`。
+
+### 机制：事实/决策分域 + 高影响不降级（planner）
+
+```yaml
+hypothesis: 高影响产品决策在预算耗尽后不得降级为 Assumption，也不得交给下游代决。
+native_baseline: >
+  2/2 自行判「不做短信验证」，写成可逆假设/ADR，随后产出规格并进入实现；
+  rep2 还「表单预留验证状态字段位」。
+suite_behavior: 2/2 停 CHECKPOINT，Pending Decision A/B，明确 Planner/Architect 不得代决，不产出 Task；confidence 65%/63%。
+evidence: round19 L2，Skill 成功 2/2；同夹具、同知识库，唯一变量是 skill。
+repeatability: 2/2（naive 2/2 同向失败）
+pass_fail: pass
+```
+
+### 机制：风险触发独立盲扫（reviewer）
+
+```yaml
+hypothesis: 高风险小 diff 必须触发独立盲扫；独立性必须由 Agent/Task 派生且可观测。
+native_baseline: 2/2 单遍审查，无第二方；仍能找到 query ACL BLOCKER（real 2/2）与跨菜单 403（clean 2/2，判 HIGH）。
+suite_behavior: >
+  4/4 触发 Independent QA；4/4 由 Agent 派生 verifier（clean-r2 派 2 个）；
+  QA 补出 fakeMenuList/insidePage 全站绕过、mode=edit 越权写、上游约百处 prevMenuPath 生产者。
+evidence: round19 L2；transcript 审计 Skill=1 4/4、Agent=1/2/1/1。
+repeatability: 触发 4/4；派生 4/4
+pass_fail: pass（独立性 + 0-BLOCKER 触发 2/2）；增量强度：中
+caveat: >
+  v1 `reviewer-clean` 的 0-BLOCKER 前提未复现（8/8 拒绝）。v2 改成来源白名单并补齐 contractAudit：
+  4/4 运行 0 BLOCKER；suite 2/2 由 one-way 触发 + Agent 派生；naive 2/2（bare）0 BLOCKER、无 QA。
+  「不依赖 BLOCKER>0」的决定性样本已 2/2 复现。
+followup: real-r1 的 verifier 撞 25-turn 上限，主会话 SendMessage resume 两次才拿到 Phase A/B；建议 verifier prompt 限轮次/先交付。
+```
+
+### 机制：失败分型 + 断言目标行为（tester）
+
+```yaml
+hypothesis: 区分目标行为未满足（RED 证据）与预期外缺陷。
+native_baseline: 2/2 写 1 条 AC 用例；node:test 跑出 '.5' !== '0.5'；定位补零分支缺失；不改源码。
+suite_behavior: 2/2 写 3–4 条同族 RED + 6 条边界；标 [RED 证据]；给 V1–V6（V5 无覆盖率基线 ⚠️）；不改源码（mtime 未变）。
+evidence: round19 L2，Skill 成功 2/2；独立复跑 naive/suite 测试均 RED。
+repeatability: 2/2 vs 2/2 等价
+pass_fail: decorate
+```
+
+### 机制：敏感面路由下限（complexity-gate）
+
+```yaml
+hypothesis: 权限/schema/契约/并发类小改动不得走 Quick Path。
+native_baseline: 2/2 判 Standard，要求安全复核 + 回归测试；均拒绝 Quick。
+suite_behavior: >
+  2/2 执行 complexity-gate.sh 均崩溃：line 89/96 `is_simple�: unbound variable`
+  （第 96 行 `$is_simple` 后紧跟全角逗号 U+FF0C，macOS bash 3.2 + set -u）；
+  按协议回落 LLM rubric：Standard、风险 HIGH、reviewer 必跑。
+  已修：`${is_simple}` / `${RISK}` 加花括号，并新增 `shared/scripts/check-complexity-gate.sh` 三 locale 冒烟。
+evidence: round19 L1（无对应可加载 Skill），2/2 独立复现脚本崩溃。
+repeatability: 2/2
+pass_fail: L1 only（装饰品/静态）；工具缺陷已修 + 冒烟
+```
+
+### 机制：Delivery Evidence · Safety Invariant + Proof
+
+```yaml
+hypothesis: one-way/高风险变更必须给 Safety Invariant 与真实 Proof；无实跑标 UNPROVEN 且不计 PASS。
+native_baseline: >
+  2/2 主动执行 verify.mjs before|after 并报告 FAIL B→PASS；列「发布前必补/待补测」：
+  迁移写入未断言、双写未断言、直读 userInfo 需 grep。
+suite_behavior: 2/2 执行同一命令；拆出 Safety Invariant / Blast Radius / Proof / Rollback，UNPROVEN 单列且不计 PASS。
+evidence: round19 L2，Skill 成功 2/2；naive 也会跑可见证明，增量收窄为「UNPROVEN 是否排除在 PASS 外」。
+repeatability: 2/2
+pass_fail: decorate（中性 2+2 复测：naive 也执行证明并列出未证明项；增量=结构化 UNPROVEN）
+note: naive rep1 的「双写期内回滚安全」在代码事实上成立；suite r2 的「已迁移数据需回填」偏保守。
+```
+
+### round19 · v2 补测（reviewer-clean-v2）
+
+```yaml
+fixture: reviewer-clean-v2（来源白名单 + 补齐 contractAudit；保留 A→B 详情能力）
+suite_r1: {Skill: 1, Agent: 1, BLOCKER: 0, HIGH: 0, verdict: "NEEDS_FIX（非阻断）", cost_usd: 2.01}
+suite_r2: {Skill: 1, Agent: 1, BLOCKER: 0, verdict: PASS, cost_usd: 3.53}
+naive_r1: {Skill: 0, Agent: 0, BLOCKER: 0, verdict: "NEEDS_FIX（仅 MEDIUM/LOW）", mode: "--bare --restricted", cost_usd: 0.22}
+naive_r2: {Skill: 0, Agent: 0, BLOCKER: 0, verdict: "NEEDS_FIX（无 P0）", mode: "--bare --restricted", cost_usd: 0.24}
+evidence: >
+  4/4 运行 0 BLOCKER。suite 2/2 在 BLOCKER=0 时由 one-way（权限边界）触发 Independent QA，
+  且 2/2 由 Agent 派生 verifier；naive 2/2 无 QA、Skill=0、零 skill 路径触达。
+verdict: v2 可作为长期 0-BLOCKER 负对照；v1 保留为「语义回归正样本」。
+```
+
+### round19 · A/B 补测（A1–A5 + B1–B3）
+
+```yaml
+A1_delivery: >
+  合成迁移夹具（synthetic；幂等/部分失败续跑/回滚/回滚后可读），中性 prompt 2+2：
+  suite 与 naive 均执行 before FAIL→after PASS，均列出未证明项。suite 增量仅结构化 UNPROVEN。
+  → decorate。
+A2_reviewer_missed_class: fakeMenuList/insidePage 在 naive 2/2 = 0 次，在 suite 2/2 = 出现 → 补漏成立。
+A3_verifier_turn: verifier.md 增加先交付 Phase A、接近上限标 [PARTIAL]、resume 只补未完成；A4 2/2 完成无 25-turn 无报告。
+A4_interactive: 交互式 2/2 Skill=1 Agent=1；一次 BLOCKER=0 由 one-way 触发 → V9 在交互式 Host 成立。
+A5_smoke: check-conformance 调用 check-complexity-gate；0 error / 9 pre-existing warnings。
+B1_routing_l2: R6 2/2 自然语言发现 pipeline-orchestrator；Gate/Reuse/Decision Boundary 正确；未自建 Run/未级联。
+B3_delivery_scope: synthetic / executable-local-fixture / production_validation unavailable / production_rollback false。
+```
+
+### 环境/方法学事实
+
+- **L2 只保证规则被加载并遵循**；round19 已把「独立 QA 必须 Agent/Task 派生」变成可观测硬条件：
+  transcript 审计 4/4 出现 Agent 派生（round18 为 2/6）。但 Host 仍不强制，属 prompt 纪律 + 审计验收。
+- **naive 结构隔离在 round19 达成**：naive 会话 cwd 为 `~/.cache/ps-eval/round19`（无 `.claude/skills`），
+  audit 12/12 `Skill=0` 且无真实 skill 路径触达。round18 的「指令级隔离」欠账已关闭。
+  ⚠️ 非 bare 会话仍可能被 SessionStart hook 注入 skill 文本（round19 一次 naive 自报过）；
+  v2 的 naive 臂改用 `claude -p --bare --restricted`，audit 2/2 `Skill=0`、零路径触达。
+- **suite 与 naive 的输入面必须一致**：suite 臂跑在无项目源码的 neutral cwd；早期 pilot 用真实仓 cwd 时，
+  planner 直接读真仓库并反驳夹具前提，已作废。
+- 路由机制没有可加载 Skill，按用户口径不能算 L2；其结论只到静态/协议检查。
+- **`shared/scripts/complexity-gate.sh:96` 是真实工具缺陷**：全角逗号 + `set -u` 在 bash 3.2 必崩；应修为 `${is_simple}` 并补冒烟用例。
+
+---
+
+### 环境/方法学事实（round17/18 记录，保留）
+
+- **L2 只保证规则被加载并遵循，不保证 verifier 真的以 fresh context 另起。** round18 一次 reviewer 臂明确自报
+  「verifier 段在同一上下文执行」；Host 没有强制派生独立 agent。该问题在 round19 由「prompt 硬约束 + transcript 审计」关闭（4/4）。
+- **naive 结构隔离（round18）仍未达成**：当时新会话仍从含 `project-*` symlink 的 workspace 启动，只能靠指令禁止 + 自报；
+  round19 已改为 cwd 无 `.claude/skills` 的会话，结构性达成。
+- 路由机制没有可加载 Skill，按用户口径不能算 L2；其结论只到静态/协议检查。

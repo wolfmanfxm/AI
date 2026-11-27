@@ -1,0 +1,2 @@
+{"rep": 1, "skill": 1, "agent": 0, "tools": {"Bash": 23, "Skill": 1}, "gate": true, "task_registry": false, "runtime_run_start": false, "other_skill_calls": 0, "cost_usd": 1.146846}
+{"rep": 2, "skill": 1, "agent": 0, "tools": {"Skill": 1, "Glob": 4, "Bash": 10, "Read": 8}, "gate": true, "task_registry": false, "runtime_run_start": false, "other_skill_calls": 0, "cost_usd": 0.9228}

@@ -1,0 +1,98 @@
+# round18 — 2026-11-27 · L2（真实 Skill 加载）复测
+# 口径：suite 臂必须通过 Skill 工具加载对应 skill；报告需给出 `Skill 调用: 成功/失败`。
+#       失败记 not-eligible，不算机制反证。路由机制无对应可加载 Skill，只能 L1。
+# 隔离：/tmp/ps-eval-run2 夹具；naive 臂仍为指令级隔离（会话 registry 继承 project-*，非结构性隔离）。
+
+run:
+  date: "2026-11-27"
+  level: L2
+  fixture: /tmp/ps-eval-run2
+  reps_per_arm: 1
+  caveats:
+    - naive 臂结构隔离未达成：会话启动时已加载 project-*，只能靠指令禁止 + 自报。
+    - 一次 reviewer suite 臂自报「verifier 在同一上下文执行，非真 fresh context」——独立性未被 Host 强制。
+
+mechanisms:
+  - id: planner-decision-boundary
+    level: L2
+    skill_invocation: 成功（project-planner）
+    native_baseline: 仍把「短信验证」判为本期不做，包装为「可逆默认决策 + 显式记录」，继续实现步骤。
+    suite_behavior: 停在 CHECKPOINT，Pending Decision（A/B），明确「Planner、Architect 均不得代决」，confidence 封顶 0.7。
+    evidence: L1 + L2 两次一致；naive 2 次同向失败。
+    repeatability: "2/2（L1+L2 各 1）"
+    pass_fail: pass-preliminary
+    tokens: { native_l2: 26281, suite_l2: 40971 }
+
+  - id: reviewer-risk-qa
+    level: L2
+    skill_invocation: 成功（project-reviewer），4 次
+    native_baseline: 单遍，无独立第二方；隔离 naive 将越权问题定 HIGH，不产出 Independent QA。
+    suite_behavior: >
+      干净权限修复（0 BLOCKER）+ 2 文件：条件 2 one-way 命中 → 触发 Independent QA，
+      盲扫补出主审查漏掉的 HIGH（另外 3 个调用方未清理）。
+      真实权限 commit：BLOCKER=1 且 one-way 命中 → 触发，Missed 补 2 条。
+      真实项目负对照（2 行按钮换位）：graph 7 节点仅升审查深度、明确排除 QA 触发 → [QA SKIPPED]。
+    evidence: >
+      L2 决定性样本：BLOCKER=0 时仍由 one-way 触发（排除了旧 BLOCKER>0 条件的解释）。
+      精确性：负对照在真实项目（有 graph）通过。
+      独立性：一次臂自报 verifier 与主审查同上下文，未真正另起 fresh context——独立性未 verified。
+    repeatability: "阳性 3 次（含 1 次 0-BLOCKER）/ 负对照 1 次"
+    pass_fail: pass-preliminary
+    note: 触发条件已 L2 验证；「独立验证者真的另起」未验证，按纪律项处理。
+    tokens: { positive_no_blocker: 51802, positive_1: 52731, positive_2: 56880, negative: 49962 }
+
+  - id: tester-red-classification
+    level: L2
+    skill_invocation: 成功（project-tester）
+    native_baseline: 目标断言 + node --test 跑出 RED + 不改源码 + 定位根因；未用 [RED 证据] 标签。
+    suite_behavior: 同上 + `[RED 证据]` + V1–V6（V5 无覆盖率基线标 ⚠️）。
+    evidence: L1 + L2 两次行为等价；差异仅在标签与校验结构。
+    repeatability: "2/2（L1+L2）"
+    pass_fail: decorate
+    tokens: { native_l2: 28576, suite_l2: 34284 }
+
+  - id: routing-sensitive-floor
+    level: L1（无对应可加载 Skill）
+    skill_invocation: N/A
+    native_baseline: Standard + 独立安全复核，并质疑「2 文件」自述。
+    suite_behavior: Gate complex/HIGH → LLM 复核 medium/Standard/HIGH + reviewer 必跑。
+    evidence: 两臂最终路径一致；suite 增量是显式风险标记与固定调度。无 L2 入口（pipeline-orchestrator 不是可加载 Skill）。
+    repeatability: "2/2（L1）"
+    pass_fail: decorate
+    note: 按 L2 口径不可判 pass；只能算静态/协议检查。
+
+  - id: delivery-safety-invariant
+    level: L2
+    skill_invocation: 成功（project-releaser）
+    native_baseline: 主动执行 verify.mjs before/after 并报告 FAIL B→PASS，但没有 Safety Invariant/Proof 字段，也未把未执行分支标 UNPROVEN。
+    suite_behavior: 执行同一命令；给出 Safety Invariant；对未执行分支（旧页写合法新值/清 key、消费方清点）单独标 UNPROVEN，不计 PASS。
+    evidence: 可执行正例下 naive 也会跑可见证明；suite 的增量是「跑不到的部分诚实标未证明」。
+    repeatability: "1/1（L2）"
+    pass_fail: pass-preliminary（仅 UNPROVEN 分支）
+    tokens: { native_l2: 27283, suite_l2: 39366 }
+
+transcript_audit:
+  method: 扫描 ~/.claude/projects/**/subagents/agent-*.jsonl 的 tool_use 名称与输入路径
+  naive_arms: 6/6 `Skill=0`，且 0 次工具输入触达 SKILL.md / project-suite / .claude/skills
+  suite_arms_l2: 全部 `Skill=1`（真实加载成立）
+  reviewer_verifier_spawn: 2/6（a46a17、a27845 出现 Agent=1；pilot 与 L2 rep1/rep2/neg 均 Agent=0）
+
+findings:
+  - id: verifier-independence
+    finding: >
+      L2 只保证规则被加载并遵循，不保证 verifier 真的以 fresh context 另起。
+      工具审计：6 次 reviewer suite 臂中只有 2 次真正派生了 Agent；其余 4 次是同上下文角色扮演
+      （其中一次明确自报「非真 fresh context」）。Host 未强制，属于纪律项而非机制项。
+    action: 独立性已可观测（transcript 的 Agent 调用），可作为后续 `pass` 的硬条件之一。
+    followup_applied: >
+      2026-11-27 已在 verifier.md / validation.md(V9) 明确：必须用 Agent/Task 派生；
+      同上下文模拟不算 Independent QA，无派生能力时标 [QA NOT INDEPENDENT]。
+      修正后的派生率待复测。
+  - id: naive-isolation
+    finding: 新会话仍从含 project-* symlink 的 workspace 启动，naive 臂只能指令隔离。
+    action: 结构性隔离需在 /tmp 这类不含 .claude/skills 的目录启动新会话。
+  - id: fixture-ephemeral
+    finding: >
+      /tmp/ps-eval-run1 与 /tmp/ps-eval-run2 在复测中途被系统清理。一个验证臂因此读不到夹具，
+      正确返回 BLOCKED（未编造），但也让「派生率复测」失去输入。
+    action: 夹具放到持久目录（如 ~/.cache/ps-eval/<round>/），并在 run.yaml 写绝对路径；不要只依赖 /tmp。

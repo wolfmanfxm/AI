@@ -165,3 +165,16 @@ tests:
       analyzer description 的负边界行「不用于：已有知识覆盖且无明显漂移的普通开发任务」
     assertion: >
       路由到 project-generator（照既有 patterns 生成页面）；不得落到 project-analyzer。
+
+  - id: R13
+    name: 敏感面小改动不得走 Quick Path（跳过 reviewer）
+    scenario: >
+      修复权限校验绕过（只有 2 个文件、改动很小）。
+    naive_failure: >
+      按「修复 + 小 diff」判 simple → Quick Path（generator → verify），
+      完全不进 reviewer；权限绕过的修复没有独立审查。
+    skill_mechanism: >
+      complexity-gate 敏感面升级：权限/认证/迁移/schema/契约/并发 → 至少 medium（Standard Path）+ 风险 HIGH
+    assertion: >
+      路由至少 Standard Path，输出 `风险: HIGH`；reviewer 被调度并触发独立 QA。
+      对照：「把按钮颜色改成蓝色」仍走 Quick Path（不因敏感规则误升级）。

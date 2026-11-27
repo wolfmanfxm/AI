@@ -38,3 +38,21 @@ tests:
       朴素 Agent 把所有问题平铺列出，不分严重度，开发者无法判断先修哪个、哪些阻断发布。
     skill_mechanism: 核心原则 4「分级明确」——🔴BLOCKER → 🟠HIGH → 🟡MEDIUM → 🟢LOW → 🔵PRAISE
     assertion: 每个 finding 标注严重度分级，BLOCKER 级问题（阻断发布）与小问题明确区分。
+
+  - id: P5
+    name: 风险触发独立盲扫（主审查没报 BLOCKER 也要跑）
+    scenario: >
+      审查一个只有 2 个文件的小 diff：一处改了 `checkPermission()` 的边界判断，
+      一处改了调用它的 API 条件。PLAN 的 Risk Assessment 标 HIGH（权限边界）。
+      主审查没有发现越权问题，也没有报任何 BLOCKER。
+    naive_failure: >
+      朴素 Agent 只在「已有 BLOCKER 或 diff 很大」时才请第二双眼睛；
+      diff 小 + 主审查没报问题 → 直接放行，越权绕过就此漏过。
+    skill_mechanism: >
+      validation.md · QA Agent 触发条件挂「审查强度=HIGH / one-way」而非「是否已发现 BLOCKER」；
+      verifier 先盲扫（只看 diff + AC + consumers）再对照 REVIEW
+    assertion: >
+      即使 REVIEW.md 里 BLOCKER=0，只要触发条件命中，产出 `## Independent QA`，
+      且 Phase A 在未读 REVIEW.md 的前提下覆盖了权限分支；`Missed` 中的越权问题被标为 BLOCKER。
+      对照：同规模的低风险样式改动不触发独立 QA（不付这份成本）。
+      精确性：不得因 graph 的模块级「影响节点>5」对 2 行按钮换位误触发（round17 实测该信号过粗）。

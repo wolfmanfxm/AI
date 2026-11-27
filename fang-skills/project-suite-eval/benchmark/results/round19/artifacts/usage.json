@@ -1,0 +1,178 @@
+{
+ "suite": [
+  {
+   "arm": "delivery-r1",
+   "session": "8c2d907e-b5b3-4642-a487-e2efc19a9ed8",
+   "turns": 21,
+   "input_tokens": 66939,
+   "output_tokens": 16845,
+   "subagents": 0,
+   "duration_s": 84.4,
+   "cost_usd": 0.938
+  },
+  {
+   "arm": "delivery-r2",
+   "session": "9bda54e3-3a7f-4f3d-9e4b-fff4cacf6ca4",
+   "turns": 17,
+   "input_tokens": 66820,
+   "output_tokens": 3743,
+   "subagents": 0,
+   "duration_s": 28.6,
+   "cost_usd": 0.55
+  },
+  {
+   "arm": "planner-r1",
+   "session": "9f572e23-6fc1-4374-a353-2dab4000840f",
+   "turns": 14,
+   "input_tokens": 73054,
+   "output_tokens": 3536,
+   "subagents": 0,
+   "duration_s": 32.0,
+   "cost_usd": 0.63
+  },
+  {
+   "arm": "planner-r2",
+   "session": "af2ffea9-c542-442a-beb0-3d36d1a8ea9e",
+   "turns": 13,
+   "input_tokens": 72594,
+   "output_tokens": 3212,
+   "subagents": 0,
+   "duration_s": 29.9,
+   "cost_usd": 0.571
+  },
+  {
+   "arm": "reviewer-clean-r1",
+   "session": "aae5f22e-8e2e-4de2-8bec-4893bad4607b",
+   "turns": 24,
+   "input_tokens": 104777,
+   "output_tokens": 18439,
+   "subagents": 1,
+   "duration_s": 127.5,
+   "cost_usd": 1.275
+  },
+  {
+   "arm": "reviewer-clean-r2",
+   "session": "d48ab509-2ec4-4168-8daa-36d424a72b83",
+   "turns": 16,
+   "input_tokens": 146777,
+   "output_tokens": 48568,
+   "subagents": 2,
+   "duration_s": 288.3,
+   "cost_usd": 2.561
+  },
+  {
+   "arm": "reviewer-real-r1",
+   "session": "0888a58b-68b3-40c5-bc2b-fea0250d2f3d",
+   "turns": 31,
+   "input_tokens": 127779,
+   "output_tokens": 41245,
+   "subagents": 1,
+   "duration_s": 269.9,
+   "cost_usd": 2.661
+  },
+  {
+   "arm": "reviewer-real-r2",
+   "session": "db280b31-fa64-4b2a-8847-5bb06838c1c4",
+   "turns": 1,
+   "input_tokens": 149650,
+   "output_tokens": 45516,
+   "subagents": 1,
+   "duration_s": 39.7,
+   "cost_usd": 2.961
+  },
+  {
+   "arm": "routing-r1",
+   "session": "60bca441-5850-4c88-8aaa-bd9e978e9d72",
+   "turns": 10,
+   "input_tokens": 64997,
+   "output_tokens": 5139,
+   "subagents": 0,
+   "duration_s": 42.7,
+   "cost_usd": 0.629
+  },
+  {
+   "arm": "routing-r2",
+   "session": "9b04f64f-8c18-418f-8652-56a1e1ea064a",
+   "turns": 7,
+   "input_tokens": 65220,
+   "output_tokens": 3334,
+   "subagents": 0,
+   "duration_s": 29.4,
+   "cost_usd": 0.505
+  },
+  {
+   "arm": "tester-r1",
+   "session": "c1ce9c42-5851-4df8-91b7-1c721a974ecb",
+   "turns": 17,
+   "input_tokens": 65240,
+   "output_tokens": 4774,
+   "subagents": 0,
+   "duration_s": 48.6,
+   "cost_usd": 0.772
+  },
+  {
+   "arm": "tester-r2",
+   "session": "3acc67a8-70b3-492e-96e8-6fc9ceff77db",
+   "turns": 18,
+   "input_tokens": 69958,
+   "output_tokens": 4882,
+   "subagents": 0,
+   "duration_s": 38.7,
+   "cost_usd": 0.708
+  }
+ ],
+ "naive": {
+  "naive-planner-r1": {
+   "subagent_tokens": 31406
+  },
+  "naive-planner-r2": {
+   "subagent_tokens": 31330
+  },
+  "naive-reviewer-real-r1": {
+   "subagent_tokens": 49480
+  },
+  "naive-reviewer-real-r2": {
+   "subagent_tokens": 61802
+  },
+  "naive-reviewer-clean-r1": {
+   "subagent_tokens": 48964
+  },
+  "naive-reviewer-clean-r2": {
+   "subagent_tokens": 44687
+  },
+  "naive-tester-r1": {
+   "subagent_tokens": 32635
+  },
+  "naive-tester-r2": {
+   "subagent_tokens": 32927
+  },
+  "naive-delivery-r1": {
+   "subagent_tokens": 38826
+  },
+  "naive-delivery-r2": {
+   "subagent_tokens": 35747
+  },
+  "naive-routing-r1": {
+   "subagent_tokens": 31585
+  },
+  "naive-routing-r2": {
+   "subagent_tokens": 29729
+  }
+ },
+ "suite_total_usd": 14.761,
+ "naive_total_subagent_tokens": 469118,
+ "v2_addendum": {
+  "suite_reviewer_clean_v2_r1": {
+   "session": "131b0e0c-96b7-4585-8aba-af92a7af418c",
+   "turns": 1,
+   "input_tokens": 139369,
+   "output_tokens": 28477,
+   "subagents": 1,
+   "duration_s": 8.8,
+   "cost_usd": 1.942
+  },
+  "naive_reviewer_clean_v2_r1": {
+   "subagent_tokens": 50302
+  }
+ }
+}

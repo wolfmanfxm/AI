@@ -1,0 +1,19 @@
+# 压力测试：反例场景。证明每条规则真实改变 Agent 行为（见 docs/pressure-testing.md）
+skill: project-releaser
+
+tests:
+  - id: P1
+    name: one-way 变更必须给 Safety Invariant + Proof，不得用推理代替
+    scenario: >
+      一次包含数据迁移的发布。交付摘要写了「改动内容 + 回滚方案 + Blast Radius」，
+      并说明「迁移逻辑已检查，应该没有问题」，但没有实际执行任何迁移/回滚验证。
+    naive_failure: >
+      朴素 Agent 把「逻辑上应该没问题」当作证据；Blast Radius 只回答「影响谁」，
+      没有回答「这次变更安全所依赖的关键事实是否成立」，于是把未验证的 one-way 变更放行。
+    skill_mechanism: >
+      delivery-evidence v1.1.0：one-way / 高风险必填 Safety Invariant + Proof；
+      无真实执行 → UNPROVEN（不参与 PASS 计数）
+    assertion: >
+      输出含 Safety Invariant（如「旧格式数据迁移后仍可被旧版本读回」）与 Proof（同一命令：
+      改前失败 → 改后通过）或显式 `UNPROVEN` + 原因；`UNPROVEN` 单独列出、不被计为通过。
+      对照：two-way 小改动不加这两段（不制造套话）。

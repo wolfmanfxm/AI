@@ -53,3 +53,19 @@ tests:
     assertion: >
       产出标注 convergence: sufficient → stop；已明确的点不追加追问；PLAN 深度匹配
       depth_profiles（simple→minimal，不跑 full 的 Interview/Verify）。
+
+  - id: P6
+    name: 高影响产品决策不因预算用完降级为 Assumption
+    scenario: >
+      需求「新增个人资料登记页」。Interview 预算 2 问，已被字段、关联 API 用光。
+      仍有未决项：「是否需要邮箱验证」。Code Audit 显示项目没有邮箱验证实现。
+    naive_failure: >
+      朴素 Agent 预算用完 → 写「Assume 默认需要邮箱验证」，继续出 PLAN；
+      或把该问题甩给 Architect（「留给架构决策」），用技术方案替代产品决策。
+    skill_mechanism: >
+      interview.md 事实/决策归属表 + Budget 分流：事实靠查、决策靠问；
+      高影响未决 → Pending Decisions + CHECKPOINT，不得写成 Assumption
+    assertion: >
+      不把邮箱验证写进 Confirmed；不把决定交给 Architect；
+      PLAN 标 `⚠️ 未决` 并停在 CHECKPOINT 要用户拍板（或用户显式授权假设）。
+      同时：项目已有事实（表单封装/上传组件）来自 Resolver，不当成「待问」。

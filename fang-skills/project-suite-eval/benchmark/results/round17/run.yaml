@@ -1,0 +1,139 @@
+# round17 — 2026-11-27
+# 场景定义：benchmark/pressure-tests/*.yaml（本次新增/修改的 5 条机制 + 1 个负对照）
+# 方法：naive vs suite 双边对照。两臂同一夹具、同一任务文本；唯一差异是 suite 臂加载对应 skill。
+# 隔离：正式运行使用 /tmp/ps-eval-run1 夹具（不含 .claude/skills）。
+#       ⚠️ 首轮 pilot 在真实项目内运行，被项目 .claude/skills（symlink 到套件仓）污染，已作废。
+# 限制：每臂 1 次（repeatability 1/1），未达 pressure-testing.md 的 ≥2 要求，结论标 preliminary。
+
+run:
+  date: "2026-11-27"
+  project: afc-newcore-web-frontend
+  fixture: /tmp/ps-eval-run1
+  reps_per_arm: 1
+  agent: general-purpose（subagent，只读约束）
+  caveat: >
+    pass-preliminary 表示「naive 缺失、suite 出现」的方向已观察到，但样本仅 1，
+    不能等同于 ledger 的 pass。需要至少再跑 1 次同场景才能判 repeatability。
+
+mechanisms:
+  - id: planner-decision-boundary
+    pressure_test: project-planner.yaml#P6
+    hypothesis: 高影响产品决策在 Interview 预算耗尽后不得降级为 Assumption，也不得交给 Architect 代决。
+    native_baseline: >
+      直接把「是否需要短信验证」判为「本期不做」，写成假设 A1 并继续给 page-spec 与实现步骤；
+      产品行为由 agent 代决。
+    suite_behavior: >
+      停在 CHECKPOINT，产出 D-001（A 需要 / B 不需要两案），明确「预算耗尽不等于可假设」
+      「不得交 Architect 代决」，不产出 PLAN。
+    evidence: >
+      naive 输出「短信验证判为本期不做」；suite 输出 Pending Decision D-001 + CHECKPOINT。
+      同一 task.md、同一夹具。
+    repeatability: "1/1"
+    pass_fail: pass-preliminary
+    tokens: { native: 26373, suite: 43759 }
+
+  - id: tester-red-classification
+    pressure_test: project-tester.yaml#P5
+    hypothesis: 测试失败要区分「目标行为未满足（RED 证据）」与「预期外缺陷」，且断言写目标行为而非现状。
+    native_baseline: >
+      写 toBe('0.5') 目标断言，node --test 跑出 RED，不改源码，定位根因；未使用 [RED 证据] 标签，
+      也未显式排除环境错误。
+    suite_behavior: >
+      同一目标断言 + 显式 [RED 证据]，V1–V6 全过，源码 sha256 未变，环境/回归用例单列。
+    evidence: >
+      naive 与 suite 在行为上等价（目标断言 + RED + 不改源码）；suite 多出的是标签与校验结构。
+    repeatability: "1/1"
+    pass_fail: decorate
+    note: RED 弱——断言目标行为、跑测试、不改源码已是当前模型默认行为；价值是统一证据标签。
+    tokens: { native: 28229, suite: 34131 }
+
+  - id: reviewer-risk-qa
+    pressure_test: project-reviewer.yaml#P5
+    hypothesis: 高风险小 diff 即使主审查没有 BLOCKER，也必须触发独立盲扫；低风险改动不触发。
+    native_baseline: >
+      isolated 臂：单遍审查，将 query.prevMenuPath 鉴权绕过定为 HIGH，无独立第二方；
+      pilot（真实项目）自述「自己审了 2 遍，但没有独立第二方/第二个 agent 复看」。
+    suite_behavior: >
+      pilot（真实项目，BLOCKER=0）：Independent QA 触发依据为 one-way「权限与认证边界」+ 影响节点>5，
+      Missed 新增 M1（工作流守卫不透传 prevMenuPath）与 M2（SELF_ROUTE 可能 403）。
+      isolated（BLOCKER=1）：QA 复核确认 F-001，Missed 补入 F-003/F-005。
+      负对照：isolated 夹具（无 graph）→ V9 未命中，[QA SKIPPED]；
+      **真实项目（有 graph，修正前）→ 2 行按钮换位被判「影响节点 7 > 5」→ 独立 QA 误触发（假阳性）**；
+      修正后复测（真实项目，graph 返回 130 节点）→ graph 不再计入 QA 触发 → [QA SKIPPED]。
+    evidence: >
+      召回：无 BLOCKER 的真实权限 commit 上仍触发独立 QA（pilot），盲扫产出主审查未报的 2 条发现。
+      精确性：真实项目的模块级 graph 把琐碎改动也算成 >5 影响节点，导致低风险改动误触发 QA。
+      两份证据方向相反：机制「该触发时触发」成立，「不该触发时不触发」在真实环境不成立。
+      isolated suite 臂曾从真实工作副本补充读取 3 个文件，隔离性弱于 naive 臂，需在复跑时收紧。
+    repeatability: "1/1"
+    pass_fail: pass-preliminary
+    note: >
+      召回：BLOCKER=0 的真实权限 commit 上触发（pilot / isolated）。
+      精确性：真实项目负对照在修正前误触发；移除 graph>5 后复测通过（见 neg_retest）。
+      两个方向的样本各自只有 1 次，仍需重复。
+    followup_applied: >
+      2026-11-27 已从 validation.md 的 QA 触发中移除 graph>5（graph 仍用于审查深度），
+      execution.md 同步措辞；修正后的负对照复测结果见 neg_retest。
+    tokens: { native_isolated: 48293, suite_isolated: 54366, negative_control: 49171, suite_pilot: 82765, native_pilot: 62702 }
+
+  - id: routing-sensitive-floor
+    pressure_test: cross-skill-routing.yaml#R13
+    hypothesis: 敏感面（权限/schema/契约/并发）小改动不得走 Quick Path，至少 Standard 且标风险 HIGH。
+    native_baseline: >
+      无 skill 臂：判 Standard，要求实施（最小 diff）+ 安全审查 + 权限回归测试；
+      理由「文件少≠风险低，安全审查与验证不可省」。
+    suite_behavior: >
+      Gate 原始判定 complex/Full/HIGH（「权限」命中 complex 关键词）；LLM 按 rubric 复核为
+      medium/Standard/HIGH，调度 planner→generator→reviewer，并明确 reviewer 触发独立安全 QA。
+    evidence: >
+      两臂最终都到 Standard 且都要求安全审查；suite 的增量是确定性的风险标记与固定调度，
+      不是能力增量。脚本对「权限」过度升级到 complex，需 LLM 复核纠偏（协议已声明）。
+    repeatability: "1/1"
+    pass_fail: decorate
+    note: RED 弱——naive 也做对；价值是一致性/可追溯（风险 HIGH 显式化），不是提升召回。
+    tokens: { native: 25274, suite: 27321 }
+
+  - id: delivery-safety-invariant
+    pressure_test: project-releaser.yaml#P1
+    hypothesis: one-way / 高风险变更必须给出 Safety Invariant 与真实 Proof；无实跑标 UNPROVEN 且不计 PASS。
+    native_baseline: >
+      给出变更、主要风险、发布前验证清单与回滚顺序；没有 Safety Invariant，也没有 Proof/UNPROVEN，
+      验证清单以「应验证」而非「已执行」呈现。
+    suite_behavior: >
+      Delivery[...] 含 Safety Invariant（迁移窗口内新 key 优先 + 旧 key 回退、旧写不覆盖新值）、
+      Proof=UNPROVEN（变更未落地，无法执行）、Door 条件判定（同批 two-way / 分批 one-way），
+      并声明 UNPROVEN 单列、不计入 PASS。
+    evidence: >
+      同一 task.md；naive 产物缺少不变式与证明字段，suite 产物两段齐全且 UNPROVEN 语义正确。
+    repeatability: "1/1"
+    pass_fail: pass-preliminary
+    tokens: { native: 25664, suite: 32302 }
+
+retests:
+  - id: reviewer-qa-negative-retest
+    pressure_test: project-reviewer.yaml#P5
+    change: QA 触发移除 graph>5（graph 仅用于审查深度）
+    scenario: 真实项目 bcb5ee74f（2 文件按钮换位）
+    result: >
+      graph 模块级深度≤2 得 130 节点，但不再计入 QA 触发；Risk/one-way/BLOCKER/文件数四条均未命中，
+      输出 [QA SKIPPED: 未命中触发条件]，结论 PASS。
+    verdict: 精确性修正在 1 次复测中生效；仍需重复。
+
+environment_findings:
+  - id: eval-leak
+    finding: >
+      目标项目 .claude/skills/project-* 是指向套件仓的 symlink。直接在该项目内跑 naive 臂，
+      agent 会读到 complexity-gate.md / reviewer validation.md，基线被污染（首轮 ROUTE-NAIVE 直接引用了
+      套件的反例条目）。
+    action: naive 基线必须放在不含 .claude/skills 的夹具中；suite 臂再用绝对路径加载 skill。
+  - id: context-leak-suite
+    finding: isolated reviewer suite 臂从真实工作副本补充读取了 detail.vue / Breadcrumb / url.ts。
+    action: 复跑时限定「只读夹具」，或在夹具中补全相关文件。
+  - id: graph-precision
+    finding: >
+      graph.json 的 findImpacted 是模块级粗粒度：2 行按钮换位被判「影响节点 7 > 5」，
+      审查强度自动 HIGH，进而触发独立 QA。孤立夹具没有 graph，所以负对照看起来通过；
+      真实项目里这条成本闸门失效。
+    action: >
+      已移除（2026-11-27）：QA 触发只保留 one-way / Risk=HIGH / BLOCKER>0 / 文件>10；
+      graph>5 仅用于审查深度。复测见 retests。
