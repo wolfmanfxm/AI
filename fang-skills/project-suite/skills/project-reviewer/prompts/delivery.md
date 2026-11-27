@@ -11,7 +11,8 @@
 3. **AC 对照表**（每条 AC 的 ✅/❌/⚠️ 状态）
 4. **审查结论**（PASS / NEEDS_FIX / BLOCKED）
 5. **Validation notes**（元审查结果）
-6. **QA findings**（若有 QA Agent 发现）
+6. **Independent QA**（命中触发条件时）——`Missed` / `Confirmed` / `Rejected` 三节；
+   未命中 → 标 `[QA SKIPPED: 未命中触发条件]` 或 `[QA SKIPPED: 原因]`
 
 ## Exit
 

@@ -8,6 +8,8 @@ description: >
 
 # Pipeline Orchestrator
 
+> 证据：eval ledger · `routing-orchestrator-r6`（L2）。
+
 > 读取 registry → 建议 pipeline 路径 → Decision-Boundary Checkpoint（用户决定）→ 传递上下文 → 报告 → 触发 Background Pipeline
 > Suite 提供 Pipeline Protocol（建议执行路径），Host/用户决定实际执行（见 [host-capability.md](../../runtime/contracts/host-capability.md)）
 

@@ -23,6 +23,11 @@ trivial_patterns=("加一个" "加一项" "补.*total" "改.*label" "改.*文案
 medium_patterns=("新增" "实现" "导出" "筛选" "搜索" "分页" "新建" "页面" "组件" "功能")
 simple_patterns=("修复" "改成蓝色" "改颜色" "样式" "删除.*import" "删.*import" "文案")
 
+# 敏感面（安全/不可逆）信号：命中即「至少 medium」并把风险标 HIGH。
+# 为什么与复杂度分开：审查强度不能由改了几行决定——2 行的权限校验绕过走 Quick Path 会完全不进 reviewer。
+# 复杂度答「要几个 skill」，风险答「审查要多严」；两者独立，取并集。
+sensitive_patterns=("权限" "鉴权" "认证" "登录" "令牌" "token" "密码" "密钥" "加密" "脱敏" "迁移" "schema" "表结构" "契约" "回调" "并发" "锁" "幂等" "审计")
+
 LEVEL="medium"  # 默认
 
 is_complex=0
@@ -56,6 +61,25 @@ elif [ "$is_simple" = "1" ]; then
   LEVEL=simple
 fi
 
+is_sensitive=0
+for p in "${sensitive_patterns[@]}"; do
+  if printf '%s' "$REQ" | grep -qi -- "$p"; then is_sensitive=1; break; fi
+done
+
+# 敏感面下限：至少 medium → Standard Path（reviewer 必跑）。已 complex 的保持不变。
+if [ "$is_sensitive" = "1" ] && [ "$LEVEL" != "complex" ]; then
+  LEVEL=medium
+fi
+
+RISK="—"
+RISK_DESC=""
+SENS_NOTE=""
+if [ "$is_sensitive" = "1" ]; then
+  RISK="HIGH"
+  RISK_DESC="（敏感面命中：权限/认证/密钥/迁移/schema/契约/并发…）"
+  SENS_NOTE="；敏感面命中 → 至少 medium"
+fi
+
 case "$LEVEL" in
   simple)  ROUTE="Quick Path (generator → verify)"; DEPTH="minimal" ;;
   medium)  ROUTE="Standard Path (planner → generator → reviewer)"; DEPTH="standard" ;;
@@ -68,5 +92,6 @@ Complexity Gate 判定:
   复杂度: $LEVEL
   路由: $ROUTE
   深度: $DEPTH
-  理由: 关键词启发式（complex=$is_complex trivial=$is_trivial medium=$is_medium simple=$is_simple，默认 medium）
+  风险: ${RISK}${RISK_DESC}
+  理由: 关键词启发式（complex=$is_complex trivial=$is_trivial medium=$is_medium simple=${is_simple}，默认 medium${SENS_NOTE}）
 EOF

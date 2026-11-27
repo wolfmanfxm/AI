@@ -1,4 +1,4 @@
-# Systematic Debugging — Suite Primitive v1.0.0
+# Systematic Debugging — Suite Primitive v1.1.0
 
 > Suite 一级「系统化定位问题」原语。当代码行为异常（测试失败 / 报错 / 输出不对）时，按统一循环定位根因，而非「改一点试试看」的随机试错。
 > 借鉴 Superpowers 的 Systematic Debugging 思想。不新增 debugger Skill——本原语让 generator / tester / reviewer / refactorer 复用同一套定位流程。
@@ -21,7 +21,7 @@ Reproduce → Isolate → Hypothesis → Minimal Fix → Re-run → Regression
 |----|------|------|---------|
 | 1. **Reproduce** | 用最小输入稳定复现问题 | 一个可复现的失败用例 | 无法复现 → 不要改，先补复现手段 |
 | 2. **Isolate** | 二分定位：是哪一层/哪个函数/哪一行导致 | 定位到最小可疑单元 | — |
-| 3. **Hypothesis** | 写下一个「根因假设」，说明为什么它会这样 | 一个明确假设（可被推翻） | 无假设 → 不盲目改 |
+| 3. **Hypothesis** | 写下一个「根因假设」，说明为什么它会这样 | 一个明确假设（可被推翻） | 无假设 → 不盲目改；**同一假设的修复连续失败 2 次 → 回到第 1 步重设前提** |
 | 4. **Minimal Fix** | 只改修复根因所需的最小代码 | 最小 diff | 禁止顺手重构 |
 | 5. **Re-run** | 重跑第 1 步的失败用例，确认转绿 | pass/fail | — |
 | 6. **Regression** | 跑相关测试，确认没引入新问题 | 回归结果 | 无测试 → 先补表征测试 |
@@ -32,6 +32,9 @@ Reproduce → Isolate → Hypothesis → Minimal Fix → Re-run → Regression
 2. **一次一个假设**——不要同时改多处「说不定哪处管用」，那样无法归因是哪个改动修好的。
 3. **Minimal Fix 优先**——修复根因的最小 diff，不顺手重构、不扩大范围。
 4. **回归兜底**——修复后必跑回归，防止「修了 A 坏了 B」。
+5. **攻击前提**——若基于同一根因假设的修复连续失败两次，不要再打第三个补丁：
+   停下来说明「这个前提可能错了」，回到 Reproduce 重新检查复现路径和共同前提。
+   连续补丁只是把「同一个错误假设」执行了更多遍，失败次数不会让它变成对的。
 
 ## 与 Tester 的关系
 
@@ -49,6 +52,7 @@ Reproduce → Isolate → Hypothesis → Minimal Fix → Re-run → Regression
 | 修复时顺手重构无关代码 | Minimal Fix，只改根因所需 |
 | 改完不跑回归 | Re-run + Regression 兜底 |
 | 测试失败直接改源码让它过 | 先定位根因（可能源码真有 bug），再修 |
+| 同一假设连修 3 次还失败，继续换写法 | 第 2 次失败即回到 Reproduce，重设前提 |
 
 ## 输出格式
 

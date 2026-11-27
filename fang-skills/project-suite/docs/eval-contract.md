@@ -3,12 +3,13 @@
 > `project-suite` = 要执行的能力 / 协议；`project-suite-eval` = 判断能力是否有效的实验数据。
 > 两者分离，但本文件定义它们之间的**契约**：Suite 需要什么证据、字段是什么、判定标准是什么、证据放在哪。
 > 本文件是 Suite 内唯一描述「外部 eval 证据」的入口——其他文档不再引用 `../../project-suite-eval/...` 相对路径。
+> 机制级索引：eval 仓的 `mechanism-evidence-index.md`（机制 ID → pressure test → ledger → 轮次/日期）。
 
 ## 为什么分离
 
 - **project-suite** = 可执行能力 + 治理契约（Skill / Protocol / Registry / Gate）。随 zip 分发。
 - **project-suite-eval** = 判断「这条 Skill 规则是否真的改变了 Agent 行为」的实验数据（benchmark / pressure-tests / results / ledger）。
-- 证据不属于 skill 本身：pressure test 数据、ledger 记录、benchmark round 是「能力验证」，不是「能力定义」，不随 Suite 分发。
+- 证据不属于 skill 本身：pressure test 数据、ledger 记录、benchmark 运行记录是「能力验证」，不是「能力定义」，不随 Suite 分发。
 
 ## 外部仓库（sibling，非 Suite 内相对路径）
 
@@ -59,7 +60,7 @@ project-suite-eval/
 
 **为什么必须分开**：用 skill 级 baseline 去判机制，得到的永远是「skill 整体有用」，
 而不是「**这一层机制**有用」——于是机制可以无限叠加而没有任何一条能被证伪。
-实证：round8 的「14/14 机制装饰品」是 **skill 级**结论；而 Resolver / Registry / Gate / 新 prompt /
+实证：外部 ledger 的「14/14 机制装饰品」是 **skill 级**结论；而 Resolver / Registry / Gate / 新 prompt /
 新 artifact / 新字段这类**机制级**对象，至今**没有一条 ablation 记录**（见 roadmap「已知缺口」G1）。
 
 ### 四类度量契约（token / retry / cache / cost）

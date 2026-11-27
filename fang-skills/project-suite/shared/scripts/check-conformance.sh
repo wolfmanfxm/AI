@@ -481,6 +481,17 @@ fi
 echo ""
 
 echo "========================================"
+echo " Complexity Gate Smoke（bash 3.2 / locale）"
+echo "========================================"
+if bash "$SUITE_ROOT/shared/scripts/check-complexity-gate.sh" >/dev/null 2>&1; then
+  green "  ✅ complexity-gate smoke passed"
+else
+  red "  ❌ complexity-gate smoke failed"
+  ERRORS=$((ERRORS+1))
+fi
+
+echo ""
+echo "========================================"
 echo " Summary"
 echo "========================================"
 echo " Errors:   $ERRORS"

@@ -25,7 +25,8 @@
 5. **Completeness Check** → [prompts/completeness-check.md](completeness-check.md)：
    - 多维度评分（goal/scope/constraints/knowledge）→ planning_confidence
    - Code Audit 已发现 + Context Resolver 已查询 → 计入 knowledge 维度
-   - ≥0.9 → 直接 Plan | 0.7-0.89 → ≤2 questions | 0.5-0.69 → ≤3 questions | <0.5 → ≤5 questions + Assumption
+   - ≥0.9 → 直接 Plan | 0.7-0.89 → ≤2 questions | 0.5-0.69 → ≤3 questions | <0.5 → ≤5 questions
+   - 预算用完：高影响未决 → `Pending Decisions` + CHECKPOINT；其余 → Assumption
 
 6. 读用户输入 + 上游 `PLAN.md` / `ARCHITECTURE.md`（若存在）
 

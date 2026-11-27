@@ -1,4 +1,4 @@
-# Delivery Evidence — Suite Primitive v1.0.0
+# Delivery Evidence — Suite Primitive v1.1.0
 
 > Suite 一级「交付实证」原语。一次变更交付时，不只声明「改了什么」，还要给出**改前/改后证明对**与**合并风险分类**——让「看起来修好了」的假阳性在交付点无处藏。借鉴 Matt Pocock pr 思想。
 
@@ -38,7 +38,7 @@
 > **规则**：
 > - 不允许只写「测试通过」而无**具体哪条测试 / 改前是什么状态**。
 > - 「修复前：Verify 未进入运行路径，测试应能复现失败；修复后：Verify 实际执行，测试通过」是合格实证；「已修复，测试全绿」不是。
-> - 无可执行验证手段的变更（纯文档/重构）→ 标 `⚠️ 无可执行实证`，并列出**为何无法验证**，不假装有证据。
+> - 无可执行验证手段的变更（纯文档/重构）→ 标 `UNPROVEN`（无可执行实证），并列出**为何无法验证**，不假装有证据。
 
 ### 3. Merge Danger（合并风险分类）
 
@@ -49,6 +49,18 @@
 > - **One-way（单向门）**：不可逆或回滚成本高——destructive migration、删数据、改 schema、改公开 API 契约、发版到生产。**必须更高审查强度 + 显式迁移步骤 + 回滚预案**。
 >
 > **Blast Radius（影响面）**：一句话描述潜在波及——layout shift / 消费方 breakage / 跨模块契约影响。来源优先用 reviewer 的 `findConsumers(<变更文件>)` graph 查询结果，不拍脑袋。
+>
+> **Safety Invariant（安全不变式）— 仅 one-way / 高风险**：这次变更之所以安全，依赖的**关键事实**是什么？
+> 不是「影响了谁」，而是「哪条前提必须成立，安全才成立」。例：改 Task 并发隔离 → 不变式是
+> 「同一 Task 不会发生两个相同 Skill 的并发写入」。写不出来 = 还没想清楚这次改动靠什么成立。
+>
+> **Proof（证明）— 仅 one-way / 高风险**：**实际执行**的验证，不是推理。格式固定为
+> 「同一命令 / 同一场景：改前 <失败/现象> → 改后 <通过/现象>」；并发/隔离类不变式给出实际并发或隔离测试结果。
+> - 没有真实执行 → 标 `UNPROVEN` + 写清为何无法执行。**不得用「逻辑上应该没问题」代替。**
+> - `UNPROVEN` **不等于 PASS**：必须在交付摘要里单独可见，不能被其他项的通过稀释。
+>
+> 只对 one-way / 高风险变更要求这两个字段。全量加到每个变更上是流程税，会让字段退化成一句套话。
+> 证据：eval ledger · `delivery-safety-invariant`（合成迁移场景）。
 >
 > **规则**：one-way door 必须在交付摘要显式标注，不得与 two-way 混为一谈。
 
@@ -71,10 +83,12 @@ Delivery[变更]: <一句话变更>
   Evidence:
     Before: <改前状态——失败测试/错误输出/截图，具体到哪条>
     After:  <改后状态——通过测试/正确输出/截图>
-    (无可执行实证 → ⚠️ 标注原因，不假装)
+    (无可执行实证 → UNPROVEN + 原因，不假装)
   Merge Danger:
     Door: <two-way | one-way>
     Blast Radius: <一句话 + reviewer findConsumers 依据>
+    Safety Invariant: <仅 one-way / 高风险：这次变更安全所依赖的关键事实>
+    Proof: <同一命令：改前失败 → 改后通过；无可执行手段 → UNPROVEN + 原因>
     Rollback: <回滚方案，或指向 RELEASE-CHECKLIST 条目>
 ```
 
@@ -84,7 +98,10 @@ Delivery[变更]: <一句话变更>
 |-----------|-----------|
 | 只写「测试通过」无具体哪条 | 给出具体测试名 + 改前失败状态 |
 | 「已修复」+ confidence 数值，无改前/改后对比 | 改前 X 失败 → 改后 X 通过的实证对 |
-| 无可执行验证却假装有证据 | 标 `⚠️ 无可执行实证` + 原因 |
+| 无可执行验证却假装有证据 | 标 `UNPROVEN` + 原因 |
 | one-way door 当 two-way 处理 | destructive/schema/API 契约变更显式标 one-way + 迁移步骤 |
 | blast radius 拍脑袋 | 用 reviewer findConsumers graph 结果 |
+| 用「逻辑上应该没问题」代替 Proof | 实际跑一次；跑不了就标 `UNPROVEN` + 原因 |
+| 把 `UNPROVEN` 混进「全部通过」 | `UNPROVEN` 单独列出，不参与 PASS 计数 |
+| 每个变更都加 Safety Invariant/Proof | 只对 one-way / 高风险加，否则退化成套话 |
 | 重复造一份 CHANGELOG 摘要 | Summary 指向 CHANGELOG.md，不重复 |

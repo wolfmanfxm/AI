@@ -38,7 +38,8 @@
                      ▼                     ▼
                 Direct Plan      Adaptive Interview
                      │              (≤5 questions)
-                     │              budget用完→Assumption
+                     │              budget用完→按影响分流
+                     │              (高影响→Pending Decisions)
                      │                     │
                      └──────────┬──────────┘
                                 │
@@ -74,7 +75,7 @@
 |----|------|------|------|
 | **Skill Routing** | skill-catalog.yaml + capability-routing.yaml | 谁来做？ | 10 skills, 6 categories, intent→capability 映射 |
 | **Knowledge Resolver** | context-resolver + knowledge-index.json | 需要知道什么？ | Task→分桶(constraints/knowledge/guidance)→context-package.json |
-| **Decision Protocol** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→Assumption |
+| **Decision Protocol** | completeness-check + project-principles + Adaptive Interview | 应该怎么做？ | 多维评分→confidence→0/2/5 questions→按影响分流（低影响 Assumption / 高影响 Pending Decisions） |
 | **Execution** | 10 Skills + workflow-protocol + Verify(9/10) + session-snapshot | 怎么执行？ | Stage Injection + Candidate→Verify + 跨session resume |
 | **Review** | cross-artifact analyzer + Decision Record | 做对了吗？ | spec↔plan↔architecture↔tasks 语义一致性 |
 | **Knowledge Promotion** | promotion-reviewer + instinct-extractor + decay | 值得保留吗？ | CrossProject/Reusability评分→auto_promote/manual confirm |

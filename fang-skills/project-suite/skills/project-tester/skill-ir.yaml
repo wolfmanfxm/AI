@@ -7,6 +7,6 @@ boundary: "只写测试不修被测代码，测试失败记录报告不修改源
 produces: [Test]
 consumes: [Code,Plan,KnowledgeBase,Context]
 stages: [discovery, execution, validation]
-verification: { checks: 5, source: prompts/validation.md }
+verification: { checks: 6, source: prompts/validation.md }
 failure_conditions: { modes: 4, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

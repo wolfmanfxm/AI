@@ -1,5 +1,7 @@
 # 机制验证台账（Mechanism Verification Ledger）
 
+> 机制级索引：[mechanism-evidence-index.md](mechanism-evidence-index.md)（机制 ID → pressure test → ledger → 轮次/日期）。
+
 > 回答元问题：**「设计好的机制，有多少真正改变了 Agent 的行为？」**
 >
 > 核心方法：问每一个机制一句——**「没有这个机制，Agent 会漏做哪个动作？」**

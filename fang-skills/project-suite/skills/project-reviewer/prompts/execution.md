@@ -72,6 +72,10 @@
 > 依据 `skill.yaml` 的 `verification: { mode: candidate-verify-accept }` → 见
 > [workflow-protocol · Verification Contract](../../../workflow-protocol/SKILL.md)。
 > ⚠️ verify **不是** stage：它不参与 stage progression，也不出现在 `interface.stages` 里。
+>
+> 若命中 [validation.md](validation.md) 的 `## QA Agent` 触发条件（Risk=HIGH / one-way /
+> BLOCKER>0 / 变更文件>10），verifier 在本轮先做**盲扫**（只看 diff + AC + consumers，不读 REVIEW 草稿）、
+> 再做候选验证与对照——两段在同一 fresh context 内、顺序不可颠倒。产出 `## Independent QA`。
 
 ## Exit
 

@@ -7,6 +7,6 @@ boundary: "只审查不修代码，发现问题记录 file:line + 修复方案�
 produces: [Review]
 consumes: [Code,Plan,KnowledgeBase,Architecture,Test]
 stages: [discovery, execution, validation, delivery]
-verification: { checks: 8, source: prompts/validation.md }
+verification: { checks: 9, source: prompts/validation.md }
 failure_conditions: { modes: 3, levels: "WARNING→retry, DEGRADED→continue, BLOCKED→ask, FATAL→stop" }
 last_reviewed: "2026-08-04"

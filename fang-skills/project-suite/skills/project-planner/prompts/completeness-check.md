@@ -53,17 +53,21 @@ planning_confidence = (requirement_completeness × 0.6) + (knowledge_coverage ×
 
 ## Interview Budget
 
-按任务复杂度自动分配预算，用完后做 Assumption：
+按任务复杂度自动分配预算，用完后**按影响分流**（不是一律写假设）：
 
 | 复杂度 | Budget | 用完行为 |
 |--------|--------|---------|
-| Simple | 0 | 假设 + 标注 |
-| Normal | 2 | 假设 + 标注 |
-| Complex | 5 | 标注 `⚠️ Assumption: ...` |
+| Simple | 0 | 低/中影响 → 假设 + 标注；高影响 → Pending Decisions |
+| Normal | 2 | 同上 |
+| Complex | 5 | 同上 |
+
+> **高影响未决项**（`state: NEEDS_CLARIFICATION` + `impact: high`）是拦截条件，不是预算问题：
+> 预算用完也必须把选择权交回用户（`## Pending Decisions` + CHECKPOINT），
+> 不得静默写成 Assumption——那等于替用户做了产品决策。
 
 ## Assumption 格式
 
-预算用完 → 不做新的 Interview → 写假设：
+预算用完 → 低/中影响写假设（高影响写 `## Pending Decisions`，格式见 [interview.md](interview.md)）：
 
 ```markdown
 ## Assumptions
@@ -96,5 +100,7 @@ Receive Task
              → Update Context
                → Completeness Check（重新评分）
                  ├─ confidence ≥ 0.9 → Generate Plan
-                 └─ budget 用完 → Assumption → Generate Plan
+                 └─ budget 用完
+                      ├─ 有高影响未决 → Pending Decisions → CHECKPOINT（用户拍板 / 显式授权按假设执行）
+                      └─ 否则 → Assumption → Generate Plan
 ```

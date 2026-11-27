@@ -18,7 +18,7 @@ Complex   → Plan + Checkpoint + Verify
 Persistent knowledge → Promotion（值得跨项目才晋升）
 ```
 
-**原则**：机制是「按需启用」的阶梯，不是「全部强制」的流水线。简单任务背全流程 = 流程税，这正是 round3/4 暴露、complexity-gate 要解决的。每个机制都有「何时触发」的入口（complexity-gate 的 Quick/Standard/Full、interview 的 confidence 分级、architect 的决策风险分级），而不是无差别执行。
+**原则**：机制是「按需启用」的阶梯，不是「全部强制」的流水线。简单任务背全流程 = 流程税，这正是早期评测暴露、complexity-gate 要解决的。每个机制都有「何时触发」的入口（complexity-gate 的 Quick/Standard/Full、interview 的 confidence 分级、architect 的决策风险分级），而不是无差别执行。
 
 ## 状态模型（避免「假完成」）
 
@@ -29,7 +29,7 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 | **Specified** | Protocol 已定义（有规范/契约文档） | Runtime（Protocol 非 Engine）、Convergence |
 | **Implemented** | 有 reference implementation / adapter / script | Complexity Gate、Command Guard（有脚本，无真 hook） |
 | **Host-Supported** | 某个 Host 能正确解释/执行（如 Claude Code Hook） | Command Guard（Claude Code PreToolUse Hook） |
-| **Validated** | Benchmark 验证行为符合预期 | depth_profiles 深度、知识缺口（round4 实测） |
+| **Validated** | Benchmark 验证行为符合预期 | depth_profiles 深度、知识缺口（评测实测） |
 
 > 关键：**没有「Enforced」这个状态**——Suite 不假装有强制能力。强制是 Host 的 `host_capabilities`（advisory/enforced），不是 Suite 的状态。
 
@@ -135,7 +135,7 @@ Persistent knowledge → Promotion（值得跨项目才晋升）
 >   两者却都被列为待修）。已改为只列真正漂移的文件并给出 `(n/total)`。**变异测试**：只改 1 个文件 →
 >   摘要显示 `（1/4）` 且只列该文件。
 
-> **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark round）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。契约见 [eval-contract.md](eval-contract.md)。
+> **评估证据与治理契约分离**：行为评估的证据/结论（mechanism-verification-ledger.md、六段补完进度、benchmark 运行记录）归 `project-suite-eval/`，project-suite 只根据评估结论修复 skill 能力，不存测试证据。契约见 [eval-contract.md](eval-contract.md)。
 
 ### P2 — Knowledge Consumption
 
@@ -459,11 +459,25 @@ var=$(grep -c X f 2>/dev/null || echo 0)     # ❌
 - `afc-newcore-web-code` 的 8 个派生补写值**未落地**（按协议回滚了）——尤其 4 个 `lifecycle: confirmed`
   的 `rules/`（`generatedBy: manual`），派生值可能与团队实际约定不符，**需人工复核后才可写入**
 
-### G5 — 机制仍未被判定
+### G5 — 部分机制已判定，仍有两项待判定
 
-benchmark 第 11–13 轮全部是 **suite-only（无 native 臂）**，`mechanism-verification-ledger.md` 里
-「Producer 契约字段」「frontmatter 读取（无行数硬窗口）」两项均标 `untested`。`pass` 需要
-native-vs-suite delta + repeatability，缺 native 臂则永远判不了。
+评测证据与逐条判定以外部 `project-suite-eval/mechanism-verification-ledger.md` 为唯一权威；
+本文件只留能力结论摘要，不存测试轮次或日期。
+
+已获得正式行为结论：
+
+- Planner 决策边界：**PASS** —— 高影响未决项会停在 CHECKPOINT，不代替用户决策
+- Reviewer 风险触发独立 QA：**PASS** —— 高风险小改动会触发独立验证；同上下文模拟不算
+- Tester 失败分型：**DECORATE** —— 与无规则基线行为等价，仅标签/结构不同
+- Delivery Safety Invariant + Proof：**DECORATE** —— 基线也能执行可见证明并列出未证明项；规则增量是结构化字段
+- Routing 敏感面下限：**L1**；Pipeline Orchestrator 已在 L2 验证（自然语言发现并加载，未改 Run 契约、未自动级联）
+
+仍未完成判定：
+
+1. Producer 契约字段（`constraint` / `statement`）
+2. Frontmatter 读取（无行数硬窗口）
+
+两项均缺少与无规则基线的受控行为对照；不能仅凭本仓修复成功或静态检查通过标记 `pass`。
 
 ### G6 — 路径裸写的已知边界（不是缺陷，是断言的能力上限）
 

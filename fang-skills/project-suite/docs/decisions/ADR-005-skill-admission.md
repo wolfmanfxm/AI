@@ -53,7 +53,7 @@ Accepted (2026-09-17)
 | A2 | **independent_boundary** — 有明确的「不做」，且与现有 skill 的 `boundary.md` 不重叠 | 边界与现有 skill 重叠 → 合并而非新建 |
 | A3 | **independent_consumption** — 存在独立的输入/输出边界，且有独立消费场景（下游 Skill **或用户直接消费**） | 只是别的 skill 产物的一个视图 → 加一个 stage/prompt |
 | A4 | **entry_value** — 有稳定、可识别的独立用户意图，值得拥有独立可发现入口 | 措辞无法稳定映射到本能力 → 并入现有 intent 集 |
-| A5 | **verification_value** — 能被独立验证（有可判定的 assertion） | 无法验证 → 进不了压力测试，只会变成装饰品（见 round8 结论） |
+| A5 | **verification_value** — 能被独立验证（有可判定的 assertion） | 无法验证 → 进不了压力测试，只会变成装饰品（见 eval ledger · 机制装饰品结论） |
 
 > **A3 的「或用户直接消费」不是放宽边界，是修正错误。** 实测：`Release` 与 `RefactoredCode`
 > 在 `capability-routing.yaml` 的 `needs` 里**没有任何下游 skill 消费者**（`Release` 只被 meta 编排器
@@ -69,7 +69,7 @@ Accepted (2026-09-17)
 > **「新 skill 稀释路由准确性」这个真实担忧由 A1 承担**——A1 要求措辞不落进任何现有 intent 集，
 > 那正是路由区分度的判据。A4 不重复承担它。
 
-> A5 是**硬项**：外部参考只提了前三问，但本仓库实测（round8：14/14 机制装饰品）说明——
+> A5 是**硬项**：外部参考只提了前三问，但本仓库实测（eval ledger · 机制装饰品结论：14/14）说明——
 > **无法验证的能力不该进 skill**，它既进不了压力测试，也无法在台账里留下结论。
 
 > ⚠️ **A5 管「能不能验证」，不管「值不值得存在」——两者是不同判据，勿混读。**

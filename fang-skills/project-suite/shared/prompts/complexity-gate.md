@@ -36,6 +36,11 @@ Intent
 **升级规则**：
 - simple 但涉及 domain 命名 / 新 API 契约 → 升 medium（需要 planner 的 Context Package）。
 - medium 但含 ≥2 个独立子功能 / 新 API 契约 / 从零搭建 → 升 complex（Full Path，需 Analyzer + Architect）。
+- **敏感面升级（安全下限，不是复杂度判断）**：改动落在 权限 / 认证 / 鉴权 / 令牌 / 密码 / 密钥 / 加密 / 脱敏 /
+  数据迁移 / schema / 公开 API 契约 / 回调 / 并发与锁 / 幂等 → **至少 medium**，保证 reviewer 必跑；
+  并标 `风险: HIGH` 供 reviewer 触发独立 QA。
+  理由：审查强度不能由「改了几行」决定——2 行的权限校验绕过走 Quick Path 会**完全不进 reviewer**。
+> 证据：eval ledger · `routing-sensitive-floor`（L1）。
 
 > ⚠️ `complexity-gate.sh` 是**零 token 关键词粗筛**，对「多子功能」「语义复杂度」有天然盲区（如「新增审批流配置页面」脚本判 medium，实际是 complex）。**脚本结果以 LLM 按 rubric 复核为准**——脚本省 token，LLM 保准确。
 
@@ -86,6 +91,7 @@ Complexity Gate 判定:
   复杂度: [trivial | simple | medium | complex | long]
   路由: [Reuse Fast Path | Quick | Standard | Full]
   深度: [无 | minimal | standard | full]
+  风险: [— | HIGH]   # 敏感面命中（权限/认证/迁移/契约/并发…）→ HIGH；与复杂度独立
   理由: <一句话，基于信号>
 ```
 
@@ -100,3 +106,4 @@ Complexity Gate 判定:
 | 简单任务也走 full-sdlc | Quick Path：generator → verify |
 | 不确定复杂度就拍 simple | 不确定 → medium |
 | 需求已覆盖还跑 generator | Reuse Fast Path 零改动 |
+| 2 文件的权限校验改动判 simple 走 Quick Path（不进 reviewer） | 敏感面命中 → 至少 medium，且标 `风险: HIGH` |
